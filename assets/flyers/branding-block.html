@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christ Church Bluffton — Branding Block</title>
+    <link rel="stylesheet" href="live/css/fonts.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1a1a1a;
+            font-family: 'Lora', serif;
+        }
+
+        .branding {
+            width: 640px;
+            height: 398px;
+            background: #FFFFFF;
+            border: 5px solid #303b6a;
+            outline: 4px solid #c3a355;
+            outline-offset: -9px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .logo {
+            width: 110px;
+            height: 110px;
+            object-fit: contain;
+            border-radius: 50%;
+            margin-bottom: 16px;
+        }
+
+        .church-name {
+            font-size: 2rem;
+            font-weight: 400;
+            color: #303b6a;
+            line-height: 1.2;
+            margin-bottom: 2px;
+        }
+
+        .church-location {
+            display: block;
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: #c3a355;
+            margin-bottom: 20px;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            color: #303b6a;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .contact-info a {
+            color: #303b6a;
+            font-size: 1.05rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .contact-info svg {
+            color: #c3a355;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="branding">
+        <img src="assets/logos/logo-white-bg.png" alt="Christ Church Bluffton" class="logo" width="110" height="110">
+        <div class="church-name">Christ Church</div>
+        <div class="church-location">Bluffton</div>
+        <p class="tagline">A Christ-centered Anglican community in<br>Bluffton, South Carolina.</p>
+        <div class="contact-info">
+            <a href="mailto:info@christchurchbluffton.org">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                info@christchurchbluffton.org
+            </a>
+        </div>
+    </div>
+</body>
+</html>

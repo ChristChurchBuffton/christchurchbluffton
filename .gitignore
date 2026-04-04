@@ -23,13 +23,16 @@ CCB EIN*
 # Non-source assets in root
 *.jpg
 !src/images/og-image.jpg
-!live/images/og-image.jpg
 ANGLICAN-CHURCH-INFO.txt
 
+# Dependencies
+node_modules/
+
 # Local dev server
-server/node_modules/
 server/.env
 
-# Old site build (design reference only, not deployed)
-src/
-netlify/functions/
+# Reference site (content source, not deployed)
+reference/
+
+# Archived old files
+archive/

@@ -1,8 +1,8 @@
 [build]
-  publish = "live/"
+  publish = "src/"
 
 [functions]
-  directory = "live/netlify/functions"
+  directory = "src/netlify/functions"
 
 # Clean URLs - removes .html from addresses
 [build.processing.html]

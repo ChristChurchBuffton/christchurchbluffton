@@ -50,7 +50,7 @@ exports.handler = async (event) => {
         headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           from: process.env.EMAIL_FROM || 'Christ Church Bluffton <notifications@christchurchbluffton.org>',
-          to: ['jonathan@christchurchbluffton.org', 'admin@christchurchbluffton.org'],
+          to: ['admin@christchurchbluffton.org'],
           subject: `New Stay Updated Signup — ${email}`,
           text: `New stay updated signup:\n\nEmail: ${email}`
         })

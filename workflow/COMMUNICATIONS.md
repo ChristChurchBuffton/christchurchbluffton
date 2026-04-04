@@ -73,6 +73,46 @@ Kevin
 
 ---
 
+### 2026-03-19 — Email to Tithely (Tori) re: DKIM Resolution
+
+> Subject: Re: DKIM / Email Deliverability
+>
+> Hi Tori,
+>
+> Thank you for looking into this and for the transparency. We understand that DKIM signing isn't currently supported on your end.
+>
+> We'll adjust our DMARC policy on our domain side to accommodate this. That should resolve the deliverability issues we've been seeing. We'll keep the SPF record as-is since that's already passing.
+>
+> We did consider the Alternate Sending option, but since our congregation and community are just getting to know us, it's important that emails come from our church domain rather than a third-party address. Building that name recognition early on really matters for a new church plant.
+>
+> I do want to mention that relaxing our DMARC policy does reduce our domain's email security posture slightly — it means we lose the ability to quarantine unauthenticated messages sent on behalf of our domain. It's a workable solution for now, but we'd love to see DKIM support added to the platform down the road. It would be a great step for churches and organizations that want to maintain strong email authentication while using Tithely's services.
+>
+> We appreciate everything your team does. Thank you for walking through this with us.
+>
+> Kevin
+
+---
+
+### 2026-03-19 — Email to Church Team re: Email Deliverability Fix
+
+> Good morning,
+>
+> I'm sure you've seen some of the emails I'm sending to Tithely so here it is in plain language:
+>
+> The issue: When setting up our domain, I implemented a security setting (DMARC) that quarantines emails that aren't fully authenticated. Tithely doesn't support DKIM, a standard authentication method most email platforms offer, so their emails sent on our behalf get flagged.
+>
+> The fix: I'm relaxing our DMARC policy so those emails deliver normally. SPF authentication is still in place, so emails are still verified — just with a slightly more flexible policy. No action needed on your end.
+>
+> Any risk? Technically, this makes it slightly easier for someone to spoof (send a fake email pretending to be from our domain—usually used for phishing scams)—but that's usually a concern for large corporations, not a church plant. The benefit of emails actually reaching inboxes far outweighs it. I personally like to keep things secure from the get-go, but this will suffice for now.
+>
+> I just made the backend change. It can take up to 48 hours for things to propagate, but it usually takes a few hours.
+>
+> Let me know if you have questions and how testing goes.
+>
+> Kevin
+
+---
+
 ## Client Feedback
 > Record client responses, change requests, and approvals here.
 

@@ -72,7 +72,6 @@ textarea:focus-visible {
     padding: 8px 30px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     height: 85px;
 }
 
@@ -82,6 +81,7 @@ textarea:focus-visible {
     gap: 15px;
     text-decoration: none;
     color: inherit;
+    margin-right: auto;
 }
 
 .logo-box {
@@ -131,77 +131,96 @@ textarea:focus-visible {
     text-align: center;
 }
 
-.header-nav {
+/* Desktop Navigation */
+.nav-desktop {
     display: flex;
-    gap: 10px;
     align-items: center;
+    margin-right: 20px;
 }
 
-.header-nav-link {
+.nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links a {
     font-family: var(--font-body);
-    margin-right: 20px;
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     font-weight: 400;
     color: var(--navy-blue);
     text-decoration: none;
-    letter-spacing: 0.5px;
     transition: color 0.3s ease;
     position: relative;
 }
 
-.header-nav-link:hover {
+.nav-links a:hover {
     color: var(--gold-text);
 }
 
-.header-nav-link::after {
+.nav-links a::after {
     content: '';
     position: absolute;
-    bottom: -4px;
+    bottom: -5px;
     left: 0;
     width: 0;
     height: 2px;
-    background: var(--gold);
+    background-color: var(--gold);
     transition: width 0.3s ease;
 }
 
-.header-nav-link:hover::after {
+.nav-links a:hover::after {
     width: 100%;
 }
 
-.header-nav-btn {
+.nav-links a.active {
+    color: var(--gold-text);
+}
+
+.nav-links a.active::after {
+    width: 100%;
+}
+
+/* Header Right */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-give {
+    font-family: var(--font-body);
+    background-color: var(--gold);
+    color: var(--white);
     padding: 10px 28px;
-    border: 2px solid var(--navy-blue);
     border-radius: 50px;
-    font-family: var(--font-heading);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 400;
-    color: var(--navy-blue);
     text-decoration: none;
-    letter-spacing: 1px;
     transition: all 0.3s ease;
 }
 
-.header-nav-btn:hover {
-    background: var(--navy-blue);
-    color: var(--white);
+.btn-give:hover {
+    background-color: var(--navy-blue);
+    transform: translateY(-2px);
 }
 
-.header-nav-btn-give {
-    padding: 10px 28px;
-    border: none;
-    border-radius: 50px;
-    font-family: var(--font-heading);
-    font-size: 0.85rem;
+.mobile-give-btn {
+    font-family: var(--font-body);
+    display: inline-block;
+    background-color: var(--gold);
+    color: var(--white) !important;
+    padding: 12px 30px;
+    border-radius: 4px;
+    text-align: center;
+    margin-top: 20px;
     font-weight: 400;
-    color: var(--white);
-    background: var(--gold);
-    text-decoration: none;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
 }
 
-.header-nav-btn-give:hover {
-    background: var(--navy-blue);
+.mobile-give-btn:hover {
+    background-color: var(--navy-blue);
 }
 
 /* ── Hamburger Button ── */
@@ -250,12 +269,12 @@ textarea:focus-visible {
     position: fixed;
     top: 0;
     right: -300px;
-    width: 280px;
+    width: 300px;
     height: 100%;
     background: var(--white);
     z-index: 200;
-    padding: 30px 24px;
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+    padding: 80px 30px 30px;
+    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.2);
     transition: right 0.3s ease;
     overflow-y: auto;
 }
@@ -291,27 +310,25 @@ textarea:focus-visible {
 }
 
 .mobile-nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.mobile-nav-links li {
-    margin-bottom: 4px;
-}
-
 .mobile-nav-links a {
-    display: block;
     font-family: var(--font-body);
-    font-size: 1rem;
+    font-size: 1.2rem;
+    font-weight: 400;
     color: var(--navy-blue);
     text-decoration: none;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--light-gray);
     transition: color 0.2s ease;
 }
 
-.mobile-nav-links a:hover {
+.mobile-nav-links a:hover,
+.mobile-nav-links a.active {
     color: var(--gold);
 }
 
@@ -396,6 +413,29 @@ textarea:focus-visible {
 .footer-contact-info svg { color: var(--gold); flex-shrink: 0; }
 
 .footer-column { text-align: center; }
+
+.footer-links-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 20px;
+}
+
+.footer-links-give {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.footer-links-give a {
+    font-family: var(--font-body);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-links-give a:hover {
+    color: var(--gold);
+}
 
 .footer-column h4 {
     font-family: var(--font-heading);
@@ -537,7 +577,7 @@ textarea:focus-visible {
 .prayer-fab {
     display: flex;
     position: fixed;
-    bottom: 30px;
+    bottom: 20px;
     right: 30px;
     background: var(--navy-blue);
     border-radius: 50%;
@@ -731,27 +771,10 @@ textarea:focus-visible {
 }
 
 /* ══════════════════════════════════════════════
-   RESPONSIVE — TABLET (max-width: 900px)
+   RESPONSIVE — TABLET (max-width: 1023px)
    ══════════════════════════════════════════════ */
-
-.prayer-fab-tablet-fix { } /* placeholder */
-
-@media (min-width: 769px) and (max-width: 1023px) {
-    .prayer-fab {
-        bottom: 80px;
-    }
-
-    .prayer-popup {
-        bottom: 150px;
-    }
-}
-
-/* ══════════════════════════════════════════════
-   RESPONSIVE — MOBILE (max-width: 768px)
-   ══════════════════════════════════════════════ */
-
-@media (max-width: 768px) {
-    .desktop-nav {
+@media (max-width: 1023px) {
+    .nav-desktop {
         display: none;
     }
 
@@ -759,37 +782,22 @@ textarea:focus-visible {
         display: flex;
     }
 
-    .header-container {
-        padding: 8px 16px;
-        height: 70px;
-    }
-
-    .logo-box {
-        width: 45px;
-        height: 45px;
-    }
-
-    .logo-box img {
-        width: 45px;
-        height: 45px;
+    .header-right .btn-give {
+        display: none;
     }
 
     .church-name {
-        font-size: 1.5rem;
+        font-size: 1.1rem;
     }
 
-    .church-location {
-        font-size: 0.65rem;
-        letter-spacing: 2px;
+    .logo-box {
+        width: 50px;
+        height: 50px;
     }
 
-    .header-nav {
-        gap: 8px;
-    }
-
-    .header-nav-btn {
-        padding: 7px 16px;
-        font-size: 0.85rem;
+    .logo-box img {
+        width: 50px;
+        height: 50px;
     }
 
     .footer-main {
@@ -801,6 +809,9 @@ textarea:focus-visible {
     .footer-branding { padding-right: 0; text-align: center; }
     .footer-logo-row { justify-content: center; flex-direction: column; gap: 8px; }
     .footer-contact-info { align-items: center; }
+    .footer-column { text-align: center; }
+    .footer-links-grid { justify-items: center; }
+    .footer-links-give { text-align: center; }
     .newsletter-form { align-items: center; }
 
     .footer-bottom {
@@ -808,6 +819,12 @@ textarea:focus-visible {
         align-items: center;
         text-align: center;
         gap: 6px;
+    }
+}
+
+@media (max-width: 768px) {
+    .footer-tagline-location {
+        display: block;
     }
 
     .prayer-fab {
@@ -819,12 +836,12 @@ textarea:focus-visible {
         line-height: 1.2;
         text-align: center;
         white-space: normal;
-        bottom: 80px;
+        bottom: 20px;
         right: 16px;
     }
 
     .prayer-popup {
-        bottom: 100px;
+        bottom: 80px;
         right: 16px;
         width: 300px;
         max-height: calc(100vh - 140px);
@@ -861,13 +878,7 @@ textarea:focus-visible {
     }
 
     .church-name {
-        font-size: 1.5rem;
-    }
-
-    .header-nav-btn {
-        padding: 5px 12px;
-        font-size: 0.85rem;
-        letter-spacing: 0.5px;
+        font-size: 1rem;
     }
 }
 
@@ -892,12 +903,11 @@ textarea:focus-visible {
     }
 
     .church-name {
-        font-size: 1.5rem;
+        font-size: 0.85rem;
     }
 
     .church-location {
-        font-size: 0.6rem;
-        letter-spacing: 1.5px;
+        display: none;
     }
 
     .footer-container {

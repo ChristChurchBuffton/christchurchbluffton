@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pledge Card — Christ Church Bluffton</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #e8e8e8;
+            font-family: 'Lora', serif;
+        }
+
+        .card {
+            width: 4in;
+            height: 8.5in;
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .card-header {
+            background: linear-gradient(135deg, #303b6a 0%, #1e2547 100%);
+            padding: 18px 18px 14px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .card-logo {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 6px;
+            border-radius: 50%;
+        }
+
+        .card-church-name {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+
+        .card-church-location {
+            font-size: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #c3a355;
+        }
+
+        .card-tagline {
+            font-size: 11px;
+            font-style: italic;
+            color: #c3a355;
+            margin-top: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Scripture */
+        .card-scripture {
+            background: #f5f4ef;
+            padding: 8px 18px;
+            text-align: center;
+            border-bottom: 1px solid #e2e0d8;
+        }
+
+        .card-verse {
+            font-size: 10px;
+            font-style: italic;
+            color: #4A4A55;
+            line-height: 1.6;
+        }
+
+        .card-reference {
+            font-size: 10.5px;
+            color: #8E7A3A;
+            margin-top: 2px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Body */
+        .card-body {
+            padding: 12px 18px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .section-label {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #303b6a;
+            font-weight: 600;
+            margin-bottom: 4px;
+            border-bottom: 1px solid #c3a355;
+            padding-bottom: 3px;
+        }
+
+        /* Form fields */
+        .field {
+            margin-bottom: 5px;
+        }
+
+        .field-label {
+            font-size: 10px;
+            color: #4A4A55;
+            margin-bottom: 2px;
+        }
+
+        .field-line {
+            border-bottom: 1px solid #ccc;
+            height: 15px;
+        }
+
+        .field-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .field-row .field {
+            flex: 1;
+        }
+
+        /* Pledge amount */
+        .pledge-amount {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin: 4px 0;
+        }
+
+        .pledge-dollar {
+            font-size: 16px;
+            color: #303b6a;
+            font-weight: 600;
+        }
+
+        .pledge-line {
+            flex: 1;
+            border-bottom: 2px solid #303b6a;
+            height: 18px;
+        }
+
+        /* Checkboxes */
+        .checkbox-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10.5px;
+            color: #333;
+        }
+
+        .checkbox {
+            width: 10px;
+            height: 10px;
+            border: 1px solid #303b6a;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        /* Instructions */
+        .instructions {
+            font-size: 10px;
+            color: #4A4A55;
+            line-height: 1.7;
+            margin-top: 4px;
+        }
+
+        .instructions strong {
+            color: #303b6a;
+        }
+
+        /* Divider */
+        .gold-divider {
+            height: 1px;
+            background: #c3a355;
+            margin: 4px 0;
+        }
+
+        /* Footer */
+        .card-footer {
+            background: #303b6a;
+            padding: 10px 18px;
+            text-align: center;
+        }
+
+        .card-footer-text {
+            font-size: 10.5px;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.6;
+        }
+
+        .card-footer-text strong {
+            color: #c3a355;
+            font-weight: 500;
+        }
+
+        /* Print styles */
+        @media print {
+            @page {
+                size: 4in 8.5in;
+                margin: 0;
+            }
+            body {
+                background: none;
+                margin: 0;
+                padding: 0;
+            }
+            .card {
+                box-shadow: none;
+                margin: 0;
+                width: 4in;
+                height: 8.5in;
+            }
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <!-- Header -->
+        <div class="card-header">
+            <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="card-logo">
+            <div class="card-church-name">Christ Church</div>
+            <div class="card-church-location">Bluffton</div>
+            <div class="card-tagline">For the Glory of God &amp; the Good of the Community</div>
+        </div>
+
+        <!-- Scripture -->
+        <div class="card-scripture">
+            <p class="card-verse">&ldquo;And day by day, attending the temple together and breaking bread in their homes, they received their food with glad and generous hearts.&rdquo;</p>
+            <p class="card-reference">&mdash; Acts 2:46 (ESV)</p>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body">
+            <!-- Personal Info -->
+            <div>
+                <div class="section-label">My Info</div>
+                <div class="field">
+                    <div class="field-label">Name</div>
+                    <div class="field-line"></div>
+                </div>
+                <div class="field">
+                    <div class="field-label">Address</div>
+                    <div class="field-line"></div>
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <div class="field-label">City</div>
+                        <div class="field-line"></div>
+                    </div>
+                    <div class="field" style="flex: 0.4;">
+                        <div class="field-label">State</div>
+                        <div class="field-line"></div>
+                    </div>
+                    <div class="field" style="flex: 0.5;">
+                        <div class="field-label">ZIP</div>
+                        <div class="field-line"></div>
+                    </div>
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <div class="field-label">Email</div>
+                        <div class="field-line"></div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Phone</div>
+                        <div class="field-line"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Commitment -->
+            <div>
+                <div class="section-label">Financial Commitment</div>
+                <div class="field-label" style="margin-bottom: 4px;">I commit to contribute over the next year:</div>
+                <div class="pledge-amount">
+                    <span class="pledge-dollar">$</span>
+                    <div class="pledge-line"></div>
+                </div>
+
+                <div class="field-label" style="margin-top: 6px; margin-bottom: 4px;">Payment Frequency:</div>
+                <div class="checkbox-row">
+                    <div class="checkbox-item"><div class="checkbox"></div> 1X</div>
+                    <div class="checkbox-item"><div class="checkbox"></div> Weekly</div>
+                    <div class="checkbox-item"><div class="checkbox"></div> Twice/Month</div>
+                    <div class="checkbox-item"><div class="checkbox"></div> Monthly</div>
+                    <div class="checkbox-item"><div class="checkbox"></div> Quarterly</div>
+                </div>
+            </div>
+
+            <div class="gold-divider"></div>
+
+            <!-- How to Give -->
+            <div>
+                <div class="instructions" style="display: flex; gap: 12px; align-items: flex-start;">
+                    <div style="flex: 1;">
+                        <strong>Please make checks payable to:</strong><br>
+                        Christ Church Bluffton<br><br>
+                        <strong>Give online at:</strong><br>
+                        www.christchurchbluffton.org<br><br>
+                        <strong>Please return this card to:</strong><br>
+                        7 Venture Drive, Suite 104, PMB 267<br>
+                        Bluffton, SC 29910<br><br>
+                        or email <strong>treasurer@christchurchbluffton.org</strong>
+                    </div>
+                    <div style="text-align: center; flex-shrink: 0;">
+                        <img src="images/qr-code-donate.webp" alt="Scan to give online" style="width: 70px; height: 70px; border-radius: 4px; object-fit: contain; aspect-ratio: 1/1;">
+                        <div style="font-size: 7.5px; color: #303b6a; margin-top: 3px; line-height: 1.4;">Use your phone's camera<br>to donate online</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="card-footer">
+            <p class="card-footer-text">
+                Christ Church Anglican Bluffton, Inc. &bull; 501(c)(3) Nonprofit<br>
+                All contributions are tax-deductible to the extent allowed by law.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

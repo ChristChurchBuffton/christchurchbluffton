@@ -2,6 +2,43 @@
 
 ---
 
+## 2026-04-03 — Full Site Rebuild & Project Reorganization
+
+**What was done:**
+- Reorganized project folder to match Forged Digital Project Template
+- Copied project from `Clients - Active/` to `Web Design/Christ Church Bluffton/` (new working copy)
+- Renamed `live/` → `src/`, old `src/` → `reference/` (now archived)
+- Updated `netlify.toml` to publish from `src/` instead of `live/`
+- Built all pages from reference site content with current branding (navy #303b6a, gold #c3a355, Lora font)
+
+**Pages built:**
+- Homepage — hero, about preview, stats, vision cards (Worship/Groups/Serve), CTA pill
+- About — mission, vision cards, beliefs (4 pillars), scripture banner, pastor section (no leadership)
+- Join Us (`join-us.html`, was `worship.html`) — service dates (May 3, Jun 7, Jul 12, Aug 2 at 5:30 PM Sat), Lord of Life Lutheran Church venue with address, What to Expect, liturgy + worship music columns, Google Map, CTA
+- Groups — Table 246 Bible study, Prayer Groups, Youth Ministry (Coming Soon)
+- Serve (NEW) — 7 ministry cards: Greeting, Safety, Nursery, Lay Readers, Technology, Eucharist, Worship. Placeholder containers for mission statements.
+- Give — moved from old index.html to /give, URLs updated
+- Contact — hero resized to match other pages, donate CTA fixed to /give
+
+**Navigation:** Home, About, Join Us, Groups, Serve, Contact + Give (pill button)
+
+**Design choices:**
+- Hero overlay: neutral grey (not blue/purple tint)
+- CTA sections: oval pill style across all pages
+- "Events" replaced with "Serve" (ministry teams)
+- "Worship" renamed to "Join Us" / "Join Us For Services"
+- Image placeholders with dashed borders for all pending photos
+
+**Known issues / remaining:**
+- Google Maps embed on join-us uses address-based URL — needs real embed from Google Maps share
+- Reference folder couldn't be deleted (Windows lock) — copied to archive
+- Backup files in src/ (-previous files) — remove before deploy
+- sitemap.xml needs all new page URLs
+- All placeholder images need real photos from client
+- Serve page mission statements pending
+
+---
+
 ## 2026-02-19 — Tithe.ly API Dead End
 
 **Issue**: Tithe.ly confirmed they no longer offer API keys in 3.0. The old Breeze 2.0 API keys are gone. There is NO way to push data from an external site into the Tithe.ly People database via API.
@@ -43,3 +80,31 @@ This plan is actually simpler and has zero ongoing cost. Netlify Forms free tier
 - DNS and Resend domain verification already done (shared across environments)
 - Add spam protection (CAPTCHA + honeypot) to all forms before going live
 - Update `NOTIFY_EMAIL` to final recipient(s) once Google Workspace emails are set up
+
+---
+
+## 2026-04-01 — Site Temporarily Taken Down (Client Request)
+
+**What happened:** Client requested the live site be temporarily taken down.
+
+**What was deployed:** A `temp-deploy/` folder with:
+- `index.html` — plain white 404 page (no branding, no colors, noindex/nofollow)
+- `netlify.toml` — no-cache headers (so browsers don't cache the 404), security headers
+- `robots.txt` — blocks all crawlers
+
+**Deployed to:** Production Netlify site (`christchurchbluffton.org`) via manual drag-and-drop.
+
+**How to revert (restore the real site):**
+1. Go to the production Netlify dashboard
+2. Go to **Deploys**
+3. Either:
+   - **Option A**: Click on the previous deploy (the last real site deploy) and hit "Publish deploy" to restore it instantly
+   - **Option B**: Drag the full `live/` folder from `C:\Users\kwmcc\Desktop\Web Design\Clients - Active\Christ Church Bluffton\live\` onto the deploy area
+4. After restoring, verify:
+   - All pages load correctly
+   - Forms work (contact, prayer, stay-updated)
+   - Tithe.ly donation modal works on give page
+   - Announcement bar shows
+   - Google can crawl again (robots.txt in live/ allows indexing)
+
+**Important:** The no-cache headers on the temp deploy mean browsers won't serve a stale 404 after restoring — visitors will see the real site immediately.

@@ -87,25 +87,26 @@
         /* ── Page Header ── */
         .page-header {
             background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
-            padding: 75px 30px;
+            padding: 120px 30px 100px;
             text-align: center;
         }
 
         .page-label {
             font-family: var(--font-body);
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 4px;
             color: var(--gold);
-            margin-bottom: 10px;
+            margin-bottom: 14px;
         }
 
         .page-title {
             font-family: var(--font-heading);
-            font-size: 1.8rem;
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
             font-weight: 400;
             color: var(--white);
             letter-spacing: 1px;
+            margin-bottom: 20px;
         }
 
         /* ── Contact Section ── */
@@ -401,8 +402,8 @@
         /* ── Mobile ── */
         @media (max-width: 768px) {
             .container { padding: 0 20px; }
-            .page-header { padding: 35px 20px; }
-            .page-title { font-size: 1.4rem; }
+            .page-header { padding: 80px 20px 60px; }
+            .page-title { font-size: 2rem; }
             .contact-section { padding: 35px 0; }
             .form-card { padding: 24px; }
             .cta-section { padding: 10px 20px 40px; }
@@ -415,8 +416,8 @@
 
         @media (max-width: 480px) {
             .container { padding: 0 16px; }
-            .page-header { padding: 30px 16px; }
-            .page-title { font-size: 1.2rem; }
+            .page-header { padding: 60px 16px 50px; }
+            .page-title { font-size: 1.8rem; }
             .contact-section { padding: 25px 0; }
             .form-card { padding: 18px; }
             .contact-card { padding: 16px; }
@@ -426,7 +427,7 @@
 
         @media (max-width: 360px) {
             .container { padding: 0 10px; }
-            .page-header { padding: 25px 10px; }
+            .page-header { padding: 50px 12px 40px; }
             .form-card { padding: 12px; }
             .contact-card { padding: 10px; }
             .contact-grid { gap: 24px; }
@@ -567,7 +568,7 @@
                     <h2 class="cta-heading">Support Our Mission</h2>
                     <p class="cta-text">Your generosity helps build a Christ-centered community in the Lowcountry. Every gift makes a difference.</p>
                 </div>
-                <a href="index.html" class="cta-btn">Donate Now</a>
+                <a href="/give" class="cta-btn">Donate Now</a>
             </div>
         </section>
 

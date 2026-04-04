@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PTWWV0M0DX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-PTWWV0M0DX');
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serve | Christ Church Bluffton</title>
+    <meta name="description" content="Discover ways to serve at Christ Church Bluffton. Join a ministry team and use your gifts to build the Kingdom.">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Serve | Christ Church Bluffton">
+    <meta property="og:description" content="Find your place to serve at Christ Church Bluffton.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://christchurchbluffton.org/images/og-image.jpg">
+    <meta property="og:url" content="https://christchurchbluffton.org/serve">
+    <meta property="og:site_name" content="Christ Church Bluffton">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Serve | Christ Church Bluffton">
+    <meta name="twitter:description" content="Find your place to serve at Christ Church Bluffton.">
+    <meta name="twitter:image" content="https://christchurchbluffton.org/images/og-image.jpg">
+    <link rel="canonical" href="https://christchurchbluffton.org/serve">
+    <link rel="stylesheet" href="css/fonts.css">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/favicon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#303b6a">
+    <link rel="stylesheet" href="css/shared.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --navy-blue: #303b6a;
+            --gold: #c3a355;
+            --gold-text: #8E7A3A;
+            --white: #FFFFFF;
+            --lightest-gray: #F5F4EF;
+            --light-gray: #E2E0D8;
+            --dark-gray: #333333;
+            --text-gray: #4A4A55;
+            --font-heading: 'Lora', serif;
+            --font-body: 'Lora', serif;
+            --font-accent: 'Lora', serif;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        html { scroll-behavior: smooth; overflow-x: clip; }
+        body {
+            font-family: var(--font-body);
+            line-height: 1.6;
+            color: var(--dark-gray);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--lightest-gray);
+            overflow-x: clip;
+        }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        .main-content { flex: 1; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 30px; }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 32px; font-family: var(--font-body); font-size: 1rem; font-weight: 400; border-radius: 8px; transition: all 0.3s ease; cursor: pointer; }
+        .btn-primary { background: var(--gold); color: var(--white); box-shadow: 0 4px 20px rgba(195, 163, 85, 0.3); }
+        .btn-primary:hover { background: var(--gold-text); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(195, 163, 85, 0.4); }
+
+        .page-header { background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%); padding: 120px 30px 100px; text-align: center; }
+        .page-label { font-family: var(--font-body); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 4px; color: var(--gold); margin-bottom: 14px; }
+        .page-title { font-family: var(--font-heading); font-size: clamp(2.2rem, 5vw, 3.2rem); font-weight: 400; color: var(--white); letter-spacing: 1px; margin-bottom: 20px; }
+
+        .section { padding: 100px 0; position: relative; }
+        .section-label { display: inline-block; font-family: var(--font-body); font-size: 0.85rem; font-weight: 400; text-transform: uppercase; letter-spacing: 3px; color: var(--gold); margin-bottom: 15px; }
+        .section-title { font-family: var(--font-heading); font-size: clamp(2rem, 5vw, 3rem); color: var(--navy-blue); margin-bottom: 20px; font-weight: 400; }
+        .section-header { text-align: center; max-width: 700px; margin: 0 auto 60px; }
+        .section-divider { display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .section-divider span { width: 8px; height: 8px; background: var(--gold); border-radius: 50%; }
+        .section-divider span:nth-child(2) { width: 40px; border-radius: 4px; }
+
+        .lead { font-family: var(--font-body); font-size: 1.1rem; line-height: 1.8; color: var(--text-gray); margin-bottom: 20px; }
+
+        /* ── Ministry Cards ── */
+        .ministry-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        .ministry-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 36px;
+            border: 1px solid var(--light-gray);
+            box-shadow: 0 4px 20px rgba(48, 59, 106, 0.08);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .ministry-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(48, 59, 106, 0.15);
+            border-color: var(--gold);
+        }
+        .ministry-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: var(--gold);
+        }
+        .ministry-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+        .ministry-card h3 {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            color: var(--navy-blue);
+            font-weight: 400;
+            margin-bottom: 14px;
+        }
+        .ministry-mission {
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            line-height: 1.8;
+            flex: 1;
+            min-height: 80px;
+            padding: 16px;
+            background: var(--lightest-gray);
+            border-radius: 10px;
+            border: 1px dashed var(--light-gray);
+        }
+        .ministry-mission.has-content {
+            border-style: solid;
+            border-color: transparent;
+            background: var(--lightest-gray);
+        }
+        .mission-placeholder {
+            color: #aaa;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        /* ── CTA ── */
+        .cta-section { background: var(--white); padding: 60px 30px; text-align: center; }
+        .cta-inner { max-width: 900px; margin: 0 auto; background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%); border-radius: 60px; padding: 40px 60px; display: flex; align-items: center; gap: 30px; }
+        .cta-logo { object-fit: contain; flex-shrink: 0; }
+        .cta-content { flex: 1; text-align: left; }
+        .cta-heading { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 400; color: var(--white); margin-bottom: 6px; }
+        .cta-text { font-family: var(--font-accent); font-size: 0.85rem; color: rgba(255, 255, 255, 0.75); line-height: 1.6; }
+        .cta-btn { display: inline-block; padding: 12px 36px; white-space: nowrap; flex-shrink: 0; border: 2px solid var(--gold); border-radius: 50px; font-family: var(--font-heading); font-size: 0.85rem; font-weight: 400; color: var(--gold); text-decoration: none; letter-spacing: 1px; transition: all 0.3s ease; }
+        .cta-btn:hover { background: var(--gold); color: var(--navy-blue); }
+
+        @media (max-width: 1023px) {
+            .section { padding: 80px 0; }
+            .ministry-grid { grid-template-columns: repeat(2, 1fr); }
+            .cta-inner { flex-direction: column; text-align: center; padding: 30px; border-radius: 30px; gap: 20px; }
+            .cta-content { text-align: center; }
+        }
+        @media (max-width: 768px) {
+            .container { padding: 0 20px; }
+            .page-header { padding: 80px 20px 60px; }
+            .page-title { font-size: 2rem; }
+            .section { padding: 60px 0; }
+            .section-title { font-size: 1.8rem; }
+            .cta-section { padding: 40px 20px; }
+        }
+        @media (max-width: 600px) {
+            .ministry-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 480px) {
+            .container { padding: 0 16px; }
+            .page-header { padding: 60px 16px 50px; }
+            .ministry-card { padding: 28px; }
+            .cta-inner { padding: 22px 20px; border-radius: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="site-header"></div>
+
+    <main class="main-content" id="main-content">
+
+        <!-- Page Header -->
+        <section class="page-header">
+            <p class="page-label">Use Your Gifts</p>
+            <h1 class="page-title">Serve Our Community</h1>
+            <div class="section-divider">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </section>
+
+        <!-- Intro -->
+        <section class="section" style="background: var(--white); padding-bottom: 60px;">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-label">Ministry Teams</span>
+                    <h2 class="section-title">Find Your Place to Serve</h2>
+                    <div class="section-divider">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                <p class="lead" style="text-align: center; max-width: 800px; margin: 0 auto;">Every member of Christ Church has a role to play. Whether you are greeting newcomers at the door, leading worship, or serving behind the scenes, your gifts matter. Explore our ministry teams below and find where God is calling you to serve.</p>
+            </div>
+        </section>
+
+        <!-- Ministry Cards -->
+        <section class="section" style="background: var(--lightest-gray);">
+            <div class="container">
+                <div class="ministry-grid">
+
+                    <!-- Greeting -->
+                    <div class="ministry-card">
+                        <div class="ministry-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </div>
+                        <h3>Greeting</h3>
+                        <div class="ministry-mission">
+                            <span class="mission-placeholder">Mission statement coming soon.</span>
+                        </div>
+                    </div>
+
+                    <!-- Safety -->
+                    <div class="ministry-card">
+                        <div class="ministry-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            </svg>
+                        </div>
+                        <h3>Safety</h3>
+                        <div class="ministry-mission">
+                            <span class="mission-placeholder">Mission statement coming soon.</span>
+                        </div>
+                    </div>
+
+                    <!-- Nursery -->
+                    <div class="ministry-card">
+                        <div class="ministry-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                        </div>
+                        <h3>Nursery</h3>
+                        <div class="ministry-mission">
+                            <span class="mission-placeholder">Mission statement coming soon.</span>
+                        </div>
+                    </div>
+
+                    <!-- Lay Readers -->
+                    <div class="ministry-card">
+                        <div class="ministry-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                            </svg>
+                        </div>
+                        <h3>Lay Readers</h3>
+                        <div class="ministry-mission">
+                            <span class="mission-placeholder">Mission statement coming soon.</span>
+                        </div>
+                    </div>
+
+                    <!-- Technology -->
+                    <div class="ministry-card">
+                        <div class="ministry-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                <line x1="8" y1="21" x2="16" y2="21"/>
+                                <line x1="12" y1="17" x2="12" y2="21"/>
+                            </svg>
+                        </div>
+                        <h3>Technology</h3>
+                        <div class="ministry-mission">
+                            <span class="mission-placeholder">Mission statement coming soon.</span>
+                        </div>
+                    </div>
+
+                    <!-- Eucharist -->
+                    <div class="ministry-card">
+                        <div class="ministry-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8 2h8l2 10H6L8 2z"/>
+                                <path d="M12 12v6"/>
+                                <path d="M8 22h8"/>
+                                <path d="M10 18h4"/>
+                            </svg>
+                        </div>
+                        <h3>Eucharist</h3>
+                        <div class="ministry-mission">
+                            <span class="mission-placeholder">Mission statement coming soon.</span>
+                        </div>
+                    </div>
+
+                    <!-- Worship -->
+                    <div class="ministry-card">
+                        <div class="ministry-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18V5l12-2v13"/>
+                                <circle cx="6" cy="18" r="3"/>
+                                <circle cx="18" cy="16" r="3"/>
+                            </svg>
+                        </div>
+                        <h3>Worship</h3>
+                        <div class="ministry-mission">
+                            <span class="mission-placeholder">Mission statement coming soon.</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta-section">
+            <div class="cta-inner">
+                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60">
+                <div class="cta-content">
+                    <h2 class="cta-heading">Ready to Serve?</h2>
+                    <p class="cta-text">Reach out and let us know which ministry team interests you. We will help you find the right fit.</p>
+                </div>
+                <a href="/contact" class="cta-btn">Get Involved</a>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="site-footer"></div>
+    <div id="site-prayer"></div>
+    <script src="js/components.js"></script>
+</body>
+</html>

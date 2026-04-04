@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PTWWV0M0DX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-PTWWV0M0DX');
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About | Christ Church Bluffton</title>
+    <meta name="description" content="Learn about Christ Church Bluffton's mission, beliefs, and vision. An Anglican church plant rooted in historic faith, launching in Bluffton, SC in 2026.">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="About | Christ Church Bluffton">
+    <meta property="og:description" content="Our mission, beliefs, and vision for Christ Church Bluffton.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://christchurchbluffton.org/images/og-image.jpg">
+    <meta property="og:url" content="https://christchurchbluffton.org/about">
+    <meta property="og:site_name" content="Christ Church Bluffton">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="About | Christ Church Bluffton">
+    <meta name="twitter:description" content="Our mission, beliefs, and vision for Christ Church Bluffton.">
+    <meta name="twitter:image" content="https://christchurchbluffton.org/images/og-image.jpg">
+    <link rel="canonical" href="https://christchurchbluffton.org/about">
+    <link rel="stylesheet" href="css/fonts.css">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/favicon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#303b6a">
+    <link rel="stylesheet" href="css/shared.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --navy-blue: #303b6a;
+            --gold: #c3a355;
+            --gold-text: #8E7A3A;
+            --white: #FFFFFF;
+            --lightest-gray: #F5F4EF;
+            --light-gray: #E2E0D8;
+            --dark-gray: #333333;
+            --text-gray: #4A4A55;
+            --font-heading: 'Lora', serif;
+            --font-body: 'Lora', serif;
+            --font-accent: 'Lora', serif;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        html { scroll-behavior: smooth; overflow-x: clip; }
+
+        body {
+            font-family: var(--font-body);
+            line-height: 1.6;
+            color: var(--dark-gray);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--lightest-gray);
+            overflow-x: clip;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        .main-content { flex: 1; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 30px; }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 32px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 400;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: var(--gold);
+            color: var(--white);
+            box-shadow: 0 4px 20px rgba(195, 163, 85, 0.3);
+        }
+        .btn-primary:hover {
+            background: var(--gold-text);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(195, 163, 85, 0.4);
+        }
+
+        /* ── Page Header ── */
+        .page-header {
+            background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            padding: 120px 30px 100px;
+            text-align: center;
+        }
+        .page-label {
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--gold);
+            margin-bottom: 14px;
+        }
+        .page-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            font-weight: 400;
+            color: var(--white);
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+        .section-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .section-divider span {
+            width: 8px; height: 8px;
+            background: var(--gold);
+            border-radius: 50%;
+        }
+        .section-divider span:nth-child(2) {
+            width: 40px;
+            border-radius: 4px;
+        }
+
+        /* ── Sections ── */
+        .section { padding: 100px 0; position: relative; }
+        .section-label {
+            display: inline-block;
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--gold);
+            margin-bottom: 15px;
+        }
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: var(--navy-blue);
+            margin-bottom: 20px;
+            font-weight: 400;
+        }
+        .section-title.left-align { text-align: left; }
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 60px;
+        }
+
+        /* ── About / Mission ── */
+        .about { background: var(--white); }
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+        .about-content p {
+            font-family: var(--font-body);
+            color: var(--text-gray);
+            margin-bottom: 20px;
+            line-height: 1.9;
+        }
+        .about-content .lead {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        .quote {
+            position: relative;
+            padding: 30px 30px 30px 40px;
+            background: var(--lightest-gray);
+            border-left: 4px solid var(--gold);
+            border-radius: 0 8px 8px 0;
+            margin-top: 30px;
+        }
+        .quote-icon {
+            position: absolute;
+            top: 15px; left: 15px;
+            font-size: 3rem;
+            color: var(--gold);
+            opacity: 0.3;
+            font-family: serif;
+            line-height: 1;
+        }
+        .quote p {
+            font-family: var(--font-accent);
+            font-size: 1.3rem;
+            font-style: italic;
+            color: var(--navy-blue);
+            margin: 0;
+        }
+        .about-visual { position: relative; }
+        .visual-card { position: relative; }
+        .visual-image {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(48, 59, 106, 0.2);
+        }
+        .visual-image img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        .image-placeholder {
+            background: linear-gradient(135deg, var(--light-gray) 0%, var(--lightest-gray) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            min-height: 350px;
+            color: #777;
+            border: 2px dashed var(--light-gray);
+        }
+        .placeholder-icon {
+            font-size: 4rem;
+            opacity: 0.5;
+        }
+        .visual-accent {
+            position: absolute;
+            bottom: -20px; right: -20px;
+            width: 150px; height: 150px;
+            background: var(--gold);
+            border-radius: 16px;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        /* ── Vision Cards ── */
+        .vision-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        .vision-card {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(48, 59, 106, 0.12);
+            border: 1px solid var(--light-gray);
+            transition: all 0.3s ease;
+        }
+        .vision-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(48, 59, 106, 0.2);
+            border-color: var(--gold);
+        }
+        .vision-card .card-icon {
+            width: 70px; height: 70px;
+            margin: 0 auto 25px;
+            color: var(--gold);
+        }
+        .vision-card .card-icon svg { width: 100%; height: 100%; }
+        .vision-card h3 {
+            font-family: var(--font-heading);
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: var(--navy-blue);
+            font-weight: 400;
+        }
+        .vision-card p {
+            font-family: var(--font-body);
+            color: var(--text-gray);
+            line-height: 1.7;
+        }
+
+        /* ── Beliefs Section ── */
+        .beliefs-intro {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 60px;
+        }
+        .beliefs-intro p {
+            font-family: var(--font-body);
+            font-size: 1.1rem;
+            color: var(--text-gray);
+            line-height: 1.9;
+        }
+        .beliefs-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        .belief-card {
+            background: var(--white);
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(48, 59, 106, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        .belief-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(48, 59, 106, 0.15);
+            border-color: var(--gold);
+        }
+        .belief-number {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 400;
+            color: var(--gold);
+            opacity: 0.3;
+            margin-bottom: 15px;
+        }
+        .belief-card h4 {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            color: var(--navy-blue);
+            font-weight: 400;
+        }
+        .belief-card p {
+            font-family: var(--font-body);
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* ── Scripture Banner ── */
+        .scripture-banner {
+            background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            padding: 60px;
+            border-radius: 24px;
+            text-align: center;
+        }
+        .scripture-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .scripture-verse {
+            font-family: var(--font-accent);
+            font-size: 1.3rem;
+            font-style: italic;
+            color: var(--white);
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+        .scripture-reference {
+            color: var(--gold);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            font-style: normal;
+        }
+
+        /* ── Pastor Section ── */
+        .pastor { background: var(--lightest-gray); }
+        .pastor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 80px;
+            align-items: center;
+        }
+        .image-frame {
+            position: relative;
+            padding: 20px;
+        }
+        .pastor-placeholder {
+            min-height: 500px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, var(--light-gray) 0%, var(--lightest-gray) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            color: #777;
+            border: 2px dashed var(--light-gray);
+        }
+        .pastor-placeholder .placeholder-icon {
+            font-size: 4rem;
+            opacity: 0.5;
+        }
+        .frame-accent {
+            position: absolute;
+            width: 100px; height: 100px;
+            border: 4px solid var(--gold);
+        }
+        .frame-accent.top-left {
+            top: 0; left: 0;
+            border-right: none;
+            border-bottom: none;
+            border-radius: 16px 0 0 0;
+        }
+        .frame-accent.bottom-right {
+            bottom: 0; right: 0;
+            border-left: none;
+            border-top: none;
+            border-radius: 0 0 16px 0;
+        }
+        .pastor-role {
+            display: inline-block;
+            background: var(--gold);
+            color: var(--white);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            font-weight: 400;
+            margin-bottom: 20px;
+        }
+        .pastor-bio {
+            font-family: var(--font-body);
+            color: var(--text-gray);
+            line-height: 1.9;
+            margin-bottom: 20px;
+        }
+        .pastor-contact { margin: 30px 0; }
+        .contact-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--navy-blue);
+            font-family: var(--font-body);
+            font-weight: 400;
+            transition: all 0.3s ease;
+        }
+        .contact-link:hover { color: var(--gold); }
+        .link-icon { font-size: 1.2rem; }
+        .pastor-quote {
+            position: relative;
+            padding: 25px 30px;
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(48, 59, 106, 0.12);
+            border-left: 4px solid var(--gold);
+        }
+        .pastor-quote p {
+            font-family: var(--font-accent);
+            font-size: 1.15rem;
+            font-style: italic;
+            color: var(--navy-blue);
+            margin: 0;
+        }
+
+        /* ── CTA Section (oval pill) ── */
+        .cta-section {
+            background: var(--lightest-gray);
+            padding: 10px 30px 60px;
+            text-align: center;
+        }
+        .cta-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            border-radius: 60px;
+            padding: 40px 60px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .cta-logo { object-fit: contain; flex-shrink: 0; }
+        .cta-content { flex: 1; text-align: left; }
+        .cta-heading {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: var(--white);
+            margin-bottom: 6px;
+        }
+        .cta-text {
+            font-family: var(--font-accent);
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.75);
+            line-height: 1.6;
+        }
+        .cta-btn {
+            display: inline-block;
+            padding: 12px 36px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            border: 2px solid var(--gold);
+            border-radius: 50px;
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: var(--gold);
+            text-decoration: none;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        .cta-btn:hover {
+            background: var(--gold);
+            color: var(--navy-blue);
+        }
+
+        /* ── Responsive — Tablet ── */
+        @media (max-width: 1023px) {
+            .section { padding: 80px 0; }
+            .about-grid,
+            .pastor-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            .pastor-placeholder { min-height: 350px; }
+            .beliefs-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .cta-inner {
+                flex-direction: column;
+                text-align: center;
+                padding: 30px 30px;
+                border-radius: 30px;
+                gap: 20px;
+            }
+            .cta-content { text-align: center; }
+        }
+
+        /* ── Responsive — Mobile ── */
+        @media (max-width: 768px) {
+            .container { padding: 0 20px; }
+            .page-header { padding: 80px 20px 60px; }
+            .page-title { font-size: 2rem; }
+            .section { padding: 60px 0; }
+            .section-title { font-size: 1.8rem; }
+            .vision-cards {
+                grid-template-columns: 1fr;
+            }
+            .beliefs-grid {
+                grid-template-columns: 1fr;
+            }
+            .scripture-banner {
+                padding: 30px 20px;
+                border-radius: 16px;
+            }
+            .scripture-verse { font-size: 1.1rem; }
+            .cta-section { padding: 10px 20px 40px; }
+            .cta-inner { padding: 30px 30px; border-radius: 30px; gap: 20px; }
+            .cta-logo { width: 50px !important; height: 50px !important; }
+            .cta-heading { font-size: 1rem; }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 0 16px; }
+            .page-header { padding: 60px 16px 50px; }
+            .page-title { font-size: 1.8rem; }
+            .belief-card { padding: 24px; }
+            .vision-card { padding: 30px; }
+            .cta-section { padding: 10px 16px 30px; }
+            .cta-inner { padding: 22px 20px; border-radius: 24px; }
+        }
+
+        @media (max-width: 360px) {
+            .container { padding: 0 12px; }
+            .page-header { padding: 50px 12px 40px; }
+            .belief-card { padding: 18px; }
+            .scripture-banner { padding: 24px 16px; border-radius: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header (loaded from includes/header.html) -->
+    <div id="site-header"></div>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+
+        <!-- Page Header -->
+        <section class="page-header">
+            <p class="page-label">Who We Are</p>
+            <h1 class="page-title">About Christ Church</h1>
+            <div class="section-divider">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </section>
+
+        <!-- Mission Section -->
+        <section class="section about">
+            <div class="container">
+                <div class="about-grid">
+                    <div class="about-content">
+                        <span class="section-label">Our Mission</span>
+                        <h2 class="section-title left-align">Rooted in Tradition,<br>Growing in Grace</h2>
+                        <p class="lead">Christ Church Bluffton is a new Anglican church plant coming to Bluffton, South Carolina in 2026. We are a community of believers united by a shared love for Christ and a desire to see His Kingdom grow in the Lowcountry.</p>
+                        <p>We are reformed and catholic Christians, rooted in the historic faith passed down through the centuries. We hold firmly to the authority of Scripture, the ancient creeds, the sacraments, and the historic episcopate as the pillars of our faith and practice.</p>
+                        <p>Christ Church Bluffton is a member of the Anglican Church in North America (ACNA), a province of the global Anglican Communion committed to the authority of Scripture, the centrality of the Gospel, and the power of the Holy Spirit.</p>
+                        <div class="quote">
+                            <span class="quote-icon">&ldquo;</span>
+                            <p>Common Grace. Common Prayer. Common Life. For the Common Good.</p>
+                        </div>
+                    </div>
+                    <div class="about-visual">
+                        <div class="visual-card">
+                            <div class="visual-image image-placeholder">
+                                <span class="placeholder-icon">&#9962;</span>
+                                <span>Church Photo</span>
+                            </div>
+                            <div class="visual-accent"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Vision Section -->
+        <section class="section" style="background: var(--lightest-gray);">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-label">Our Vision</span>
+                    <h2 class="section-title">What Drives Us</h2>
+                    <div class="section-divider">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                <div class="vision-cards">
+                    <div class="vision-card">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="32" y1="8" x2="32" y2="56"/>
+                                <line x1="16" y1="22" x2="48" y2="22"/>
+                            </svg>
+                        </div>
+                        <h3>Gospel-Centered</h3>
+                        <p>Everything we do is rooted in the truth of Scripture and the good news of Jesus Christ. The Gospel shapes our worship, our community, and our mission to the world.</p>
+                    </div>
+                    <div class="vision-card">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="12" y="8" width="40" height="48" rx="2"/>
+                                <line x1="20" y1="20" x2="44" y2="20"/>
+                                <line x1="20" y1="28" x2="44" y2="28"/>
+                                <line x1="20" y1="36" x2="44" y2="36"/>
+                                <line x1="20" y1="44" x2="36" y2="44"/>
+                            </svg>
+                        </div>
+                        <h3>Ancient Worship</h3>
+                        <p>We worship using the Book of Common Prayer, drawing from centuries of Christian liturgy. Our services connect us to the ancient faith while speaking to the present day.</p>
+                    </div>
+                    <div class="vision-card">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="32" cy="20" r="10"/>
+                                <path d="M16 52c0-8.8 7.2-16 16-16s16 7.2 16 16"/>
+                            </svg>
+                        </div>
+                        <h3>Community Focused</h3>
+                        <p>We believe in common grace, common prayer, and common life for the common good. Our church exists not just for ourselves, but to serve and bless the Bluffton community.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Beliefs Section -->
+        <section id="beliefs" class="section" style="background: var(--lightest-gray);">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-label">What We Believe</span>
+                    <h2 class="section-title">Our Beliefs</h2>
+                    <div class="section-divider">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                <div class="beliefs-intro">
+                    <p>As Anglicans, we stand within a rich spiritual heritage that stretches back through the centuries to the early Church. Our faith is built upon four essential pillars that have guided Christians throughout the ages.</p>
+                </div>
+                <div class="beliefs-grid">
+                    <div class="belief-card">
+                        <div class="belief-number">01</div>
+                        <h4>Scripture</h4>
+                        <p>The Holy Scriptures of the Old and New Testaments are the Word of God written, containing all things necessary for salvation, and serving as the ultimate rule and standard of faith.</p>
+                    </div>
+                    <div class="belief-card">
+                        <div class="belief-number">02</div>
+                        <h4>Creeds</h4>
+                        <p>The Apostles' Creed and the Nicene Creed serve as sufficient statements of the Christian faith, summarizing the essential doctrines believed by Christians throughout history.</p>
+                    </div>
+                    <div class="belief-card">
+                        <div class="belief-number">03</div>
+                        <h4>Sacraments</h4>
+                        <p>The two sacraments ordained by Christ himself &mdash; Baptism and the Supper of the Lord &mdash; are administered with unfailing use of His words of institution and the elements ordained by Him.</p>
+                    </div>
+                    <div class="belief-card">
+                        <div class="belief-number">04</div>
+                        <h4>Historic Episcopate</h4>
+                        <p>The historic episcopate, locally adapted, provides the continuity of apostolic leadership and governance that has been a hallmark of the Church since its earliest days.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scripture Banner -->
+        <section class="section" style="background: var(--white); padding: 60px 0;">
+            <div class="container">
+                <div class="scripture-banner">
+                    <div class="scripture-content">
+                        <p class="scripture-verse">&ldquo;And day by day, attending the temple together and breaking bread in their homes, they received their food with glad and generous hearts, praising God and having favor with all the people.&rdquo;</p>
+                        <span class="scripture-reference">&mdash; Acts 2:46-47 (ESV)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pastor Section -->
+        <section id="pastor" class="section pastor">
+            <div class="container">
+                <div class="pastor-grid">
+                    <div class="pastor-image">
+                        <div class="image-frame">
+                            <div class="pastor-placeholder">
+                                <span class="placeholder-icon">&#128100;</span>
+                                <span>Rev. Jonathan Riddle</span>
+                            </div>
+                            <div class="frame-accent top-left"></div>
+                            <div class="frame-accent bottom-right"></div>
+                        </div>
+                    </div>
+                    <div class="pastor-content">
+                        <span class="section-label">Meet Our Pastor</span>
+                        <h2 class="section-title left-align">Rev. Jonathan Riddle</h2>
+                        <span class="pastor-role">Lead Pastor &amp; Church Planter</span>
+                        <p class="pastor-bio">Rev. Jonathan Riddle is the founding pastor and church planter of Christ Church Bluffton. Called to ministry with a deep love for Anglican worship and theology, he brings a passion for building Christ-centered communities rooted in the historic faith.</p>
+                        <p class="pastor-bio">With a heart for the Lowcountry, Pastor Riddle is committed to establishing a church that serves as a beacon of hope, grace, and truth in Bluffton. He believes that the Anglican tradition offers a unique and beautiful expression of the Christian faith that speaks to people from all walks of life.</p>
+                        <p class="pastor-bio">Pastor Riddle's vision for Christ Church is to create a welcoming community where people can encounter the living God through Word and Sacrament, grow in their faith through discipleship, and go out to serve their neighbors and the world.</p>
+                        <div class="pastor-contact">
+                            <a href="mailto:jonathan@christchurchbluffton.org" class="contact-link">
+                                <span class="link-icon">&#9993;</span>
+                                jonathan@christchurchbluffton.org
+                            </a>
+                        </div>
+                        <div class="pastor-quote">
+                            <p>&ldquo;We are planting Christ Church Bluffton because we believe God is calling us to bring the beauty of Anglican worship and the power of the Gospel to this growing community. Come and see what God is doing.&rdquo;</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Banner -->
+        <section class="cta-section" style="background: var(--lightest-gray);">
+
+            <div class="cta-inner">
+                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60">
+                <div class="cta-content">
+                    <h2 class="cta-heading">We&rsquo;d Love to Hear from You</h2>
+                    <p class="cta-text">Whether you have questions about our community, would like to submit a prayer request, or are simply looking for a church to call home &mdash; we&rsquo;d love to connect with you.</p>
+                </div>
+                <a href="/contact" class="cta-btn">Get in Touch</a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer (loaded from includes/footer.html) -->
+    <div id="site-footer"></div>
+
+    <!-- Prayer FAB (loaded from includes/prayer-fab.html) -->
+    <div id="site-prayer"></div>
+
+    <script src="js/components.js"></script>
+</body>
+</html>

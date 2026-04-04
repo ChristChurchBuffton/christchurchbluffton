@@ -44,6 +44,14 @@ window.scrollTo(0, 0);
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && mobileMenu.classList.contains('active')) closeMenu();
         });
+
+        // Active nav link highlighting
+        var path = window.location.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
+        var allLinks = document.querySelectorAll('.nav-links a, .mobile-nav-links a');
+        allLinks.forEach(function(link) {
+            var href = link.getAttribute('href').replace(/\.html$/, '').replace(/\/$/, '') || '/';
+            if (href === path) link.classList.add('active');
+        });
     });
 
     // Load footer + newsletter handler
@@ -107,26 +115,6 @@ window.scrollTo(0, 0);
         closeBtn.addEventListener('click', closePrayer);
         overlay.addEventListener('click', closePrayer);
 
-        // Keep FAB above footer on scroll (768px+ only)
-        window.addEventListener('scroll', function() {
-            if (window.innerWidth < 768) {
-                fab.style.bottom = '';
-                return;
-            }
-            var footer = document.querySelector('.footer');
-            if (!footer) return;
-            var footerTop = footer.getBoundingClientRect().top;
-            var windowHeight = window.innerHeight;
-            var triggerOffset = 30;
-            var buffer = -25;
-
-            if (footerTop < windowHeight + triggerOffset) {
-                var newBottom = (windowHeight - footerTop) + buffer;
-                fab.style.bottom = newBottom + 'px';
-            } else {
-                fab.style.bottom = '';
-            }
-        });
 
         form.addEventListener('submit', function(e) {
             e.preventDefault();

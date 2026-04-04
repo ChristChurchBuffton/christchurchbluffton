@@ -1,0 +1,4 @@
+# API routes
+/api/contact    /.netlify/functions/contact    200
+/api/prayer     /.netlify/functions/prayer     200
+/api/stay-updated   /.netlify/functions/stay-updated   200
