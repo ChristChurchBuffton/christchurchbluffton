@@ -1,6 +1,21 @@
 // Scroll to top on page load
 window.scrollTo(0, 0);
 
+// Scroll animations via Intersection Observer
+(function() {
+    var targets = document.querySelectorAll('.animate');
+    if (!targets.length) return;
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    targets.forEach(function(el) { observer.observe(el); });
+})();
+
 // Load shared components (header, footer, prayer FAB)
 (function() {
     function loadComponent(id, file, callback) {

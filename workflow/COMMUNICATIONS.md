@@ -113,6 +113,25 @@ Kevin
 
 ---
 
+### 2026-04-07 — Pastor Bio & Mission Statement Received
+
+**From:** Jonathan (email)
+**Content received:**
+- Official pastor bio (written by Jonathan when he preached at Palmetto Bluff)
+- Church mission statement (may be modified later)
+- 10 Easter service photos (IMG_6417–6429)
+
+**Actions taken:**
+- Full email saved to `comm/client/2026-04-07-jonathan-bio-mission.md`
+- Bio applied to about.html pastor section (edited for flow, kept all key details)
+- Mission statement applied to about.html and index.html (woven into existing copy)
+- Easter photos converted to webp, saved to `assets/photos/` with descriptive names
+- Backups created: `about-previous.html`, `index-previous.html`
+
+**Pending review:** Jonathan to review bio edits and mission statement wording on site.
+
+---
+
 ## Client Feedback
 > Record client responses, change requests, and approvals here.
 
@@ -132,11 +151,15 @@ Kevin
 ## Content Received
 > Track what the client has provided.
 
-- [ ] Photos (about, worship, groups, pastor headshot, leadership)
+- [x] Photos — 9 photos received 2026-04-05 (outdoor service, sanctuary, Riddle family, youth, community)
+- [x] Photos — 10 Easter service photos received 2026-04-07 (altar communion, fellowship, worship music, baptism, pastor lectern)
+- [x] Pastor bio — received 2026-04-07 (written by Jonathan, applied to about.html)
+- [x] Mission statement — received 2026-04-07 (applied to about.html + index.html)
+- [ ] Pastor headshot (using Riddle family photo or placeholder for now)
 - [ ] Phone number
 - [ ] Street address
 - [ ] Email addresses confirmed
-- [ ] Pastor bio (written by client)
-- [ ] Pastor quote
+- [ ] Pastor quote (current is placeholder — needs Jonathan's preferred wording)
 - [ ] ACNA membership confirmed
 - [ ] Domain choice
+- [ ] Serve ministry team mission statements

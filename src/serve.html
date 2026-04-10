@@ -83,71 +83,89 @@
 
         .lead { font-family: var(--font-body); font-size: 1.1rem; line-height: 1.8; color: var(--text-gray); margin-bottom: 20px; }
 
-        /* ── Ministry Cards ── */
-        .ministry-grid {
+        /* ── Ministry Rows ── */
+        .ministry-row {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
-        }
-        .ministry-card {
-            background: var(--white);
-            border-radius: 16px;
-            padding: 36px;
-            border: 1px solid var(--light-gray);
-            box-shadow: 0 4px 20px rgba(48, 59, 106, 0.08);
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-        .ministry-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px rgba(48, 59, 106, 0.15);
-            border-color: var(--gold);
-        }
-        .ministry-icon {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
-            border-radius: 14px;
-            display: flex;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
             align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            color: var(--gold);
+            padding: 80px 0;
+            border-bottom: 1px solid var(--light-gray);
         }
-        .ministry-icon svg {
-            width: 28px;
-            height: 28px;
+        .ministry-row:last-child {
+            border-bottom: none;
         }
-        .ministry-card h3 {
+        .ministry-row.reverse .ministry-image {
+            order: 2;
+        }
+        .ministry-row.reverse .ministry-content {
+            order: 1;
+        }
+        .ministry-content h3 {
             font-family: var(--font-heading);
-            font-size: 1.3rem;
+            font-size: 1.8rem;
             color: var(--navy-blue);
             font-weight: 400;
-            margin-bottom: 14px;
+            margin-bottom: 8px;
         }
-        .ministry-mission {
+        .ministry-content .ministry-subtitle {
             font-family: var(--font-body);
-            font-size: 0.9rem;
-            color: var(--text-gray);
-            line-height: 1.8;
-            flex: 1;
-            min-height: 80px;
-            padding: 16px;
-            background: var(--lightest-gray);
-            border-radius: 10px;
-            border: 1px dashed var(--light-gray);
-        }
-        .ministry-mission.has-content {
-            border-style: solid;
-            border-color: transparent;
-            background: var(--lightest-gray);
-        }
-        .mission-placeholder {
-            color: #aaa;
-            font-style: italic;
             font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--gold);
+            margin-bottom: 20px;
         }
+        .ministry-content p {
+            font-family: var(--font-body);
+            color: var(--text-gray);
+            line-height: 1.9;
+            margin-bottom: 16px;
+        }
+        .ministry-content p:last-child {
+            margin-bottom: 0;
+        }
+        .ministry-quote {
+            position: relative;
+            padding: 20px 24px 20px 30px;
+            background: var(--lightest-gray);
+            border-left: 4px solid var(--gold);
+            border-radius: 0 8px 8px 0;
+            margin-top: 20px;
+        }
+        .ministry-quote p {
+            font-family: var(--font-accent);
+            font-size: 1.05rem;
+            font-style: italic;
+            color: var(--navy-blue);
+            margin: 0;
+            line-height: 1.7;
+        }
+        .ministry-quote .quote-ref {
+            font-style: normal;
+            font-size: 0.9rem;
+            color: var(--gold-text);
+            display: block;
+            margin-top: 8px;
+        }
+        .ministry-image {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(48, 59, 106, 0.12);
+        }
+        .image-placeholder {
+            background: linear-gradient(135deg, var(--light-gray) 0%, var(--lightest-gray) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            min-height: 320px;
+            color: #777;
+            border: 2px dashed var(--light-gray);
+            border-radius: 16px;
+        }
+        .placeholder-icon { font-size: 3.5rem; opacity: 0.5; }
 
         /* ── CTA ── */
         .cta-section { background: var(--white); padding: 60px 30px; text-align: center; }
@@ -161,7 +179,11 @@
 
         @media (max-width: 1023px) {
             .section { padding: 80px 0; }
-            .ministry-grid { grid-template-columns: repeat(2, 1fr); }
+            .ministry-row { grid-template-columns: 2fr 3fr; gap: 30px; padding: 60px 0; }
+            .image-placeholder { min-height: 240px; }
+            .ministry-content h3 { font-size: 1.5rem; }
+            .ministry-content p { font-size: 0.95rem; }
+            .ministry-quote p { font-size: 0.95rem; }
             .cta-inner { flex-direction: column; text-align: center; padding: 30px; border-radius: 30px; gap: 20px; }
             .cta-content { text-align: center; }
         }
@@ -171,15 +193,15 @@
             .page-title { font-size: 2rem; }
             .section { padding: 60px 0; }
             .section-title { font-size: 1.8rem; }
+            .ministry-row { grid-template-columns: 1fr; padding: 40px 0; }
+            .ministry-row.reverse .ministry-image { order: 0; }
+            .ministry-row.reverse .ministry-content { order: 0; }
+            .ministry-content h3 { font-size: 1.5rem; }
             .cta-section { padding: 40px 20px; }
-        }
-        @media (max-width: 600px) {
-            .ministry-grid { grid-template-columns: 1fr; }
         }
         @media (max-width: 480px) {
             .container { padding: 0 16px; }
             .page-header { padding: 60px 16px 50px; }
-            .ministry-card { padding: 28px; }
             .cta-inner { padding: 22px 20px; border-radius: 24px; }
         }
     </style>
@@ -202,9 +224,9 @@
         </section>
 
         <!-- Intro -->
-        <section class="section" style="background: var(--white); padding-bottom: 60px;">
+        <section class="section" style="background: var(--white); padding-bottom: 0;">
             <div class="container">
-                <div class="section-header">
+                <div class="section-header animate">
                     <span class="section-label">Ministry Teams</span>
                     <h2 class="section-title">Find Your Place to Serve</h2>
                     <div class="section-divider">
@@ -213,130 +235,142 @@
                         <span></span>
                     </div>
                 </div>
-                <p class="lead" style="text-align: center; max-width: 800px; margin: 0 auto;">Every member of Christ Church has a role to play. Whether you are greeting newcomers at the door, leading worship, or serving behind the scenes, your gifts matter. Explore our ministry teams below and find where God is calling you to serve.</p>
+                <p class="lead animate" style="text-align: center; max-width: 800px; margin: 0 auto;">Let us consider it a privilege and a responsibility to have the opportunity to serve God within Christ Church and beyond. Jesus has sought to use the gifts that God has placed in his hand at all times.</p>
             </div>
         </section>
 
-        <!-- Ministry Cards -->
-        <section class="section" style="background: var(--lightest-gray);">
+        <!-- Ministry Teams -->
+        <section class="section" style="background: var(--white); padding-top: 0;">
             <div class="container">
-                <div class="ministry-grid">
 
-                    <!-- Greeting -->
-                    <div class="ministry-card">
-                        <div class="ministry-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                <circle cx="12" cy="7" r="4"/>
-                            </svg>
-                        </div>
-                        <h3>Greeting</h3>
-                        <div class="ministry-mission">
-                            <span class="mission-placeholder">Mission statement coming soon.</span>
+                <!-- 1. Greeting & Ushers — Image Left -->
+                <div class="ministry-row animate">
+                    <div class="ministry-image">
+                        <div class="image-placeholder">
+                            <span class="placeholder-icon">&#128075;</span>
+                            <span>Greeting & Ushers Photo</span>
                         </div>
                     </div>
+                    <div class="ministry-content">
+                        <p class="ministry-subtitle">Ministry Team</p>
+                        <h3>Greeting &amp; Ushers</h3>
+                        <p>To reflect Christ's hospitality by offering a warm welcome and orderly presence that helps every person encounter God in worship. Like the father in the parable of the Prodigal Son, greeters and ushers actively welcome and ensure everyone who walks through our doors feels seen and valued.</p>
+                    </div>
+                </div>
 
-                    <!-- Safety -->
-                    <div class="ministry-card">
-                        <div class="ministry-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                            </svg>
-                        </div>
-                        <h3>Safety</h3>
-                        <div class="ministry-mission">
-                            <span class="mission-placeholder">Mission statement coming soon.</span>
+                <!-- 2. Altar Guild — Image Right -->
+                <div class="ministry-row reverse animate">
+                    <div class="ministry-image">
+                        <div class="image-placeholder">
+                            <span class="placeholder-icon">&#9962;</span>
+                            <span>Altar Guild Photo</span>
                         </div>
                     </div>
-
-                    <!-- Nursery -->
-                    <div class="ministry-card">
-                        <div class="ministry-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                            </svg>
-                        </div>
-                        <h3>Nursery</h3>
-                        <div class="ministry-mission">
-                            <span class="mission-placeholder">Mission statement coming soon.</span>
+                    <div class="ministry-content">
+                        <p class="ministry-subtitle">Ministry Team</p>
+                        <h3>Altar Guild</h3>
+                        <p>To prepare the sanctuary for worship with reverence and devotion &mdash; caring for sacred vessels, linens, vestments, and flowers &mdash; ensuring the altar is a worthy place for the Eucharist.</p>
+                        <div class="ministry-quote">
+                            <p>&ldquo;Ascribe to the Lord the honor due his Name; bring offerings and come into his courts.&rdquo;<span class="quote-ref">&mdash; Psalm 96:8</span></p>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Lay Readers -->
-                    <div class="ministry-card">
-                        <div class="ministry-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                            </svg>
+                <!-- 3. Communion — Image Left -->
+                <div class="ministry-row animate">
+                    <div class="ministry-image">
+                        <div class="image-placeholder">
+                            <span class="placeholder-icon">&#127839;</span>
+                            <span>Communion Photo</span>
                         </div>
+                    </div>
+                    <div class="ministry-content">
+                        <p class="ministry-subtitle">Ministry Team</p>
+                        <h3>Communion</h3>
+                        <p>To serve the Lord's Table with reverence, care, and hospitality, helping the congregation encounter Christ's grace through Holy Communion. Ministers of Holy Communion assist in distributing the Body and Blood of Christ, serving with devotion to ensure orderly, respectful communion.</p>
+                    </div>
+                </div>
+
+                <!-- 4. Lay Readers — Image Right -->
+                <div class="ministry-row reverse animate">
+                    <div class="ministry-image">
+                        <div class="image-placeholder">
+                            <span class="placeholder-icon">&#128214;</span>
+                            <span>Lay Readers Photo</span>
+                        </div>
+                    </div>
+                    <div class="ministry-content">
+                        <p class="ministry-subtitle">Ministry Team</p>
                         <h3>Lay Readers</h3>
-                        <div class="ministry-mission">
-                            <span class="mission-placeholder">Mission statement coming soon.</span>
+                        <p>To faithfully proclaim the Word of God with clarity, reverence, and understanding, so that Scripture comes alive and strengthens the faith of the congregation.</p>
+                        <div class="ministry-quote">
+                            <p>&ldquo;Devote yourself to the public reading of Scripture, to exhortation, to teaching.&rdquo;<span class="quote-ref">&mdash; 1 Timothy 4:13</span></p>
                         </div>
                     </div>
-
-                    <!-- Technology -->
-                    <div class="ministry-card">
-                        <div class="ministry-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                                <line x1="8" y1="21" x2="16" y2="21"/>
-                                <line x1="12" y1="17" x2="12" y2="21"/>
-                            </svg>
-                        </div>
-                        <h3>Technology</h3>
-                        <div class="ministry-mission">
-                            <span class="mission-placeholder">Mission statement coming soon.</span>
-                        </div>
-                    </div>
-
-                    <!-- Eucharist -->
-                    <div class="ministry-card">
-                        <div class="ministry-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M8 2h8l2 10H6L8 2z"/>
-                                <path d="M12 12v6"/>
-                                <path d="M8 22h8"/>
-                                <path d="M10 18h4"/>
-                            </svg>
-                        </div>
-                        <h3>Eucharist</h3>
-                        <div class="ministry-mission">
-                            <span class="mission-placeholder">Mission statement coming soon.</span>
-                        </div>
-                    </div>
-
-                    <!-- Worship -->
-                    <div class="ministry-card">
-                        <div class="ministry-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M9 18V5l12-2v13"/>
-                                <circle cx="6" cy="18" r="3"/>
-                                <circle cx="18" cy="16" r="3"/>
-                            </svg>
-                        </div>
-                        <h3>Worship</h3>
-                        <div class="ministry-mission">
-                            <span class="mission-placeholder">Mission statement coming soon.</span>
-                        </div>
-                    </div>
-
                 </div>
+
+                <!-- 5. Nursery — Image Left -->
+                <div class="ministry-row animate">
+                    <div class="ministry-image">
+                        <div class="image-placeholder">
+                            <span class="placeholder-icon">&#128118;</span>
+                            <span>Nursery Photo</span>
+                        </div>
+                    </div>
+                    <div class="ministry-content">
+                        <p class="ministry-subtitle">Ministry Team</p>
+                        <h3>Nursery</h3>
+                        <p>To provide a safe, loving, and nurturing environment for our youngest children, allowing parents to worship with peace of mind while introducing children to God's love through care, play, and simple Bible stories.</p>
+                    </div>
+                </div>
+
+                <!-- 6. Musical Worship — Image Right -->
+                <div class="ministry-row reverse animate">
+                    <div class="ministry-image">
+                        <div class="image-placeholder">
+                            <span class="placeholder-icon">&#127925;</span>
+                            <span>Musical Worship Photo</span>
+                        </div>
+                    </div>
+                    <div class="ministry-content">
+                        <p class="ministry-subtitle">Ministry Team</p>
+                        <h3>Musical Worship</h3>
+                        <p>To lead the congregation in Christ-centered worship through music, fostering participation and helping create a meaningful, God-glorifying environment. We point to Christ and not to ourselves &mdash; worship is never about performance or personal glory. Skill matters, but humility matters more.</p>
+                        <div class="ministry-quote">
+                            <p>&ldquo;Oh come, let us sing to the Lord; let us make a joyful noise to the rock of our salvation!&rdquo;<span class="quote-ref">&mdash; Psalm 95:1&ndash;2</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. Technology — Image Left -->
+                <div class="ministry-row animate">
+                    <div class="ministry-image">
+                        <div class="image-placeholder">
+                            <span class="placeholder-icon">&#128187;</span>
+                            <span>Technology Team Photo</span>
+                        </div>
+                    </div>
+                    <div class="ministry-content">
+                        <p class="ministry-subtitle">Ministry Team</p>
+                        <h3>Technology &amp; Social Media</h3>
+                        <p>To serve and support worship through technology and social media, helping create a clear, distraction-free experience while extending the message of Christ to our community and beyond. Technology is a tool to facilitate the Word of God, not for entertainment.</p>
+                        <div class="ministry-quote">
+                            <p>&ldquo;So, whether you eat or drink, or whatever you do, do all to the glory of God.&rdquo;<span class="quote-ref">&mdash; 1 Corinthians 10:31</span></p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- CTA inline -->
+                <div class="animate" style="text-align: center; padding: 60px 0 0;">
+                    <h2 style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 400; color: var(--navy-blue); margin-bottom: 12px;">Ready to Serve?</h2>
+                    <p style="font-family: var(--font-body); font-size: 1rem; color: var(--text-gray); margin-bottom: 30px; line-height: 1.8;">Reach out and let us know which ministry team interests you. We will help you find the right fit.</p>
+                    <a href="/contact" class="btn btn-primary">Get Involved</a>
+                </div>
+
             </div>
         </section>
 
-        <!-- CTA -->
-        <section class="cta-section">
-            <div class="cta-inner">
-                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60">
-                <div class="cta-content">
-                    <h2 class="cta-heading">Ready to Serve?</h2>
-                    <p class="cta-text">Reach out and let us know which ministry team interests you. We will help you find the right fit.</p>
-                </div>
-                <a href="/contact" class="cta-btn">Get Involved</a>
-            </div>
-        </section>
 
     </main>
 

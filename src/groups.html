@@ -125,7 +125,9 @@
         @media (max-width: 1023px) {
             .section { padding: 80px 0; }
             .about-grid { grid-template-columns: 1fr; gap: 40px; }
-            .vision-cards { grid-template-columns: 1fr; }
+            .about-grid { max-width: 550px; margin: 0 auto; }
+            .about-grid .image-placeholder { max-width: 650px; min-height: 280px; margin: 0 auto; }
+            .vision-cards { grid-template-columns: repeat(3, 1fr); max-width: none; }
             .cta-inner { flex-direction: column; text-align: center; padding: 30px; border-radius: 30px; gap: 20px; }
             .cta-content { text-align: center; }
         }
@@ -138,6 +140,7 @@
             .about-grid { direction: ltr !important; }
             .about-grid > * { direction: ltr !important; }
             .service-notice { flex-direction: column; gap: 12px; }
+            .vision-cards { grid-template-columns: 1fr; }
             .cta-section { padding: 10px 20px 40px; }
         }
         @media (max-width: 480px) {
@@ -167,7 +170,7 @@
         <!-- Intro -->
         <section class="section" style="background: var(--white); padding-bottom: 60px;">
             <div class="container">
-                <div class="section-header">
+                <div class="section-header animate">
                     <span class="section-label">Life Together</span>
                     <h2 class="section-title">Find Your Community</h2>
                     <div class="section-divider">
@@ -176,7 +179,7 @@
                         <span></span>
                     </div>
                 </div>
-                <p class="lead" style="text-align: center; max-width: 800px; margin: 0 auto;">Faith was never meant to be lived alone. At Christ Church Bluffton, we believe that spiritual growth happens best in the context of authentic community. Whether gathered around a dinner table, joined in prayer, or studying Scripture together, our groups are where real life and real faith intersect.</p>
+                <p class="lead animate" style="text-align: center; max-width: 800px; margin: 0 auto;">Faith was never meant to be lived alone. At Christ Church Bluffton, we believe that spiritual growth happens best in the context of authentic community. Whether gathered around a dinner table, joined in prayer, or studying Scripture together, our groups are where real life and real faith intersect.</p>
             </div>
         </section>
 
@@ -184,7 +187,7 @@
         <section class="section" style="background: var(--lightest-gray);">
             <div class="container">
                 <div class="about-grid">
-                    <div class="about-content">
+                    <div class="about-content animate">
                         <span class="section-label">Bible Study</span>
                         <h2 class="section-title left-align">Table 246</h2>
                         <div class="section-divider left-align" style="margin-bottom: 25px;">
@@ -201,7 +204,7 @@
                         </a>
                     </div>
                     <div>
-                        <div class="image-placeholder large">
+                        <div class="image-placeholder large animate">
                             <span class="placeholder-icon">&#127860;</span>
                             <span>Table 246</span>
                         </div>
@@ -214,7 +217,7 @@
         <section class="section" style="background: var(--white);">
             <div class="container">
                 <div class="about-grid" style="direction: rtl;">
-                    <div class="about-content" style="direction: ltr;">
+                    <div class="about-content animate" style="direction: ltr;">
                         <span class="section-label">Intercession</span>
                         <h2 class="section-title left-align">Prayer Groups</h2>
                         <div class="section-divider left-align" style="margin-bottom: 25px;">
@@ -230,7 +233,7 @@
                         </a>
                     </div>
                     <div style="direction: ltr;">
-                        <div class="image-placeholder large">
+                        <div class="image-placeholder large animate">
                             <span class="placeholder-icon">&#128591;</span>
                             <span>Prayer Group</span>
                         </div>
@@ -242,7 +245,7 @@
         <!-- Youth Ministry -->
         <section class="section" style="background: var(--lightest-gray);">
             <div class="container">
-                <div class="section-header">
+                <div class="section-header animate">
                     <span class="section-label">Our Vision</span>
                     <h2 class="section-title">Youth Ministry</h2>
                     <div class="section-divider">
@@ -253,10 +256,10 @@
                     <span class="coming-soon-badge" style="background: var(--gold); color: var(--white);">Coming Soon</span>
                 </div>
 
-                <p class="lead" style="text-align: center; max-width: 800px; margin: 0 auto 60px;"><em>Who said learning about Jesus can't be fun?</em></p>
+                <p class="lead animate" style="text-align: center; max-width: 800px; margin: 0 auto 60px;"><em>Who said learning about Jesus can't be fun?</em></p>
 
                 <div class="about-grid">
-                    <div class="about-content">
+                    <div class="about-content animate">
                         <span class="section-label">Future Leaders</span>
                         <h3>Building the Future</h3>
                         <p class="lead">We are dreaming big for the next generation. Our youth ministry will be a place where teens are equipped, encouraged, and empowered to own their faith and impact their world.</p>
@@ -271,7 +274,7 @@
                         </div>
                     </div>
                     <div>
-                        <div class="image-placeholder large">
+                        <div class="image-placeholder large animate">
                             <span class="placeholder-icon">&#127918;</span>
                             <span>Youth Activities</span>
                         </div>
@@ -279,24 +282,24 @@
                 </div>
 
                 <div class="vision-cards" style="margin-top: 60px;">
-                    <div class="vision-card">
+                    <div class="vision-card animate animate-delay-1">
                         <div style="font-size: 3rem; margin-bottom: 15px;">&#128214;</div>
                         <h3>Weekly Gatherings</h3>
                         <p>Age-appropriate Bible study and worship designed to help teens engage with Scripture and grow in their faith journey.</p>
                     </div>
-                    <div class="vision-card">
+                    <div class="vision-card animate animate-delay-2">
                         <div style="font-size: 3rem; margin-bottom: 15px;">&#127760;</div>
                         <h3>Trips &amp; Retreats</h3>
                         <p>Mission trips and retreats that build lasting friendships and give students the opportunity to serve others and encounter God in new ways.</p>
                     </div>
-                    <div class="vision-card">
+                    <div class="vision-card animate animate-delay-3">
                         <div style="font-size: 3rem; margin-bottom: 15px;">&#127881;</div>
                         <h3>Games &amp; Fun</h3>
                         <p>From game nights to outdoor adventures, we believe that laughter and joy are essential ingredients for a thriving youth community.</p>
                     </div>
                 </div>
 
-                <div class="service-notice" style="margin-top: 60px;">
+                <div class="service-notice animate" style="margin-top: 60px;">
                     <div class="notice-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/>
@@ -313,8 +316,8 @@
 
         <!-- CTA -->
         <section class="cta-section">
-            <div class="cta-inner">
-                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60">
+            <div class="cta-inner animate">
+                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60" loading="lazy">
                 <div class="cta-content">
                     <h2 class="cta-heading">Ready to Find Your Community?</h2>
                     <p class="cta-text">Join a Table 246 group or start one in your home. There is a place for you here.</p>

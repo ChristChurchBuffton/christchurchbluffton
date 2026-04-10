@@ -51,17 +51,7 @@
       "nonprofitStatus": "https://schema.org/Nonprofit501c3"
     }
     </script>
-    <script>
-        (function() {
-            var visited = sessionStorage.getItem('donationVisited');
-            if (visited) {
-                document.documentElement.classList.add('skip-loader');
-            }
-        })();
-    </script>
     <style>
-        .skip-loader .loader { display: none !important; }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
 
@@ -109,90 +99,6 @@
             flex-direction: column;
             background: var(--lightest-gray);
             overflow-x: clip;
-        }
-
-        /* ── Loading Screen ── */
-        .loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--navy-blue);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            transition: opacity 1.5s ease, visibility 1.5s ease;
-        }
-
-        .loader.fade-out {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .loader-content {
-            text-align: center;
-        }
-
-        .loader-cross {
-            position: relative;
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 20px;
-        }
-
-        .cross-vertical,
-        .cross-horizontal {
-            position: absolute;
-            background: var(--gold);
-            border-radius: 4px;
-        }
-
-        .cross-vertical {
-            width: 8px;
-            height: 50px;
-            left: 50%;
-            top: 5px;
-            transform: translateX(-50%);
-            animation: pulse-glow 1.5s ease-in-out infinite;
-        }
-
-        .cross-horizontal {
-            width: 35px;
-            height: 8px;
-            left: 50%;
-            top: 18px;
-            transform: translateX(-50%);
-            animation: pulse-glow 1.5s ease-in-out infinite 0.2s;
-        }
-
-        @keyframes pulse-glow {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-
-        .loader-text {
-            color: var(--white);
-            font-family: var(--font-heading);
-            font-size: 1.6rem;
-            letter-spacing: 3px;
-            animation: loader-fade 2s ease-in-out infinite;
-        }
-
-        .loader-subtext {
-            color: var(--gold);
-            font-family: var(--font-body);
-            font-size: 1.15rem;
-            font-style: italic;
-            letter-spacing: 2px;
-            margin-top: 10px;
-            opacity: 0.9;
-        }
-
-        @keyframes loader-fade {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
         }
 
         /* ── Main Content ── */
@@ -830,15 +736,6 @@
 </head>
 <body>
 
-    <!-- Loading Screen -->
-    <div class="loader" id="loader">
-        <div class="loader-content">
-            <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton logo" style="width: 100px; height: 100px; object-fit: contain; margin-bottom: 20px;">
-            <p class="loader-text">Christ Church Bluffton</p>
-            <p class="loader-subtext">Welcome Home</p>
-        </div>
-    </div>
-
     <!-- Header (loaded from includes/header.html) -->
     <div id="site-header"></div>
 
@@ -849,7 +746,7 @@
 
         <!-- Scripture Banner -->
         <section class="scripture-section">
-            <div class="scripture-inner">
+            <div class="scripture-inner animate">
                 <p class="scripture-verse">&ldquo;And day by day, attending the temple together and breaking bread in their homes, they received their food with glad and generous hearts.&rdquo;</p>
                 <span class="scripture-reference">&mdash; Acts 2:46 (ESV)</span>
             </div>
@@ -861,7 +758,7 @@
                 <div class="give-grid">
 
                     <!-- Left: Mission + Info -->
-                    <div class="give-content">
+                    <div class="give-content animate">
                         <p class="mission-text">&ldquo;God is doing a new thing in Bluffton, and we are planting a church to reach our community with the hope of Jesus Christ. Your partnership helps lay a strong foundation so that more people can hear the Gospel, encounter Christ, and find a church home. Join us in this mission by partnering with us to build the future of Christ Church.&rdquo;</p>
                         <p class="mission-attribution">&mdash; Rev. Jonathan Riddle</p>
 
@@ -891,10 +788,10 @@
                     </div>
 
                     <!-- Right: Donation Box -->
-                    <div class="give-form-wrapper">
+                    <div class="give-form-wrapper animate">
                         <div class="donation-box">
                             <div class="donation-header">
-                                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton logo" class="donation-cross" width="60" height="60" style="object-fit: contain;">
+                                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton logo" class="donation-cross" width="60" height="60" style="object-fit: contain;" loading="lazy">
                                 <h2>Make a Donation</h2>
                                 <p>Your gift makes a difference</p>
                             </div>
@@ -928,8 +825,8 @@
 
         <!-- CTA Banner -->
         <section class="cta-section">
-            <div class="cta-inner">
-                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60">
+            <div class="cta-inner animate">
+                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60" loading="lazy">
                 <div class="cta-content">
                     <h2 class="cta-heading">We&rsquo;d Love to Hear from You</h2>
                     <p class="cta-text">Whether you have questions about our community, would like to submit a prayer request, or are simply looking for a church to call home &mdash; we&rsquo;d love to connect with you.</p>
@@ -957,23 +854,6 @@
     </div>
 
     <script>
-        // Loader
-        sessionStorage.setItem('donationVisited', 'true');
-        (function() {
-            var loader = document.getElementById('loader');
-            if (!loader) return;
-            if (document.documentElement.classList.contains('skip-loader')) {
-                loader.style.display = 'none';
-                return;
-            }
-            var minTime = 1500;
-            function hideLoader() {
-                loader.classList.add('fade-out');
-                setTimeout(function() { loader.style.display = 'none'; }, 1500);
-            }
-            setTimeout(hideLoader, minTime);
-        })();
-
         // Tithe.ly Modal
         (function() {
             var modal = document.getElementById('giveModal');

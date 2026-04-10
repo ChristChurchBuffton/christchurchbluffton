@@ -33,7 +33,7 @@
 ### Pages Built
 - [x] **Homepage** (`index.html`) — Hero with candle image, about preview, stats section, vision cards (Worship/Groups/Serve), CTA pill
 - [x] **About** (`about.html`) — Mission, vision cards, beliefs (4 pillars), scripture banner, pastor section (Rev. Jonathan Riddle). No leadership section.
-- [x] **Join Us** (`join-us.html`) — Upcoming services (May 3, Jun 7, Jul 12, Aug 2 at 5:30 PM Saturday), Lord of Life Lutheran Church location with address, What to Expect, liturgy + worship music columns, Google Map, CTA
+- [x] **Join Us** (`join-us.html`) — Upcoming services (May 2, Jun 6, Jul 11, Aug 1 at 5:30 PM Saturday), Lord of Life Lutheran Church location with address, What to Expect, liturgy + worship music columns, Google Map, CTA
 - [x] **Groups** (`groups.html`) — Table 246 Bible study, Prayer Groups, Youth Ministry (Coming Soon)
 - [x] **Serve** (`serve.html`) — NEW page. 7 ministry cards: Greeting, Safety, Nursery, Lay Readers, Technology, Eucharist, Worship. Each has placeholder container for mission statements.
 - [x] **Give** (`give.html`) — Moved from old index.html. Scripture banner, two-column layout, Tithe.ly modal, pastor quote, QR code.
@@ -71,6 +71,38 @@
 
 ---
 
+## Phase 3.5: Content Updates (2026-04-10) ✅ IN PROGRESS
+> Received pastor bio, mission statement, Easter photos, and ministry team guidelines.
+
+### Content Applied
+- [x] Pastor bio updated on about.html (from Jonathan's Palmetto Bluff write-up)
+- [x] Mission statement updated on about.html and index.html
+- [x] 10 Easter service photos added to `assets/photos/` (converted to webp)
+- [x] Serve page rebuilt — alternating left/right layout with mission statements from Ministry Teams Guidelines doc
+- [x] Ministry teams on serve page: Greeting & Ushers, Altar Guild, Communion, Lay Readers, Nursery, Musical Worship, Technology & Social Media (Safety removed — not advertised)
+- [x] Scroll animations added site-wide (Intersection Observer, fade-in/slide-up)
+- [x] Sitemap updated with all 9 pages
+- [x] Accessibility: sr-only class, footer form label, footer role
+- [x] Lazy loading on all non-hero images
+- [ ] Pastor quote — still placeholder, needs Jonathan's preferred wording
+
+### Images Placed (2026-04-10)
+- [x] **index.html** — Hero: church-christmas-candle. Rooted in Tradition: worship-welcome-screens. Worship card: worship-music-team. Groups card: youth-group-outing. Serve card: fellowship-conversation.
+- [x] **about.html** — Our Mission: sanctuary-behind-altar-wide.
+- [x] **join-us.html** — Worship Service: altar-service-helpers.
+
+### Images Still Needed
+- [ ] **about.html** — Pastor section: Professional headshot of Rev. Jonathan Riddle
+- [ ] **join-us.html** — Book of Common Prayer placeholder (Liturgy section). Worship Music placeholder (Music section).
+- [ ] **groups.html** — Table 246 photo. Prayer Groups photo (people praying together). Youth Ministry photo (higher quality than current).
+- [ ] **serve.html** — All 7 ministry team photos: Greeting & Ushers, Altar Guild, Communion, Lay Readers, Nursery, Musical Worship, Technology & Social Media
+- [ ] **give.html** — Any image placeholders on the page
+
+### Photo Request Sent
+- Email drafted: `comm/client/2026-04-10-photo-request.md` — requesting professional Jonathan photo, youth group, small groups, prayer group, and all ministry team photos
+
+---
+
 ## Phase 4: Deployment 🚀 EXISTING
 > Production site is LIVE at christchurchbluffton.org with Give + Contact pages.
 > New full site build needs to be deployed.
@@ -83,13 +115,15 @@
 
 ### Before Deploying New Build
 - [ ] Test Netlify deploy with new folder structure
-- [ ] Update sitemap.xml with all new pages
+- [x] Update sitemap.xml with all new pages (done 2026-04-10)
 - [ ] Update Google Maps embed with real URL
 - [ ] Remove backup files (-previous files)
-- [ ] Verify all forms work
-- [ ] Breakpoint testing
-- [ ] Cross-browser testing
-- [ ] Lighthouse audit
+- [ ] Place all remaining images (see Phase 3.5 image list)
+- [ ] Verify all forms work (contact, prayer, newsletter)
+- [ ] Breakpoint testing (mobile, tablet, desktop)
+- [ ] Cross-browser testing (Chrome, Safari, Firefox, Edge)
+- [ ] Lighthouse audit (Performance, Accessibility, SEO, Best Practices)
+- [ ] Submit updated sitemap to Google Search Console
 
 ### Env Vars (Netlify)
 - BREEZE_URL, BREEZE_API_KEY, BREEZE_EMAIL_FIELD_ID, BREEZE_PHONE_FIELD_ID, BREEZE_TAG_CONTACT
@@ -124,4 +158,4 @@
 | Client | Rev. Jonathan Riddle |
 | Billing | Donation (free) |
 | Service venue | Lord of Life Lutheran Church, 351 Buckwalter Pkwy, Bluffton SC 29910 |
-| Service times | Saturdays at 5:30 PM (May 3, Jun 7, Jul 12, Aug 2) |
+| Service times | Saturdays at 5:30 PM (May 2, Jun 6, Jul 11, Aug 1) |

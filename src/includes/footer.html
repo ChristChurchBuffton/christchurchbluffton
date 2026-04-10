@@ -1,4 +1,4 @@
-<footer class="footer">
+<footer class="footer" role="contentinfo">
     <div class="footer-top-bar"></div>
     <div class="footer-container">
         <div class="footer-main">
@@ -32,6 +32,9 @@
                         <li><a href="/contact">Contact</a></li>
                     </ul>
                 </div>
+                <div class="footer-give-mobile">
+                    <a href="/give" class="btn-give-footer">Give</a>
+                </div>
             </div>
 
             <!-- Stay Updated -->
@@ -39,7 +42,8 @@
                 <h4>Stay Updated</h4>
                 <p>Sign up to receive updates on our journey</p>
                 <form class="newsletter-form" id="newsletterForm">
-                    <input type="email" name="email" placeholder="Your email" required>
+                    <label for="newsletterEmail" class="sr-only">Email address</label>
+                    <input type="email" name="email" id="newsletterEmail" placeholder="Your email" required aria-label="Email address for newsletter">
                     <input type="text" name="website_url_confirm" style="position:absolute;left:-9999px;" tabindex="-1" autocomplete="new-password">
                     <button type="submit" class="btn-subscribe">Subscribe</button>
                 </form>

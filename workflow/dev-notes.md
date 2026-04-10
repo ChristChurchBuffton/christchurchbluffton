@@ -29,6 +29,16 @@
 - "Worship" renamed to "Join Us" / "Join Us For Services"
 - Image placeholders with dashed borders for all pending photos
 
+**Post-push fixes (2026-04-04):**
+- Removed loading screen/fade from give.html — only homepage should have the loader
+
+**2026-04-05 — Project relocation + photos:**
+- Moved project from `Web Design/Christ Church Bluffton/` to `Clients - Active/Christ Church Bluffton/`
+- Original Clients - Active version archived to `archive/original-clients-active/`
+- Added 9 photos from client to `assets/photos/` — renamed descriptively, converted to webp
+- Photos include: outdoor service (2), Riddle family, sanctuary shots (4), youth outing, community gathering
+- 3 sanctuary photos (4411, 4413, 4414) are portrait orientation — taken with phone held vertically
+
 **Known issues / remaining:**
 - Google Maps embed on join-us uses address-based URL — needs real embed from Google Maps share
 - Reference folder couldn't be deleted (Windows lock) — copied to archive
@@ -36,6 +46,34 @@
 - sitemap.xml needs all new page URLs
 - All placeholder images need real photos from client
 - Serve page mission statements pending
+
+---
+
+## 2026-04-07 — Pastor Bio, Mission Statement & Easter Photos
+
+**What was done:**
+- Received email from Jonathan with his official bio and mission statement
+- Saved original email to `comm/client/2026-04-07-jonathan-bio-mission.md`
+- Updated pastor bio on `about.html` with Jonathan's real bio:
+  - Background at The Church of the Cross (10+ years ministry leadership)
+  - Vision for Gospel-centered presence in the Lowcountry
+  - Education: Appalachian State (undergrad), Reformed Theological Seminary (MDiv)
+  - Family: wife Lisa, 29 years married, 6 children
+  - Personal: C.S. Lewis, Tolkien, Carolina Panthers
+- Updated mission statement on both `about.html` and `index.html`:
+  - "Plant a reproducing Anglican church in Bluffton and beyond"
+  - "Shaped by Scripture, Prayer, and Sacramental Life"
+  - "Gospel movement that fosters personal conversion and authentic community"
+  - "Every person is known and valued"
+  - "Make Bluffton a better and more hopeful place to live"
+- Added 10 new Easter service photos from Jonathan (converted jpeg → webp, saved to `assets/photos/`):
+  - 4 altar/communion shots, 1 sanctuary wide, 1 fellowship, 1 worship music, 1 pastor at lectern, 2 baptism
+- Backups: `about-previous.html`, `index-previous.html`
+
+**Still pending:**
+- Pastor quote on about.html — still placeholder, needs Jonathan's preferred wording
+- Photos not yet placed on site pages — ready in assets/photos/ for future placement
+- Serve page mission statements still pending from client
 
 ---
 
