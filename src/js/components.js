@@ -1,6 +1,3 @@
-// Scroll to top on page load
-window.scrollTo(0, 0);
-
 // Scroll animations via Intersection Observer
 (function() {
     var targets = document.querySelectorAll('.animate');
