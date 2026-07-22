@@ -12,7 +12,7 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About | Christ Church Bluffton</title>
-    <meta name="description" content="Learn about Christ Church Bluffton's mission, beliefs, and vision. An Anglican church plant rooted in historic faith, launching in Bluffton, SC in 2026.">
+    <meta name="description" content="Learn about Christ Church Bluffton's mission, beliefs, and vision. An Anglican church plant rooted in historic faith, serving Bluffton, SC and the surrounding Lowcountry.">
     <meta name="robots" content="index, follow">
     <meta property="og:title" content="About | Christ Church Bluffton">
     <meta property="og:description" content="Our mission, beliefs, and vision for Christ Church Bluffton.">
@@ -95,13 +95,26 @@
 
         /* ── Page Header ── */
         .page-header {
-            background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background:
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background-size: 24px 24px, 100% 100%;
             padding: 120px 30px 100px;
             text-align: center;
+            position: relative;
+        }
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
         }
         .page-label {
             font-family: var(--font-body);
-            font-size: 0.95rem;
+            font-size: 1rem;
             text-transform: uppercase;
             letter-spacing: 4px;
             color: var(--gold);
@@ -136,7 +149,7 @@
         .section-label {
             display: inline-block;
             font-family: var(--font-body);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             font-weight: 400;
             text-transform: uppercase;
             letter-spacing: 3px;
@@ -172,7 +185,7 @@
             line-height: 1.9;
         }
         .about-content .lead {
-            font-size: 1.1rem;
+            font-size: 1.125rem;
             line-height: 1.8;
             margin-bottom: 20px;
         }
@@ -195,7 +208,7 @@
         }
         .quote p {
             font-family: var(--font-accent);
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             font-style: italic;
             color: var(--navy-blue);
             margin: 0;
@@ -264,7 +277,7 @@
         .vision-card .card-icon svg { width: 100%; height: 100%; }
         .vision-card h3 {
             font-family: var(--font-heading);
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             margin-bottom: 15px;
             color: var(--navy-blue);
             font-weight: 400;
@@ -283,7 +296,7 @@
         }
         .beliefs-intro p {
             font-family: var(--font-body);
-            font-size: 1.1rem;
+            font-size: 1.125rem;
             color: var(--text-gray);
             line-height: 1.9;
         }
@@ -316,7 +329,7 @@
         }
         .belief-card h4 {
             font-family: var(--font-heading);
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             margin-bottom: 12px;
             color: var(--navy-blue);
             font-weight: 400;
@@ -324,7 +337,7 @@
         .belief-card p {
             font-family: var(--font-body);
             color: var(--text-gray);
-            font-size: 0.95rem;
+            font-size: 1rem;
             line-height: 1.7;
         }
 
@@ -341,7 +354,7 @@
         }
         .scripture-verse {
             font-family: var(--font-accent);
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             font-style: italic;
             color: var(--white);
             line-height: 1.8;
@@ -350,7 +363,7 @@
         .scripture-reference {
             color: var(--gold);
             font-family: var(--font-body);
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-style: normal;
         }
 
@@ -376,7 +389,16 @@
             justify-content: center;
             gap: 15px;
             color: #777;
-            border: 2px dashed var(--light-gray);
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(48, 59, 106, 0.2);
+        }
+        .pastor-placeholder img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+            min-height: 500px;
         }
         .pastor-placeholder .placeholder-icon {
             font-size: 4rem;
@@ -406,7 +428,7 @@
             padding: 8px 20px;
             border-radius: 50px;
             font-family: var(--font-body);
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             font-weight: 400;
             margin-bottom: 20px;
         }
@@ -427,7 +449,7 @@
             transition: all 0.3s ease;
         }
         .contact-link:hover { color: var(--gold); }
-        .link-icon { font-size: 1.2rem; }
+        .link-icon { font-size: 1.25rem; }
         .pastor-quote {
             position: relative;
             padding: 25px 30px;
@@ -438,7 +460,7 @@
         }
         .pastor-quote p {
             font-family: var(--font-accent);
-            font-size: 1.15rem;
+            font-size: 1.125rem;
             font-style: italic;
             color: var(--navy-blue);
             margin: 0;
@@ -453,7 +475,10 @@
         .cta-inner {
             max-width: 900px;
             margin: 0 auto;
-            background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background:
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background-size: 24px 24px, 100% 100%;
             border-radius: 60px;
             padding: 40px 60px;
             display: flex;
@@ -464,14 +489,14 @@
         .cta-content { flex: 1; text-align: left; }
         .cta-heading {
             font-family: var(--font-heading);
-            font-size: 1.1rem;
+            font-size: 1.125rem;
             font-weight: 400;
             color: var(--white);
             margin-bottom: 6px;
         }
         .cta-text {
             font-family: var(--font-accent);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             color: rgba(255, 255, 255, 0.75);
             line-height: 1.6;
         }
@@ -483,7 +508,7 @@
             border: 2px solid var(--gold);
             border-radius: 50px;
             font-family: var(--font-heading);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             font-weight: 400;
             color: var(--gold);
             text-decoration: none;
@@ -503,7 +528,8 @@
                 grid-template-columns: 1fr;
                 gap: 40px;
             }
-            .pastor-placeholder { min-height: 350px; }
+            .pastor-placeholder { min-height: 400px; max-width: 400px; margin: 0 auto; }
+            .pastor-placeholder img { min-height: 400px; }
             .beliefs-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -523,7 +549,7 @@
             .page-header { padding: 80px 20px 60px; }
             .page-title { font-size: 2rem; }
             .section { padding: 60px 0; }
-            .section-title { font-size: 1.8rem; }
+            .section-title { font-size: 2rem; }
             .vision-cards {
                 grid-template-columns: 1fr;
             }
@@ -534,7 +560,7 @@
                 padding: 30px 20px;
                 border-radius: 16px;
             }
-            .scripture-verse { font-size: 1.1rem; }
+            .scripture-verse { font-size: 1.125rem; }
             .cta-section { padding: 10px 20px 40px; }
             .cta-inner { padding: 30px 30px; border-radius: 30px; gap: 20px; }
             .cta-logo { width: 50px !important; height: 50px !important; }
@@ -544,7 +570,7 @@
         @media (max-width: 480px) {
             .container { padding: 0 16px; }
             .page-header { padding: 60px 16px 50px; }
-            .page-title { font-size: 1.8rem; }
+            .page-title { font-size: 2rem; }
             .belief-card { padding: 24px; }
             .vision-card { padding: 30px; }
             .cta-section { padding: 10px 16px 30px; }
@@ -582,22 +608,21 @@
         <section class="section about">
             <div class="container">
                 <div class="about-grid">
-                    <div class="about-content">
+                    <div class="about-content animate">
                         <span class="section-label">Our Mission</span>
                         <h2 class="section-title left-align">Rooted in Tradition,<br>Growing in Grace</h2>
-                        <p class="lead">Christ Church Bluffton is a new Anglican church plant coming to Bluffton, South Carolina in 2026. We are a community of believers united by a shared love for Christ and a desire to see His Kingdom grow in the Lowcountry.</p>
-                        <p>We are reformed and catholic Christians, rooted in the historic faith passed down through the centuries. We hold firmly to the authority of Scripture, the ancient creeds, the sacraments, and the historic episcopate as the pillars of our faith and practice.</p>
+                        <p class="lead">Christ Church Bluffton is an Anglican church plant serving Bluffton, South Carolina and the surrounding Lowcountry. We are a community of believers united by a shared love for Christ and a desire to see His Kingdom grow here.</p>
+                        <p>We are rooted in the historic Christian faith, grounded in the authority of Scripture, shaped by the ancient creeds, nourished by the sacraments, and guided by the wisdom of the historic Church.</p>
                         <p>Christ Church Bluffton is a member of the Anglican Church in North America (ACNA), a province of the global Anglican Communion committed to the authority of Scripture, the centrality of the Gospel, and the power of the Holy Spirit.</p>
                         <div class="quote">
                             <span class="quote-icon">&ldquo;</span>
                             <p>Common Grace. Common Prayer. Common Life. For the Common Good.</p>
                         </div>
                     </div>
-                    <div class="about-visual">
+                    <div class="about-visual animate animate-delay-1">
                         <div class="visual-card">
-                            <div class="visual-image image-placeholder">
-                                <span class="placeholder-icon">&#9962;</span>
-                                <span>Church Photo</span>
+                            <div class="visual-image">
+                                <img src="images/sanctuary-behind-altar-wide.webp" alt="Sanctuary view from behind the altar at Christ Church Bluffton" loading="lazy">
                             </div>
                             <div class="visual-accent"></div>
                         </div>
@@ -609,7 +634,7 @@
         <!-- Vision Section -->
         <section class="section" style="background: var(--lightest-gray);">
             <div class="container">
-                <div class="section-header">
+                <div class="section-header animate">
                     <span class="section-label">Our Vision</span>
                     <h2 class="section-title">What Drives Us</h2>
                     <div class="section-divider">
@@ -619,7 +644,7 @@
                     </div>
                 </div>
                 <div class="vision-cards">
-                    <div class="vision-card">
+                    <div class="vision-card animate">
                         <div class="card-icon">
                             <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="32" y1="8" x2="32" y2="56"/>
@@ -629,7 +654,7 @@
                         <h3>Gospel-Centered</h3>
                         <p>Everything we do is rooted in the truth of Scripture and the good news of Jesus Christ. The Gospel shapes our worship, our community, and our mission to the world.</p>
                     </div>
-                    <div class="vision-card">
+                    <div class="vision-card animate animate-delay-1">
                         <div class="card-icon">
                             <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="12" y="8" width="40" height="48" rx="2"/>
@@ -642,7 +667,7 @@
                         <h3>Ancient Worship</h3>
                         <p>We worship using the Book of Common Prayer, drawing from centuries of Christian liturgy. Our services connect us to the ancient faith while speaking to the present day.</p>
                     </div>
-                    <div class="vision-card">
+                    <div class="vision-card animate animate-delay-2">
                         <div class="card-icon">
                             <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="32" cy="20" r="10"/>
@@ -659,7 +684,7 @@
         <!-- Beliefs Section -->
         <section id="beliefs" class="section" style="background: var(--lightest-gray);">
             <div class="container">
-                <div class="section-header">
+                <div class="section-header animate">
                     <span class="section-label">What We Believe</span>
                     <h2 class="section-title">Our Beliefs</h2>
                     <div class="section-divider">
@@ -672,22 +697,22 @@
                     <p>As Anglicans, we stand within a rich spiritual heritage that stretches back through the centuries to the early Church. Our faith is built upon four essential pillars that have guided Christians throughout the ages.</p>
                 </div>
                 <div class="beliefs-grid">
-                    <div class="belief-card">
+                    <div class="belief-card animate">
                         <div class="belief-number">01</div>
                         <h4>Scripture</h4>
                         <p>The Holy Scriptures of the Old and New Testaments are the Word of God written, containing all things necessary for salvation, and serving as the ultimate rule and standard of faith.</p>
                     </div>
-                    <div class="belief-card">
+                    <div class="belief-card animate animate-delay-1">
                         <div class="belief-number">02</div>
                         <h4>Creeds</h4>
                         <p>The Apostles' Creed and the Nicene Creed serve as sufficient statements of the Christian faith, summarizing the essential doctrines believed by Christians throughout history.</p>
                     </div>
-                    <div class="belief-card">
+                    <div class="belief-card animate animate-delay-2">
                         <div class="belief-number">03</div>
                         <h4>Sacraments</h4>
                         <p>The two sacraments ordained by Christ himself &mdash; Baptism and the Supper of the Lord &mdash; are administered with unfailing use of His words of institution and the elements ordained by Him.</p>
                     </div>
-                    <div class="belief-card">
+                    <div class="belief-card animate animate-delay-3">
                         <div class="belief-number">04</div>
                         <h4>Historic Episcopate</h4>
                         <p>The historic episcopate, locally adapted, provides the continuity of apostolic leadership and governance that has been a hallmark of the Church since its earliest days.</p>
@@ -715,8 +740,7 @@
                     <div class="pastor-image">
                         <div class="image-frame">
                             <div class="pastor-placeholder">
-                                <span class="placeholder-icon">&#128100;</span>
-                                <span>Rev. Jonathan Riddle</span>
+                                <img src="images/riddle-headshot.webp" alt="Rev. Jonathan Riddle, Lead Pastor of Christ Church Bluffton" width="496" height="481" loading="lazy">
                             </div>
                             <div class="frame-accent top-left"></div>
                             <div class="frame-accent bottom-right"></div>

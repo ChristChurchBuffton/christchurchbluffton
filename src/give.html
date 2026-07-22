@@ -38,7 +38,7 @@
       "name": "Christ Church Anglican Bluffton",
       "url": "https://christchurchbluffton.org",
       "logo": "https://christchurchbluffton.org/images/favicon.png",
-      "description": "A Christ-centered Anglican community rooted in historic faith, launching in Bluffton, SC in 2026.",
+      "description": "A Christ-centered Anglican community rooted in historic faith, serving Bluffton, SC and the surrounding Lowcountry.",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "7 Venture Drive, Suite 104, PMB 267",
@@ -51,17 +51,7 @@
       "nonprofitStatus": "https://schema.org/Nonprofit501c3"
     }
     </script>
-    <script>
-        (function() {
-            var visited = sessionStorage.getItem('donationVisited');
-            if (visited) {
-                document.documentElement.classList.add('skip-loader');
-            }
-        })();
-    </script>
     <style>
-        .skip-loader .loader { display: none !important; }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
 
@@ -111,90 +101,6 @@
             overflow-x: clip;
         }
 
-        /* ── Loading Screen ── */
-        .loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--navy-blue);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            transition: opacity 1.5s ease, visibility 1.5s ease;
-        }
-
-        .loader.fade-out {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .loader-content {
-            text-align: center;
-        }
-
-        .loader-cross {
-            position: relative;
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 20px;
-        }
-
-        .cross-vertical,
-        .cross-horizontal {
-            position: absolute;
-            background: var(--gold);
-            border-radius: 4px;
-        }
-
-        .cross-vertical {
-            width: 8px;
-            height: 50px;
-            left: 50%;
-            top: 5px;
-            transform: translateX(-50%);
-            animation: pulse-glow 1.5s ease-in-out infinite;
-        }
-
-        .cross-horizontal {
-            width: 35px;
-            height: 8px;
-            left: 50%;
-            top: 18px;
-            transform: translateX(-50%);
-            animation: pulse-glow 1.5s ease-in-out infinite 0.2s;
-        }
-
-        @keyframes pulse-glow {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-
-        .loader-text {
-            color: var(--white);
-            font-family: var(--font-heading);
-            font-size: 1.6rem;
-            letter-spacing: 3px;
-            animation: loader-fade 2s ease-in-out infinite;
-        }
-
-        .loader-subtext {
-            color: var(--gold);
-            font-family: var(--font-body);
-            font-size: 1.15rem;
-            font-style: italic;
-            letter-spacing: 2px;
-            margin-top: 10px;
-            opacity: 0.9;
-        }
-
-        @keyframes loader-fade {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-
         /* ── Main Content ── */
         .main-content {
             flex: 1;
@@ -226,7 +132,7 @@
 
         .scripture-verse {
             font-family: var(--font-accent);
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-style: italic;
             color: var(--white);
             line-height: 1.7;
@@ -235,7 +141,7 @@
 
         .scripture-reference {
             font-family: var(--font-body);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             color: var(--gold);
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -260,7 +166,7 @@
 
         .mission-text {
             font-family: var(--font-accent);
-            font-size: 1.1rem;
+            font-size: 1.125rem;
             font-style: italic;
             color: var(--dark-gray);
             line-height: 1.8;
@@ -269,7 +175,7 @@
 
         .mission-attribution {
             font-family: var(--font-accent);
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             font-style: italic;
             color: var(--gold-text);
             margin-bottom: 36px;
@@ -285,7 +191,7 @@
 
         .info-label {
             font-family: var(--font-body);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             text-transform: uppercase;
             letter-spacing: 2px;
             color: var(--gold-text);
@@ -294,7 +200,7 @@
 
         .info-text {
             font-family: var(--font-body);
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             color: var(--dark-gray);
             line-height: 1.7;
         }
@@ -305,7 +211,7 @@
 
         .connect-text {
             font-family: var(--font-body);
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             color: var(--text-gray);
             line-height: 1.6;
             margin-bottom: 8px;
@@ -314,7 +220,7 @@
         .connect-email {
             display: block;
             font-family: var(--font-body);
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             color: var(--gold-text);
             font-weight: 400;
         }
@@ -339,14 +245,14 @@
 
         .qr-text {
             font-family: var(--font-body);
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             color: var(--text-gray);
             line-height: 1.5;
         }
 
         .qr-text span {
             display: block;
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             text-transform: uppercase;
             letter-spacing: 2px;
             color: var(--gold-text);
@@ -378,7 +284,7 @@
 
         .donation-header h2 {
             font-family: var(--font-heading);
-            font-size: 1.35rem;
+            font-size: 1.25rem;
             color: var(--white);
             margin-bottom: 8px;
             letter-spacing: 0.5px;
@@ -388,7 +294,7 @@
             font-family: var(--font-accent);
             font-style: italic;
             color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
+            font-size: 0.875rem;
         }
 
         .donation-body {
@@ -403,7 +309,7 @@
         .donation-message p {
             font-family: var(--font-body);
             color: var(--text-gray);
-            font-size: 0.95rem;
+            font-size: 1rem;
             line-height: 1.7;
         }
 
@@ -416,7 +322,7 @@
             background: linear-gradient(135deg, #303b6a 0%, #3d4a7a 100%);
             color: #FFFFFF;
             font-family: var(--font-heading);
-            font-size: 1.1rem;
+            font-size: 1.125rem;
             font-weight: 400;
             letter-spacing: 1px;
             padding: 16px 60px;
@@ -446,7 +352,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             color: #999;
         }
 
@@ -464,7 +370,7 @@
         }
 
         .donation-footer p {
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             color: var(--text-gray);
             margin-bottom: 12px;
         }
@@ -475,7 +381,7 @@
             border: 2px solid var(--navy-blue);
             border-radius: 50px;
             font-family: var(--font-heading);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             font-weight: 400;
             color: var(--navy-blue);
             text-decoration: none;
@@ -541,7 +447,7 @@
             color: #fff;
             border: none;
             border-radius: 50%;
-            font-size: 1.1rem;
+            font-size: 1.125rem;
             line-height: 1;
             cursor: pointer;
             z-index: 2;
@@ -567,7 +473,7 @@
             align-items: center;
             gap: 6px;
             font-family: var(--font-body);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             color: var(--text-gray);
             text-decoration: none;
             letter-spacing: 0.5px;
@@ -599,7 +505,10 @@
         .cta-inner {
             max-width: 900px;
             margin: 0 auto;
-            background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background:
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background-size: 24px 24px, 100% 100%;
             border-radius: 60px;
             padding: 40px 60px;
             display: flex;
@@ -629,7 +538,7 @@
 
         .cta-text {
             font-family: var(--font-accent);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             color: rgba(255, 255, 255, 0.75);
             line-height: 1.6;
             margin-bottom: 0;
@@ -643,7 +552,7 @@
             border: 2px solid var(--gold);
             border-radius: 50px;
             font-family: var(--font-heading);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             font-weight: 400;
             color: var(--gold);
             text-decoration: none;
@@ -688,12 +597,12 @@
             }
 
             .cta-text {
-                font-size: 0.85rem;
+                font-size: 0.875rem;
             }
 
             .cta-btn {
                 padding: 10px 28px;
-                font-size: 0.85rem;
+                font-size: 0.875rem;
             }
         }
 
@@ -721,7 +630,7 @@
             }
 
             .donation-header h2 {
-                font-size: 1.1rem;
+                font-size: 1.125rem;
             }
 
             .donation-body {
@@ -731,7 +640,7 @@
 
             .give-btn-custom {
                 padding: 12px 40px;
-                font-size: 0.9rem;
+                font-size: 0.875rem;
             }
 
             .give-modal {
@@ -758,16 +667,16 @@
             }
 
             .scripture-verse {
-                font-size: 0.9rem;
+                font-size: 0.875rem;
             }
 
             .give-btn-custom {
                 padding: 12px 36px;
-                font-size: 0.85rem;
+                font-size: 0.875rem;
             }
 
             .mission-text {
-                font-size: 0.9rem;
+                font-size: 0.875rem;
             }
 
             .info-card {
@@ -794,7 +703,7 @@
 
             .cta-btn {
                 padding: 10px 24px;
-                font-size: 0.85rem;
+                font-size: 0.875rem;
             }
         }
 
@@ -819,7 +728,7 @@
 
             .give-btn-custom {
                 padding: 12px 28px;
-                font-size: 0.85rem;
+                font-size: 0.875rem;
             }
 
             .info-card {
@@ -829,15 +738,6 @@
     </style>
 </head>
 <body>
-
-    <!-- Loading Screen -->
-    <div class="loader" id="loader">
-        <div class="loader-content">
-            <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton logo" style="width: 100px; height: 100px; object-fit: contain; margin-bottom: 20px;">
-            <p class="loader-text">Christ Church Bluffton</p>
-            <p class="loader-subtext">Welcome Home</p>
-        </div>
-    </div>
 
     <!-- Header (loaded from includes/header.html) -->
     <div id="site-header"></div>
@@ -861,7 +761,7 @@
                 <div class="give-grid">
 
                     <!-- Left: Mission + Info -->
-                    <div class="give-content">
+                    <div class="give-content animate">
                         <p class="mission-text">&ldquo;God is doing a new thing in Bluffton, and we are planting a church to reach our community with the hope of Jesus Christ. Your partnership helps lay a strong foundation so that more people can hear the Gospel, encounter Christ, and find a church home. Join us in this mission by partnering with us to build the future of Christ Church.&rdquo;</p>
                         <p class="mission-attribution">&mdash; Rev. Jonathan Riddle</p>
 
@@ -891,7 +791,7 @@
                     </div>
 
                     <!-- Right: Donation Box -->
-                    <div class="give-form-wrapper">
+                    <div class="give-form-wrapper animate animate-delay-1">
                         <div class="donation-box">
                             <div class="donation-header">
                                 <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton logo" class="donation-cross" width="60" height="60" style="object-fit: contain;">
@@ -957,23 +857,6 @@
     </div>
 
     <script>
-        // Loader
-        sessionStorage.setItem('donationVisited', 'true');
-        (function() {
-            var loader = document.getElementById('loader');
-            if (!loader) return;
-            if (document.documentElement.classList.contains('skip-loader')) {
-                loader.style.display = 'none';
-                return;
-            }
-            var minTime = 1500;
-            function hideLoader() {
-                loader.classList.add('fade-out');
-                setTimeout(function() { loader.style.display = 'none'; }, 1500);
-            }
-            setTimeout(hideLoader, minTime);
-        })();
-
         // Tithe.ly Modal
         (function() {
             var modal = document.getElementById('giveModal');

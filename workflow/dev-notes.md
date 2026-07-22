@@ -29,6 +29,9 @@
 - "Worship" renamed to "Join Us" / "Join Us For Services"
 - Image placeholders with dashed borders for all pending photos
 
+**Post-push fix (2026-04-04):**
+- Removed loading screen/fade from give.html — only homepage should have the loader
+
 **Known issues / remaining:**
 - Google Maps embed on join-us uses address-based URL — needs real embed from Google Maps share
 - Reference folder couldn't be deleted (Windows lock) — copied to archive

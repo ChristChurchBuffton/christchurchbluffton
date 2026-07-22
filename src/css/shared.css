@@ -14,7 +14,7 @@
     padding: 10px 24px;
     border-radius: 0 0 8px 8px;
     font-family: var(--font-body);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     text-decoration: none;
     z-index: 9999;
     transition: top 0.2s ease;
@@ -40,6 +40,20 @@ textarea:focus-visible {
 }
 
 /* ── Reduced Motion (accessibility) ── */
+/* ── Scroll Animations ── */
+.animate {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.animate.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+.animate-delay-1 { transition-delay: 0.15s; }
+.animate-delay-2 { transition-delay: 0.3s; }
+.animate-delay-3 { transition-delay: 0.45s; }
+
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -47,6 +61,7 @@ textarea:focus-visible {
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+    .animate { opacity: 1; transform: none; }
 }
 
 /* ── Anti-flash (hide until JS loads includes) ── */
@@ -102,7 +117,7 @@ textarea:focus-visible {
 
 .logo-example {
     font-family: var(--font-body);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: var(--text-gray);
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -112,7 +127,7 @@ textarea:focus-visible {
 
 .church-name {
     font-family: var(--font-heading);
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     font-weight: 400;
     color: var(--navy-blue);
     display: flex;
@@ -123,7 +138,7 @@ textarea:focus-visible {
 .church-location {
     display: block;
     font-family: var(--font-accent);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-weight: 400;
     letter-spacing: 3px;
     text-transform: uppercase;
@@ -148,7 +163,7 @@ textarea:focus-visible {
 
 .nav-links a {
     font-family: var(--font-body);
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 400;
     color: var(--navy-blue);
     text-decoration: none;
@@ -196,7 +211,7 @@ textarea:focus-visible {
     color: var(--white);
     padding: 10px 28px;
     border-radius: 50px;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 400;
     text-decoration: none;
     transition: all 0.3s ease;
@@ -289,7 +304,7 @@ textarea:focus-visible {
     right: 16px;
     background: none;
     border: none;
-    font-size: 1.8rem;
+    font-size: 2rem;
     color: var(--navy-blue);
     cursor: pointer;
     line-height: 1;
@@ -320,7 +335,7 @@ textarea:focus-visible {
 
 .mobile-nav-links a {
     font-family: var(--font-body);
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     font-weight: 400;
     color: var(--navy-blue);
     text-decoration: none;
@@ -370,7 +385,7 @@ textarea:focus-visible {
 
 .footer-church-name {
     font-family: var(--font-heading);
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     font-weight: 400;
     color: var(--white);
     display: flex;
@@ -381,7 +396,7 @@ textarea:focus-visible {
 .footer-church-location {
     display: block;
     font-family: var(--font-accent);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-weight: 400;
     letter-spacing: 3px;
     text-transform: uppercase;
@@ -390,10 +405,13 @@ textarea:focus-visible {
 
 .footer-tagline {
     font-family: var(--font-body);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: rgba(255, 255, 255, 0.8);
     line-height: 1.7;
     margin-bottom: 12px;
+}
+.footer-tagline-location {
+    display: block;
 }
 
 .footer-contact-info { display: flex; flex-direction: column; gap: 6px; }
@@ -401,7 +419,7 @@ textarea:focus-visible {
 .footer-contact-info a {
     color: rgba(255, 255, 255, 0.8);
     font-family: var(--font-body);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -428,7 +446,7 @@ textarea:focus-visible {
 .footer-links-give a {
     font-family: var(--font-body);
     color: rgba(255, 255, 255, 0.8);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     text-decoration: none;
     transition: color 0.3s ease;
 }
@@ -440,7 +458,7 @@ textarea:focus-visible {
 .footer-column h4 {
     font-family: var(--font-heading);
     color: var(--white);
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     letter-spacing: 1px;
     text-transform: uppercase;
     margin-bottom: 16px;
@@ -454,31 +472,33 @@ textarea:focus-visible {
     font-family: var(--font-body);
     color: rgba(255, 255, 255, 0.8);
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     transition: color 0.3s ease;
 }
 
 .footer-links-list a:hover { color: var(--gold); }
 
 .footer-bottom {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1.3fr;
+    gap: 40px;
     align-items: center;
     padding-top: 14px;
-    flex-wrap: wrap;
-    gap: 8px;
 }
+.footer-bottom .copyright { text-align: left; }
+.footer-bottom .footer-legal { justify-content: center; margin-top: 0; }
+.footer-bottom .footer-powered { text-align: center; }
 
 .copyright {
     font-family: var(--font-body);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: rgba(255, 255, 255, 0.65);
     margin: 0;
 }
 
 .pastor-credit {
     font-family: var(--font-body);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: var(--gold);
     margin: 0;
 }
@@ -486,13 +506,15 @@ textarea:focus-visible {
 .footer-legal {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
+    margin-top: 16px;
 }
 
 .footer-legal a {
     font-family: var(--font-body);
     color: rgba(255, 255, 255, 0.7);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     text-decoration: none;
     transition: color 0.2s ease;
 }
@@ -501,14 +523,14 @@ textarea:focus-visible {
 
 .footer-legal .divider {
     color: rgba(255, 255, 255, 0.4);
-    font-size: 0.6rem;
+    font-size: 0.75rem;
 }
 
 .footer-powered { margin: 0; }
 
 .footer-powered a {
     font-family: var(--font-body);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: rgba(255, 255, 255, 0.6);
     text-decoration: none;
     transition: color 0.2s ease;
@@ -522,7 +544,7 @@ textarea:focus-visible {
 
 .footer-newsletter p {
     font-family: var(--font-body);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: rgba(255, 255, 255, 0.75);
     margin-bottom: 12px;
     line-height: 1.6;
@@ -531,14 +553,16 @@ textarea:focus-visible {
 .newsletter-form {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    align-items: flex-end;
+    gap: 10px;
+    align-items: stretch;
+    max-width: 260px;
+    margin: 0 auto;
 }
 
 .newsletter-form input[type="email"] {
     padding: 10px 14px;
     font-family: var(--font-body);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.1);
@@ -554,7 +578,7 @@ textarea:focus-visible {
 .btn-subscribe {
     padding: 10px 28px;
     font-family: var(--font-heading);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-weight: 400;
     background: transparent;
     color: var(--gold);
@@ -562,7 +586,7 @@ textarea:focus-visible {
     border-radius: 50px;
     cursor: pointer;
     transition: all 0.3s ease;
-    width: auto;
+    width: 100%;
 }
 
 .btn-subscribe:hover {
@@ -590,9 +614,9 @@ textarea:focus-visible {
     z-index: 89;
     cursor: pointer;
     border: 2px solid var(--white);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
     font-family: var(--font-heading);
-    font-size: 0.6rem;
+    font-size: 0.75rem;
     font-weight: 400;
     letter-spacing: 0.3px;
     color: var(--white);
@@ -607,7 +631,7 @@ textarea:focus-visible {
         height: auto;
         border-radius: 50px;
         padding: 14px 22px;
-        font-size: 0.85rem;
+        font-size: 0.875rem;
         white-space: nowrap;
         text-align: left;
         line-height: normal;
@@ -618,6 +642,13 @@ textarea:focus-visible {
 .prayer-fab:hover {
     transform: scale(1.08);
     box-shadow: 0 6px 30px rgba(48, 59, 106, 0.45);
+}
+
+/* Hide the FAB while the footer is in view so it never overlaps footer content */
+.prayer-fab.fab-near-footer {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.85);
 }
 
 .prayer-overlay {
@@ -669,7 +700,7 @@ textarea:focus-visible {
 
 .prayer-popup-header h4 {
     font-family: var(--font-heading);
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 400;
     color: var(--white);
     margin: 0;
@@ -700,7 +731,7 @@ textarea:focus-visible {
 .prayer-popup-body label {
     display: block;
     font-family: var(--font-body);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-weight: 400;
     color: var(--dark-gray);
     margin-bottom: 5px;
@@ -710,7 +741,7 @@ textarea:focus-visible {
 .prayer-popup-body textarea {
     width: 100%;
     padding: 10px 12px;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-family: var(--font-body);
     border: 1px solid var(--light-gray);
     border-radius: 8px;
@@ -733,7 +764,7 @@ textarea:focus-visible {
     width: 100%;
     padding: 11px;
     font-family: var(--font-heading);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-weight: 400;
     background: linear-gradient(135deg, #303b6a 0%, #3d4a7a 100%);
     color: var(--white);
@@ -766,7 +797,7 @@ textarea:focus-visible {
 
 .prayer-success p {
     font-family: var(--font-body);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: var(--text-gray);
 }
 
@@ -787,7 +818,7 @@ textarea:focus-visible {
     }
 
     .church-name {
-        font-size: 1.1rem;
+        font-size: 1.125rem;
     }
 
     .logo-box {
@@ -810,29 +841,28 @@ textarea:focus-visible {
     .footer-logo-row { justify-content: center; flex-direction: column; gap: 8px; }
     .footer-contact-info { align-items: center; }
     .footer-column { text-align: center; }
-    .footer-links-grid { justify-items: center; }
+    .footer-links-grid { display: flex; flex-direction: column; align-items: center; gap: 0; }
+    .footer-links-list { margin: 0; }
     .footer-links-give { text-align: center; }
-    .newsletter-form { align-items: center; }
+    .newsletter-form { align-items: center; margin: 0 auto; }
 
     .footer-bottom {
-        flex-direction: column;
+        grid-template-columns: 1fr;
         align-items: center;
         text-align: center;
         gap: 6px;
     }
+    .footer-bottom .copyright,
+    .footer-bottom .footer-powered { text-align: center; }
 }
 
 @media (max-width: 768px) {
-    .footer-tagline-location {
-        display: block;
-    }
-
     .prayer-fab {
         width: 60px;
         height: 60px;
         border-radius: 50%;
         padding: 8px;
-        font-size: 0.55rem;
+        font-size: 0.75rem;
         line-height: 1.2;
         text-align: center;
         white-space: normal;
@@ -903,7 +933,7 @@ textarea:focus-visible {
     }
 
     .church-name {
-        font-size: 0.85rem;
+        font-size: 0.875rem;
     }
 
     .church-location {

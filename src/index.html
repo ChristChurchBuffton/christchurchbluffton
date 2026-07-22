@@ -12,17 +12,17 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Christ Church Bluffton | Anglican Church</title>
-    <meta name="description" content="Christ Church Bluffton is a Christ-centered Anglican community launching in 2026 in Bluffton, South Carolina. Rooted in historic faith and liturgical worship.">
+    <meta name="description" content="Christ Church Bluffton is a Christ-centered Anglican community serving Bluffton, South Carolina and the surrounding Lowcountry. Rooted in historic faith and liturgical worship.">
     <meta name="robots" content="index, follow">
     <meta property="og:title" content="Christ Church Bluffton | Anglican Church">
-    <meta property="og:description" content="A Christ-centered Anglican community rooted in historic faith, launching in Bluffton, SC in 2026.">
+    <meta property="og:description" content="A Christ-centered Anglican community rooted in historic faith, serving Bluffton, SC and the surrounding Lowcountry.">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://christchurchbluffton.org/images/og-image.jpg">
     <meta property="og:url" content="https://christchurchbluffton.org/">
     <meta property="og:site_name" content="Christ Church Bluffton">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Christ Church Bluffton | Anglican Church">
-    <meta name="twitter:description" content="A Christ-centered Anglican community rooted in historic faith, launching in Bluffton, SC in 2026.">
+    <meta name="twitter:description" content="A Christ-centered Anglican community rooted in historic faith, serving Bluffton, SC and the surrounding Lowcountry.">
     <meta name="twitter:image" content="https://christchurchbluffton.org/images/og-image.jpg">
     <link rel="canonical" href="https://christchurchbluffton.org/">
     <link rel="preload" as="image" type="image/webp" href="images/church-christmas-candle-1920.webp"
@@ -40,7 +40,7 @@
       "name": "Christ Church Anglican Bluffton",
       "url": "https://christchurchbluffton.org",
       "logo": "https://christchurchbluffton.org/images/favicon.png",
-      "description": "A Christ-centered Anglican community rooted in historic faith, launching in Bluffton, SC in 2026.",
+      "description": "A Christ-centered Anglican community rooted in historic faith, serving Bluffton, SC and the surrounding Lowcountry.",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "7 Venture Drive, Suite 104, PMB 267",
@@ -113,14 +113,14 @@
         .loader-text {
             color: var(--white);
             font-family: var(--font-heading);
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             letter-spacing: 3px;
             animation: loader-fade 2s ease-in-out infinite;
         }
         .loader-subtext {
             color: var(--gold);
             font-family: var(--font-body);
-            font-size: 1.15rem;
+            font-size: 1.125rem;
             font-style: italic;
             letter-spacing: 2px;
             margin-top: 10px;
@@ -186,7 +186,7 @@
         .section-label {
             display: inline-block;
             font-family: var(--font-body);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             font-weight: 400;
             text-transform: uppercase;
             letter-spacing: 3px;
@@ -232,6 +232,16 @@
             padding: 80px 24px;
             overflow: hidden;
         }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            z-index: 1;
+        }
         .hero-bg {
             position: absolute;
             top: 0; left: 0;
@@ -249,7 +259,10 @@
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.40) 50%, rgba(0, 0, 0, 0.45) 100%);
+            background:
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.55) 50%, rgba(0, 0, 0, 0.6) 100%);
+            background-size: 24px 24px, 100% 100%;
         }
         .hero-content {
             position: relative;
@@ -286,10 +299,11 @@
         }
         .hero-tagline {
             font-family: var(--font-body);
-            font-size: 1.15rem;
+            font-size: 1.125rem;
             color: rgba(255, 255, 255, 0.85);
             line-height: 1.8;
             margin-bottom: 40px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
         }
         .hero-buttons {
             display: flex;
@@ -298,8 +312,48 @@
             flex-wrap: wrap;
         }
 
+        /* ── Motto Band ── */
+        .motto-band {
+            background: var(--white);
+            padding: 36px 30px;
+            text-align: center;
+        }
+        .motto-lines {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 26px;
+        }
+        .motto-divider {
+            width: 2px;
+            height: 32px;
+            background: var(--gold);
+        }
+        .motto-line {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            font-weight: 400;
+            color: var(--navy-blue);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: inline-block;
+            transition: color 0.3s ease, transform 0.3s ease;
+            cursor: default;
+        }
+        .motto-line:hover {
+            color: var(--gold);
+            transform: translateY(-3px);
+        }
+        @media (max-width: 600px) {
+            .motto-band { padding: 26px 20px; }
+            .motto-lines { gap: 14px; }
+            .motto-line { font-size: 1.25rem; letter-spacing: 1px; }
+            .motto-divider { display: none; }
+        }
+
         /* ── About Section ── */
-        .about { background: var(--white); }
+        .about { background: var(--white); padding-top: 35px; }
         .about-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -331,7 +385,7 @@
         }
         .quote p {
             font-family: var(--font-accent);
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             font-style: italic;
             color: var(--navy-blue);
             margin: 0;
@@ -374,7 +428,10 @@
 
         /* ── Stats Section ── */
         .stats-section {
-            background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background:
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background-size: 24px 24px, 100% 100%;
             padding: 100px 0;
             position: relative;
         }
@@ -388,7 +445,7 @@
         .stat-item { text-align: center; padding: 30px; }
         .stat-number {
             font-family: var(--font-heading);
-            font-size: 3.5rem;
+            font-size: 3rem;
             font-weight: 400;
             color: var(--white);
             display: inline;
@@ -396,7 +453,7 @@
         .stat-label {
             display: block;
             font-family: var(--font-body);
-            font-size: 0.95rem;
+            font-size: 1rem;
             color: rgba(255, 255, 255, 0.7);
             margin-top: 10px;
             text-transform: uppercase;
@@ -418,7 +475,8 @@
         .vision-card {
             display: block;
             background: var(--white);
-            padding: 40px;
+            padding: 0;
+            overflow: hidden;
             border-radius: 16px;
             text-align: center;
             box-shadow: 0 4px 20px rgba(48, 59, 106, 0.12);
@@ -432,6 +490,23 @@
             box-shadow: 0 20px 60px rgba(48, 59, 106, 0.2);
             border-color: var(--gold);
         }
+        .vision-card-body {
+            padding: 30px 40px 40px;
+        }
+        .vision-card-img {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+        }
+        .vision-card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .vision-card:hover .vision-card-img img {
+            transform: scale(1.05);
+        }
         .vision-card .card-icon {
             width: 70px; height: 70px;
             margin: 0 auto 25px;
@@ -440,7 +515,7 @@
         .vision-card .card-icon svg { width: 100%; height: 100%; }
         .vision-card h3 {
             font-family: var(--font-heading);
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             margin-bottom: 15px;
             color: var(--navy-blue);
             font-weight: 400;
@@ -454,23 +529,87 @@
             font-family: var(--font-body);
             font-weight: 400;
             color: var(--gold);
-            font-size: 0.95rem;
+            font-size: 1rem;
             transition: all 0.3s ease;
             display: block;
             margin-top: 5px;
         }
         .vision-card:hover .card-link { color: var(--navy-blue); }
 
+        /* ── Join Us Section ── */
+        .hero-info-bar-wrap {
+            position: relative;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            padding: 24px 24px 0;
+            background: var(--white);
+        }
+        .hero-info-bar {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            background: var(--lightest-gray);
+            border-radius: 16px;
+            padding: 22px 34px;
+        }
+        .hero-info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .hero-info-label {
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--gold-text);
+            font-weight: 400;
+        }
+        .hero-info-value {
+            font-family: var(--font-heading);
+            font-size: 1.125rem;
+            color: var(--navy-blue);
+        }
+        /* ── Youth Spotlight ── */
+        .youth-spotlight-img {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(48, 59, 106, 0.2);
+            height: 460px;
+        }
+        .youth-spotlight-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 30%;
+        }
+        .youth-spotlight-badge {
+            display: inline-block;
+            padding: 7px 20px;
+            border-radius: 50px;
+            font-family: var(--font-body);
+            font-size: 0.8125rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+            background: var(--gold);
+            color: var(--white);
+            margin-bottom: 18px;
+        }
+
         /* ── CTA Banner (oval pill style) ── */
         .cta-section {
-            background: var(--lightest-gray);
-            padding: 10px 30px 60px;
+            background: var(--white);
+            padding: 20px 30px 100px;
             text-align: center;
         }
         .cta-inner {
             max-width: 900px;
             margin: 0 auto;
-            background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background:
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background-size: 24px 24px, 100% 100%;
             border-radius: 60px;
             padding: 40px 60px;
             display: flex;
@@ -487,14 +626,14 @@
         }
         .cta-heading {
             font-family: var(--font-heading);
-            font-size: 1.1rem;
+            font-size: 1.125rem;
             font-weight: 400;
             color: var(--white);
             margin-bottom: 6px;
         }
         .cta-text {
             font-family: var(--font-accent);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             color: rgba(255, 255, 255, 0.75);
             line-height: 1.6;
         }
@@ -506,7 +645,7 @@
             border: 2px solid var(--gold);
             border-radius: 50px;
             font-family: var(--font-heading);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             font-weight: 400;
             color: var(--gold);
             text-decoration: none;
@@ -542,12 +681,12 @@
         @media (max-width: 600px) {
             .section { padding: 60px 0; }
             .container { padding: 0 20px; }
-            .section-title { font-size: 1.8rem; }
+            .section-title { font-size: 2rem; }
             .hero {
                 padding: 60px 20px;
                 min-height: auto;
             }
-            .title-line { font-size: 2.2rem; }
+            .title-line { font-size: 2rem; }
             .hero-buttons {
                 flex-direction: column;
                 width: 100%;
@@ -558,21 +697,23 @@
             .vision-cards {
                 grid-template-columns: 1fr;
             }
+            .vision-card-img { height: 180px; }
             .stats-grid {
                 grid-template-columns: 1fr;
             }
-            .stat-number { font-size: 2.2rem; }
+            .stat-number { font-size: 2rem; }
             .cta-section { padding: 10px 20px 40px; }
             .cta-inner { padding: 30px 30px; border-radius: 30px; gap: 20px; }
             .cta-logo { width: 50px !important; height: 50px !important; }
             .cta-heading { font-size: 1rem; }
-            .cta-text { font-size: 0.85rem; }
-            .cta-btn { padding: 10px 28px; font-size: 0.85rem; }
+            .cta-text { font-size: 0.875rem; }
+            .cta-btn { padding: 10px 28px; font-size: 0.875rem; }
         }
 
         @media (max-width: 480px) {
             .cta-section { padding: 10px 16px 30px; }
             .cta-inner { padding: 22px 20px; border-radius: 24px; }
+            .vision-card-body { padding: 20px; }
         }
 
         @media (max-width: 360px) {
@@ -613,10 +754,34 @@
                 <div class="hero-divider">
                     <span class="divider-line"></span>
                 </div>
-                <p class="hero-tagline">A Christ-centered Anglican community rooted in historic faith, liturgical worship, and Christ's mission for the common good.</p>
+                <p class="hero-tagline">A Christ-centered community rooted in historic faith and liturgical worship.</p>
                 <div class="hero-buttons">
                     <a href="/about" class="btn btn-primary">Discover Our Vision</a>
                     <a href="/contact" class="btn btn-outline">Stay Connected</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hero Info Bar -->
+        <div class="hero-info-bar-wrap">
+            <div class="hero-info-bar animate">
+                <div class="hero-info-item">
+                    <span class="hero-info-label">Join Us</span>
+                    <span class="hero-info-value">Weekly Schedule Coming Soon</span>
+                </div>
+                <a href="/join-us" class="btn btn-primary">Plan Your Visit</a>
+            </div>
+        </div>
+
+        <!-- Motto Band -->
+        <section class="motto-band">
+            <div class="container">
+                <div class="motto-lines animate">
+                    <span class="motto-line">Knowing Jesus</span>
+                    <span class="motto-divider"></span>
+                    <span class="motto-line">Sharing Life</span>
+                    <span class="motto-divider"></span>
+                    <span class="motto-line">Bringing Hope</span>
                 </div>
             </div>
         </section>
@@ -626,21 +791,20 @@
             <div class="container">
                 <div class="about-grid">
                     <div class="about-content">
-                        <span class="section-label">Our Mission</span>
-                        <h2 class="section-title left-align">Rooted in Tradition,<br>Growing in Grace</h2>
-                        <p>Christ Church Bluffton is an Anglican church plant launching in 2026. We are committed to the historic Christian faith as expressed through the Anglican tradition &mdash; a faith both catholic and reformed, ancient and alive.</p>
-                        <p>We believe the Church is called to be a faithful presence in the world, extending Christ's love through Word and Sacrament, prayer and service.</p>
-                        <div class="quote">
+                        <span class="section-label animate">Our Mission</span>
+                        <h2 class="section-title left-align animate">Rooted in Tradition,<br>Growing in Grace</h2>
+                        <p class="animate">Christ Church Bluffton is an Anglican church plant serving Bluffton and the surrounding Lowcountry. We are committed to the historic Christian faith as expressed through the Anglican tradition &mdash; a faith both catholic and reformed, ancient and alive.</p>
+                        <p class="animate">We believe the Church is called to be a faithful presence in the world, extending Christ's love through Word and Sacrament, prayer and service.</p>
+                        <div class="quote animate">
                             <span class="quote-icon">&ldquo;</span>
                             <p>Common Grace. Common Prayer. Common Life. For the Common Good.</p>
                         </div>
                         <a href="/about" class="btn btn-primary" style="margin-top: 30px;">Learn More About Us</a>
                     </div>
-                    <div class="about-visual">
+                    <div class="about-visual animate">
                         <div class="visual-card">
-                            <div class="visual-image image-placeholder">
-                                <span class="placeholder-icon">&#9962;</span>
-                                <span>Church Photo</span>
+                            <div class="visual-image">
+                                <img src="images/congregation-packed-wide.webp" alt="Christ Church Bluffton congregation during worship service" loading="lazy" style="transform: scale(1.4); transform-origin: center center;">
                             </div>
                             <div class="visual-accent"></div>
                         </div>
@@ -653,21 +817,21 @@
         <section class="stats-section">
             <div class="container">
                 <div class="stats-grid">
-                    <div class="stat-item">
+                    <div class="stat-item animate">
                         <span class="stat-number">85M+</span>
                         <span class="stat-label">Anglicans Worldwide</span>
                     </div>
-                    <div class="stat-item">
+                    <div class="stat-item animate animate-delay-1">
                         <span class="stat-number">2000+</span>
                         <span class="stat-label">Years of Tradition</span>
                     </div>
-                    <div class="stat-item">
+                    <div class="stat-item animate animate-delay-2">
                         <span class="stat-number">165</span>
                         <span class="stat-label">Countries Represented</span>
                     </div>
-                    <div class="stat-item special">
-                        <span class="stat-number">2026</span>
-                        <span class="stat-label">Launching in Bluffton</span>
+                    <div class="stat-item special animate animate-delay-3">
+                        <span class="stat-number">Est. 2026</span>
+                        <span class="stat-label">Serving the Lowcountry</span>
                     </div>
                 </div>
             </div>
@@ -676,7 +840,7 @@
         <!-- Vision Cards Section -->
         <section class="section" style="background: var(--lightest-gray);">
             <div class="container">
-                <div class="section-header">
+                <div class="section-header animate">
                     <span class="section-label">Get Involved</span>
                     <h2 class="section-title">Explore Our Vision</h2>
                     <div class="section-divider">
@@ -686,47 +850,80 @@
                     </div>
                 </div>
                 <div class="vision-cards">
-                    <a href="/join-us" class="vision-card">
-                        <div class="card-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 2L12 22"></path>
-                                <path d="M5 8L19 8"></path>
-                            </svg>
+                    <a href="/join-us" class="vision-card animate">
+                        <div class="vision-card-img">
+                            <img src="images/worship-music-team.webp" alt="Worship music team at Christ Church Bluffton" loading="lazy" style="object-position: center calc(50% - 125px);">
                         </div>
-                        <h3>Worship</h3>
-                        <p>Experience the beauty of Anglican liturgy rooted in the Book of Common Prayer &mdash; Word and Sacrament, song and silence.</p>
-                        <span class="card-link">Explore Worship &rarr;</span>
-                    </a>
-                    <a href="/groups" class="vision-card">
-                        <div class="card-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="9" cy="7" r="4"></circle>
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                            </svg>
+                        <div class="vision-card-body">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2L12 22"></path>
+                                    <path d="M5 8L19 8"></path>
+                                </svg>
+                            </div>
+                            <h3>Worship</h3>
+                            <p>Experience the beauty of Anglican liturgy rooted in the Book of Common Prayer &mdash; Word and Sacrament, song and silence.</p>
+                            <span class="card-link">Explore Worship &rarr;</span>
                         </div>
-                        <h3>Groups</h3>
-                        <p>Join a small group for fellowship, study, and prayer. Grow deeper in community and in your walk with Christ.</p>
-                        <span class="card-link">Find a Group &rarr;</span>
                     </a>
-                    <a href="/serve" class="vision-card">
-                        <div class="card-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                            </svg>
+                    <a href="/groups" class="vision-card animate animate-delay-1">
+                        <div class="vision-card-img">
+                            <img src="images/youth-group-outing.webp" alt="Youth group outing at Christ Church Bluffton" loading="lazy" style="object-position: center calc(50% - 20px);">
                         </div>
-                        <h3>Serve</h3>
-                        <p>Use your gifts to build the Kingdom. From greeting to worship, there is a place for you on one of our ministry teams.</p>
-                        <span class="card-link">Find Your Place &rarr;</span>
+                        <div class="vision-card-body">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                            </div>
+                            <h3>Groups</h3>
+                            <p>Join a small group for fellowship, study, and prayer. Grow deeper in community and in your walk with Christ.</p>
+                            <span class="card-link">Find a Group &rarr;</span>
+                        </div>
                     </a>
+                    <a href="/serve" class="vision-card animate animate-delay-2">
+                        <div class="vision-card-img">
+                            <img src="images/fellowship-conversation.webp" alt="Fellowship and serving together at Christ Church Bluffton" loading="lazy">
+                        </div>
+                        <div class="vision-card-body">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                </svg>
+                            </div>
+                            <h3>Serve</h3>
+                            <p>Use your gifts to build the Kingdom. From greeting to worship, there is a place for you on one of our ministry teams.</p>
+                            <span class="card-link">Find Your Place &rarr;</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Youth Spotlight -->
+        <section class="section" style="background: var(--white);">
+            <div class="container">
+                <div class="about-grid">
+                    <div class="youth-spotlight-img animate">
+                        <img src="images/youth-group-hands-prayer.webp" alt="Teens holding hands in prayer together during worship" loading="lazy" width="1200" height="1800">
+                    </div>
+                    <div class="about-content animate">
+                        <span class="section-label">Next Generation</span>
+                        <span class="youth-spotlight-badge">Coming Soon</span>
+                        <h2 class="section-title left-align">A Heart for Our Youth</h2>
+                        <p>Pastor Jonathan has a deep passion for raising up the next generation. We're in the planning stages of a youth ministry where teens will grow through Bible study, real conversations, and genuine fellowship &mdash; equipped and empowered to own their faith.</p>
+                        <a href="/groups#youth-ministry" class="btn btn-primary" style="margin-top: 20px;">Learn More</a>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- CTA Banner -->
         <section class="cta-section">
-            <div class="cta-inner">
+            <div class="cta-inner animate">
                 <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60">
                 <div class="cta-content">
                     <h2 class="cta-heading">Be Part of Something New</h2>

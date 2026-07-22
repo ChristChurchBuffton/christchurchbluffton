@@ -86,14 +86,27 @@
 
         /* ── Page Header ── */
         .page-header {
-            background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background:
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background-size: 24px 24px, 100% 100%;
             padding: 120px 30px 100px;
             text-align: center;
+            position: relative;
+        }
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
         }
 
         .page-label {
             font-family: var(--font-body);
-            font-size: 0.95rem;
+            font-size: 1rem;
             text-transform: uppercase;
             letter-spacing: 4px;
             color: var(--gold);
@@ -124,7 +137,7 @@
         /* Left: Info */
         .contact-info h2 {
             font-family: var(--font-heading);
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             font-weight: 400;
             color: var(--navy-blue);
             margin-bottom: 14px;
@@ -132,7 +145,7 @@
 
         .contact-intro {
             font-family: var(--font-body);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             color: var(--text-gray);
             line-height: 1.7;
             margin-bottom: 30px;
@@ -173,7 +186,7 @@
 
         .contact-card-content h3 {
             font-family: var(--font-heading);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             font-weight: 400;
             color: var(--navy-blue);
             margin-bottom: 4px;
@@ -182,7 +195,7 @@
         .contact-card-content p,
         .contact-card-content a {
             font-family: var(--font-body);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             color: var(--text-gray);
             text-decoration: none;
             line-height: 1.6;
@@ -204,7 +217,7 @@
 
         .form-card h3 {
             font-family: var(--font-heading);
-            font-size: 1.1rem;
+            font-size: 1.125rem;
             font-weight: 400;
             color: var(--navy-blue);
             margin-bottom: 8px;
@@ -212,7 +225,7 @@
 
         .form-card > p {
             font-family: var(--font-body);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             color: var(--text-gray);
             line-height: 1.6;
             margin-bottom: 24px;
@@ -225,14 +238,14 @@
         .form-group label {
             display: block;
             font-family: var(--font-body);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             color: var(--navy-blue);
             margin-bottom: 6px;
             letter-spacing: 0.5px;
         }
 
         .required { color: #c0392b; }
-        .optional { color: var(--text-gray); font-size: 0.85rem; }
+        .optional { color: var(--text-gray); font-size: 0.875rem; }
 
         .form-group input,
         .form-group select,
@@ -240,7 +253,7 @@
             width: 100%;
             padding: 10px 14px;
             font-family: var(--font-body);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             color: var(--dark-gray);
             border: 1px solid var(--light-gray);
             border-radius: 8px;
@@ -268,7 +281,7 @@
             background: linear-gradient(135deg, #303b6a 0%, #3d4a7a 100%);
             color: var(--white);
             font-family: var(--font-heading);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             font-weight: 400;
             letter-spacing: 1px;
             border: none;
@@ -300,7 +313,7 @@
 
         .form-success h4 {
             font-family: var(--font-heading);
-            font-size: 1.1rem;
+            font-size: 1.125rem;
             font-weight: 400;
             color: var(--navy-blue);
             margin-bottom: 8px;
@@ -308,7 +321,7 @@
 
         .form-success p {
             font-family: var(--font-body);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             color: var(--text-gray);
         }
 
@@ -322,7 +335,10 @@
         .cta-inner {
             max-width: 900px;
             margin: 0 auto;
-            background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background:
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background-size: 24px 24px, 100% 100%;
             border-radius: 60px;
             padding: 40px 60px;
             display: flex;
@@ -342,7 +358,7 @@
 
         .cta-heading {
             font-family: var(--font-heading);
-            font-size: 1.1rem;
+            font-size: 1.125rem;
             font-weight: 400;
             color: var(--white);
             margin-bottom: 6px;
@@ -350,7 +366,7 @@
 
         .cta-text {
             font-family: var(--font-accent);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             color: rgba(255, 255, 255, 0.75);
             line-height: 1.6;
         }
@@ -363,7 +379,7 @@
             border: 2px solid var(--gold);
             border-radius: 50px;
             font-family: var(--font-heading);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             font-weight: 400;
             color: var(--gold);
             text-decoration: none;
@@ -410,14 +426,14 @@
             .cta-inner { padding: 30px 30px; border-radius: 30px; gap: 20px; }
             .cta-logo { width: 50px !important; height: 50px !important; }
             .cta-heading { font-size: 1rem; }
-            .cta-text { font-size: 0.85rem; }
-            .cta-btn { padding: 10px 28px; font-size: 0.85rem; }
+            .cta-text { font-size: 0.875rem; }
+            .cta-btn { padding: 10px 28px; font-size: 0.875rem; }
         }
 
         @media (max-width: 480px) {
             .container { padding: 0 16px; }
             .page-header { padding: 60px 16px 50px; }
-            .page-title { font-size: 1.8rem; }
+            .page-title { font-size: 2rem; }
             .contact-section { padding: 25px 0; }
             .form-card { padding: 18px; }
             .contact-card { padding: 16px; }
@@ -436,13 +452,13 @@
             .form-group input,
             .form-group select,
             .form-group textarea {
-                font-size: 0.8rem;
+                font-size: 0.75rem;
                 padding: 8px 10px;
             }
 
             .btn-submit {
                 padding: 10px 24px;
-                font-size: 0.8rem;
+                font-size: 0.75rem;
             }
 
             .cf-turnstile {
@@ -473,7 +489,7 @@
                 <div class="contact-grid">
 
                     <!-- Left: Contact Info -->
-                    <div class="contact-info">
+                    <div class="contact-info animate">
                         <h2>Connect With Us</h2>
                         <p class="contact-intro">We would love to hear from you. Whether you have questions about Christ Church Bluffton, want to learn more about our vision, or simply want to say hello &mdash; we are here for you.</p>
 
@@ -511,7 +527,7 @@
                     </div>
 
                     <!-- Right: Contact Form -->
-                    <div class="form-card">
+                    <div class="form-card animate animate-delay-1">
                         <h3>Send Us a Message</h3>
                         <p>Have a question or want to stay connected? Fill out the form below and we will get back to you.</p>
                         <form class="contact-form" id="contactForm">

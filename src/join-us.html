@@ -94,13 +94,26 @@
 
         /* ── Page Header ── */
         .page-header {
-            background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background:
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background-size: 24px 24px, 100% 100%;
             padding: 120px 30px 100px;
             text-align: center;
+            position: relative;
+        }
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
         }
         .page-label {
             font-family: var(--font-body);
-            font-size: 0.95rem;
+            font-size: 1rem;
             text-transform: uppercase;
             letter-spacing: 4px;
             color: var(--gold);
@@ -120,7 +133,7 @@
         .section-label {
             display: inline-block;
             font-family: var(--font-body);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             font-weight: 400;
             text-transform: uppercase;
             letter-spacing: 3px;
@@ -159,7 +172,7 @@
 
         .subsection-title {
             font-family: var(--font-heading);
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             font-weight: 400;
             color: var(--navy-blue);
             margin-bottom: 20px;
@@ -199,7 +212,7 @@
         .notice-icon svg { width: 24px; height: 24px; color: var(--white); }
         .notice-content h4 {
             font-family: var(--font-heading);
-            font-size: 1.1rem;
+            font-size: 1.125rem;
             margin-bottom: 5px;
             color: var(--navy-blue);
             font-weight: 400;
@@ -207,7 +220,7 @@
         .notice-content p {
             font-family: var(--font-body);
             color: var(--text-gray);
-            font-size: 0.95rem;
+            font-size: 1rem;
             line-height: 1.7;
         }
 
@@ -216,7 +229,7 @@
         .expect-list h4,
         .expect-list h3 {
             font-family: var(--font-heading);
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             margin-bottom: 20px;
             color: var(--navy-blue);
             font-weight: 400;
@@ -231,7 +244,7 @@
             align-items: center;
             gap: 15px;
             font-family: var(--font-body);
-            font-size: 1.05rem;
+            font-size: 1rem;
             color: var(--text-gray);
         }
         .check-icon {
@@ -242,7 +255,7 @@
             align-items: center;
             justify-content: center;
             color: var(--white);
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             flex-shrink: 0;
         }
 
@@ -258,8 +271,11 @@
             color: #777;
             border: 2px dashed var(--light-gray);
             border-radius: 16px;
+            overflow: hidden;
         }
         .image-placeholder.large { min-height: 450px; }
+        .image-placeholder.has-image { padding: 0; border: none; min-height: 0; display: block; box-shadow: 0 20px 60px rgba(48, 59, 106, 0.2); border-radius: 16px; }
+        .image-placeholder.has-image img { display: block; width: 100%; height: auto; border-radius: 16px; }
         .placeholder-icon { font-size: 4rem; opacity: 0.5; }
         .visual-accent {
             position: absolute;
@@ -326,13 +342,26 @@
         }
         .service-day {
             font-family: var(--font-body);
-            font-size: 0.95rem;
+            font-size: 1rem;
             color: var(--navy-blue);
         }
         .service-time {
             font-family: var(--font-body);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             color: var(--text-gray);
+        }
+        .service-row-placeholder {
+            background: var(--white);
+            border: 1px dashed var(--light-gray);
+            border-left: 1px dashed var(--light-gray);
+        }
+        .service-row-placeholder .service-month,
+        .service-row-placeholder .service-num {
+            color: var(--text-gray);
+            opacity: 0.6;
+        }
+        .service-row-placeholder .service-day {
+            color: var(--navy-blue);
         }
         .upcoming-image { position: relative; }
         .location-card {
@@ -357,7 +386,7 @@
         }
         .location-card-header h4 {
             font-family: var(--font-heading);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             font-weight: 400;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -366,7 +395,7 @@
         }
         .location-name {
             font-family: var(--font-heading);
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             color: var(--navy-blue);
             font-weight: 400;
         }
@@ -393,7 +422,7 @@
         .provision-box p {
             font-family: var(--font-body);
             color: var(--text-gray);
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             line-height: 1.8;
             margin-bottom: 8px;
         }
@@ -417,7 +446,7 @@
             line-height: 1.9;
         }
         .about-content .lead {
-            font-size: 1.1rem;
+            font-size: 1.125rem;
             line-height: 1.8;
         }
 
@@ -436,6 +465,10 @@
             margin-top: auto;
             padding-top: 20px;
             min-height: 200px;
+        }
+        .worship-column .image-placeholder.has-image {
+            padding-top: 0;
+            min-height: 0;
         }
         .worship-column p {
             font-family: var(--font-body);
@@ -477,7 +510,7 @@
         }
         .map-info p {
             font-family: var(--font-body);
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             color: var(--text-gray);
             line-height: 1.6;
         }
@@ -495,7 +528,7 @@
         .scripture-content { max-width: 800px; margin: 0 auto; }
         .scripture-verse {
             font-family: var(--font-accent);
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             font-style: italic;
             color: var(--white);
             line-height: 1.8;
@@ -504,7 +537,7 @@
         .scripture-reference {
             color: var(--gold);
             font-family: var(--font-body);
-            font-size: 0.95rem;
+            font-size: 1rem;
         }
 
         /* ── CTA Section ── */
@@ -516,7 +549,10 @@
         .cta-inner {
             max-width: 900px;
             margin: 0 auto;
-            background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background:
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background-size: 24px 24px, 100% 100%;
             border-radius: 60px;
             padding: 40px 60px;
             display: flex;
@@ -527,14 +563,14 @@
         .cta-content { flex: 1; text-align: left; }
         .cta-heading {
             font-family: var(--font-heading);
-            font-size: 1.1rem;
+            font-size: 1.125rem;
             font-weight: 400;
             color: var(--white);
             margin-bottom: 6px;
         }
         .cta-text {
             font-family: var(--font-accent);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             color: rgba(255, 255, 255, 0.75);
             line-height: 1.6;
         }
@@ -546,7 +582,7 @@
             border: 2px solid var(--gold);
             border-radius: 50px;
             font-family: var(--font-heading);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             font-weight: 400;
             color: var(--gold);
             text-decoration: none;
@@ -586,9 +622,9 @@
             .page-header { padding: 80px 20px 60px; }
             .page-title { font-size: 2rem; }
             .section { padding: 60px 0; }
-            .section-title { font-size: 1.8rem; }
+            .section-title { font-size: 2rem; }
             .scripture-banner { padding: 30px 20px; border-radius: 16px; }
-            .scripture-verse { font-size: 1.1rem; }
+            .scripture-verse { font-size: 1.125rem; }
             .map-wrapper iframe { height: 280px; }
             .cta-section { padding: 10px 20px 40px; }
             .cta-inner { padding: 30px 30px; border-radius: 30px; gap: 20px; }
@@ -598,7 +634,7 @@
         @media (max-width: 480px) {
             .container { padding: 0 16px; }
             .page-header { padding: 60px 16px 50px; }
-            .page-title { font-size: 1.8rem; }
+            .page-title { font-size: 2rem; }
             .service-notice { flex-direction: column; gap: 12px; }
             .map-wrapper iframe { height: 240px; }
             .cta-section { padding: 10px 16px 30px; }
@@ -634,7 +670,7 @@
         <!-- Worship With Us — Combined Section -->
         <section class="section" style="background: var(--white);">
             <div class="container">
-                <div class="section-header">
+                <div class="section-header animate">
                     <span class="section-label">Gather With Us</span>
                     <h2 class="section-title">Worship With Us</h2>
                     <div class="section-divider">
@@ -646,47 +682,44 @@
 
                 <div class="worship-grid">
                     <!-- Left: Dates + Location -->
-                    <div>
+                    <div class="animate">
                         <h3 class="subsection-title">Upcoming Services</h3>
                         <div class="services-list">
                             <div class="service-row">
                                 <div class="service-date-block">
-                                    <span class="service-month">May</span>
-                                    <span class="service-num">3</span>
-                                </div>
-                                <div class="service-details">
-                                    <span class="service-day">Saturday</span>
-                                    <span class="service-time">5:30 PM</span>
-                                </div>
-                            </div>
-                            <div class="service-row">
-                                <div class="service-date-block">
-                                    <span class="service-month">Jun</span>
-                                    <span class="service-num">7</span>
-                                </div>
-                                <div class="service-details">
-                                    <span class="service-day">Saturday</span>
-                                    <span class="service-time">5:30 PM</span>
-                                </div>
-                            </div>
-                            <div class="service-row">
-                                <div class="service-date-block">
-                                    <span class="service-month">Jul</span>
-                                    <span class="service-num">12</span>
-                                </div>
-                                <div class="service-details">
-                                    <span class="service-day">Saturday</span>
-                                    <span class="service-time">5:30 PM</span>
-                                </div>
-                            </div>
-                            <div class="service-row">
-                                <div class="service-date-block">
                                     <span class="service-month">Aug</span>
-                                    <span class="service-num">2</span>
+                                    <span class="service-num">1</span>
                                 </div>
                                 <div class="service-details">
                                     <span class="service-day">Saturday</span>
                                     <span class="service-time">5:30 PM</span>
+                                </div>
+                            </div>
+                            <div class="service-row service-row-placeholder">
+                                <div class="service-date-block">
+                                    <span class="service-month">TBD</span>
+                                    <span class="service-num">&mdash;</span>
+                                </div>
+                                <div class="service-details">
+                                    <span class="service-day">Date Coming Soon</span>
+                                </div>
+                            </div>
+                            <div class="service-row service-row-placeholder">
+                                <div class="service-date-block">
+                                    <span class="service-month">TBD</span>
+                                    <span class="service-num">&mdash;</span>
+                                </div>
+                                <div class="service-details">
+                                    <span class="service-day">Date Coming Soon</span>
+                                </div>
+                            </div>
+                            <div class="service-row service-row-placeholder">
+                                <div class="service-date-block">
+                                    <span class="service-month">TBD</span>
+                                    <span class="service-num">&mdash;</span>
+                                </div>
+                                <div class="service-details">
+                                    <span class="service-day">Date Coming Soon</span>
                                 </div>
                             </div>
                         </div>
@@ -710,45 +743,46 @@
                     </div>
 
                     <!-- Right: What to Expect + CTA -->
-                    <div>
+                    <div class="animate animate-delay-1">
                         <div class="expect-list">
                             <h3 class="subsection-title">What to Expect</h3>
                             <ul>
                                 <li>
                                     <span class="check-icon">&#10003;</span>
-                                    <span>Reverent worship rooted in ancient liturgy</span>
+                                    <span>Come as you are — whether you're exploring Christianity or have followed Jesus for years.</span>
                                 </li>
                                 <li>
                                     <span class="check-icon">&#10003;</span>
-                                    <span>Scripture-based preaching and teaching</span>
+                                    <span>Ancient prayers, timeless hymns, and contemporary worship.</span>
                                 </li>
                                 <li>
                                     <span class="check-icon">&#10003;</span>
-                                    <span>Traditional hymns and contemporary worship</span>
+                                    <span>Biblical teaching that connects God's Word to everyday life.</span>
                                 </li>
                                 <li>
                                     <span class="check-icon">&#10003;</span>
-                                    <span>Holy Communion as central to worship</span>
+                                    <span>Weekly Communion centered on God's grace through Jesus Christ.</span>
                                 </li>
                                 <li>
                                     <span class="check-icon">&#10003;</span>
-                                    <span>Welcoming community for all ages</span>
+                                    <span>A community where you'll be known, valued, and encouraged.</span>
                                 </li>
                             </ul>
                         </div>
 
-                        <div class="image-placeholder" style="margin-top: 30px;">
-                            <span class="placeholder-icon">&#9962;</span>
-                            <span>Worship Service</span>
+                        <div style="margin-top: 30px; border-radius: 16px; overflow: hidden;">
+                            <img src="images/altar-service-helpers.webp" alt="Altar service helpers at Christ Church Bluffton" loading="lazy" style="display: block; width: 100%; height: 100%; object-fit: cover; min-height: 200px;">
                         </div>
-
-                        <a href="/contact" class="btn btn-primary" style="margin-top: 30px;">
-                            Get Service Updates
-                            <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M5 12h14M12 5l7 7-7 7"/>
-                            </svg>
-                        </a>
                     </div>
+                </div>
+
+                <div class="animate" style="text-align: center; margin-top: 50px;">
+                    <a href="/contact" class="btn btn-primary">
+                        Get Service Updates
+                        <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </a>
                 </div>
             </div>
         </section>
@@ -756,7 +790,7 @@
         <!-- Liturgy & Music Section -->
         <section class="section" style="background: var(--lightest-gray);">
             <div class="container">
-                <div class="section-header">
+                <div class="section-header animate">
                     <span class="section-label">How We Worship</span>
                     <h2 class="section-title">Liturgy &amp; Music</h2>
                     <div class="section-divider">
@@ -767,7 +801,7 @@
                 </div>
 
                 <div class="worship-grid">
-                    <div class="worship-column">
+                    <div class="worship-column animate">
                         <div class="column-icon">
                             <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="12" y="8" width="40" height="48" rx="2"/>
@@ -781,13 +815,12 @@
                         <p>Our worship follows the historic patterns found in the Book of Common Prayer, connecting us to Christians across centuries and continents.</p>
                         <p>The liturgy guides us through confession, Scripture readings, prayers, and the celebration of Holy Communion. This rhythm of worship shapes our hearts and minds toward God week after week.</p>
                         <p>Whether you're new to liturgical worship or have been practicing it your whole life, you'll find our services accessible and meaningful. We provide service bulletins to help everyone follow along and participate fully.</p>
-                        <div class="image-placeholder">
-                            <span class="placeholder-icon">&#128214;</span>
-                            <span>Book of Common Prayer</span>
+                        <div class="image-placeholder has-image">
+                            <img src="images/book-of-common-prayer.webp" alt="An open Book of Common Prayer resting on a church pew" width="1184" height="672" loading="lazy">
                         </div>
                     </div>
 
-                    <div class="worship-column">
+                    <div class="worship-column animate animate-delay-1">
                         <div class="column-icon">
                             <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M22 48V16l24-6v32"/>
@@ -798,9 +831,8 @@
                         <h3 class="subsection-title">Worship Music</h3>
                         <p>Music is an integral part of our worship. We draw from the rich heritage of Anglican hymnody while embracing contemporary worship that speaks to the heart.</p>
                         <p>From timeless hymns to modern songs of praise, our music lifts hearts to God and unites us in worship. Whether you grew up singing from a hymnal or find your voice in contemporary worship, you will find a place here.</p>
-                        <div class="image-placeholder">
-                            <span class="placeholder-icon">&#127925;</span>
-                            <span>Worship Music</span>
+                        <div class="image-placeholder has-image">
+                            <img src="images/worship-piano-keys.webp" alt="Piano keys in the sanctuary at Christ Church Bluffton" width="1152" height="654" loading="lazy">
                         </div>
                     </div>
                 </div>
@@ -810,7 +842,7 @@
         <!-- Map Section -->
         <section class="map-section">
             <div class="container">
-                <div class="section-header" style="margin-bottom: 30px;">
+                <div class="section-header animate" style="margin-bottom: 30px;">
                     <span class="section-label">Find Us</span>
                     <h2 class="section-title">Service Location</h2>
                     <div class="section-divider">

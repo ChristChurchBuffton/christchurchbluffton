@@ -1,6 +1,21 @@
 // Scroll to top on page load
 window.scrollTo(0, 0);
 
+// Scroll animations via Intersection Observer
+(function() {
+    var targets = document.querySelectorAll('.animate');
+    if (!targets.length) return;
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    targets.forEach(function(el) { observer.observe(el); });
+})();
+
 // Load shared components (header, footer, prayer FAB)
 (function() {
     function loadComponent(id, file, callback) {
@@ -114,6 +129,17 @@ window.scrollTo(0, 0);
         fab.addEventListener('click', openPrayer);
         closeBtn.addEventListener('click', closePrayer);
         overlay.addEventListener('click', closePrayer);
+
+        // Fade the FAB out while the footer is in view so it never overlaps footer content
+        var footerEl = document.getElementById('site-footer');
+        if (footerEl && 'IntersectionObserver' in window) {
+            var footerObserver = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    fab.classList.toggle('fab-near-footer', entry.isIntersecting);
+                });
+            }, { threshold: 0 });
+            footerObserver.observe(footerEl);
+        }
 
 
         form.addEventListener('submit', function(e) {

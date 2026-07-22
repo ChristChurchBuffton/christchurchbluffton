@@ -71,12 +71,13 @@
         .btn-arrow { width: 20px; height: 20px; transition: all 0.3s ease; }
         .btn:hover .btn-arrow { transform: translateX(5px); }
 
-        .page-header { background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%); padding: 120px 30px 100px; text-align: center; }
-        .page-label { font-family: var(--font-body); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 4px; color: var(--gold); margin-bottom: 14px; }
+        .page-header { background: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px), linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%); background-size: 24px 24px, 100% 100%; padding: 120px 30px 100px; text-align: center; position: relative; }
+        .page-header::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 3px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+        .page-label { font-family: var(--font-body); font-size: 1rem; text-transform: uppercase; letter-spacing: 4px; color: var(--gold); margin-bottom: 14px; }
         .page-title { font-family: var(--font-heading); font-size: clamp(2.2rem, 5vw, 3.2rem); font-weight: 400; color: var(--white); letter-spacing: 1px; margin-bottom: 20px; }
 
         .section { padding: 100px 0; position: relative; }
-        .section-label { display: inline-block; font-family: var(--font-body); font-size: 0.85rem; font-weight: 400; text-transform: uppercase; letter-spacing: 3px; color: var(--gold); margin-bottom: 15px; }
+        .section-label { display: inline-block; font-family: var(--font-body); font-size: 0.875rem; font-weight: 400; text-transform: uppercase; letter-spacing: 3px; color: var(--gold); margin-bottom: 15px; }
         .section-title { font-family: var(--font-heading); font-size: clamp(2rem, 5vw, 3rem); color: var(--navy-blue); margin-bottom: 20px; font-weight: 400; }
         .section-title.left-align { text-align: left; }
         .section-header { text-align: center; max-width: 700px; margin: 0 auto 60px; }
@@ -85,41 +86,43 @@
         .section-divider span { width: 8px; height: 8px; background: var(--gold); border-radius: 50%; }
         .section-divider span:nth-child(2) { width: 40px; border-radius: 4px; }
 
-        .lead { font-family: var(--font-body); font-size: 1.1rem; line-height: 1.8; color: var(--text-gray); margin-bottom: 20px; }
+        .lead { font-family: var(--font-body); font-size: 1.125rem; line-height: 1.8; color: var(--text-gray); margin-bottom: 20px; }
 
         .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
         .about-content p { font-family: var(--font-body); color: var(--text-gray); margin-bottom: 20px; line-height: 1.9; }
         .about-content h3 { font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 15px; color: var(--navy-blue); font-weight: 400; }
 
-        .image-placeholder { background: linear-gradient(135deg, var(--light-gray) 0%, var(--lightest-gray) 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; min-height: 350px; color: #777; border: 2px dashed var(--light-gray); border-radius: 16px; }
+        .image-placeholder { background: linear-gradient(135deg, var(--light-gray) 0%, var(--lightest-gray) 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; min-height: 350px; color: #777; border: 2px dashed var(--light-gray); border-radius: 16px; overflow: hidden; }
         .image-placeholder.large { min-height: 450px; }
+        .image-placeholder.has-image { padding: 0; border: none; box-shadow: 0 20px 60px rgba(48, 59, 106, 0.2); }
+        .image-placeholder.has-image img { display: block; width: 100%; height: 100%; min-height: inherit; object-fit: cover; border-radius: 16px; }
         .placeholder-icon { font-size: 4rem; opacity: 0.5; }
 
         .expect-list ul { display: flex; flex-direction: column; gap: 15px; }
-        .expect-list li { display: flex; align-items: center; gap: 15px; font-family: var(--font-body); font-size: 1.05rem; color: var(--text-gray); }
-        .check-icon { width: 28px; height: 28px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 0.8rem; flex-shrink: 0; }
+        .expect-list li { display: flex; align-items: center; gap: 15px; font-family: var(--font-body); font-size: 1rem; color: var(--text-gray); }
+        .check-icon { width: 28px; height: 28px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 0.75rem; flex-shrink: 0; }
 
         .service-notice { display: flex; gap: 20px; padding: 25px; background: linear-gradient(135deg, rgba(195, 163, 85, 0.12) 0%, rgba(195, 163, 85, 0.05) 100%); border-radius: 16px; border-left: 4px solid var(--gold); }
         .notice-icon { width: 50px; height: 50px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .notice-icon svg { width: 24px; height: 24px; color: var(--white); }
-        .notice-content h4 { font-family: var(--font-heading); font-size: 1.1rem; margin-bottom: 5px; color: var(--navy-blue); font-weight: 400; }
-        .notice-content p { font-family: var(--font-body); color: var(--text-gray); font-size: 0.95rem; line-height: 1.7; }
+        .notice-content h4 { font-family: var(--font-heading); font-size: 1.125rem; margin-bottom: 5px; color: var(--navy-blue); font-weight: 400; }
+        .notice-content p { font-family: var(--font-body); color: var(--text-gray); font-size: 1rem; line-height: 1.7; }
 
-        .coming-soon-badge { display: inline-block; padding: 6px 20px; border-radius: 50px; font-family: var(--font-body); font-size: 0.85rem; font-weight: 400; letter-spacing: 1px; margin-top: 15px; }
+        .coming-soon-badge { display: inline-block; padding: 9px 26px; border-radius: 50px; font-family: var(--font-body); font-size: 1.0625rem; font-weight: 400; letter-spacing: 1px; margin-top: 15px; }
 
         .vision-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
         .vision-card { background: var(--white); padding: 40px; border-radius: 16px; text-align: center; box-shadow: 0 4px 20px rgba(48, 59, 106, 0.12); border: 1px solid var(--light-gray); transition: all 0.3s ease; }
         .vision-card:hover { transform: translateY(-10px); box-shadow: 0 20px 60px rgba(48, 59, 106, 0.2); border-color: var(--gold); }
-        .vision-card h3 { font-family: var(--font-heading); font-size: 1.4rem; margin-bottom: 15px; color: var(--navy-blue); font-weight: 400; }
+        .vision-card h3 { font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 15px; color: var(--navy-blue); font-weight: 400; }
         .vision-card p { font-family: var(--font-body); color: var(--text-gray); line-height: 1.7; }
 
         .cta-section { background: var(--lightest-gray); padding: 10px 30px 60px; text-align: center; }
-        .cta-inner { max-width: 900px; margin: 0 auto; background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%); border-radius: 60px; padding: 40px 60px; display: flex; align-items: center; gap: 30px; }
+        .cta-inner { max-width: 900px; margin: 0 auto; background: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px), linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%); background-size: 24px 24px, 100% 100%; border-radius: 60px; padding: 40px 60px; display: flex; align-items: center; gap: 30px; }
         .cta-logo { object-fit: contain; flex-shrink: 0; }
         .cta-content { flex: 1; text-align: left; }
-        .cta-heading { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 400; color: var(--white); margin-bottom: 6px; }
-        .cta-text { font-family: var(--font-accent); font-size: 0.85rem; color: rgba(255, 255, 255, 0.75); line-height: 1.6; }
-        .cta-btn { display: inline-block; padding: 12px 36px; white-space: nowrap; flex-shrink: 0; border: 2px solid var(--gold); border-radius: 50px; font-family: var(--font-heading); font-size: 0.85rem; font-weight: 400; color: var(--gold); text-decoration: none; letter-spacing: 1px; transition: all 0.3s ease; }
+        .cta-heading { font-family: var(--font-heading); font-size: 1.125rem; font-weight: 400; color: var(--white); margin-bottom: 6px; }
+        .cta-text { font-family: var(--font-accent); font-size: 0.875rem; color: rgba(255, 255, 255, 0.75); line-height: 1.6; }
+        .cta-btn { display: inline-block; padding: 12px 36px; white-space: nowrap; flex-shrink: 0; border: 2px solid var(--gold); border-radius: 50px; font-family: var(--font-heading); font-size: 0.875rem; font-weight: 400; color: var(--gold); text-decoration: none; letter-spacing: 1px; transition: all 0.3s ease; }
         .cta-btn:hover { background: var(--gold); color: var(--navy-blue); }
 
         @media (max-width: 1023px) {
@@ -134,7 +137,7 @@
             .page-header { padding: 80px 20px 60px; }
             .page-title { font-size: 2rem; }
             .section { padding: 60px 0; }
-            .section-title { font-size: 1.8rem; }
+            .section-title { font-size: 2rem; }
             .about-grid { direction: ltr !important; }
             .about-grid > * { direction: ltr !important; }
             .service-notice { flex-direction: column; gap: 12px; }
@@ -167,7 +170,7 @@
         <!-- Intro -->
         <section class="section" style="background: var(--white); padding-bottom: 60px;">
             <div class="container">
-                <div class="section-header">
+                <div class="section-header animate">
                     <span class="section-label">Life Together</span>
                     <h2 class="section-title">Find Your Community</h2>
                     <div class="section-divider">
@@ -176,7 +179,7 @@
                         <span></span>
                     </div>
                 </div>
-                <p class="lead" style="text-align: center; max-width: 800px; margin: 0 auto;">Faith was never meant to be lived alone. At Christ Church Bluffton, we believe that spiritual growth happens best in the context of authentic community. Whether gathered around a dinner table, joined in prayer, or studying Scripture together, our groups are where real life and real faith intersect.</p>
+                <p class="lead animate" style="text-align: center; max-width: 800px; margin: 0 auto;">Faith was never meant to be lived alone. At Christ Church Bluffton, we believe that spiritual growth happens best in the context of authentic community. Whether gathered around a dinner table, joined in prayer, or studying Scripture together, our groups are where real life and real faith intersect.</p>
             </div>
         </section>
 
@@ -184,7 +187,7 @@
         <section class="section" style="background: var(--lightest-gray);">
             <div class="container">
                 <div class="about-grid">
-                    <div class="about-content">
+                    <div class="about-content animate">
                         <span class="section-label">Bible Study</span>
                         <h2 class="section-title left-align">Table 246</h2>
                         <div class="section-divider left-align" style="margin-bottom: 25px;">
@@ -200,10 +203,9 @@
                             <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         </a>
                     </div>
-                    <div>
-                        <div class="image-placeholder large">
-                            <span class="placeholder-icon">&#127860;</span>
-                            <span>Table 246</span>
+                    <div class="animate animate-delay-1">
+                        <div class="image-placeholder large has-image">
+                            <img src="images/table-246-group.webp" alt="Table 246 women's small group gathered in a Bluffton home at Christ Church Bluffton" loading="lazy" width="1600" height="1200" style="object-position: right center; transform: translateX(5px);">
                         </div>
                     </div>
                 </div>
@@ -214,7 +216,7 @@
         <section class="section" style="background: var(--white);">
             <div class="container">
                 <div class="about-grid" style="direction: rtl;">
-                    <div class="about-content" style="direction: ltr;">
+                    <div class="about-content animate" style="direction: ltr;">
                         <span class="section-label">Intercession</span>
                         <h2 class="section-title left-align">Prayer Groups</h2>
                         <div class="section-divider left-align" style="margin-bottom: 25px;">
@@ -229,10 +231,9 @@
                             <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         </a>
                     </div>
-                    <div style="direction: ltr;">
-                        <div class="image-placeholder large">
-                            <span class="placeholder-icon">&#128591;</span>
-                            <span>Prayer Group</span>
+                    <div class="animate animate-delay-1" style="direction: ltr;">
+                        <div class="image-placeholder large has-image" style="min-height: 340px; max-width: 420px; margin: 0 auto;">
+                            <img src="images/prayer-group-saved-book.webp" alt="Women gathered around a table studying scripture together in prayerful fellowship" loading="lazy" width="1200" height="1800" style="object-position: center 60%;">
                         </div>
                     </div>
                 </div>
@@ -240,9 +241,9 @@
         </section>
 
         <!-- Youth Ministry -->
-        <section class="section" style="background: var(--lightest-gray);">
+        <section class="section" id="youth-ministry" style="background: var(--lightest-gray); scroll-margin-top: 90px;">
             <div class="container">
-                <div class="section-header">
+                <div class="section-header animate">
                     <span class="section-label">Our Vision</span>
                     <h2 class="section-title">Youth Ministry</h2>
                     <div class="section-divider">
@@ -256,7 +257,7 @@
                 <p class="lead" style="text-align: center; max-width: 800px; margin: 0 auto 60px;"><em>Who said learning about Jesus can't be fun?</em></p>
 
                 <div class="about-grid">
-                    <div class="about-content">
+                    <div class="about-content animate">
                         <span class="section-label">Future Leaders</span>
                         <h3>Building the Future</h3>
                         <p class="lead">We are dreaming big for the next generation. Our youth ministry will be a place where teens are equipped, encouraged, and empowered to own their faith and impact their world.</p>
@@ -270,10 +271,9 @@
                             </ul>
                         </div>
                     </div>
-                    <div>
-                        <div class="image-placeholder large">
-                            <span class="placeholder-icon">&#127918;</span>
-                            <span>Youth Activities</span>
+                    <div class="animate animate-delay-1">
+                        <div class="image-placeholder large has-image" style="min-height: 340px; max-width: 420px; margin: 0 auto;">
+                            <img src="images/youth-group-hands-prayer.webp" alt="Teens holding hands in prayer together during worship" loading="lazy" width="1200" height="1800" style="object-position: center 30%;">
                         </div>
                     </div>
                 </div>

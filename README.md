@@ -15,8 +15,8 @@ Website for Christ Church Bluffton, an Anglican church plant in Bluffton, SC. Le
 
 ## How to Run Locally
 1. Navigate to the project folder
-2. Run `npx http-server ./src -p 3001`
-3. Open `http://localhost:3001` in your browser
+2. Run `npx http-server ./src -p 3002 -e html` (the `-e html` flag is required so clean-URL nav links like `/about` resolve locally — production Netlify handles this via `pretty_urls` in netlify.toml, plain http-server needs the flag)
+3. Open `http://localhost:3002` in your browser
 
 For serverless function testing, use the local dev server:
 1. `cd server/`

@@ -106,12 +106,30 @@
 
 ---
 
+## Phase 6: Recovery, Visual Audit & Copy Update (2026-07-20)
+> Project folder had been mis-swept into `zArchive\Chirst Church Bluffton (DO NOT USE)` during the 2026-07-01 Google Drive → Desktop migration. Recovered and moved back to `Clients - Active\Christ Church Bluffton` (correct spelling) with no data loss.
+
+- [x] Folder recovered from zArchive, path corrected
+- [x] Local dev server moved to port 3002 (3001 now used by Praesidium Pro) — must be started with `-e html` flag (`npx http-server src/ -p 3002 -c-1 -e html`) or clean-URL nav links (`/about`, `/contact`, etc.) 404 locally. Production Netlify handles this via `pretty_urls = true` in netlify.toml; plain http-server does not without the flag.
+- [x] Full visual + responsive breakpoint audit across all 10 pages (mobile/tablet/laptop/desktop) — layout/reflow clean everywhere, no broken states found. Open items moved to `todo.md` (placeholder images, Serve mission-statement copy, live-domain CAPTCHA check).
+- [x] First round of client copy feedback applied: About page beliefs paragraph (plainer language) + Join Us "What to Expect" list (5 new lines) — see `comm/client/2026-07-20-copy-feedback-about-and-what-to-expect.md`
+- [x] Serve page mission statements populated 2026-07-21 from client's "Ministry Teams Guidlines.docx" (archived to `comm/client/`) — all 7 existing cards filled, plus new 8th card (Altar Guild) added and 8-card grid confirmed clean at all breakpoints
+- [x] Footer redesign 2026-07-21 — tablet/mobile now single-column (was a broken intermediate 2-col layout), Quick Links merged into one unified list (was two visually-gapped stacked lists), newsletter input capped at 260px width
+- [x] Prayer Request FAB overlap fix 2026-07-21 — fades out via IntersectionObserver + CSS opacity transition when the footer scrolls into view, instead of permanently reserving padding
+- [x] Photo recovery 2026-07-21 — discovered `https://christchurch-bluffton.netlify.app/` (live preview) has real photos that never made it into this repo's git history (confirmed via `git log`, stops at `fcf2613`). Downloaded 8 images from the live site into `src/images/` and wired them into index.html, about.html, join-us.html, groups.html — homepage mission photo, homepage vision cards (new markup added, didn't exist locally before), About mission + pastor photo, Join Us "What to Expect" photo, Groups Table 246 photo. 4 photos remain genuine placeholders (Join Us: Book of Common Prayer + Worship Music; Groups: Prayer Group + Youth Activities) — confirmed no photo exists anywhere for these, including live.
+- [ ] **Awaiting further content/comm from Rev. Riddle** — remaining full content review still outstanding (project currently blocked on this).
+
+## Phase 7: Front-End Visual Pass (planned, not started)
+> Heads-up given by user 2026-07-21: next working session will be a front-end inspection/changes pass — colors, fonts, general visual polish. Not yet begun.
+
+---
+
 ## Quick Reference
 | Item | Value |
 |---|---|
 | Project folder | `Web Design/Christ Church Bluffton/` |
 | Active codebase | `src/` (publishes to Netlify) |
-| Dev server | `npx http-server src/ -p 3001 -c-1` |
+| Dev server | `npx http-server src/ -p 3002 -c-1 -e html` |
 | GitHub (testing) | `ForgedDigital/christ-church-bluffton` |
 | GitHub (production) | `ChristChurchBuffton/christchurchbluffton` |
 | Production URL | `christchurchbluffton.org` |
