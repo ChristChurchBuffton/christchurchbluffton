@@ -464,7 +464,8 @@
         .worship-column .image-placeholder {
             margin-top: auto;
             padding-top: 20px;
-            min-height: 200px;
+            min-height: 250px;
+            aspect-ratio: 4 / 3;
         }
         .worship-column .image-placeholder.has-image {
             padding-top: 0;
@@ -614,6 +615,9 @@
                 gap: 20px;
             }
             .cta-content { text-align: center; }
+            .worship-grid img { max-height: 250px; max-width: 400px; margin: 0 auto; border-radius: 16px; }
+            .image-placeholder { min-height: 200px; }
+            .worship-column .image-placeholder { aspect-ratio: 3 / 2; min-height: 120px; max-width: 300px; margin-left: auto; margin-right: auto; }
         }
 
         /* ── Responsive — Mobile ── */
@@ -851,7 +855,7 @@
                         <span></span>
                     </div>
                 </div>
-                <div class="map-wrapper">
+                <div class="map-wrapper animate">
                     <iframe
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3379.0!2d-80.8607!3d32.2285!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88fc7121c8e3e9f7%3A0x5e7e8f1a1a1a1a1a!2s351+Buckwalter+Pkwy%2C+Bluffton%2C+SC+29910!5e0!3m2!1sen!2sus!4v1"
                         allowfullscreen=""
@@ -867,8 +871,8 @@
 
         <!-- CTA Banner -->
         <section class="cta-section" style="padding-top: 60px; background: var(--white);">
-            <div class="cta-inner">
-                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60">
+            <div class="cta-inner animate">
+                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60" loading="lazy">
                 <div class="cta-content">
                     <h2 class="cta-heading">Questions About Our Services?</h2>
                     <p class="cta-text">We would love to hear from you. Reach out anytime &mdash; whether you are planning your first visit or just want to learn more.</p>

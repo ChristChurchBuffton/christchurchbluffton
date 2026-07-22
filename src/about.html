@@ -221,8 +221,11 @@
             box-shadow: 0 20px 60px rgba(48, 59, 106, 0.2);
         }
         .visual-image img {
-            width: 100%; height: 100%;
+            display: block;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
+            min-height: 350px;
         }
         .image-placeholder {
             background: linear-gradient(135deg, var(--light-gray) 0%, var(--lightest-gray) 100%);
@@ -608,15 +611,14 @@
         <section class="section about">
             <div class="container">
                 <div class="about-grid">
-                    <div class="about-content animate">
-                        <span class="section-label">Our Mission</span>
-                        <h2 class="section-title left-align">Rooted in Tradition,<br>Growing in Grace</h2>
-                        <p class="lead">Christ Church Bluffton is an Anglican church plant serving Bluffton, South Carolina and the surrounding Lowcountry. We are a community of believers united by a shared love for Christ and a desire to see His Kingdom grow here.</p>
-                        <p>We are rooted in the historic Christian faith, grounded in the authority of Scripture, shaped by the ancient creeds, nourished by the sacraments, and guided by the wisdom of the historic Church.</p>
-                        <p>Christ Church Bluffton is a member of the Anglican Church in North America (ACNA), a province of the global Anglican Communion committed to the authority of Scripture, the centrality of the Gospel, and the power of the Holy Spirit.</p>
-                        <div class="quote">
+                    <div class="about-content">
+                        <span class="section-label animate">Our Mission</span>
+                        <h2 class="section-title left-align animate">Rooted in Tradition,<br>Growing in Grace</h2>
+                        <p class="lead animate">To plant a reproducing Anglican church in Bluffton and beyond. A faith community shaped by Scripture, Prayer, and Sacramental Life, joining a Gospel movement that fosters personal conversion and authentic community where every person is known and valued. That our faithful Christian presence makes Bluffton a better and more hopeful place to live.</p>
+                        <p class="animate">We are reformed and catholic Christians, rooted in the historic faith passed down through the centuries. We hold firmly to the authority of Scripture, the ancient creeds, the sacraments, and the historic episcopate as the pillars of our faith and practice.</p>
+                        <div class="quote animate">
                             <span class="quote-icon">&ldquo;</span>
-                            <p>Common Grace. Common Prayer. Common Life. For the Common Good.</p>
+                            <p>For where two or three are gathered in my name, there am I among them. &mdash; Matthew 18:20</p>
                         </div>
                     </div>
                     <div class="about-visual animate animate-delay-1">
@@ -693,7 +695,7 @@
                         <span></span>
                     </div>
                 </div>
-                <div class="beliefs-intro">
+                <div class="beliefs-intro animate">
                     <p>As Anglicans, we stand within a rich spiritual heritage that stretches back through the centuries to the early Church. Our faith is built upon four essential pillars that have guided Christians throughout the ages.</p>
                 </div>
                 <div class="beliefs-grid">
@@ -724,7 +726,7 @@
         <!-- Scripture Banner -->
         <section class="section" style="background: var(--white); padding: 60px 0;">
             <div class="container">
-                <div class="scripture-banner">
+                <div class="scripture-banner animate">
                     <div class="scripture-content">
                         <p class="scripture-verse">&ldquo;And day by day, attending the temple together and breaking bread in their homes, they received their food with glad and generous hearts, praising God and having favor with all the people.&rdquo;</p>
                         <span class="scripture-reference">&mdash; Acts 2:46-47 (ESV)</span>
@@ -737,7 +739,7 @@
         <section id="pastor" class="section pastor">
             <div class="container">
                 <div class="pastor-grid">
-                    <div class="pastor-image">
+                    <div class="pastor-image animate">
                         <div class="image-frame">
                             <div class="pastor-placeholder">
                                 <img src="images/riddle-headshot.webp" alt="Rev. Jonathan Riddle, Lead Pastor of Christ Church Bluffton" width="496" height="481" loading="lazy">
@@ -747,19 +749,19 @@
                         </div>
                     </div>
                     <div class="pastor-content">
-                        <span class="section-label">Meet Our Pastor</span>
-                        <h2 class="section-title left-align">Rev. Jonathan Riddle</h2>
-                        <span class="pastor-role">Lead Pastor &amp; Church Planter</span>
-                        <p class="pastor-bio">Rev. Jonathan Riddle is the founding pastor and church planter of Christ Church Bluffton. Called to ministry with a deep love for Anglican worship and theology, he brings a passion for building Christ-centered communities rooted in the historic faith.</p>
-                        <p class="pastor-bio">With a heart for the Lowcountry, Pastor Riddle is committed to establishing a church that serves as a beacon of hope, grace, and truth in Bluffton. He believes that the Anglican tradition offers a unique and beautiful expression of the Christian faith that speaks to people from all walks of life.</p>
-                        <p class="pastor-bio">Pastor Riddle's vision for Christ Church is to create a welcoming community where people can encounter the living God through Word and Sacrament, grow in their faith through discipleship, and go out to serve their neighbors and the world.</p>
-                        <div class="pastor-contact">
+                        <span class="section-label animate">Meet Our Pastor</span>
+                        <h2 class="section-title left-align animate">Rev. Jonathan Riddle</h2>
+                        <span class="pastor-role animate">Lead Pastor &amp; Church Planter</span>
+                        <p class="pastor-bio animate">The Rev. Jonathan H. Riddle is an Anglican priest and church planter serving in Bluffton, South Carolina. Jonathan and his wife, Lisa, have been married for 29 years and are grateful parents to six incredible children. He is a graduate of Appalachian State University and holds a Master of Divinity from Reformed Theological Seminary.</p>
+                        <p class="pastor-bio animate">After more than a decade of ministry leadership at The Church of the Cross, Jonathan is now planting Christ Church Bluffton with a vision to cultivate a faithful, Gospel-centered presence in the Lowcountry. He is passionate about forming communities shaped by Scripture, shared meals, and lives arranged for the glory of God and the good of others.</p>
+                        <p class="pastor-bio animate">When he&rsquo;s not serving the church, Jonathan can happily talk for hours about C.S. Lewis, J.R.R. Tolkien, and the Carolina Panthers.</p>
+                        <div class="pastor-contact animate">
                             <a href="mailto:jonathan@christchurchbluffton.org" class="contact-link">
                                 <span class="link-icon">&#9993;</span>
                                 jonathan@christchurchbluffton.org
                             </a>
                         </div>
-                        <div class="pastor-quote">
+                        <div class="pastor-quote animate">
                             <p>&ldquo;We are planting Christ Church Bluffton because we believe God is calling us to bring the beauty of Anglican worship and the power of the Gospel to this growing community. Come and see what God is doing.&rdquo;</p>
                         </div>
                     </div>
@@ -770,8 +772,8 @@
         <!-- CTA Banner -->
         <section class="cta-section" style="background: var(--lightest-gray);">
 
-            <div class="cta-inner">
-                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60">
+            <div class="cta-inner animate">
+                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60" loading="lazy">
                 <div class="cta-content">
                     <h2 class="cta-heading">We&rsquo;d Love to Hear from You</h2>
                     <p class="cta-text">Whether you have questions about our community, would like to submit a prayer request, or are simply looking for a church to call home &mdash; we&rsquo;d love to connect with you.</p>

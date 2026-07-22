@@ -24,6 +24,19 @@
     top: 0;
 }
 
+/* ── Screen Reader Only (accessibility) ── */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 /* ── Focus Styles (accessibility) ── */
 *:focus-visible {
     outline: 2px solid var(--gold);
@@ -38,6 +51,20 @@ textarea:focus-visible {
     outline: 2px solid var(--gold);
     outline-offset: 3px;
 }
+
+/* ── Scroll Animations ── */
+.animate {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.animate.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+.animate-delay-1 { transition-delay: 0.15s; }
+.animate-delay-2 { transition-delay: 0.3s; }
+.animate-delay-3 { transition-delay: 0.45s; }
 
 /* ── Reduced Motion (accessibility) ── */
 /* ── Scroll Animations ── */
@@ -438,6 +465,28 @@ textarea:focus-visible {
     gap: 0 20px;
 }
 
+.footer-give-mobile {
+    display: none;
+    text-align: center;
+    margin-top: 16px;
+}
+.btn-give-footer {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--white);
+    padding: 12px 36px;
+    border-radius: 50px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 400;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+.btn-give-footer:hover {
+    background: var(--white);
+    color: var(--navy-blue);
+    transform: translateY(-2px);
+}
 .footer-links-give {
     text-align: center;
     margin-top: 10px;
@@ -483,6 +532,7 @@ textarea:focus-visible {
     grid-template-columns: 1.5fr 1fr 1.3fr;
     gap: 40px;
     align-items: center;
+    text-align: center;
     padding-top: 14px;
 }
 .footer-bottom .copyright { text-align: left; }
@@ -832,12 +882,12 @@ textarea:focus-visible {
     }
 
     .footer-main {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
         gap: 30px;
-        text-align: center;
     }
 
-    .footer-branding { padding-right: 0; text-align: center; }
+    .footer-give-mobile { display: block; }
+    .footer-branding { grid-column: 1 / -1; text-align: center; padding-right: 0; }
     .footer-logo-row { justify-content: center; flex-direction: column; gap: 8px; }
     .footer-contact-info { align-items: center; }
     .footer-column { text-align: center; }
@@ -857,6 +907,14 @@ textarea:focus-visible {
 }
 
 @media (max-width: 768px) {
+    .footer-main {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .footer-branding { grid-column: auto; }
+    .footer-links-give { text-align: center; }
+    .newsletter-form { margin: 0 auto; }
+
     .prayer-fab {
         width: 60px;
         height: 60px;

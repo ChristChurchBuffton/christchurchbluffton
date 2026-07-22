@@ -29,8 +29,15 @@
 - "Worship" renamed to "Join Us" / "Join Us For Services"
 - Image placeholders with dashed borders for all pending photos
 
-**Post-push fix (2026-04-04):**
+**Post-push fixes (2026-04-04):**
 - Removed loading screen/fade from give.html — only homepage should have the loader
+
+**2026-04-05 — Project relocation + photos:**
+- Moved project from `Web Design/Christ Church Bluffton/` to `Clients - Active/Christ Church Bluffton/`
+- Original Clients - Active version archived to `archive/original-clients-active/`
+- Added 9 photos from client to `assets/photos/` — renamed descriptively, converted to webp
+- Photos include: outdoor service (2), Riddle family, sanctuary shots (4), youth outing, community gathering
+- 3 sanctuary photos (4411, 4413, 4414) are portrait orientation — taken with phone held vertically
 
 **Known issues / remaining:**
 - Google Maps embed on join-us uses address-based URL — needs real embed from Google Maps share
@@ -39,6 +46,34 @@
 - sitemap.xml needs all new page URLs
 - All placeholder images need real photos from client
 - Serve page mission statements pending
+
+---
+
+## 2026-04-07 — Pastor Bio, Mission Statement & Easter Photos
+
+**What was done:**
+- Received email from Jonathan with his official bio and mission statement
+- Saved original email to `comm/client/2026-04-07-jonathan-bio-mission.md`
+- Updated pastor bio on `about.html` with Jonathan's real bio:
+  - Background at The Church of the Cross (10+ years ministry leadership)
+  - Vision for Gospel-centered presence in the Lowcountry
+  - Education: Appalachian State (undergrad), Reformed Theological Seminary (MDiv)
+  - Family: wife Lisa, 29 years married, 6 children
+  - Personal: C.S. Lewis, Tolkien, Carolina Panthers
+- Updated mission statement on both `about.html` and `index.html`:
+  - "Plant a reproducing Anglican church in Bluffton and beyond"
+  - "Shaped by Scripture, Prayer, and Sacramental Life"
+  - "Gospel movement that fosters personal conversion and authentic community"
+  - "Every person is known and valued"
+  - "Make Bluffton a better and more hopeful place to live"
+- Added 10 new Easter service photos from Jonathan (converted jpeg → webp, saved to `assets/photos/`):
+  - 4 altar/communion shots, 1 sanctuary wide, 1 fellowship, 1 worship music, 1 pastor at lectern, 2 baptism
+- Backups: `about-previous.html`, `index-previous.html`
+
+**Still pending:**
+- Pastor quote on about.html — still placeholder, needs Jonathan's preferred wording
+- Photos not yet placed on site pages — ready in assets/photos/ for future placement
+- Serve page mission statements still pending from client
 
 ---
 
@@ -111,3 +146,17 @@ This plan is actually simpler and has zero ongoing cost. Netlify Forms free tier
    - Google can crawl again (robots.txt in live/ allows indexing)
 
 **Important:** The no-cache headers on the temp deploy mean browsers won't serve a stale 404 after restoring — visitors will see the real site immediately.
+
+---
+
+## 2026-07-20 to 2026-07-22 — Photo recovery, homepage rebuild, and merge reconciliation
+
+**What was done (local session, before discovering it diverged from origin/main):**
+- Recovered real photos and re-applied touch-ups to About/Groups/Join Us that (unknown at the time) had already been committed to origin/main in April but never pulled into this local working copy
+- Homepage: added motto band, hero-docked "Join Us / Plan Your Visit" info bar, "A Heart for Our Youth" spotlight section, tightened section spacing
+- Site-wide: navy-section dot-texture + gold divider accents on page-headers, standardized photo shadow/border-radius treatment, Serve page ministry-grid fix so an incomplete last row centers instead of leaving a gap
+- Footer: newsletter form alignment/centering fixes, tagline permanent line break, "Powered by" centered under Stay Updated
+- Removed stale "launching in 2026" copy (About, Home, Give meta/JSON-LD) now that the church has launched; confirmed all service dates read Aug 1, 2026
+- Font-size scale consolidation to a consistent type scale
+
+**Discovered on push (2026-07-22):** `git push` was rejected — origin/main had 3 commits from April 2026 (pastor headshot + Table 246 photo, pastor bio reorder, full serve.html rebuild + site-wide animations + accessibility pass) that were pushed straight to GitHub and never fetched into this local clone. Ran `git merge origin/main`, resolved conflicts across about.html, contact.html, css/shared.css, give.html, groups.html, index.html, join-us.html, serve.html, todo.md, and this file — keeping origin's serve.html rebuild as the real page structure and de-duplicating the pastor-headshot/Table-246 image wiring that both sides had added independently. See commit history for the merge commit.

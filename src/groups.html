@@ -128,7 +128,9 @@
         @media (max-width: 1023px) {
             .section { padding: 80px 0; }
             .about-grid { grid-template-columns: 1fr; gap: 40px; }
-            .vision-cards { grid-template-columns: 1fr; }
+            .about-grid { max-width: 550px; margin: 0 auto; }
+            .about-grid .image-placeholder { max-width: 650px; min-height: 280px; margin: 0 auto; }
+            .vision-cards { grid-template-columns: repeat(3, 1fr); max-width: none; }
             .cta-inner { flex-direction: column; text-align: center; padding: 30px; border-radius: 30px; gap: 20px; }
             .cta-content { text-align: center; }
         }
@@ -141,6 +143,7 @@
             .about-grid { direction: ltr !important; }
             .about-grid > * { direction: ltr !important; }
             .service-notice { flex-direction: column; gap: 12px; }
+            .vision-cards { grid-template-columns: 1fr; }
             .cta-section { padding: 10px 20px 40px; }
         }
         @media (max-width: 480px) {
@@ -254,7 +257,7 @@
                     <span class="coming-soon-badge" style="background: var(--gold); color: var(--white);">Coming Soon</span>
                 </div>
 
-                <p class="lead" style="text-align: center; max-width: 800px; margin: 0 auto 60px;"><em>Who said learning about Jesus can't be fun?</em></p>
+                <p class="lead animate" style="text-align: center; max-width: 800px; margin: 0 auto 60px;"><em>Who said learning about Jesus can't be fun?</em></p>
 
                 <div class="about-grid">
                     <div class="about-content animate">
@@ -279,24 +282,24 @@
                 </div>
 
                 <div class="vision-cards" style="margin-top: 60px;">
-                    <div class="vision-card">
+                    <div class="vision-card animate animate-delay-1">
                         <div style="font-size: 3rem; margin-bottom: 15px;">&#128214;</div>
                         <h3>Weekly Gatherings</h3>
                         <p>Age-appropriate Bible study and worship designed to help teens engage with Scripture and grow in their faith journey.</p>
                     </div>
-                    <div class="vision-card">
+                    <div class="vision-card animate animate-delay-2">
                         <div style="font-size: 3rem; margin-bottom: 15px;">&#127760;</div>
                         <h3>Trips &amp; Retreats</h3>
                         <p>Mission trips and retreats that build lasting friendships and give students the opportunity to serve others and encounter God in new ways.</p>
                     </div>
-                    <div class="vision-card">
+                    <div class="vision-card animate animate-delay-3">
                         <div style="font-size: 3rem; margin-bottom: 15px;">&#127881;</div>
                         <h3>Games &amp; Fun</h3>
                         <p>From game nights to outdoor adventures, we believe that laughter and joy are essential ingredients for a thriving youth community.</p>
                     </div>
                 </div>
 
-                <div class="service-notice" style="margin-top: 60px;">
+                <div class="service-notice animate" style="margin-top: 60px;">
                     <div class="notice-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/>
@@ -313,8 +316,8 @@
 
         <!-- CTA -->
         <section class="cta-section">
-            <div class="cta-inner">
-                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60">
+            <div class="cta-inner animate">
+                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60" loading="lazy">
                 <div class="cta-content">
                     <h2 class="cta-heading">Ready to Find Your Community?</h2>
                     <p class="cta-text">Join a Table 246 group or start one in your home. There is a place for you here.</p>

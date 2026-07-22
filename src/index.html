@@ -398,8 +398,11 @@
             box-shadow: 0 20px 60px rgba(48, 59, 106, 0.2);
         }
         .visual-image img {
-            width: 100%; height: 100%;
+            display: block;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
+            min-height: 350px;
         }
         .image-placeholder {
             background: linear-gradient(135deg, var(--light-gray) 0%, var(--lightest-gray) 100%);
@@ -484,6 +487,31 @@
             transition: all 0.3s ease;
             text-decoration: none;
             color: inherit;
+            overflow: hidden;
+        }
+        .vision-card-body {
+            padding: 30px 40px 40px;
+        }
+        .vision-card-img {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+        }
+        .vision-card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .vision-card:hover .vision-card-img img {
+            transform: scale(1.05);
+        }
+        .vision-card-img .image-placeholder {
+            height: 100%;
+            min-height: 0;
+            border-radius: 0;
+            border: none;
+            border-bottom: 2px dashed var(--light-gray);
         }
         .vision-card:hover {
             transform: translateY(-10px);
@@ -667,6 +695,7 @@
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+            .vision-card-img { height: 180px; }
             .cta-inner {
                 flex-direction: column;
                 text-align: center;
@@ -675,6 +704,16 @@
                 gap: 20px;
             }
             .cta-content { text-align: center; }
+        }
+
+        /* ── Responsive — Below Tablet ── */
+        @media (max-width: 900px) {
+            .vision-cards {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+                margin: 0 auto;
+            }
+            .vision-card-img { height: 220px; }
         }
 
         /* ── Responsive — Mobile ── */
@@ -718,6 +757,21 @@
 
         @media (max-width: 360px) {
             .container { padding: 0 12px; }
+        }
+
+        @media (max-width: 320px) {
+            .container { padding: 0 8px; }
+            .title-line { font-size: 1.6rem; }
+            .hero-tagline { font-size: 0.9rem; }
+            .section-title { font-size: 1.4rem; }
+            .stat-number { font-size: 1.8rem; }
+            .stat-label { font-size: 0.75rem; letter-spacing: 1px; }
+            .vision-card-body { padding: 20px; }
+            .btn { padding: 12px 20px; font-size: 0.85rem; }
+            .cta-inner { padding: 18px 14px; border-radius: 20px; }
+            .cta-heading { font-size: 0.85rem; }
+            .cta-text { font-size: 0.75rem; }
+            .cta-btn { padding: 8px 20px; font-size: 0.75rem; }
         }
     </style>
 </head>
@@ -793,8 +847,7 @@
                     <div class="about-content">
                         <span class="section-label animate">Our Mission</span>
                         <h2 class="section-title left-align animate">Rooted in Tradition,<br>Growing in Grace</h2>
-                        <p class="animate">Christ Church Bluffton is an Anglican church plant serving Bluffton and the surrounding Lowcountry. We are committed to the historic Christian faith as expressed through the Anglican tradition &mdash; a faith both catholic and reformed, ancient and alive.</p>
-                        <p class="animate">We believe the Church is called to be a faithful presence in the world, extending Christ's love through Word and Sacrament, prayer and service.</p>
+                        <p class="animate">To plant a reproducing Anglican church in Bluffton and beyond. A faith community shaped by Scripture, Prayer, and Sacramental Life, joining a Gospel movement that fosters personal conversion and authentic community where every person is known and valued. That our faithful Christian presence makes Bluffton a better and more hopeful place to live.</p>
                         <div class="quote animate">
                             <span class="quote-icon">&ldquo;</span>
                             <p>Common Grace. Common Prayer. Common Life. For the Common Good.</p>
@@ -924,7 +977,7 @@
         <!-- CTA Banner -->
         <section class="cta-section">
             <div class="cta-inner animate">
-                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60">
+                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60" loading="lazy">
                 <div class="cta-content">
                     <h2 class="cta-heading">Be Part of Something New</h2>
                     <p class="cta-text">Join us as we build a Christ-centered community in the Lowcountry. We would love to connect with you.</p>
