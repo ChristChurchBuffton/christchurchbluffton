@@ -23,6 +23,10 @@ CCB EIN*
 # Non-source assets in root
 *.jpg
 !src/images/og-image.jpg
+!src/images/og-about.jpg
+!src/images/og-join-us.jpg
+!src/images/og-groups.jpg
+!src/images/og-serve.jpg
 ANGLICAN-CHURCH-INFO.txt
 
 # Dependencies
