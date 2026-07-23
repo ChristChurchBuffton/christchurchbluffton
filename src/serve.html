@@ -167,6 +167,8 @@
             border-radius: 16px;
         }
         .placeholder-icon { font-size: 3.5rem; opacity: 0.5; }
+        .image-placeholder.has-image { padding: 0; border: none; min-height: 0; display: block; }
+        .image-placeholder.has-image img { display: block; width: 100%; height: 260px; object-fit: cover; border-radius: 16px; }
 
         /* ── CTA ── */
         .cta-section { background: var(--white); padding: 60px 30px; text-align: center; }
@@ -247,24 +249,22 @@
                 <!-- 1. Greeting & Ushers — Image Left -->
                 <div class="ministry-row animate">
                     <div class="ministry-image">
-                        <div class="image-placeholder">
-                            <span class="placeholder-icon">&#128075;</span>
-                            <span>Greeting & Ushers Photo</span>
+                        <div class="image-placeholder has-image">
+                            <img src="images/ministry-greeting-ushers.webp" alt="A smiling greeter welcoming members of the congregation before worship" loading="lazy" width="1400" height="2100" style="object-position: center 20%;">
                         </div>
                     </div>
                     <div class="ministry-content">
                         <p class="ministry-subtitle">Ministry Team</p>
                         <h3>Greeting &amp; Ushers</h3>
-                        <p>To reflect Christ's hospitality by offering a warm welcome and orderly presence that helps every person encounter God in worship. Like the father in the parable of the Prodigal Son, greeters and ushers actively welcome and ensure everyone who walks through our doors feels seen and valued.</p>
+                        <p>To reflect Christ's hospitality by offering a warm welcome and orderly presence that helps every person, from the parking lot to the sanctuary, encounter God in worship. Like the father in the parable of the Prodigal Son, greeters and ushers actively welcome and ensure everyone who walks through our doors feels seen and valued.</p>
                     </div>
                 </div>
 
                 <!-- 2. Altar Guild — Image Right -->
                 <div class="ministry-row reverse animate">
                     <div class="ministry-image">
-                        <div class="image-placeholder">
-                            <span class="placeholder-icon">&#9962;</span>
-                            <span>Altar Guild Photo</span>
+                        <div class="image-placeholder has-image">
+                            <img src="images/ministry-altar-guild.webp" alt="A church altar prepared with candles, flowers, and a cross" loading="lazy" width="1400" height="856">
                         </div>
                     </div>
                     <div class="ministry-content">
@@ -280,9 +280,8 @@
                 <!-- 3. Communion — Image Left -->
                 <div class="ministry-row animate">
                     <div class="ministry-image">
-                        <div class="image-placeholder">
-                            <span class="placeholder-icon">&#127839;</span>
-                            <span>Communion Photo</span>
+                        <div class="image-placeholder has-image">
+                            <img src="images/ministry-communion.webp" alt="A silver chalice and paten with communion wafers prepared for the Eucharist" loading="lazy" width="1400" height="933">
                         </div>
                     </div>
                     <div class="ministry-content">
@@ -295,9 +294,8 @@
                 <!-- 4. Lay Readers — Image Right -->
                 <div class="ministry-row reverse animate">
                     <div class="ministry-image">
-                        <div class="image-placeholder">
-                            <span class="placeholder-icon">&#128214;</span>
-                            <span>Lay Readers Photo</span>
+                        <div class="image-placeholder has-image">
+                            <img src="images/ministry-lay-readers.webp" alt="Hands holding an open Bible at a lectern during a reading" loading="lazy" width="1400" height="935">
                         </div>
                     </div>
                     <div class="ministry-content">
@@ -313,9 +311,8 @@
                 <!-- 5. Nursery — Image Left -->
                 <div class="ministry-row animate">
                     <div class="ministry-image">
-                        <div class="image-placeholder">
-                            <span class="placeholder-icon">&#128118;</span>
-                            <span>Nursery Photo</span>
+                        <div class="image-placeholder has-image">
+                            <img src="images/ministry-nursery.webp" alt="A caregiver playing warmly with children in the nursery" loading="lazy" width="1400" height="2097" style="object-position: center 35%;">
                         </div>
                     </div>
                     <div class="ministry-content">
@@ -328,9 +325,8 @@
                 <!-- 6. Musical Worship — Image Right -->
                 <div class="ministry-row reverse animate">
                     <div class="ministry-image">
-                        <div class="image-placeholder">
-                            <span class="placeholder-icon">&#127925;</span>
-                            <span>Musical Worship Photo</span>
+                        <div class="image-placeholder has-image">
+                            <img src="images/ministry-musical-worship.webp" alt="A Bible resting beside an acoustic guitar in warm natural light" loading="lazy" width="1400" height="787">
                         </div>
                     </div>
                     <div class="ministry-content">
@@ -346,9 +342,8 @@
                 <!-- 7. Technology — Image Left -->
                 <div class="ministry-row animate">
                     <div class="ministry-image">
-                        <div class="image-placeholder">
-                            <span class="placeholder-icon">&#128187;</span>
-                            <span>Technology Team Photo</span>
+                        <div class="image-placeholder has-image">
+                            <img src="images/ministry-technology.webp" alt="Close-up of an audio mixing board used for worship sound" loading="lazy" width="1400" height="1050">
                         </div>
                     </div>
                     <div class="ministry-content">
@@ -361,6 +356,23 @@
                     </div>
                 </div>
 
+
+                <!-- 8. Safety — Image Right -->
+                <div class="ministry-row reverse animate">
+                    <div class="ministry-image">
+                        <div class="image-placeholder has-image">
+                            <img src="images/ministry-safety.webp" alt="A peaceful, illuminated church at night" loading="lazy" width="1400" height="2100" style="object-position: center 65%;">
+                        </div>
+                    </div>
+                    <div class="ministry-content">
+                        <p class="ministry-subtitle">Ministry Team</p>
+                        <h3>Safety</h3>
+                        <p>To provide a safe and secure environment for worship, allowing the congregation to gather in peace while caring for the well-being of all who enter. Safety Team members serve as protective watchmen &mdash; trained to handle emergencies and safeguard our clergy, congregation, and church family so that worship can continue undisturbed.</p>
+                        <div class="ministry-quote">
+                            <p>&ldquo;We prayed to our God and posted a guard day and night to meet this threat.&rdquo;<span class="quote-ref">&mdash; Nehemiah 4:9</span></p>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- CTA inline -->
                 <div class="animate" style="text-align: center; padding: 60px 0 0;">
