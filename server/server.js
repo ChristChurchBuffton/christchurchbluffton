@@ -8,8 +8,8 @@ const PORT = 3002;
 // Middleware
 app.use(express.json());
 
-// Serve static files from src/primary/
-const staticRoot = path.join(__dirname, '..', 'src', 'primary');
+// Serve static files from src/
+const staticRoot = path.join(__dirname, '..', 'src');
 app.use(express.static(staticRoot));
 
 // --- Breeze API helper ---
@@ -21,7 +21,8 @@ async function breezeRequest(endpoint, params) {
 
   const res = await fetch(url.toString(), {
     method: 'GET',
-    headers: { 'Content-Type': 'application/json', 'Api-Key': process.env.BREEZE_API_KEY }
+    headers: { 'Content-Type': 'application/json', 'Api-Key': process.env.BREEZE_API_KEY },
+    signal: AbortSignal.timeout(10000)
   });
 
   if (!res.ok) {
@@ -94,22 +95,6 @@ app.post('/api/prayer', async (req, res) => {
 
     if (!prayer) {
       return res.status(400).json({ error: 'Prayer text is required.' });
-    }
-
-    if (name && name.trim()) {
-      // Named prayer — add to Breeze
-      const trimmed = name.trim();
-      const spaceIdx = trimmed.indexOf(' ');
-      const first = spaceIdx > 0 ? trimmed.substring(0, spaceIdx) : trimmed;
-      const last = spaceIdx > 0 ? trimmed.substring(spaceIdx + 1) : '';
-
-      const person = await addPerson(first, last, null, null);
-      console.log('[Prayer] Added person:', person.id, '-', first, last);
-
-      await assignTag(person.id, process.env.BREEZE_TAG_PRAYER);
-      console.log('[Prayer] Assigned tag Prayer Request to', person.id);
-    } else {
-      console.log('[Prayer] Anonymous prayer — no Breeze entry');
     }
 
     // Log notification

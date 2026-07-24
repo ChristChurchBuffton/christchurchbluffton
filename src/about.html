@@ -228,21 +228,6 @@
             object-fit: cover;
             min-height: 350px;
         }
-        .image-placeholder {
-            background: linear-gradient(135deg, var(--light-gray) 0%, var(--lightest-gray) 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            min-height: 350px;
-            color: #777;
-            border: 2px dashed var(--light-gray);
-        }
-        .placeholder-icon {
-            font-size: 4rem;
-            opacity: 0.5;
-        }
         .visual-accent {
             position: absolute;
             bottom: -20px; right: -20px;
@@ -403,10 +388,6 @@
             object-fit: cover;
             object-position: center top;
             min-height: 500px;
-        }
-        .pastor-placeholder .placeholder-icon {
-            font-size: 4rem;
-            opacity: 0.5;
         }
         .frame-accent {
             position: absolute;
@@ -791,6 +772,7 @@
     <!-- Prayer FAB (loaded from includes/prayer-fab.html) -->
     <div id="site-prayer"></div>
 
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script src="js/components.js"></script>
 </body>
 </html>

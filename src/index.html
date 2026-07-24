@@ -410,21 +410,6 @@
             object-fit: cover;
             min-height: 350px;
         }
-        .image-placeholder {
-            background: linear-gradient(135deg, var(--light-gray) 0%, var(--lightest-gray) 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            min-height: 350px;
-            color: #777;
-            border: 2px dashed var(--light-gray);
-        }
-        .placeholder-icon {
-            font-size: 4rem;
-            opacity: 0.5;
-        }
         .visual-accent {
             position: absolute;
             bottom: -20px; right: -20px;
@@ -512,34 +497,10 @@
         .vision-card:hover .vision-card-img img {
             transform: scale(1.05);
         }
-        .vision-card-img .image-placeholder {
-            height: 100%;
-            min-height: 0;
-            border-radius: 0;
-            border: none;
-            border-bottom: 2px dashed var(--light-gray);
-        }
         .vision-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 20px 60px rgba(48, 59, 106, 0.2);
             border-color: var(--gold);
-        }
-        .vision-card-body {
-            padding: 30px 40px 40px;
-        }
-        .vision-card-img {
-            width: 100%;
-            height: 200px;
-            overflow: hidden;
-        }
-        .vision-card-img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-        .vision-card:hover .vision-card-img img {
-            transform: scale(1.05);
         }
         .vision-card .card-icon {
             width: 70px; height: 70px;
@@ -827,7 +788,7 @@
             <div class="hero-info-bar animate">
                 <div class="hero-info-item">
                     <span class="hero-info-label">Join Us</span>
-                    <span class="hero-info-value">Weekly Schedule Coming Soon</span>
+                    <span class="hero-info-value">Saturdays at 5:30 PM</span>
                 </div>
                 <a href="/join-us" class="btn btn-primary">Plan Your Visit</a>
             </div>
@@ -1018,6 +979,7 @@
             setTimeout(hideLoader, minTime);
         })();
     </script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script src="js/components.js"></script>
 </body>
 </html>

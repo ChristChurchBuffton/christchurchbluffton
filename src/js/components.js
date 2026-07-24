@@ -13,21 +13,6 @@
     targets.forEach(function(el) { observer.observe(el); });
 })();
 
-// Scroll animations via Intersection Observer
-(function() {
-    var targets = document.querySelectorAll('.animate');
-    if (!targets.length) return;
-    var observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.1 });
-    targets.forEach(function(el) { observer.observe(el); });
-})();
-
 // Load shared components (header, footer, prayer FAB)
 (function() {
     function loadComponent(id, file, callback) {
@@ -39,7 +24,8 @@
                 el.innerHTML = html;
                 el.classList.add('loaded');
                 if (callback) callback();
-            });
+            })
+            .catch(function(err) { console.error('[Components] Failed to load ' + file + ':', err); });
     }
 
     // Load header + mobile menu handler
@@ -94,10 +80,13 @@
             btn.textContent = 'Sending...';
             btn.disabled = true;
 
+            var token = '';
+            try { token = turnstile.getResponse(form.querySelector('.cf-turnstile')); } catch (err) {}
+
             fetch('/api/stay-updated', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: form.email.value })
+                body: JSON.stringify({ email: form.email.value, website_url_confirm: hp ? hp.value : '', turnstileToken: token })
             })
             .then(function(res) {
                 if (res.ok) {
@@ -110,12 +99,14 @@
                 } else {
                     btn.textContent = 'Subscribe';
                     btn.disabled = false;
+                    try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
                     alert('Something went wrong. Please try again.');
                 }
             })
             .catch(function() {
                 btn.textContent = 'Subscribe';
                 btn.disabled = false;
+                try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
                 alert('Something went wrong. Please try again.');
             });
         });
@@ -163,12 +154,17 @@
             btn.textContent = 'Sending...';
             btn.disabled = true;
 
+            var token = '';
+            try { token = turnstile.getResponse(form.querySelector('.cf-turnstile')); } catch (err) {}
+
             fetch('/api/prayer', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: form.querySelector('[name="name"]').value || 'Anonymous',
-                    prayer: form.querySelector('[name="prayer"]').value
+                    prayer: form.querySelector('[name="prayer"]').value,
+                    website_url_confirm: hp ? hp.value : '',
+                    turnstileToken: token
                 })
             })
             .then(function(res) {
@@ -178,12 +174,14 @@
                 } else {
                     btn.textContent = 'Submit Prayer';
                     btn.disabled = false;
+                    try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
                     alert('Something went wrong. Please try again or email us directly.');
                 }
             })
             .catch(function() {
                 btn.textContent = 'Submit Prayer';
                 btn.disabled = false;
+                try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
                 alert('Something went wrong. Please try again or email us directly.');
             });
         });

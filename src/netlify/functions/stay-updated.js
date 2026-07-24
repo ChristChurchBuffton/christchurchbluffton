@@ -1,3 +1,14 @@
+async function verifyTurnstile(token) {
+  const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ secret: process.env.TURNSTILE_SECRET_KEY_INVISIBLE, response: token }),
+    signal: AbortSignal.timeout(10000)
+  });
+  const data = await res.json();
+  return data.success;
+}
+
 async function breezeRequest(endpoint, params) {
   const url = new URL(endpoint, process.env.BREEZE_URL + '/');
   Object.entries(params).forEach(([k, v]) => {
@@ -5,7 +16,8 @@ async function breezeRequest(endpoint, params) {
   });
   const res = await fetch(url.toString(), {
     method: 'GET',
-    headers: { 'Content-Type': 'application/json', 'Api-Key': process.env.BREEZE_API_KEY }
+    headers: { 'Content-Type': 'application/json', 'Api-Key': process.env.BREEZE_API_KEY },
+    signal: AbortSignal.timeout(10000)
   });
   if (!res.ok) throw new Error(`Breeze API ${res.status}: ${await res.text()}`);
   const text = await res.text();
@@ -19,29 +31,38 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { email, website_url_confirm } = JSON.parse(event.body);
+    const { email, website_url_confirm, turnstileToken } = JSON.parse(event.body);
 
     // Honeypot — bots fill this hidden field, real users don't
     if (website_url_confirm) {
       return { statusCode: 200, body: JSON.stringify({ success: true }) };
     }
 
-    if (!email) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'Email is required.' }) };
+    // Cloudflare Turnstile verification
+    if (!turnstileToken || !(await verifyTurnstile(turnstileToken))) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'CAPTCHA verification failed. Please try again.' }) };
+    }
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'A valid email is required.' }) };
     }
 
     const prefix = email.split('@')[0];
     const first = prefix.charAt(0).toUpperCase() + prefix.slice(1);
     const last = '(Stay Updated)';
 
-    // Add person to Breeze
-    const fields = [
-      { field_id: process.env.BREEZE_EMAIL_FIELD_ID, field_type: 'email', response: true, details: { address: email } }
-    ];
-    const person = await breezeRequest('people/add', { first, last, fields_json: JSON.stringify(fields) });
+    // Add person to Breeze — failure here shouldn't stop the staff notification email below
+    try {
+      const fields = [
+        { field_id: process.env.BREEZE_EMAIL_FIELD_ID, field_type: 'email', response: true, details: { address: email } }
+      ];
+      const person = await breezeRequest('people/add', { first, last, fields_json: JSON.stringify(fields) });
 
-    // Assign "Stay Updated" tag
-    await breezeRequest('tags/assign', { person_id: person.id, tag_id: process.env.BREEZE_TAG_STAYUPDATED });
+      // Assign "Stay Updated" tag
+      await breezeRequest('tags/assign', { person_id: person.id, tag_id: process.env.BREEZE_TAG_STAYUPDATED });
+    } catch (breezeErr) {
+      console.error('[Stay Updated] Breeze error:', breezeErr.message);
+    }
 
     // Send email notification via Resend
     if (process.env.RESEND_API_KEY) {
@@ -53,7 +74,8 @@ exports.handler = async (event) => {
           to: ['admin@christchurchbluffton.org'],
           subject: `New Stay Updated Signup — ${email}`,
           text: `New stay updated signup:\n\nEmail: ${email}`
-        })
+        }),
+        signal: AbortSignal.timeout(10000)
       });
     }
 

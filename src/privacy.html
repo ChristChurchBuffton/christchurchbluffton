@@ -50,7 +50,7 @@
             --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        html { scroll-behavior: smooth; }
+        html { scroll-behavior: smooth; overflow-x: clip; }
 
         body {
             font-family: var(--font-body);
@@ -186,6 +186,9 @@
                 <h3>Cookies</h3>
                 <p>This website may use cookies to enhance your browsing experience. You can control cookie settings through your browser preferences.</p>
 
+                <h3>Security &amp; Bot Protection</h3>
+                <p>To protect our contact, prayer request, and newsletter forms from spam and abuse, we use Cloudflare Turnstile, a security service that verifies visitors are human. Turnstile may run without any visible interaction. Please refer to <a href="https://www.cloudflare.com/turnstileprivacypolicy/" target="_blank" rel="noopener">Cloudflare's Turnstile Privacy Policy</a> for information on how it handles data.</p>
+
                 <h3>Third-Party Links</h3>
                 <p>Our website may contain links to external sites. We are not responsible for the privacy practices of third-party websites.</p>
 
@@ -214,6 +217,7 @@
     <div id="site-prayer"></div>
     <div id="site-footer"></div>
 
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script src="js/components.js"></script>
 </body>
 </html>

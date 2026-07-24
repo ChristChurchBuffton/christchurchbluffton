@@ -1,5 +1,18 @@
 # Christ Church Bluffton — TODO
 
+## Full Site Audit (2026-07-23/24) — all HTML/CSS/JS/serverless functions reviewed line-by-line via 3 parallel review passes
+- [x] **Security gap, fixed**: contact form had TWO Cloudflare Turnstile widgets rendering on one form (one force-hidden via `!important` CSS instead of just not existing) — `turnstile.getResponse()` was grabbing an unspecified widget's token, which risked failing CAPTCHA verification unpredictably. Removed the duplicate, kept one widget.
+- [x] **Security gap, fixed**: the honeypot anti-spam field was checked server-side in all 3 Netlify functions, but the client-side JS (contact.html, and the newsletter/prayer handlers in components.js) never actually included it in the POST payload — meaning the server-side honeypot check could never fire. Now wired through on all 3 forms.
+- [ ] **Security gap, NOT yet fixed — needs a decision**: the prayer request and newsletter signup forms (`prayer.js`, `stay-updated.js`) have no server-side Cloudflare Turnstile verification at all — only the client-side honeypot, which is trivially bypassed by posting directly to `/api/prayer` or `/api/stay-updated`. Both endpoints write to the real Breeze CRM and email real staff inboxes with zero bot-abuse protection beyond that honeypot. The contact form already has the correct pattern (`contact.js`'s `verifyTurnstile()`) to copy. Not done yet because it touches production form-handling + requires adding a Turnstile widget to `prayer-fab.html` and `footer.html`, and Turnstile is domain-locked so it can't be tested locally — wanted a green light before touching it live.
+- [x] Fixed a real path bug in the local dev server (`server/server.js`) — it pointed at `src/primary/`, which doesn't exist (would 500/404 everything on a fresh restart; the currently-running dev process just has the old correct path cached in memory from before a folder reorg). Fixed to `src/`.
+- [x] Fixed stale "Weekly Schedule Coming Soon" text in the homepage hero info bar — contradicted the site's own established Saturday 5:30 PM service time (now shows "Saturdays at 5:30 PM")
+- [ ] **Needs a content decision**: `join-us.html`'s "Upcoming Services" list shows one real date (Aug 1) followed by 3 literal "TBD / Date Coming Soon" placeholder rows. Since this is actually a recurring weekly service (not occasional dated events), a specific-date list may be the wrong format entirely — consider replacing with a simple "Every Saturday at 5:30 PM" statement instead of a date list that needs manual upkeep. Left as-is pending a decision, since it's a content/design call, not a pure bug.
+- [x] Removed several dead/duplicated CSS blocks found across shared.css and 5 pages (duplicate `.animate` scroll-animation rules in shared.css, duplicate `.vision-card-*` rules on index.html, unused `.image-placeholder`/`.placeholder-icon` leftover from before real photos replaced icon placeholders on index/about/join-us, redundant `.sr-only` redefinitions on give.html/contact.html that duplicated shared.css, split `html{}` rules consolidated)
+- [x] Removed a duplicate IntersectionObserver setup in `js/components.js` (the whole scroll-animation block was defined twice, byte-identical)
+- [x] Added a `.catch()` to `components.js`'s shared-component loader — previously a failed fetch of header/footer/prayer-fab silently left nav/footer missing with only a console warning
+- [x] **Verified correct, not a bug**: confirmed groups.html already has real photos wired in for both Prayer Group and Youth Ministry sections — an earlier note in this file claiming those were still missing was stale/wrong, corrected below
+- [ ] Lower-priority findings not yet acted on: Breeze API failures can prevent the staff notification email from sending even though the email doesn't depend on Breeze succeeding (contact.js, stay-updated.js); no email-format validation on stay-updated.js or contact.js (truthy-only checks); no fetch timeouts on Resend/Breeze calls
+
 ## Backend / SEO Audit (2026-07-23)
 - [x] Fixed broken Google Maps embed on Join Us page — old `pb=` param had a fabricated place ID and truncated timestamp, replaced with a standard `?q=...&output=embed` URL (no API key needed)
 - [x] Fixed the actual root cause of the map staying broken live — CSP `frame-src` didn't allow `google.com`, so the iframe was silently blocked by the site's own security header even after the embed URL was fixed. Added `https://www.google.com` to `frame-src` in netlify.toml
@@ -13,8 +26,8 @@
 - [x] Added 8 scripture quotes to Serve page ministry cards that were missing one (Greeting & Ushers, Communion, Nursery) — matches the pull-quote style already used on the other 5 teams
 - [x] Mobile image optimization pass — found and fixed two images being served at raw ~4000px camera resolution with no downsizing (About's sanctuary photo 484KB→152KB, Home's congregation photo 912KB→216KB); everything else site-wide is already in the 1200-1600px range (appropriate for mobile retina) and lazy-loaded
 - [ ] **Optional next step, not yet done**: full `srcset`/`sizes` responsive rollout across all ~30 remaining images (currently only the homepage hero has a 2-size srcset). Not urgent — the real offenders were the two oversized originals above, now fixed — but would shave a bit more mobile data if wanted
-- [ ] Found but not removed (per no-delete-without-asking rule): `images/worship-welcome-screens.webp` (572KB) is not referenced anywhere in the site — orphaned, safe to delete once confirmed
-- [ ] Found but not wired in: `images/prayer-group-bible-study.webp` and `images/youth-group-fellowship-circle.webp` — downloaded earlier but never added to groups.html; still needed for the two remaining Photos Needed items below
+- [x] Moved 6 unused images out of `src/images/` (not deployed, gitignored) into `archive/unused-images/` since none were referenced anywhere in the site: `church-interior-1200.webp`, `church-interior-600.webp`, `worship-welcome-screens.webp`, `youth-group-bible-study-circle.webp`, `prayer-group-bible-study.webp`, `youth-group-fellowship-circle.webp`
+- [ ] `archive/unused-images/prayer-group-bible-study.webp` and `archive/unused-images/youth-group-fellowship-circle.webp` are downloaded/converted and ready — move back into `src/images/` and wire in when doing the two remaining Photos Needed items below
 
 ## Professional Polish Roadmap (from 2026-07-21 full visual scan, going one at a time)
 - [x] 1. Subtle texture in navy sections (stats bar, CTA pills, hero overlay, page-headers) — done 2026-07-21, dot-grid pattern (radial-gradient, 24px spacing, 6% white opacity) layered onto every navy background site-wide
@@ -50,8 +63,8 @@
 - [x] Join Us page — Book of Common Prayer image (liturgy section) — done 2026-07-21, AI-generated (Flux Dev via Leonardo.ai), `book-of-common-prayer.webp`
 - [x] Join Us page — worship music image (music section) — done 2026-07-21, AI-generated (Flux Dev via Leonardo.ai), `worship-piano-keys.webp`
 - [x] Groups page — Table 246 photo (`table-246-group.webp`) — added April 2026
-- [ ] Groups page — Prayer Group image — `images/prayer-group-bible-study.webp` already downloaded/converted but not yet wired into groups.html
-- [ ] Groups page — Youth Activities image — `images/youth-group-fellowship-circle.webp` already downloaded/converted but not yet wired into groups.html
+- [x] Groups page — Prayer Group image — CORRECTION 2026-07-23: this was already done, `prayer-group-saved-book.webp` is live on the page. The archived `prayer-group-bible-study.webp` is an unused alternate, not a gap.
+- [x] Groups page — Youth Activities image — CORRECTION 2026-07-23: this was already done, `youth-group-hands-prayer.webp` is live on the page. The archived `youth-group-fellowship-circle.webp` is an unused alternate, not a gap.
 - [x] Serve page — all 8 ministry team photos (Greeting & Ushers, Altar Guild, Communion, Lay Readers, Nursery, Musical Worship, Technology & Social Media, Safety) — done 2026-07-22/23
 
 ## Site Notes

@@ -2,7 +2,8 @@ async function verifyTurnstile(token) {
   const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ secret: process.env.TURNSTILE_SECRET_KEY, response: token })
+    body: JSON.stringify({ secret: process.env.TURNSTILE_SECRET_KEY, response: token }),
+    signal: AbortSignal.timeout(10000)
   });
   const data = await res.json();
   return data.success;
@@ -15,7 +16,8 @@ async function breezeRequest(endpoint, params) {
   });
   const res = await fetch(url.toString(), {
     method: 'GET',
-    headers: { 'Content-Type': 'application/json', 'Api-Key': process.env.BREEZE_API_KEY }
+    headers: { 'Content-Type': 'application/json', 'Api-Key': process.env.BREEZE_API_KEY },
+    signal: AbortSignal.timeout(10000)
   });
   if (!res.ok) throw new Error(`Breeze API ${res.status}: ${await res.text()}`);
   const text = await res.text();
@@ -45,19 +47,27 @@ exports.handler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: 'Full name, email, and interest are required.' }) };
     }
 
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'A valid email is required.' }) };
+    }
+
     const spaceIdx = fullName.trim().indexOf(' ');
     const first = spaceIdx > 0 ? fullName.trim().substring(0, spaceIdx) : fullName.trim();
     const last = spaceIdx > 0 ? fullName.trim().substring(spaceIdx + 1) : '';
 
-    // Add person to Breeze
-    const fields = [
-      { field_id: process.env.BREEZE_EMAIL_FIELD_ID, field_type: 'email', response: true, details: { address: email } },
-      ...(phone ? [{ field_id: process.env.BREEZE_PHONE_FIELD_ID, field_type: 'phone', response: true, details: { phone_mobile: phone } }] : [])
-    ];
-    const person = await breezeRequest('people/add', { first, last, fields_json: JSON.stringify(fields) });
+    // Add person to Breeze — failure here shouldn't stop the staff notification email below
+    try {
+      const fields = [
+        { field_id: process.env.BREEZE_EMAIL_FIELD_ID, field_type: 'email', response: true, details: { address: email } },
+        ...(phone ? [{ field_id: process.env.BREEZE_PHONE_FIELD_ID, field_type: 'phone', response: true, details: { phone_mobile: phone } }] : [])
+      ];
+      const person = await breezeRequest('people/add', { first, last, fields_json: JSON.stringify(fields) });
 
-    // Assign "Contact Form" tag
-    await breezeRequest('tags/assign', { person_id: person.id, tag_id: process.env.BREEZE_TAG_CONTACT });
+      // Assign "Contact Form" tag
+      await breezeRequest('tags/assign', { person_id: person.id, tag_id: process.env.BREEZE_TAG_CONTACT });
+    } catch (breezeErr) {
+      console.error('[Contact] Breeze error:', breezeErr.message);
+    }
 
     // Send email notification via Resend
     if (process.env.RESEND_API_KEY) {
@@ -69,7 +79,8 @@ exports.handler = async (event) => {
           to: ['admin@christchurchbluffton.org'],
           subject: `New Contact Form — ${fullName}`,
           text: `New contact form submission:\n\nName: ${fullName}\nEmail: ${email}\nPhone: ${phone || '(none)'}\nInterest: ${interest}\nMessage: ${message || '(none)'}`
-        })
+        }),
+        signal: AbortSignal.timeout(10000)
       });
     }
 

@@ -35,19 +35,6 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
-        }
-
         :root {
             --navy-blue: #303b6a;
             --gold: #c3a355;
@@ -393,11 +380,6 @@
             color: var(--navy-blue);
         }
 
-        /* ── Turnstile ── */
-        .cf-turnstile[data-size="compact"] {
-            display: none !important;
-        }
-
         /* ── Tablet ── */
         @media (max-width: 900px) {
             .contact-grid {
@@ -561,7 +543,6 @@
                             </div>
                             <input type="text" name="website_url_confirm" style="position:absolute;left:-9999px;" tabindex="-1" autocomplete="new-password">
                             <div class="cf-turnstile" data-sitekey="0x4AAAAAACneNwgE844_oOI-" data-size="flexible"></div>
-                            <div class="cf-turnstile" data-sitekey="0x4AAAAAACneNwgE844_oOI-" data-size="compact"></div>
                             <button type="submit" class="btn-submit">
                                 Send Message
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -612,9 +593,8 @@
             btn.textContent = 'Sending...';
             btn.disabled = true;
 
-            var turnstileResponse = document.querySelector('.cf-turnstile iframe');
             var token = '';
-            try { token = turnstile.getResponse(); } catch(e) {}
+            try { token = turnstile.getResponse(form.querySelector('.cf-turnstile')); } catch(e) {}
 
             var data = {
                 fullName: form.fullName.value,
@@ -622,6 +602,7 @@
                 phone: form.phone.value || '',
                 interest: form.interest.value,
                 message: form.message.value || '',
+                website_url_confirm: hp ? hp.value : '',
                 turnstileToken: token
             };
 
@@ -637,12 +618,14 @@
                 } else {
                     btn.textContent = 'Send Message';
                     btn.disabled = false;
+                    try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch(e) {}
                     alert('Something went wrong. Please try again or email us directly.');
                 }
             })
             .catch(function() {
                 btn.textContent = 'Send Message';
                 btn.disabled = false;
+                try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch(e) {}
                 alert('Something went wrong. Please try again or email us directly.');
             });
         });

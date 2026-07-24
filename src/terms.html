@@ -50,7 +50,7 @@
             --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        html { scroll-behavior: smooth; }
+        html { scroll-behavior: smooth; overflow-x: clip; }
 
         body {
             font-family: var(--font-body);
@@ -211,6 +211,7 @@
     <div id="site-prayer"></div>
     <div id="site-footer"></div>
 
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script src="js/components.js"></script>
 </body>
 </html>
