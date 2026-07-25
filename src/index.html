@@ -51,6 +51,7 @@
         "addressCountry": "US"
       },
       "email": "info@christchurchbluffton.org",
+      "areaServed": ["Bluffton, SC", "Okatie, SC", "Hardeeville, SC", "Hilton Head Island, SC", "Beaufort County, SC"],
       "nonprofitStatus": "https://schema.org/Nonprofit501c3",
       "openingHoursSpecification": {
         "@type": "OpeningHoursSpecification",
@@ -75,7 +76,8 @@
         :root {
             --navy-blue: #303b6a;
             --gold: #c3a355;
-            --gold-text: #8E7A3A;
+            --gold-text: #7F6D34;
+            --accent-terracotta: #B15A43;
             --white: #FFFFFF;
             --lightest-gray: #F5F4EF;
             --light-gray: #E2E0D8;
@@ -458,7 +460,7 @@
             border-radius: 16px;
         }
         .stat-item.special .stat-number { color: var(--navy-blue); }
-        .stat-item.special .stat-label { color: var(--navy-blue); opacity: 0.8; }
+        .stat-item.special .stat-label { color: #2B355F; }
 
         /* ── Vision Cards ── */
         .vision-cards {
@@ -506,8 +508,13 @@
             width: 70px; height: 70px;
             margin: 0 auto 25px;
             color: var(--gold);
+            transition: color 0.3s ease, transform 0.3s ease;
         }
         .vision-card .card-icon svg { width: 100%; height: 100%; }
+        .vision-card:hover .card-icon {
+            color: var(--navy-blue);
+            transform: translateY(-3px);
+        }
         .vision-card h3 {
             font-family: var(--font-heading);
             font-size: 1.5rem;
@@ -587,7 +594,7 @@
             font-size: 0.8125rem;
             font-weight: 400;
             letter-spacing: 1px;
-            background: var(--gold);
+            background: var(--accent-terracotta);
             color: var(--white);
             margin-bottom: 18px;
         }
@@ -700,6 +707,14 @@
                 margin: 0 auto;
             }
             .hero-buttons .btn { width: 100%; }
+            .hero-info-bar-wrap { padding: 16px 16px 0; }
+            .hero-info-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+                padding: 20px 24px;
+            }
+            .hero-info-bar .btn { width: 100%; }
             .vision-cards {
                 grid-template-columns: 1fr;
             }
@@ -788,7 +803,7 @@
             <div class="hero-info-bar animate">
                 <div class="hero-info-item">
                     <span class="hero-info-label">Join Us</span>
-                    <span class="hero-info-value">Saturdays at 5:30 PM</span>
+                    <span class="hero-info-value">Saturday, August 1 at 5:30 PM</span>
                 </div>
                 <a href="/join-us" class="btn btn-primary">Plan Your Visit</a>
             </div>
@@ -824,7 +839,7 @@
                     <div class="about-visual animate">
                         <div class="visual-card">
                             <div class="visual-image">
-                                <img src="images/congregation-packed-wide.webp" alt="Christ Church Bluffton congregation during worship service" loading="lazy" width="1600" height="1200" style="transform: scale(1.4); transform-origin: center center;">
+                                <img src="images/congregation-packed-wide.webp" srcset="images/congregation-packed-wide-800.webp 800w, images/congregation-packed-wide.webp 1600w" sizes="(max-width: 768px) 100vw, 50vw" alt="Christ Church Bluffton congregation during worship service" loading="lazy" width="1600" height="1200" style="transform: scale(1.4); transform-origin: center center;">
                             </div>
                             <div class="visual-accent"></div>
                         </div>
@@ -838,15 +853,15 @@
             <div class="container">
                 <div class="stats-grid">
                     <div class="stat-item animate">
-                        <span class="stat-number">85M+</span>
+                        <span class="stat-number" data-count="85" data-suffix="M+">0</span>
                         <span class="stat-label">Anglicans Worldwide</span>
                     </div>
                     <div class="stat-item animate animate-delay-1">
-                        <span class="stat-number">2000+</span>
+                        <span class="stat-number" data-count="2000" data-suffix="+">0</span>
                         <span class="stat-label">Years of Tradition</span>
                     </div>
                     <div class="stat-item animate animate-delay-2">
-                        <span class="stat-number">165</span>
+                        <span class="stat-number" data-count="165" data-suffix="">0</span>
                         <span class="stat-label">Countries Represented</span>
                     </div>
                     <div class="stat-item special animate animate-delay-3">
@@ -872,7 +887,7 @@
                 <div class="vision-cards">
                     <a href="/join-us" class="vision-card animate">
                         <div class="vision-card-img">
-                            <img src="images/worship-music-team.webp" alt="Worship music team at Christ Church Bluffton" loading="lazy" style="object-position: center calc(50% - 125px);">
+                            <img src="images/worship-music-team.webp" alt="Worship music team at Christ Church Bluffton" loading="lazy" width="481" height="621" style="object-position: center calc(50% - 125px);">
                         </div>
                         <div class="vision-card-body">
                             <div class="card-icon">
@@ -888,7 +903,7 @@
                     </a>
                     <a href="/groups" class="vision-card animate animate-delay-1">
                         <div class="vision-card-img">
-                            <img src="images/youth-group-outing.webp" alt="Youth group outing at Christ Church Bluffton" loading="lazy" style="object-position: center calc(50% - 20px);">
+                            <img src="images/youth-group-outing.webp" alt="Youth group outing at Christ Church Bluffton" loading="lazy" width="307" height="240" style="object-position: center calc(50% - 20px);">
                         </div>
                         <div class="vision-card-body">
                             <div class="card-icon">
@@ -906,7 +921,7 @@
                     </a>
                     <a href="/serve" class="vision-card animate animate-delay-2">
                         <div class="vision-card-img">
-                            <img src="images/fellowship-conversation.webp" alt="Fellowship and serving together at Christ Church Bluffton" loading="lazy">
+                            <img src="images/fellowship-conversation.webp" alt="Fellowship and serving together at Christ Church Bluffton" loading="lazy" width="480" height="561">
                         </div>
                         <div class="vision-card-body">
                             <div class="card-icon">
@@ -928,7 +943,7 @@
             <div class="container">
                 <div class="about-grid">
                     <div class="youth-spotlight-img animate">
-                        <img src="images/youth-group-hands-prayer.webp" alt="Teens holding hands in prayer together during worship" loading="lazy" width="1200" height="1800">
+                        <img src="images/youth-group-hands-prayer.webp" srcset="images/youth-group-hands-prayer-600.webp 600w, images/youth-group-hands-prayer.webp 1200w" sizes="(max-width: 768px) 100vw, 50vw" alt="Teens holding hands in prayer together during worship" loading="lazy" width="1200" height="1800">
                     </div>
                     <div class="about-content animate">
                         <span class="section-label">Next Generation</span>
@@ -981,5 +996,48 @@
     </script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script src="js/components.js"></script>
+    <script>
+        // Stat counter — counts up from 0 when scrolled into view
+        (function() {
+            var statNumbers = document.querySelectorAll('.stat-number[data-count]');
+            if (!statNumbers.length) return;
+
+            var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            function animateCount(el) {
+                var target = parseInt(el.getAttribute('data-count'), 10);
+                var suffix = el.getAttribute('data-suffix') || '';
+                if (reduceMotion) {
+                    el.textContent = target + suffix;
+                    return;
+                }
+                var duration = 1500;
+                var startTime = null;
+                function step(timestamp) {
+                    if (!startTime) startTime = timestamp;
+                    var progress = Math.min((timestamp - startTime) / duration, 1);
+                    var eased = 1 - Math.pow(1 - progress, 3);
+                    el.textContent = Math.floor(eased * target) + suffix;
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    } else {
+                        el.textContent = target + suffix;
+                    }
+                }
+                requestAnimationFrame(step);
+            }
+
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        animateCount(entry.target);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            statNumbers.forEach(function(el) { observer.observe(el); });
+        })();
+    </script>
 </body>
 </html>

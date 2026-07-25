@@ -1,8 +1,8 @@
 <div class="prayer-overlay" id="prayerOverlay"></div>
-<button class="prayer-fab" id="prayerFab" aria-label="Prayer Request">Prayer Request</button>
-<div class="prayer-popup" id="prayerPopup">
+<button class="prayer-fab" id="prayerFab" aria-label="Prayer Request" aria-expanded="false" aria-controls="prayerPopup">Prayer Request</button>
+<div class="prayer-popup" id="prayerPopup" role="dialog" aria-modal="true" aria-labelledby="prayerPopupTitle">
     <div class="prayer-popup-header">
-        <h4>Prayer Request</h4>
+        <h4 id="prayerPopupTitle">Prayer Request</h4>
         <button class="prayer-popup-close" id="prayerClose" aria-label="Close">&times;</button>
     </div>
     <div id="prayerFormBody">

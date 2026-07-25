@@ -28,6 +28,32 @@
             .catch(function(err) { console.error('[Components] Failed to load ' + file + ':', err); });
     }
 
+    // Returns focusable elements inside a container, in DOM order.
+    // Excludes anything with tabindex="-1" (e.g. the hidden honeypot field),
+    // which a plain OR'd selector would otherwise still match via its tag type.
+    function getFocusable(container) {
+        var all = container.querySelectorAll(
+            'a[href], button:not([disabled]), textarea, input:not([type="hidden"]), select, [tabindex]'
+        );
+        return Array.prototype.filter.call(all, function(el) { return el.tabIndex !== -1; });
+    }
+
+    // Keeps Tab/Shift+Tab cycling within `container` while it's open
+    function trapFocus(e, container) {
+        if (e.key !== 'Tab') return;
+        var focusable = getFocusable(container);
+        if (!focusable.length) return;
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+        }
+    }
+
     // Load header + mobile menu handler
     loadComponent('site-header', 'includes/header.html', function() {
         var hamburger = document.getElementById('hamburger');
@@ -37,26 +63,32 @@
 
         if (!hamburger) return;
 
+        function menuKeydown(e) {
+            if (e.key === 'Escape') { closeMenu(); return; }
+            trapFocus(e, mobileMenu);
+        }
+
         function openMenu() {
             mobileMenu.classList.add('active');
             mobileOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
+            hamburger.setAttribute('aria-expanded', 'true');
+            document.addEventListener('keydown', menuKeydown);
+            mobileClose.focus();
         }
 
         function closeMenu() {
             mobileMenu.classList.remove('active');
             mobileOverlay.classList.remove('active');
             document.body.style.overflow = '';
+            hamburger.setAttribute('aria-expanded', 'false');
+            document.removeEventListener('keydown', menuKeydown);
+            hamburger.focus();
         }
 
         hamburger.addEventListener('click', openMenu);
         mobileClose.addEventListener('click', closeMenu);
         mobileOverlay.addEventListener('click', closeMenu);
-
-        // Close on Escape
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && mobileMenu.classList.contains('active')) closeMenu();
-        });
 
         // Active nav link highlighting
         var path = window.location.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
@@ -120,13 +152,25 @@
         var closeBtn = document.getElementById('prayerClose');
         var form = document.getElementById('prayerForm');
 
+        function prayerKeydown(e) {
+            if (e.key === 'Escape') { closePrayer(); return; }
+            trapFocus(e, popup);
+        }
+
         function openPrayer() {
             popup.classList.add('active');
             overlay.classList.add('active');
+            fab.setAttribute('aria-expanded', 'true');
+            document.addEventListener('keydown', prayerKeydown);
+            var firstField = document.getElementById('prayerName');
+            if (firstField) firstField.focus();
         }
         function closePrayer() {
             popup.classList.remove('active');
             overlay.classList.remove('active');
+            fab.setAttribute('aria-expanded', 'false');
+            document.removeEventListener('keydown', prayerKeydown);
+            fab.focus();
         }
 
         fab.addEventListener('click', openPrayer);

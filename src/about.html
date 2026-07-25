@@ -38,7 +38,7 @@
         :root {
             --navy-blue: #303b6a;
             --gold: #c3a355;
-            --gold-text: #8E7A3A;
+            --gold-text: #7F6D34;
             --white: #FFFFFF;
             --lightest-gray: #F5F4EF;
             --light-gray: #E2E0D8;
@@ -315,6 +315,11 @@
             color: var(--gold);
             opacity: 0.3;
             margin-bottom: 15px;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .belief-card:hover .belief-number {
+            opacity: 1;
+            transform: translateY(-3px);
         }
         .belief-card h4 {
             font-family: var(--font-heading);
@@ -598,6 +603,7 @@
                         <h2 class="section-title left-align animate">Rooted in Tradition,<br>Growing in Grace</h2>
                         <p class="lead animate">To plant a reproducing Anglican church in Bluffton and beyond. A faith community shaped by Scripture, Prayer, and Sacramental Life, joining a Gospel movement that fosters personal conversion and authentic community where every person is known and valued. That our faithful Christian presence makes Bluffton a better and more hopeful place to live.</p>
                         <p class="animate">We are rooted in the historic Christian faith, grounded in the authority of Scripture, shaped by the ancient creeds, nourished by the sacraments, and guided by the wisdom of the historic Church.</p>
+                        <p class="animate">We are honored to welcome and serve families throughout Bluffton, Okatie, Hardeeville, Hilton Head Island, and the wider Beaufort County community.</p>
                         <div class="quote animate">
                             <span class="quote-icon">&ldquo;</span>
                             <p>For where two or three are gathered in my name, there am I among them. &mdash; Matthew 18:20</p>
@@ -606,7 +612,7 @@
                     <div class="about-visual animate animate-delay-1">
                         <div class="visual-card">
                             <div class="visual-image">
-                                <img src="images/sanctuary-behind-altar-wide.webp" alt="Sanctuary view from behind the altar at Christ Church Bluffton" loading="lazy" width="1600" height="900">
+                                <img src="images/sanctuary-behind-altar-wide.webp" srcset="images/sanctuary-behind-altar-wide-800.webp 800w, images/sanctuary-behind-altar-wide.webp 1600w" sizes="(max-width: 768px) 100vw, 50vw" alt="Sanctuary view from behind the altar at Christ Church Bluffton" loading="lazy" width="1600" height="900">
                             </div>
                             <div class="visual-accent"></div>
                         </div>
@@ -699,7 +705,7 @@
                     <div class="belief-card animate animate-delay-3">
                         <div class="belief-number">04</div>
                         <h4>Historic Episcopate</h4>
-                        <p>The historic episcopate, locally adapted, provides the continuity of apostolic leadership and governance that has been a hallmark of the Church since its earliest days.</p>
+                        <p>The historic episcopate, locally adapted, reflects the continuity of apostolic leadership that has been a hallmark of the Church since its earliest days.</p>
                     </div>
                 </div>
             </div>
