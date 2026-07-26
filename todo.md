@@ -88,7 +88,7 @@ Jonathan's production Netlify site (the real one, bound to `christchurchbluffton
 - [x] `js/components.js` — confirmed `window.scrollTo(0,0)` should NOT be present (removed 2026-04-21 to preserve scroll position on refresh); do not re-add
 
 ## Site Build — Remaining
-- [x] Update sitemap.xml with all new pages (about, join-us, groups, serve, give) — dates refreshed to 2026-07-23
+- [x] Update sitemap.xml with all new pages (about, join-us, groups, serve, give) — dates refreshed to 2026-08-01
 - [x] Update Google Maps embed on join-us page with real embed URL — done 2026-07-23, see Backend/SEO Audit above for the full fix (embed URL + CSP)
 - [x] Breakpoint/responsive QA pass across all pages — done 2026-07-20/22, all 10 pages clean at 375–1440px. Still need a true <375px phone check (tooling limit, not a known bug).
 - [x] Test all 3 forms on production URL — done 2026-07-24, prayer and newsletter both confirmed passing live with the new invisible Turnstile widget. Contact form's original widget was already proven live before today.
