@@ -1,6 +1,13 @@
 # Christ Church Bluffton — TODO
 
-## STATUS (2026-07-27): Awaiting a potential live push to the real domain. Client is on standby to cut `christchurchbluffton.org` over to Jonathan's Netlify site. See "Go-Live / Domain Cutover" below for what needs to happen at that moment.
+## STATUS (2026-07-27): ON STANDBY TO GO LIVE. Code/backend is fully confirmed launch-ready — client will trigger the actual domain cutover on their own timing. See "Go-Live / Domain Cutover" below for the exact checklist for that moment.
+
+## Deploy workflow clarified (2026-07-27)
+- Single git remote (`origin` → `ForgedDigital/christ-church-bluffton`) — confirmed via `git remote -v`, there is no second remote configured locally
+- Client's own git client shows a Windows Credential Manager account picker on push (3 cached identities: ForgedDigital, traditionsfieldclub, ChristChurchBuffton) — **selecting "Christ Church" there is the client's manual, deliberate live-deploy trigger**, done on their own machine/timing, not something exposed to Claude as a tool
+- Confirmed: every push made by Claude this whole project resolved automatically with the ForgedDigital credential, no picker ever appeared — Claude's pushes structurally cannot reach the live deploy path, only the testing site
+- Backend pre-launch review (2026-07-27) — confirmed clean: netlify.toml (build/redirects/headers), all 3 serverless functions (syntax valid), no hardcoded secrets in tracked files, `.env` properly gitignored, no debug/TODO leftovers, git fully synced with origin
+- [x] Found + fixed: unused root-level `package.json` (puppeteer dependency, unrelated to the deployed site) would have triggered an unnecessary `npm install` + Chromium download on every Netlify build — removed from the repo, backed up to sibling folder `Christ Church Bluffton - Root Files Backup/`
 
 ## Real Client Photos (2026-07-26/27)
 - [x] Reviewed 5 real photos from the church (not stock) found in Downloads — 2 are now in use, 3 archived for later
