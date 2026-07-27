@@ -1,5 +1,13 @@
 # Christ Church Bluffton — TODO
 
+## STATUS (2026-07-27): Awaiting a potential live push to the real domain. Client is on standby to cut `christchurchbluffton.org` over to Jonathan's Netlify site. See "Go-Live / Domain Cutover" below for what needs to happen at that moment.
+
+## Real Client Photos (2026-07-26/27)
+- [x] Reviewed 5 real photos from the church (not stock) found in Downloads — 2 are now in use, 3 archived for later
+- [x] Homepage "Worship" vision card — swapped the low-quality/cropped photo for the Bible+guitar photo already used on Serve page's Musical Worship section (same file, `ministry-musical-worship.webp`), for visual consistency and better quality
+- [x] Serve page "Greeting & Ushers" — replaced the stock Pexels handshake photo with a real photo of an actual greeter handing a bulletin to arriving members at Christ Church Bluffton (`ministry-greeting-ushers.webp`, re-shot at 1400x933 + 700x467 mobile), alt text updated to match
+- [x] Archived the 3 unused real photos (pastor preaching, staff team candid, greeters in fellowship hall, usher "Rob") into a new folder `Christ Church Bluffton - Client Photos/` (sibling to the project, outside git) in case needed for future updates — originals also still sit in `Downloads/`, untouched
+
 ## Go-Live / Domain Cutover — NOT TRACKED ANYWHERE ELSE, added 2026-07-24 on review
 Jonathan's production Netlify site (the real one, bound to `christchurchbluffton.org`) is confirmed not live yet — nothing in this file actually covers switching the real domain over to it. Flagging as genuinely missing rather than guessing specifics:
 - [ ] Confirm what `christchurchbluffton.org` currently points to today (existing old site? nothing? a placeholder?) before cutover, so nothing gets lost
