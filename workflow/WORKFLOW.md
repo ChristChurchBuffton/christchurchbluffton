@@ -153,8 +153,16 @@
 - [x] Photo recovery 2026-07-21 — discovered `https://christchurch-bluffton.netlify.app/` (live preview) has real photos that never made it into this repo's git history (confirmed via `git log`, stops at `fcf2613`). Downloaded 8 images from the live site into `src/images/` and wired them into index.html, about.html, join-us.html, groups.html — homepage mission photo, homepage vision cards (new markup added, didn't exist locally before), About mission + pastor photo, Join Us "What to Expect" photo, Groups Table 246 photo. 4 photos remain genuine placeholders (Join Us: Book of Common Prayer + Worship Music; Groups: Prayer Group + Youth Activities) — confirmed no photo exists anywhere for these, including live.
 - [ ] **Awaiting further content/comm from Rev. Riddle** — remaining full content review still outstanding (project currently blocked on this).
 
-## Phase 7: Front-End Visual Pass (planned, not started)
-> Heads-up given by user 2026-07-21: next working session will be a front-end inspection/changes pass — colors, fonts, general visual polish. Not yet begun.
+## Phase 7: Front-End Visual Pass, Full Audit & Launch Standby (2026-07-21 → 2026-07-27) ✅ COMPLETE
+> Heads-up given by user 2026-07-21 kicked off a front-end visual pass that grew into a full multi-day security/SEO/accessibility audit and Anglican rebrand. Full itemized detail lives in `todo.md`; this is the condensed phase summary.
+
+- [x] **Visual polish roadmap** (2026-07-21) — navy section texture, gold section-divider accents, consistent photo shadow/border-radius treatment, animated stat counters, hover treatments, one supporting accent color (terracotta, later removed — see rebrand below)
+- [x] **Full site audit** (2026-07-23/24) — 3 parallel review passes across all HTML/CSS/JS/serverless functions. Fixed real security gaps (duplicate Turnstile widget, non-functional honeypot wiring, missing CAPTCHA on prayer/newsletter forms), dead code cleanup, broken Google Maps embed (root cause was a CSP `frame-src` block), stale cache headers, full responsive `srcset` rollout
+- [x] **Backend/SEO audit** (2026-07-23) — meta tag standardization, dedicated OG images per page, structured data service hours, image compression pass, unused image cleanup
+- [x] **Real client photos** (2026-07-26/27) — sourced and placed real (non-stock) photos for Worship vision card and Greeting & Ushers card
+- [x] **Anglican rebrand** (2026-07-27, commit `909e952`) — "Anglican" removed sitewide per client request; legal pages, homepage stats, youth sections all updated; found/fixed a leftover visual bug on Join Us liturgy cards along the way
+- [x] **Team feedback + badge polish** (2026-07-27, commit `b1be370`) — Prayer Groups marked "Coming Soon" instead of describing an unlaunched ministry as active, new Refreshments & Hospitality ministry card added, and all three "Coming Soon" badges across the site fixed for consistent color/style/spacing (see `todo.md` for full detail)
+- [x] **STATUS as of 2026-07-27**: site is ON STANDBY TO GO LIVE — code/backend fully confirmed launch-ready, client will trigger the domain cutover on their own timing (see `todo.md` "Go-Live / Domain Cutover" checklist)
 
 ---
 

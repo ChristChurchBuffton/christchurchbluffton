@@ -2,6 +2,14 @@
 
 ## STATUS (2026-07-27): ON STANDBY TO GO LIVE. Code/backend is fully confirmed launch-ready — client will trigger the actual domain cutover on their own timing. See "Go-Live / Domain Cutover" below for the exact checklist for that moment.
 
+## Team feedback (2026-07-27) — pushed to testing site, commit `b1be370`
+Team (Karen/Judy et al.) sent 3 pieces of feedback after reviewing the site. Response logged in full at `comm/client/2026-07-27-team-feedback-table246-prayer-refreshments.md`.
+- [x] **Table 246 photo** — flagged as actually being from a discontinued coffee gathering, not a real Table 246 group. Decision: leave in place for now (no change made) until Karen/Judy can supply a real photo. See correction note under Photos Needed below.
+- [x] **Prayer ministry listed too early** — ministry hasn't launched yet (pending Jonathan meeting with Pastoral Care teams), but the Groups page "Prayer Groups" section described it in present tense as already meeting with an active prayer chain. Rewrote to planning-stage language, added the same gold "Coming Soon" badge/pattern used for Youth Ministry, and changed the CTA from "Join in Prayer" to "Let Us Know You're Interested."
+- [x] **Refreshments volunteers needed** — added a new 9th ministry card on the Serve page, "Refreshments & Hospitality," noting volunteers are needed for post-service cookies and lemonade. New photo sourced (free-licensed, Unsplash) and processed to match the other 8 cards (`ministry-refreshments.webp` / `-700.webp`).
+- [x] **Bonus fix from user review**: homepage Youth Ministry spotlight badge was using an orphaned `--accent-terracotta` (red) color instead of gold, inconsistent with the two Groups-page badges — fixed to gold.
+- [x] **Bonus polish from user review**: all three "Coming Soon" badges (homepage Youth spotlight, Groups Youth Ministry, Groups Prayer Groups) made bolder/bigger/uppercase with a soft gold glow, and their surrounding spacing was found to be wildly inconsistent (40px/15px/4px above, 20px/60px/18px below across the three) due to stacked/leftover margins — standardized to consistent, deliberate spacing (15px above for the two divider-based badges, ~16px for the homepage inline one; 24px below on all three) via a scoped `#youth-ministry .section-header` override rather than touching the sitewide `.section-header` class.
+
 ## Anglican rebrand (2026-07-27) — pushed live to testing site, commit `909e952`
 Client requested "Anglican" be removed from the site entirely (denomination is stepping back from that label). Full scope:
 - [x] Removed "Anglican" from every page title, meta/OG/Twitter tag, JSON-LD schema (index.html + give.html), body copy, and the shared footer tagline/copyright — verified zero remaining matches across all of `src/` (every file type, not just HTML)
@@ -97,7 +105,7 @@ Jonathan's production Netlify site (the real one, bound to `christchurchbluffton
 - [x] Join Us page — worship service photo (`altar-service-helpers.webp`)
 - [x] Join Us page — Book of Common Prayer image (liturgy section) — done 2026-07-21, AI-generated (Flux Dev via Leonardo.ai), `book-of-common-prayer.webp`
 - [x] Join Us page — worship music image (music section) — done 2026-07-21, AI-generated (Flux Dev via Leonardo.ai), `worship-piano-keys.webp`
-- [x] Groups page — Table 246 photo (`table-246-group.webp`) — added April 2026
+- [ ] Groups page — Table 246 photo (`table-246-group.webp`) — added April 2026, but **flagged 2026-07-27 by the team as the wrong photo** (it's actually from a discontinued coffee gathering, not a real Table 246 group). Left in place for now; waiting on Karen or Judy to supply a real Table 246 photo.
 - [x] Groups page — Prayer Group image — CORRECTION 2026-07-23: this was already done, `prayer-group-saved-book.webp` is live on the page. The archived `prayer-group-bible-study.webp` is an unused alternate, not a gap.
 - [x] Groups page — Youth Activities image — CORRECTION 2026-07-23: this was already done, `youth-group-hands-prayer.webp` is live on the page. The archived `youth-group-fellowship-circle.webp` is an unused alternate, not a gap.
 - [x] Serve page — all 8 ministry team photos (Greeting & Ushers, Altar Guild, Communion, Lay Readers, Nursery, Musical Worship, Technology & Social Media, Safety) — done 2026-07-22/23
