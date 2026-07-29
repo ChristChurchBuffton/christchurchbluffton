@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Christ Church Bluffton — Coming Soon</title>
+<meta property="og:title" content="Christ Church Bluffton">
+<meta property="og:description" content="Our new website launches soon.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://christchurchbluffton.org/images/og-image.png">
+<meta property="og:url" content="https://christchurchbluffton.org/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://christchurchbluffton.org/images/og-image.png">
+<style>
+  :root {
+    --navy: #303b6a;
+    --gold: #c3a355;
+    --gold-text: #7F6D34;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fdfcf9;
+    font-family: Georgia, 'Times New Roman', serif;
+    color: var(--navy);
+    padding: 24px;
+  }
+  .card {
+    width: 100%;
+    max-width: 560px;
+    text-align: center;
+  }
+  .logo {
+    width: 180px;
+    max-width: 60%;
+    height: auto;
+    margin: 0 auto 32px;
+    display: block;
+  }
+  h1 {
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: var(--navy);
+  }
+  .divider {
+    width: 64px;
+    height: 2px;
+    background: var(--gold);
+    margin: 18px auto;
+  }
+  .subtitle {
+    font-size: 1.05rem;
+    color: var(--gold-text);
+    font-style: italic;
+    margin-bottom: 36px;
+  }
+  .countdown {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+  }
+  .unit {
+    background: var(--navy);
+    color: #fff;
+    border-radius: 8px;
+    padding: 14px 10px;
+    min-width: 74px;
+  }
+  .unit .num {
+    font-size: clamp(1.5rem, 6vw, 2.1rem);
+    font-weight: 700;
+    line-height: 1;
+    font-family: Georgia, serif;
+  }
+  .unit .label {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-top: 6px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  .live-message {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--gold-text);
+  }
+  .scripture {
+    font-style: italic;
+    color: var(--navy);
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+  .scripture-ref {
+    display: block;
+    margin-top: 10px;
+    font-style: normal;
+    color: var(--gold-text);
+    font-size: 0.85rem;
+    letter-spacing: 0.03em;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="logo" src="images/logo.png" alt="Christ Church Bluffton">
+    <h1>Coming Soon</h1>
+    <div class="divider"></div>
+    <p class="subtitle">Our new website launches soon</p>
+
+    <div id="countdown" class="countdown" aria-live="polite">
+      <div class="unit"><span class="num" id="days">--</span><span class="label">Days</span></div>
+      <div class="unit"><span class="num" id="hours">--</span><span class="label">Hours</span></div>
+      <div class="unit"><span class="num" id="minutes">--</span><span class="label">Minutes</span></div>
+      <div class="unit"><span class="num" id="seconds">--</span><span class="label">Seconds</span></div>
+    </div>
+
+    <p class="scripture">&ldquo;And day by day, attending the temple together and breaking bread in their homes, they received their food with glad and generous hearts.&rdquo;<span class="scripture-ref">&mdash; Acts 2:46 (ESV)</span></p>
+  </div>
+
+<script>
+  // Aug 1, 2026, 9:00 AM Eastern (EDT, UTC-4)
+  var launchDate = new Date('2026-08-01T09:00:00-04:00').getTime();
+  var countdownEl = document.getElementById('countdown');
+
+  var timer = setInterval(function () {
+    var distance = launchDate - Date.now();
+
+    if (distance <= 0) {
+      clearInterval(timer);
+      countdownEl.innerHTML = '<p class="live-message">We\'re live! Refresh the page.</p>';
+      return;
+    }
+
+    var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    document.getElementById('days').textContent = days;
+    document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+    document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+    document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+  }, 1000);
+</script>
+</body>
+</html>
