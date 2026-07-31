@@ -221,7 +221,7 @@ textarea:focus-visible {
 .btn-give {
     font-family: var(--font-body);
     background-color: var(--gold);
-    color: var(--white);
+    color: var(--dark-gray);
     padding: 10px 28px;
     border-radius: 50px;
     font-size: 1rem;
@@ -239,7 +239,7 @@ textarea:focus-visible {
     font-family: var(--font-body);
     display: inline-block;
     background-color: var(--gold);
-    color: var(--white) !important;
+    color: var(--dark-gray) !important;
     padding: 12px 30px;
     border-radius: 4px;
     text-align: center;
@@ -413,7 +413,7 @@ textarea:focus-visible {
     font-weight: 400;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: var(--gold);
+    color: #c9ac66;
 }
 
 .footer-tagline {
@@ -459,7 +459,7 @@ textarea:focus-visible {
 .btn-give-footer {
     display: inline-block;
     background: var(--gold);
-    color: var(--white);
+    color: var(--dark-gray);
     padding: 12px 36px;
     border-radius: 50px;
     font-family: var(--font-body);
@@ -490,7 +490,7 @@ textarea:focus-visible {
     color: var(--gold);
 }
 
-.footer-column h4 {
+.footer-column h2 {
     font-family: var(--font-heading);
     color: var(--white);
     font-size: 0.875rem;
@@ -617,7 +617,7 @@ textarea:focus-visible {
     font-size: 0.875rem;
     font-weight: 400;
     background: transparent;
-    color: var(--gold);
+    color: #c9ac66;
     border: 2px solid var(--gold);
     border-radius: 50px;
     cursor: pointer;

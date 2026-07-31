@@ -4,19 +4,28 @@
 
 ## Pre-Launch Punch List (2026-07-31) — working one at a time before tomorrow's push
 Blocking:
-- [ ] 1. Commit + push today's uncommitted changes (index.html/join-us.html Aug 1 + Sept 5th schedule edits, 2 new fellowship-conversation images) to `origin` (ForgedDigital testing repo)
-- [ ] 2. Domain cutover checklist — confirm what `christchurchbluffton.org` DNS currently points to, confirm it gets pointed at Jonathan's production Netlify site, confirm SSL provisions correctly after the switch
-- [ ] 3. Remove the standalone Coming Soon page from the production repo (`ChristChurchBuffton/christchurchbluffton`) when the real site goes live there — separate repo/push from `origin`
-- [ ] 4. Confirm GA4 (`G-PTWWV0M0DX`) is actually receiving data once real traffic hits the production domain
-- [ ] 5. Submit/resubmit sitemap in Google Search Console once the production domain is live
+- [x] 1. Commit today's schedule changes (index.html/join-us.html Aug 1 + Sept 5th edits, todo update) — done, commit `82cddbb`, not yet pushed to `origin` per instruction (pushing after all steps done)
+- [x] 2. Domain cutover checklist — CHECKED 2026-07-31 LIVE: DNS already resolves `christchurchbluffton.org` + `www` to Netlify (75.2.60.5), SSL already valid (HTTPS 200, HSTS present). No DNS change needed — domain is already pointed at Jonathan's production Netlify site (it's currently serving the Coming Soon page). The actual go-live push itself is tracked separately now, see "Launch Day Walkthrough" below.
+- [x] 3. Confirm GA4 (`G-PTWWV0M0DX`) is receiving data — CHECKED 2026-07-31 LIVE in GA account: data stream correctly registered to `https://christchurchbluffton.org`, "Receiving traffic in past 48 hours," 1,264 views / 62 active users over last 28 days across all real pages (this is dev/testing-site traffic, not public — real site isn't live yet, tag will pick up real traffic automatically once pushed). ⚠️ Flagged: "Key events" shows 0.00 across all 28 days — no contact/prayer/newsletter form submission has ever fired a conversion event. Do one live test submission of each form right after launch to confirm they're wired up.
+- [x] 4. Sitemap resubmit + robots.txt fix — CHECKED 2026-07-31: both require the live push first (robots.txt on production currently `Disallow: /`, sitemap 404s). Moved to Launch Day Walkthrough steps 5-8, not a separate pre-launch action.
 
 Not blocking, but still open:
-- [ ] 6. Get pastor quote text from client, apply to about.html (client confirmed they have it 2026-07-24, text not yet delivered)
-- [ ] 7. Get church phone number from client, add site-wide (currently only a visitor-entry field on the contact form)
-- [ ] 8. Get real Table 246 photo from Karen/Judy (current photo is a discontinued coffee gathering, not Table 246)
-- [ ] 9. Cross-browser test (Firefox, Safari, Edge, real mobile)
-- [ ] 10. Lighthouse audit
-- [ ] 11. Color contrast (WCAG AA) review
+- [x] 5. Pastor quote — confirmed complete by client 2026-07-31, existing text on about.html is final
+- [x] 6. Table 246 photo — closed 2026-07-31 per client, more photos to come later, not a launch blocker
+- [x] 7. Cross-browser test — CLOSED 2026-07-31: Chrome/Edge covered (checked homepage + join-us at 375px/768px, both clean). Firefox low-risk, nothing exotic in the CSS. Safari — Kevin will check on his personal iPhone (no prior Safari-specific issues on this project historically), accepted as good enough, not blocking launch.
+- [x] 8. Lighthouse audit — DONE 2026-07-31 on homepage: Performance 70 (mostly local-dev-server artifacts — no gzip/caching/minification on `npx http-server`, will be better on real Netlify), Accessibility 90→96, Best Practices 96, SEO 92→100. Fixed same day: footer heading order (h4→h2, skipped h3), 3 honeypot fields missing `aria-hidden`, one generic "Learn More" link text. One `console.error` from Cloudflare Turnstile (code 110200 = domain not allowed) — expected on localhost since the sitekey is domain-locked to the real site, not a real bug.
+- [x] 9. Color contrast (WCAG AA) review — FIXED 2026-07-31, all 9 flagged issues: all 7 gold buttons sitewide (white→#333 dark charcoal, 5.23:1) — homepage hero buttons, Groups, Join Us, Serve, and all 3 "Give" buttons (header/mobile menu/footer); footer "BLUFFTON" text + newsletter Subscribe button (gold #c3a355→#c9ac66, 4.44:1→4.89:1). Verified live on every affected page.
+- [x] 9b. Gold "eyebrow" label text sitewide — FIXED 2026-07-31: `.page-label` (5 pages, navy header band, 5 instances) → `#c9ac66`, 4.44:1→4.89:1. `.section-label` (5 pages, light/white sections, 16 instances) → switched to existing `--gold-text` (#7F6D34, already used elsewhere for hover states, no new color introduced), 2.19-2.42:1→5.07:1 on white / 4.61:1 on lightest-gray. Verified live on Groups + Home. Full color-contrast pass (9+9b) now complete — 30 total instances fixed across the site.
+
+## Backend SEO Re-Review (2026-07-31, second pass after today's edits)
+- [x] Titles/meta descriptions/canonicals/OG tags — checked all 10 pages, all correct and within length limits. Two "mismatches" my script initially flagged were false positives (`&amp;` in `<title>` vs raw `&` in attribute content — same rendered text, both valid).
+- [x] JSON-LD structured data (index.html + give.html) — both still valid JSON, unaffected by today's edits.
+- [x] Sitemap.xml — all 9 real pages present, correct priorities, `lastmod` already set to 2026-08-01 (launch day). No changes needed, already launch-ready.
+- [x] robots.txt (in `src/`) — still correct (`Allow: /` + sitemap link), unaffected by today's edits.
+- [x] Internal links — crawled every `href` sitewide, all resolve to real pages, zero broken links.
+- [x] Image alt text — all 32 images sitewide have alt attributes.
+- [x] Heading order — **found + fixed 2 pre-existing issues** (not caused by today's button/color work): about.html's 4 belief cards (Scripture/Creeds/Sacraments/Historic Episcopate) were `h4` directly under an `h2`, skipping `h3` — bumped to `h3`. privacy.html + terms.html had all section headings as `h3` directly under `h1`, skipping `h2` — bumped to `h2`. All 9 pages now have exactly one H1 and zero heading-level skips.
+- [x] Re-ran Lighthouse on Home, About, Join Us, Privacy after fixes — all 4 now score **100/100 Accessibility, 100/100 SEO**.
 
 ## Team feedback (2026-07-27) — pushed to testing site, commit `b1be370`
 Team (Karen/Judy et al.) sent 3 pieces of feedback after reviewing the site. Response logged in full at `comm/client/2026-07-27-team-feedback-table246-prayer-refreshments.md`.
@@ -57,13 +66,25 @@ Discovered during pre-launch audit that `christchurchbluffton.org` was showing a
 - [x] Pushed directly to `ChristChurchBuffton/christchurchbluffton` (main) and confirmed live on the real domain — commits `994a79d` (page) and `03a742c` (OG image). Push worked cleanly with no credential picker/auth issue, contrary to the old assumption that Claude's pushes can't reach production — worth re-testing that assumption before the real cutover too.
 - [ ] **IMPORTANT — on the next (real launch) push**: this Coming Soon page must be removed/replaced, not left in the repo. Either delete `index.html`/`images/og-image.png`/`images/logo.png` from the production repo when pushing the real `src/` site over it, or archive the coming-soon files (e.g. copy to `archive/` or the local `coming-soon/` folder is already the source of truth) before overwriting. Do not let the countdown page linger post-launch.
 
-## Go-Live / Domain Cutover — NOT TRACKED ANYWHERE ELSE, added 2026-07-24 on review
-Jonathan's production Netlify site (the real one, bound to `christchurchbluffton.org`) is confirmed not live yet — nothing in this file actually covers switching the real domain over to it. Flagging as genuinely missing rather than guessing specifics:
-- [ ] Confirm what `christchurchbluffton.org` currently points to today (existing old site? nothing? a placeholder?) before cutover, so nothing gets lost
-- [ ] Confirm DNS is pointed at Jonathan's Netlify site when ready to go live (A/CNAME records via GoDaddy, per Account PWs doc)
-- [ ] Confirm SSL cert provisions correctly on the real domain once DNS is switched (Netlify auto-provisions, but only after DNS actually points there)
-- [ ] Confirm GA4 property (`G-PTWWV0M0DX`) is tracking correctly once traffic is real, not just the review-site's traffic
-- [ ] Decide/confirm a rollback plan if something breaks right after cutover
+## Launch Day Walkthrough — the actual go-live push (moved out of Pre-Launch Punch List 2026-07-31, do this last, step by step, confirm before each push)
+Pre-flight (already confirmed 2026-07-31, no action needed):
+- [x] `christchurchbluffton.org` DNS already points to the correct Netlify site (75.2.60.5) — no DNS change needed
+- [x] SSL already valid on the domain (HTTPS 200, HSTS present)
+- [x] `src/robots.txt` already correct (`Allow: /` + sitemap link) and `src/sitemap.xml` already valid — just need to actually reach production (see steps below)
+- [x] GA4 tag (`G-PTWWV0M0DX`) already in every page of `src/` and already confirmed sending data to the right property
+
+The push itself:
+1. [ ] Add the production repo as a git remote (e.g. `git remote add production https://github.com/ChristChurchBuffton/christchurchbluffton.git`) — `origin` only points at the testing repo
+2. [ ] Push local `main` (with today's commit `82cddbb` + anything after) to the production repo's `main` branch
+3. [ ] Confirm the push removed/overwrote the Coming Soon files (`index.html`, `images/og-image.png`, `images/logo.png`) — do not leave the countdown page live post-launch
+4. [ ] Load `https://christchurchbluffton.org` in a real browser (cache-busted) and click through all 10 pages to confirm the real site is live, not a stale cached Coming Soon page
+5. [ ] Verify `https://christchurchbluffton.org/robots.txt` now shows `Allow: /` (not the old `Disallow: /`)
+6. [ ] Verify `https://christchurchbluffton.org/sitemap.xml` now returns 200, not 404
+7. [ ] In GSC, manually resubmit `https://christchurchbluffton.org/sitemap.xml` (Sitemaps tab) rather than waiting on Google's own recrawl schedule
+8. [ ] In GSC, use URL Inspection → "Request Indexing" on the homepage and a couple of key pages (join-us, about) to speed up re-crawling now that robots.txt allows it
+9. [ ] Submit one real test through each of the 3 forms (contact, prayer request, newsletter) on the live domain and confirm: (a) the email arrives, (b) a GA4 Key Event fires — this has never been confirmed, GA4 currently shows 0 Key Events across 28 days of testing
+10. [ ] Confirm GA4 Realtime shows active users while doing the above (proves the tag is firing on the real domain, not just the testing site)
+11. [ ] Decide/confirm a rollback plan if something breaks right after cutover (e.g. revert the production repo to the Coming Soon commit)
 
 ## Full Site Audit (2026-07-23/24) — all HTML/CSS/JS/serverless functions reviewed line-by-line via 3 parallel review passes
 - [x] **Security gap, fixed**: contact form had TWO Cloudflare Turnstile widgets rendering on one form (one force-hidden via `!important` CSS instead of just not existing) — `turnstile.getResponse()` was grabbing an unspecified widget's token, which risked failing CAPTCHA verification unpredictably. Removed the duplicate, kept one widget.
