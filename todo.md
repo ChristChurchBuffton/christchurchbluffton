@@ -2,6 +2,22 @@
 
 ## STATUS (2026-07-27): ON STANDBY TO GO LIVE. Code/backend is fully confirmed launch-ready — client will trigger the actual domain cutover on their own timing. See "Go-Live / Domain Cutover" below for the exact checklist for that moment.
 
+## Pre-Launch Punch List (2026-07-31) — working one at a time before tomorrow's push
+Blocking:
+- [ ] 1. Commit + push today's uncommitted changes (index.html/join-us.html Aug 1 + Sept 5th schedule edits, 2 new fellowship-conversation images) to `origin` (ForgedDigital testing repo)
+- [ ] 2. Domain cutover checklist — confirm what `christchurchbluffton.org` DNS currently points to, confirm it gets pointed at Jonathan's production Netlify site, confirm SSL provisions correctly after the switch
+- [ ] 3. Remove the standalone Coming Soon page from the production repo (`ChristChurchBuffton/christchurchbluffton`) when the real site goes live there — separate repo/push from `origin`
+- [ ] 4. Confirm GA4 (`G-PTWWV0M0DX`) is actually receiving data once real traffic hits the production domain
+- [ ] 5. Submit/resubmit sitemap in Google Search Console once the production domain is live
+
+Not blocking, but still open:
+- [ ] 6. Get pastor quote text from client, apply to about.html (client confirmed they have it 2026-07-24, text not yet delivered)
+- [ ] 7. Get church phone number from client, add site-wide (currently only a visitor-entry field on the contact form)
+- [ ] 8. Get real Table 246 photo from Karen/Judy (current photo is a discontinued coffee gathering, not Table 246)
+- [ ] 9. Cross-browser test (Firefox, Safari, Edge, real mobile)
+- [ ] 10. Lighthouse audit
+- [ ] 11. Color contrast (WCAG AA) review
+
 ## Team feedback (2026-07-27) — pushed to testing site, commit `b1be370`
 Team (Karen/Judy et al.) sent 3 pieces of feedback after reviewing the site. Response logged in full at `comm/client/2026-07-27-team-feedback-table246-prayer-refreshments.md`.
 - [x] **Table 246 photo** — flagged as actually being from a discontinued coffee gathering, not a real Table 246 group. Decision: leave in place for now (no change made) until Karen/Judy can supply a real photo. See correction note under Photos Needed below.
