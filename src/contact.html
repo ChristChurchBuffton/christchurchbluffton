@@ -617,6 +617,7 @@
                     form.style.display = 'none';
                     document.getElementById('formSuccess').classList.add('show');
                     try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch(e) {}
+                    try { gtag('event', 'generate_lead', { form_name: 'contact_form' }); } catch(e) {}
                 } else {
                     btn.textContent = 'Send Message';
                     btn.disabled = false;

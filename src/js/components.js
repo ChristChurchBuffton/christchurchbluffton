@@ -125,6 +125,7 @@
                     btn.textContent = 'Subscribed!';
                     form.email.value = '';
                     try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
+                    try { gtag('event', 'generate_lead', { form_name: 'newsletter_signup' }); } catch (err) {}
                     setTimeout(function() {
                         btn.textContent = 'Subscribe';
                         btn.disabled = false;
@@ -217,6 +218,7 @@
                     document.getElementById('prayerFormBody').style.display = 'none';
                     document.getElementById('prayerSuccess').classList.add('active');
                     try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
+                    try { gtag('event', 'generate_lead', { form_name: 'prayer_request' }); } catch (err) {}
                 } else {
                     btn.textContent = 'Submit Prayer';
                     btn.disabled = false;
