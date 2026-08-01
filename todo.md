@@ -97,7 +97,7 @@ The push itself:
 8. [x] URL Inspection → Request Indexing — DONE 2026-08-01, all 9 real pages submitted by Kevin
 9. [x] All 3 forms tested live on production by Kevin directly — confirmed working (contact, newsletter, prayer)
 10. [x] GA4 Realtime confirmed active during today's automated + manual live testing
-11. [ ] Rollback plan — not formally decided, low priority now given site is stable and confirmed working
+11. [x] Rollback plan — DEFINED 2026-08-01: if a real problem shows up on production, revert to the last known-good commit with `git push production <commit-sha> --force` (from the `Christ Church Bluffton` project folder) — Netlify auto-redeploys within ~1 minute of any push to that repo. Known-good checkpoints: `565c7ab` (initial full-site launch, before today's contrast/GA4/Turnstile fixes) or `27b4067`/`3f54715` (today's fixes, current state). Only reverts code — any Breeze contacts or Resend emails already sent aren't undone by a rollback, which is expected/fine. Extreme fallback (site itself needs to come down again): revert to `03a742c`, the old Coming Soon page commit.
 
 ## Full Site Audit (2026-07-23/24) — all HTML/CSS/JS/serverless functions reviewed line-by-line via 3 parallel review passes
 - [x] **Security gap, fixed**: contact form had TWO Cloudflare Turnstile widgets rendering on one form (one force-hidden via `!important` CSS instead of just not existing) — `turnstile.getResponse()` was grabbing an unspecified widget's token, which risked failing CAPTCHA verification unpredictably. Removed the duplicate, kept one widget.
@@ -194,13 +194,13 @@ The push itself:
 - [ ] Cross-browser testing (Firefox, Safari, Edge, mobile)
 
 ## Post-Launch QA — reorganized 2026-07-24, categorized per client
-- [x] Verify Tithe.ly donation button/modal works on production — confirmed working 2026-07-24 per client
-- [ ] Google Analytics — verify data is actually flowing in
-- [ ] SSL verification — quick check, Netlify provisions this automatically but worth confirming
-- [ ] Google Search Console — re-submit sitemap with new pages
-- [ ] Lighthouse audit
-- [ ] Color contrast review (WCAG AA)
+- [x] Verify Tithe.ly donation button/modal works on production — confirmed working 2026-07-24 per client, re-confirmed live 2026-08-01
+- [x] Google Analytics — DONE 2026-08-01, confirmed flowing (see Launch Day Walkthrough)
+- [x] SSL verification — DONE 2026-08-01, confirmed valid
+- [x] Google Search Console — DONE 2026-08-01, sitemap resubmitted + all 9 pages Request Indexing by Kevin
+- [x] Lighthouse audit — DONE 2026-07-31/08-01, see Pre-Launch Punch List #8
+- [x] Color contrast review (WCAG AA) — DONE 2026-08-01, see Pre-Launch Punch List #9/9b + Post-Launch section
 
 ## Cleanup
 - [x] ~~Delete duplicate `Web Design/Christ Church Bluffton/` folder~~ — checked 2026-07-24, doesn't exist, already resolved previously
-- [x] Remove backup files from src/ — done 2026-07-24, all 16 `-previous.html/css/js/xml` files sent to the Windows Recycle Bin (not permanently deleted, none were git-tracked)
+- [x] Remove backup files from src/ — done 2026-07-24 (16 files to Recycle Bin). **Round 2, 2026-08-01**: today's editing session generated 16 more `-previous.*` files across `src/` — moved (not deleted) to `archive/src-backups-2026-08-01/`, preserving subfolder structure (`css/`, `images/`, `includes/`, `js/`). None were git-tracked (`*-previous.*` is gitignored), so this was a filesystem move only, no git action needed. `src/` confirmed clean of any `-previous.*` files.
