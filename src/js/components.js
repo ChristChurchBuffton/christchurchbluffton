@@ -103,6 +103,7 @@
     loadComponent('site-footer', 'includes/footer.html', function() {
         var form = document.getElementById('newsletterForm');
         if (!form) return;
+        if (window.renderTurnstile) renderTurnstile(form.querySelector('.cf-turnstile'));
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             var hp = form.querySelector('[name="website_url_confirm"]');
@@ -153,6 +154,8 @@
         var overlay = document.getElementById('prayerOverlay');
         var closeBtn = document.getElementById('prayerClose');
         var form = document.getElementById('prayerForm');
+
+        if (window.renderTurnstile) renderTurnstile(form.querySelector('.cf-turnstile'));
 
         function prayerKeydown(e) {
             if (e.key === 'Escape') { closePrayer(); return; }

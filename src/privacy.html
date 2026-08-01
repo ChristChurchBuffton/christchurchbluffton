@@ -223,7 +223,21 @@
     <div id="site-prayer"></div>
     <div id="site-footer"></div>
 
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script>
+            window.__turnstileReady = false;
+            window.__turnstileQueue = [];
+            window.turnstileOnLoad = function() {
+                window.__turnstileReady = true;
+                window.__turnstileQueue.forEach(function(el) { try { turnstile.render(el); } catch (e) {} });
+                window.__turnstileQueue = [];
+            };
+            window.renderTurnstile = function(el) {
+                if (!el) return;
+                if (window.__turnstileReady && window.turnstile) { try { turnstile.render(el); } catch (e) {} }
+                else { window.__turnstileQueue.push(el); }
+            };
+        </script>
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=turnstileOnLoad&render=explicit" async defer></script>
     <script src="js/components.js"></script>
 </body>
 </html>
