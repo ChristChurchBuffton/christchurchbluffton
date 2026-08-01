@@ -369,7 +369,7 @@
             font-family: var(--font-heading);
             font-size: 0.875rem;
             font-weight: 400;
-            color: var(--gold);
+            color: #c9ac66;
             text-decoration: none;
             letter-spacing: 1px;
             transition: all 0.3s ease;
@@ -616,6 +616,7 @@
                 if (res.ok) {
                     form.style.display = 'none';
                     document.getElementById('formSuccess').classList.add('show');
+                    try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch(e) {}
                 } else {
                     btn.textContent = 'Send Message';
                     btn.disabled = false;

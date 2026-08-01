@@ -124,6 +124,7 @@
                 if (res.ok) {
                     btn.textContent = 'Subscribed!';
                     form.email.value = '';
+                    try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
                     setTimeout(function() {
                         btn.textContent = 'Subscribe';
                         btn.disabled = false;
@@ -215,6 +216,7 @@
                 if (res.ok) {
                     document.getElementById('prayerFormBody').style.display = 'none';
                     document.getElementById('prayerSuccess').classList.add('active');
+                    try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
                 } else {
                     btn.textContent = 'Submit Prayer';
                     btn.disabled = false;
