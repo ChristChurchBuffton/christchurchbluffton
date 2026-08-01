@@ -77,7 +77,7 @@ Client requested "Anglican" be removed from the site entirely (denomination is s
 Discovered during pre-launch audit that `christchurchbluffton.org` was showing a bare "404 Not Found" placeholder (committed directly to the production repo `ChristChurchBuffton/christchurchbluffton` back in April, "Temporarily take down site — client request"). That repo has never had the finished site pushed to it — only an old early build, then the takedown commit.
 - [x] Built a standalone "Coming Soon" page (own folder `coming-soon/`, not part of `src/`) — logo, countdown to Saturday Aug 1 9:00 AM Eastern, Acts 2:46 (ESV) verse (same wording as the real site's About/Give/Groups pages), Open Graph image (logo only, `images/og-image.png`) for link previews
 - [x] Pushed directly to `ChristChurchBuffton/christchurchbluffton` (main) and confirmed live on the real domain — commits `994a79d` (page) and `03a742c` (OG image). Push worked cleanly with no credential picker/auth issue, contrary to the old assumption that Claude's pushes can't reach production — worth re-testing that assumption before the real cutover too.
-- [ ] **IMPORTANT — on the next (real launch) push**: this Coming Soon page must be removed/replaced, not left in the repo. Either delete `index.html`/`images/og-image.png`/`images/logo.png` from the production repo when pushing the real `src/` site over it, or archive the coming-soon files (e.g. copy to `archive/` or the local `coming-soon/` folder is already the source of truth) before overwriting. Do not let the countdown page linger post-launch.
+- [x] Coming Soon page fully overwritten by the 2026-08-01 production push (force-push replaced the entire repo history/files) — confirmed live title is the real site, not the countdown page.
 
 ## Launch Day Walkthrough — the actual go-live push (moved out of Pre-Launch Punch List 2026-07-31, do this last, step by step, confirm before each push)
 Pre-flight (already confirmed 2026-07-31, no action needed):
@@ -93,11 +93,11 @@ The push itself:
 4. [x] Confirmed real site live on all pages — DONE 2026-08-01: `/`, `/about`, `/join-us`, `/groups`, `/serve`, `/contact`, `/give`, `/privacy`, `/terms` all return 200
 5. [x] robots.txt fixed — DONE 2026-08-01: now shows `Allow: /` + sitemap link, old `Disallow: /` gone
 6. [x] sitemap.xml live — DONE 2026-08-01: returns 200
-7. [ ] In GSC, manually resubmit `https://christchurchbluffton.org/sitemap.xml` (Sitemaps tab) rather than waiting on Google's own recrawl schedule
-8. [ ] In GSC, use URL Inspection → "Request Indexing" on the homepage and a couple of key pages (join-us, about) to speed up re-crawling now that robots.txt allows it
-9. [ ] Submit one real test through each of the 3 forms (contact, prayer request, newsletter) on the live domain and confirm: (a) the email arrives, (b) a GA4 Key Event fires — this has never been confirmed, GA4 currently shows 0 Key Events across 28 days of testing
-10. [ ] Confirm GA4 Realtime shows active users while doing the above (proves the tag is firing on the real domain, not just the testing site)
-11. [ ] Decide/confirm a rollback plan if something breaks right after cutover (e.g. revert the production repo to the Coming Soon commit)
+7. [x] Sitemap resubmitted in GSC — DONE 2026-08-01 by Kevin
+8. [x] URL Inspection → Request Indexing — DONE 2026-08-01, all 9 real pages submitted by Kevin
+9. [x] All 3 forms tested live on production by Kevin directly — confirmed working (contact, newsletter, prayer)
+10. [x] GA4 Realtime confirmed active during today's automated + manual live testing
+11. [ ] Rollback plan — not formally decided, low priority now given site is stable and confirmed working
 
 ## Full Site Audit (2026-07-23/24) — all HTML/CSS/JS/serverless functions reviewed line-by-line via 3 parallel review passes
 - [x] **Security gap, fixed**: contact form had TWO Cloudflare Turnstile widgets rendering on one form (one force-hidden via `!important` CSS instead of just not existing) — `turnstile.getResponse()` was grabbing an unspecified widget's token, which risked failing CAPTCHA verification unpredictably. Removed the duplicate, kept one widget.
