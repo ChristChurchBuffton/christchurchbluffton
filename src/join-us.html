@@ -296,72 +296,42 @@
             gap: 80px;
             align-items: center;
         }
-        .services-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin-bottom: 10px;
-        }
-        .service-row {
+        .service-schedule {
             display: flex;
             align-items: center;
             gap: 20px;
-            padding: 16px 20px;
+            padding: 20px 24px;
             background: var(--lightest-gray);
             border-radius: 12px;
             border-left: 4px solid var(--gold);
-            transition: all 0.3s ease;
+            margin-bottom: 30px;
         }
-        .service-row:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 15px rgba(48, 59, 106, 0.1);
+        .service-schedule-icon {
+            width: 50px; height: 50px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
-        .service-date-block {
+        .service-schedule-icon svg { width: 24px; height: 24px; color: var(--white); }
+        .service-schedule-details {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            min-width: 55px;
+            gap: 2px;
         }
-        .service-month {
-            font-family: var(--font-body);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--gold-text);
-        }
-        .service-num {
+        .service-schedule-day {
             font-family: var(--font-heading);
-            font-size: 2rem;
+            font-size: 1.375rem;
             color: var(--navy-blue);
             font-weight: 400;
-            line-height: 1;
+            line-height: 1.2;
         }
-        .service-details {
-            display: flex;
-            flex-direction: column;
-        }
-        .service-day {
+        .service-schedule-time {
             font-family: var(--font-body);
             font-size: 1rem;
-            color: var(--navy-blue);
-        }
-        .service-time {
-            font-family: var(--font-body);
-            font-size: 0.875rem;
             color: var(--text-gray);
-        }
-        .service-row-placeholder {
-            background: var(--white);
-            border: 1px dashed var(--light-gray);
-            border-left: 1px dashed var(--light-gray);
-        }
-        .service-row-placeholder .service-month,
-        .service-row-placeholder .service-num {
-            color: var(--text-gray);
-            opacity: 0.6;
-        }
-        .service-row-placeholder .service-day {
-            color: var(--navy-blue);
         }
         .upcoming-image { position: relative; }
         .location-card {
@@ -688,27 +658,14 @@
                 <div class="worship-grid">
                     <!-- Left: Dates + Location -->
                     <div class="animate">
-                        <h3 class="subsection-title">Upcoming Services</h3>
-                        <div class="services-list">
-                            <div class="service-row">
-                                <div class="service-date-block">
-                                    <span class="service-month">Aug</span>
-                                    <span class="service-num">1</span>
-                                </div>
-                                <div class="service-details">
-                                    <span class="service-day">Saturday</span>
-                                    <span class="service-time">5:30 PM</span>
-                                </div>
+                        <h3 class="subsection-title">Our Services</h3>
+                        <div class="service-schedule">
+                            <div class="service-schedule-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                             </div>
-                            <div class="service-row">
-                                <div class="service-date-block">
-                                    <span class="service-month">Sep</span>
-                                    <span class="service-num">5</span>
-                                </div>
-                                <div class="service-details">
-                                    <span class="service-day">Weekly Saturday Services</span>
-                                    <span class="service-time">5:30 PM &mdash; Beginning September 5th</span>
-                                </div>
+                            <div class="service-schedule-details">
+                                <span class="service-schedule-day">Every Saturday</span>
+                                <span class="service-schedule-time">5:30 PM &mdash; Beginning September 5th</span>
                             </div>
                         </div>
 

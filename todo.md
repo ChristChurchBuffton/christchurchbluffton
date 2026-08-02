@@ -2,6 +2,15 @@
 
 ## STATUS (2026-07-27): ON STANDBY TO GO LIVE. Code/backend is fully confirmed launch-ready — client will trigger the actual domain cutover on their own timing. See "Go-Live / Domain Cutover" below for the exact checklist for that moment.
 
+## Post-Launch Site/GA4/GSC Audit (2026-08-01, second full pass after go-live)
+- [x] Live Lighthouse re-run against production (not local dev server): Performance 93, Accessibility 100, Best Practices 96, SEO 100. Core Web Vitals all "good" except CLS at 0.129 (borderline, minor, not urgent). One console error (Turnstile code 600010) only appears under Lighthouse's own headless/automated browser — real-browser tests today got clean 773-char tokens, not a real user-facing issue.
+- [x] Security headers confirmed solid on production: CSP scoped to only the actual third parties in use, HSTS with `preload`+`includeSubDomains`, no other gaps.
+- [x] **GA4 Key Events cleaned up** — `generate_lead` (the event added earlier today) is confirmed firing correctly and has been starred as a Key Event. The 3 previously-configured Key Events (`close_convert_lead`, `purchase`, `qualify_lead`) were stale/unused leftovers with zero data ever — all un-starred.
+- [x] GA4 data caveat noted: current 28-day numbers mix real launch traffic with weeks of internal dev/testing traffic on the same property (100% "(direct)/(none)" source, Ashburn VA in top cities = automation signature). Filter any real reporting to 8/1/26 onward.
+- [x] GSC sitemap confirmed "Success" status, 9 discovered pages (matches real page count exactly). Homepage individually confirmed indexed via URL Inspection.
+- [x] GSC's aggregate Pages/Indexing chart and Core Web Vitals report both show stale/no data — expected lag, not a real issue, will catch up over the next 1-2 weeks as Google recrawls.
+- [ ] **Legacy GSC warning to validate**: "Indexed, though blocked by robots.txt" (2 affected pages, first detected 4/11/26, all affected dates before the 8/1/26 launch) — this is the old pre-launch robots.txt `Disallow: /` issue, already fixed. Kevin clicking "Validate Fix" in GSC to clear it.
+
 ## Pre-Launch Punch List (2026-07-31) — working one at a time before tomorrow's push
 Blocking:
 - [x] 1. Commit today's schedule changes (index.html/join-us.html Aug 1 + Sept 5th edits, todo update) — done, commit `82cddbb`, not yet pushed to `origin` per instruction (pushing after all steps done)
