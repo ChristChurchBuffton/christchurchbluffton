@@ -9,6 +9,40 @@ async function verifyTurnstile(token) {
   return data.success;
 }
 
+function fieldRow(label, valueHtml) {
+  return `
+    <tr><td style="padding:0 0 14px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="background-color:#F5F4EF; border-left:4px solid #c3a355; border-radius:6px; padding:12px 16px;">
+          <div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#7F6D34;">${label}</div>
+          <div style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; margin-top:3px; line-height:1.5;">${valueHtml}</div>
+        </td></tr>
+      </table>
+    </td></tr>`;
+}
+
+function emailShell(heading, fieldsHtml) {
+  return `<!DOCTYPE html>
+<html>
+<body style="margin:0; padding:0; background-color:#F5F4EF;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F5F4EF; padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; background-color:#FFFFFF; border-radius:12px; overflow:hidden;">
+        <tr><td style="background-color:#303b6a; padding:28px 32px 22px;">
+          <div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#A9B3D6;">Christ Church Bluffton</div>
+          <div style="font-family:Georgia,'Times New Roman',serif; font-size:24px; color:#FFFFFF; margin-top:8px;">${heading}</div>
+        </td></tr>
+        <tr><td style="padding:28px 32px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${fieldsHtml}
+          </table>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
 async function breezeRequest(endpoint, params) {
   const url = new URL(endpoint, process.env.BREEZE_URL + '/');
   Object.entries(params).forEach(([k, v]) => {
@@ -70,15 +104,37 @@ exports.handler = async (event) => {
     }
 
     // Send email notification via Resend
+    // "Receiving Updates" goes to info@ (matches newsletter routing); everything else goes to admin@
     if (process.env.RESEND_API_KEY) {
+      const notifyTo = interest === 'updates'
+        ? ['info@christchurchbluffton.org']
+        : ['admin@christchurchbluffton.org'];
+
+      const interestLabels = {
+        updates: 'Receiving Updates',
+        visiting: 'Planning to Visit',
+        volunteering: 'Volunteering',
+        prayer: 'Prayer Request',
+        other: 'Other'
+      };
+
+      const fieldsHtml = [
+        fieldRow('Name', fullName),
+        fieldRow('Email', `<a href="mailto:${email}" style="color:#303b6a;">${email}</a>`),
+        fieldRow('Phone', phone || '(none)'),
+        fieldRow('Interested In', interestLabels[interest] || interest),
+        fieldRow('Message', (message || '(none)').replace(/\n/g, '<br>'))
+      ].join('');
+
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from: process.env.EMAIL_FROM || 'Christ Church Bluffton <notifications@christchurchbluffton.org>',
-          to: ['admin@christchurchbluffton.org'],
+          from: process.env.EMAIL_FROM || 'Contact Form Submission <notifications@christchurchbluffton.org>',
+          to: notifyTo,
           subject: `New Contact Form — ${fullName}`,
-          text: `New contact form submission:\n\nName: ${fullName}\nEmail: ${email}\nPhone: ${phone || '(none)'}\nInterest: ${interest}\nMessage: ${message || '(none)'}`
+          text: `New contact form submission:\n\nName: ${fullName}\nEmail: ${email}\nPhone: ${phone || '(none)'}\nInterest: ${interest}\nMessage: ${message || '(none)'}`,
+          html: emailShell('Contact Form Submission', fieldsHtml)
         }),
         signal: AbortSignal.timeout(10000)
       });
