@@ -104,11 +104,8 @@ exports.handler = async (event) => {
     }
 
     // Send email notification via Resend
-    // "Receiving Updates" goes to info@ (matches newsletter routing); everything else goes to admin@
     if (process.env.RESEND_API_KEY) {
-      const notifyTo = interest === 'updates'
-        ? ['info@christchurchbluffton.org']
-        : ['admin@christchurchbluffton.org'];
+      const notifyTo = ['info@christchurchbluffton.org', 'admin@christchurchbluffton.org'];
 
       const interestLabels = {
         updates: 'Receiving Updates',
