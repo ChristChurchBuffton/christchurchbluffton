@@ -98,6 +98,28 @@ exports.handler = async (event) => {
       console.error('[Stay Updated] Breeze error:', breezeErr.message);
     }
 
+    // Add to the admin panel's Subscribers list (Supabase) — best-effort like the Breeze
+    // block above. This form only ever collects an email, no name, so first/last name are
+    // left blank (the columns are NOT NULL, so empty strings rather than null).
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
+      try {
+        const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/subscribers`, {
+          method: 'POST',
+          headers: {
+            'apikey': process.env.SUPABASE_SECRET_KEY,
+            'Authorization': `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ first_name: '', last_name: '', email, source: 'newsletter' }),
+          signal: AbortSignal.timeout(10000)
+        });
+        if (!res.ok) console.error('[Stay Updated] Supabase insert failed:', res.status, await res.text());
+      } catch (supabaseErr) {
+        console.error('[Stay Updated] Supabase error:', supabaseErr.message);
+      }
+    }
+
     // Send email notification via Resend
     if (process.env.RESEND_API_KEY) {
       await fetch('https://api.resend.com/emails', {

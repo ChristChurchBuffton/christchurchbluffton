@@ -43,3 +43,6 @@ reference/
 
 # Archived old files
 archive/
+
+# Local Netlify folder
+.netlify
