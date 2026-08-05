@@ -67,6 +67,35 @@ exports.handler = async (event) => {
       return { statusCode: 200, body: JSON.stringify({ success: true }) };
     }
 
+    // Add to the admin panel's Prayer Requests log (Supabase) — best-effort, mirrors the
+    // Breeze block pattern elsewhere: a failure here shouldn't block the email below or the
+    // pastoral "always succeed" response. This form only ever collects name + prayer text,
+    // no email/phone.
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
+      try {
+        const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/prayer_requests`, {
+          method: 'POST',
+          headers: {
+            'apikey': process.env.SUPABASE_SECRET_KEY,
+            'Authorization': `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            is_anonymous: !name,
+            requester_name: name || null,
+            request_text: prayer,
+            status: 'active',
+            submitted_at: new Date().toISOString().slice(0, 10)
+          }),
+          signal: AbortSignal.timeout(10000)
+        });
+        if (!res.ok) console.error('[Prayer] Supabase insert failed:', res.status, await res.text());
+      } catch (supabaseErr) {
+        console.error('[Prayer] Supabase error:', supabaseErr.message);
+      }
+    }
+
     // Send email notification via Resend
     if (process.env.RESEND_API_KEY) {
       await fetch('https://api.resend.com/emails', {
