@@ -338,10 +338,12 @@
     }
 
     // The same full, ready-to-paste URL "Copy Link" copies and clicking a thumbnail opens —
-    // one source of truth so both stay in sync. External seed rows point at the real
-    // production URL; real uploads use their actual Supabase Storage public URL.
+    // one source of truth so both stay in sync. LIVE_BASE_URL now works for every photo
+    // (not just the external seed rows): a netlify.toml redirect proxies anything under
+    // /a34317d8/ that isn't a real file here through to Supabase Storage, so real uploads
+    // resolve at the exact same christchurchbluffton.org/a34317d8/ URL.
     function photoLink(p) {
-      return p.external ? (LIVE_BASE_URL + p.filename) : p.src;
+      return LIVE_BASE_URL + p.filename;
     }
 
     // Pure render from whatever's already in `photos` — callers load fresh data first

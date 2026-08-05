@@ -24,6 +24,16 @@
   to = "/.netlify/functions/stay-updated"
   status = 200
 
+# Photos uploaded through the admin panel live in Supabase Storage, not in this git repo —
+# this makes them resolve at the same christchurchbluffton.org/a34317d8/ URL as the images
+# that ARE real files here. Netlify checks for a real static file at the exact path first;
+# this proxy only kicks in when nothing local matches, so the existing real files are
+# completely unaffected.
+[[redirects]]
+  from = "/a34317d8/*"
+  to = "https://fhktlrbadddmhrijhjwa.supabase.co/storage/v1/object/public/photos/:splat"
+  status = 200
+
 # Legacy redirects
 [[redirects]]
   from = "/donation"
