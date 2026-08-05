@@ -8,7 +8,8 @@ Explanations to the user should be to the point and in plain language — no jar
 - Never delete files without explicit user confirmation
 - Never push to remote without explicit user confirmation
 - Do not add Co-Authored-By tags to git commits
-- **Supabase admin backend now lives in `admin/`, inside this repo** (moved 2026-08-05 — previously a separate standalone repo). It has its own `server/` (Express backend, port 8099) distinct from the public site's `server/` (port 3002, contact/prayer/newsletter forms) — don't confuse the two. Credentials for the admin backend live in `admin/server/.env` only (gitignored) — see `christ-church-bluffton-notes` memory for project ref/keys.
+- **Supabase admin panel is part of THIS site now — same repo, same Netlify deploy, served at `/admin`** (corrected 2026-08-05; an earlier version of this note wrongly described it as a separate Netlify site with a future reverse-proxy — that plan is dead, do not resurrect it). Deployable pages live in `src/admin/` (published by Netlify same as the rest of `src/`). Dev-only tooling (`server/` — Express backend, port 8100, distinct from the public site's own `server/` on port 3002 — plus `supabase/` migrations and `build-sidebar.js`) stays at repo-root `admin/`, outside the deploy path, same pattern as the site's own `server/`. Credentials live in `admin/server/.env` only (gitignored) — see `christ-church-bluffton-notes` memory for project ref/keys. Root `netlify.toml`'s CSP is extended (Supabase + jsdelivr) and has a dedicated `/admin/*` noindex header — don't strip those thinking they're leftover site-only rules.
+- **`admin/` and `src/` changes commit and push together now** (as of 2026-08-05, reversing the prior "never together" rule above). When Kevin says "commit and push," stage and push everything relevant across both — they're one repo, one push workflow. Still always ask before the actual push itself.
 
 ## Tech Stack
 - Static HTML / CSS / JavaScript
@@ -21,7 +22,7 @@ Explanations to the user should be to the point and in plain language — no jar
 
 ## Folder Structure
 - `src/` — Deployable site code (Netlify publish directory)
-- `admin/` — Supabase-backed admin panel (separate app, own `server/`, own `netlify.toml` — not part of the public site's Netlify deploy)
+- `admin/` — Supabase-backed admin panel's dev-only tooling (`server/`, `supabase/`, `build-sidebar.js`) — the actual deployable pages live in `src/admin/`, published to `christchurchbluffton.org/admin` as part of the normal site build
 - `reference/` — Original site build for content/design reference (not deployed, gitignored)
 - `assets/` — Logos, business docs, flyers
 - `workflow/` — Project workflows and dev notes
@@ -47,7 +48,8 @@ Explanations to the user should be to the point and in plain language — no jar
 - Do not create documentation files unless explicitly requested
 
 ## Git Remotes
-- `origin` → `ForgedDigital/christ-church-bluffton` (live site + test via Forged Digital)
+- `origin` → `ForgedDigital/christ-church-bluffton` (staging/save — Kevin pushes here first)
+- `production` → `ChristChurchBuffton/christchurchbluffton` (the live site — pushed second, same commits)
 
 ## Breakpoint / Responsive Testing Protocol
 - Do NOT resize the actual browser window to test breakpoints — `resize_window` is unreliable in this environment (can silently fail, get stuck at a stale size, or apply an inconsistent scaling factor) and it visibly disrupts the user's real browser window, which should never be touched for this.
