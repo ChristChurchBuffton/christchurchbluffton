@@ -1,0 +1,79 @@
+# Netlify config for the Christ Church Bluffton admin panel.
+# This deploys as its OWN separate Netlify site — kept deliberately isolated from the
+# main christ-church-bluffton site repo/deploys. The plan is for the main site to
+# reverse-proxy /admin/* to wherever this ends up hosted (a Netlify redirect with
+# status = 200 on the MAIN site's netlify.toml), so the client always sees
+# christchurchbluffton.org/admin in their browser while the two codebases/deploys
+# stay fully separate underneath. That proxy rule can't be added until this site
+# has an actual deploy URL to point to — not done yet, on purpose.
+
+[build]
+  publish = "."
+
+# Clean URLs (matches local dev server behavior: /staff instead of /staff.html)
+[[redirects]]
+  from = "/dashboard"
+  to = "/dashboard.html"
+  status = 200
+
+[[redirects]]
+  from = "/staff"
+  to = "/staff.html"
+  status = 200
+
+[[redirects]]
+  from = "/congregants"
+  to = "/congregants.html"
+  status = 200
+
+[[redirects]]
+  from = "/prayers"
+  to = "/prayers.html"
+  status = 200
+
+[[redirects]]
+  from = "/volunteers"
+  to = "/volunteers.html"
+  status = 200
+
+[[redirects]]
+  from = "/subscribers"
+  to = "/subscribers.html"
+  status = 200
+
+[[redirects]]
+  from = "/newsletter"
+  to = "/newsletter.html"
+  status = 200
+
+[[redirects]]
+  from = "/events"
+  to = "/events.html"
+  status = 200
+
+[[redirects]]
+  from = "/content"
+  to = "/content.html"
+  status = 200
+
+[[redirects]]
+  from = "/photos"
+  to = "/photos.html"
+  status = 200
+
+[[redirects]]
+  from = "/team"
+  to = "/team.html"
+  status = 200
+
+[[redirects]]
+  from = "/account"
+  to = "/account.html"
+  status = 200
+
+# Belt-and-suspenders on top of each page's own <meta robots noindex> tag —
+# this is an internal admin tool, never meant to be crawled or indexed.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"

@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base href="/assets/site-mirror/">
+    <meta charset="UTF-8">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PTWWV0M0DX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-PTWWV0M0DX');
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christ Church Bluffton | Give</title>
+    <meta name="description" content="Support the mission of Christ Church Bluffton through generous giving.">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Christ Church Bluffton | Give">
+    <meta property="og:description" content="Support the mission of Christ Church Bluffton through generous giving.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://christchurchbluffton.org/images/og-image.jpg">
+    <meta property="og:url" content="https://christchurchbluffton.org/give">
+    <meta property="og:site_name" content="Christ Church Bluffton">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Christ Church Bluffton | Give">
+    <meta name="twitter:description" content="Support the mission of Christ Church Bluffton through generous giving.">
+    <meta name="twitter:image" content="https://christchurchbluffton.org/images/og-image.jpg">
+    <link rel="canonical" href="https://christchurchbluffton.org/give">
+    <link rel="stylesheet" href="css/fonts.css">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/favicon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#303b6a">
+    <meta name="apple-mobile-web-app-title" content="Christ Church Bluffton">
+    <link rel="stylesheet" href="css/shared.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": ["Church", "NonprofitOrganization"],
+      "name": "Christ Church Bluffton",
+      "url": "https://christchurchbluffton.org",
+      "logo": "https://christchurchbluffton.org/images/favicon.png",
+      "description": "A Christ-centered community rooted in historic faith, serving Bluffton, SC and the surrounding Lowcountry.",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "7 Venture Drive, Suite 104, PMB 267",
+        "addressLocality": "Bluffton",
+        "addressRegion": "SC",
+        "postalCode": "29910",
+        "addressCountry": "US"
+      },
+      "email": "info@christchurchbluffton.org",
+      "nonprofitStatus": "https://schema.org/Nonprofit501c3"
+    }
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --navy-blue: #303b6a;
+            --gold: #c3a355;
+            --gold-text: #7F6D34;
+            --white: #FFFFFF;
+            --lightest-gray: #F5F4EF;
+            --light-gray: #E2E0D8;
+            --dark-gray: #333333;
+            --text-gray: #4A4A55;
+            --font-heading: 'Lora', serif;
+            --font-body: 'Lora', serif;
+            --font-accent: 'Lora', serif;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        html { scroll-behavior: smooth; overflow-x: clip; }
+
+        body {
+            font-family: var(--font-body);
+            line-height: 1.6;
+            color: var(--dark-gray);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--lightest-gray);
+            overflow-x: clip;
+        }
+
+        /* ── Main Content ── */
+        .main-content {
+            flex: 1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+        /* ── Scripture Banner ── */
+        .scripture-section {
+            background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            padding: 100px 30px 90px;
+            text-align: center;
+        }
+
+        .scripture-inner {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .scripture-cross {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 20px;
+        }
+
+        .scripture-verse {
+            font-family: var(--font-accent);
+            font-size: 1.25rem;
+            font-style: italic;
+            color: var(--white);
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .scripture-reference {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: #7F6D34;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* ── Two-Column Give Section (desktop) ── */
+        .give-section {
+            padding: 60px 0 50px;
+        }
+
+        .give-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: start;
+        }
+
+        /* Left column: mission + info */
+        .give-content {
+            padding-top: 10px;
+        }
+
+        .mission-text {
+            font-family: var(--font-accent);
+            font-size: 1.125rem;
+            font-style: italic;
+            color: var(--dark-gray);
+            line-height: 1.8;
+            margin-bottom: 14px;
+        }
+
+        .mission-attribution {
+            font-family: var(--font-accent);
+            font-size: 0.875rem;
+            font-style: italic;
+            color: var(--gold-text);
+            margin-bottom: 36px;
+        }
+
+        .info-card {
+            background: #FAF8F3;
+            border-radius: 12px;
+            border: 1px solid var(--light-gray);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .info-label {
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--gold-text);
+            margin-bottom: 10px;
+        }
+
+        .info-text {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--dark-gray);
+            line-height: 1.7;
+        }
+
+        .info-text strong {
+            color: var(--navy-blue);
+        }
+
+        .connect-text {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--text-gray);
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .connect-email {
+            display: block;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--gold-text);
+            font-weight: 400;
+        }
+
+        .connect-email:hover {
+            color: var(--navy-blue);
+        }
+
+        .qr-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .qr-image {
+            width: 90px;
+            height: 90px;
+            border-radius: 8px;
+            border: 1px solid var(--light-gray);
+        }
+
+        .qr-text {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--text-gray);
+            line-height: 1.5;
+        }
+
+        .qr-text span {
+            display: block;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--gold-text);
+            margin-bottom: 4px;
+        }
+
+        /* Right column: donation box */
+        .donation-box {
+            background: #FAF8F3;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(48, 59, 106, 0.15);
+            overflow: hidden;
+            border: 1px solid rgba(48, 59, 106, 0.08);
+        }
+
+        .donation-header {
+            background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            padding: 40px 30px 35px;
+            text-align: center;
+            color: var(--white);
+        }
+
+        .donation-cross {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 16px;
+            object-fit: contain;
+        }
+
+        .donation-header h2 {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            color: var(--white);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .donation-header p {
+            font-family: var(--font-accent);
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.875rem;
+        }
+
+        .donation-body {
+            padding: 40px 30px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 28px;
+        }
+
+        .donation-message p {
+            font-family: var(--font-body);
+            color: var(--text-gray);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .give-btn-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .give-btn-custom {
+            background: linear-gradient(135deg, #303b6a 0%, #3d4a7a 100%);
+            color: #FFFFFF;
+            font-family: var(--font-heading);
+            font-size: 1.125rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+            padding: 16px 60px;
+            border: none;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(48, 59, 106, 0.25);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .give-btn-wrapper:hover .give-btn-custom {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(48, 59, 106, 0.35);
+        }
+
+        .give-btn-icon {
+            width: 20px;
+            height: 20px;
+            stroke: var(--gold);
+            fill: none;
+        }
+
+        .donation-secure {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+            color: #999;
+        }
+
+        .donation-secure svg {
+            width: 14px;
+            height: 14px;
+            stroke: var(--gold);
+        }
+
+        .donation-footer {
+            padding: 24px 30px;
+            text-align: center;
+            border-top: 1px solid rgba(48, 59, 106, 0.08);
+            background: var(--lightest-gray);
+        }
+
+        .donation-footer p {
+            font-size: 0.875rem;
+            color: var(--text-gray);
+            margin-bottom: 12px;
+        }
+
+        .btn-outline-give {
+            display: inline-block;
+            padding: 10px 28px;
+            border: 2px solid var(--navy-blue);
+            border-radius: 50px;
+            font-family: var(--font-heading);
+            font-size: 0.875rem;
+            font-weight: 400;
+            color: var(--navy-blue);
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-give:hover {
+            background: var(--navy-blue);
+            color: var(--white);
+        }
+
+        /* ── Tithe.ly Giving Modal ── */
+        .give-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .give-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .give-modal-wrapper {
+            position: relative;
+            width: 90%;
+            max-width: 600px;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .give-modal-overlay.active .give-modal-wrapper {
+            transform: translateY(0);
+        }
+
+        .give-modal {
+            width: 100%;
+            height: 92vh;
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+        }
+
+        .give-modal-close {
+            position: absolute;
+            top: -15px;
+            right: 0px;
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.125rem;
+            line-height: 1;
+            cursor: pointer;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+
+        .give-modal-close:hover {
+            background: rgba(0, 0, 0, 0.85);
+        }
+
+        .give-modal-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* ── Back Link ── */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            color: var(--text-gray);
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            padding: 20px 0;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--navy-blue);
+        }
+
+        .back-link svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .bottom-bar {
+            text-align: center;
+            padding: 20px 30px 10px;
+        }
+
+        /* ── CTA Section ── */
+        .cta-section {
+            background: transparent;
+            padding: 50px 30px 60px;
+            text-align: center;
+        }
+
+        .cta-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            background:
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background-size: 24px 24px, 100% 100%;
+            border-radius: 60px;
+            padding: 40px 60px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            box-sizing: border-box;
+        }
+
+        .cta-logo {
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .cta-content {
+            flex: 1;
+            text-align: left;
+        }
+
+        .cta-heading {
+            font-family: var(--font-heading);
+            font-size: 1.125rem;
+            font-weight: 400;
+            color: var(--white);
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .cta-text {
+            font-family: var(--font-accent);
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.75);
+            line-height: 1.6;
+            margin-bottom: 0;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            padding: 12px 36px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            border: 2px solid var(--gold);
+            border-radius: 50px;
+            font-family: var(--font-heading);
+            font-size: 0.875rem;
+            font-weight: 400;
+            color: #c9ac66;
+            text-decoration: none;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .cta-btn:hover {
+            background: var(--gold);
+            color: var(--navy-blue);
+        }
+
+        /* ── Tablet ── */
+        @media (max-width: 900px) {
+            .give-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .cta-inner {
+                flex-direction: column;
+                text-align: center;
+                padding: 30px 30px !important;
+                border-radius: 30px !important;
+                gap: 20px !important;
+                max-width: 480px !important;
+                width: auto !important;
+                margin: 0 auto;
+            }
+
+            .cta-content {
+                text-align: center;
+            }
+
+            .cta-logo {
+                width: 50px !important;
+                height: 50px !important;
+            }
+
+            .cta-heading {
+                font-size: 1rem;
+            }
+
+            .cta-text {
+                font-size: 0.875rem;
+            }
+
+            .cta-btn {
+                padding: 10px 28px;
+                font-size: 0.875rem;
+            }
+        }
+
+
+        /* ── Mobile ── */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 20px;
+            }
+
+            .scripture-section {
+                padding: 35px 20px;
+            }
+
+            .scripture-verse {
+                font-size: 1.125rem;
+            }
+
+            .give-section {
+                padding: 30px 0 20px;
+            }
+
+            .donation-header {
+                padding: 25px 20px 20px;
+            }
+
+            .donation-header h2 {
+                font-size: 1.25rem;
+            }
+
+            .donation-body {
+                padding: 25px 20px;
+                gap: 18px;
+            }
+
+            .give-btn-custom {
+                padding: 12px 40px;
+                font-size: 0.875rem;
+            }
+
+            .give-modal {
+                width: 95%;
+                height: 90vh;
+            }
+
+            .qr-row {
+                justify-content: center;
+            }
+
+            .cta-section {
+                padding: 30px 20px 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 16px;
+            }
+
+            .scripture-section {
+                padding: 30px 16px;
+            }
+
+            .scripture-verse {
+                font-size: 1rem;
+            }
+
+            .give-btn-custom {
+                padding: 12px 36px;
+                font-size: 0.875rem;
+            }
+
+            .mission-text {
+                font-size: 0.875rem;
+            }
+
+            .info-card {
+                padding: 18px;
+            }
+
+            .donation-header {
+                padding: 20px 16px 18px;
+            }
+
+            .donation-body {
+                padding: 20px 16px;
+            }
+
+            .cta-section {
+                padding: 20px 16px 30px;
+            }
+
+            .cta-inner {
+                padding: 25px 20px;
+                border-radius: 24px;
+                gap: 16px;
+            }
+
+            .cta-btn {
+                padding: 10px 24px;
+                font-size: 0.875rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .container {
+                padding: 0 12px;
+            }
+
+            .scripture-section {
+                padding: 25px 12px;
+            }
+
+            .cta-inner {
+                flex-direction: column;
+                text-align: center;
+                padding: 22px 16px;
+            }
+
+            .cta-content {
+                text-align: center;
+            }
+
+            .give-btn-custom {
+                padding: 12px 28px;
+                font-size: 0.875rem;
+            }
+
+            .info-card {
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header (loaded from includes/header.html) -->
+    <div id="site-header"></div>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+
+        <h1 class="sr-only">Give to Christ Church Bluffton</h1>
+
+        <!-- Scripture Banner -->
+        <section class="scripture-section">
+            <div class="scripture-inner animate">
+                <p class="scripture-verse">&ldquo;And day by day, attending the temple together and breaking bread in their homes, they received their food with glad and generous hearts.&rdquo;</p>
+                <span class="scripture-reference">&mdash; Acts 2:46 (ESV)</span>
+            </div>
+        </section>
+
+        <!-- Two-Column Give Section -->
+        <section class="give-section">
+            <div class="container">
+                <div class="give-grid">
+
+                    <!-- Left: Mission + Info -->
+                    <div class="give-content animate">
+                        <p class="mission-text">&ldquo;God is doing a new thing in Bluffton, and we are planting a church to reach our community with the hope of Jesus Christ. Your partnership helps lay a strong foundation so that more people can hear the Gospel, encounter Christ, and find a church home. Join us in this mission by partnering with us to build the future of Christ Church.&rdquo;</p>
+                        <p class="mission-attribution">&mdash; Rev. Jonathan Riddle</p>
+
+                        <div class="info-card">
+                            <p class="info-label">Give by Check</p>
+                            <p class="info-text">
+                                Checks can be sent to:<br>
+                                <strong>Christ Church Bluffton</strong><br>
+                                7 Venture Drive<br>
+                                Suite 104, PMB 267<br>
+                                Bluffton, SC 29910
+                            </p>
+                        </div>
+
+                        <div class="info-card">
+                            <p class="info-label">Stay Connected</p>
+                            <p class="connect-text">Questions or want to be included in future updates?<br>Email us at</p>
+                            <a href="mailto:info@christchurchbluffton.org" class="connect-email">info@christchurchbluffton.org</a>
+                        </div>
+
+                        <div class="qr-row">
+                            <img src="images/qr-code.webp" alt="QR code for Christ Church Bluffton giving" class="qr-image" width="90" height="90" loading="lazy">
+                            <div class="qr-text">
+                                <span>Scan to Give</span>
+                                Use your phone's camera to open the giving page directly.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Donation Box -->
+                    <div class="give-form-wrapper animate animate-delay-1">
+                        <div class="donation-box">
+                            <div class="donation-header">
+                                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton logo" class="donation-cross" width="60" height="60" style="object-fit: contain;" loading="lazy">
+                                <h2>Make a Donation</h2>
+                                <p>Your gift makes a difference</p>
+                            </div>
+                            <div class="donation-body">
+                                <div class="donation-message">
+                                    <p>Every gift &mdash; large or small &mdash; helps build a Christ-centered community in the Lowcountry.</p>
+                                </div>
+                                <div class="give-btn-wrapper">
+                                    <button type="button" class="give-btn-custom" id="giveNowBtn">
+                                        <svg class="give-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                                        Give Now
+                                    </button>
+                                </div>
+                                <div class="donation-secure">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                    <span>Secure giving powered by Tithe.ly</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-card" style="margin-top: 20px;">
+                            <p class="info-label">Other Ways to Give</p>
+                            <p class="connect-text">Interested in donating in a different way?<br>Reach out to our treasurer at</p>
+                            <a href="mailto:treasurer@christchurchbluffton.org" class="connect-email">treasurer@christchurchbluffton.org</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Banner -->
+        <section class="cta-section">
+            <div class="cta-inner animate">
+                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60" loading="lazy">
+                <div class="cta-content">
+                    <h2 class="cta-heading">We&rsquo;d Love to Hear from You</h2>
+                    <p class="cta-text">Whether you have questions about our community, would like to submit a prayer request, or are simply looking for a church to call home &mdash; we&rsquo;d love to connect with you.</p>
+                </div>
+                <a href="/contact" class="cta-btn">Get in Touch</a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer (loaded from includes/footer.html) -->
+    <div id="site-footer"></div>
+
+    <!-- Prayer FAB (loaded from includes/prayer-fab.html) -->
+    <div id="site-prayer"></div>
+
+    <!-- Tithe.ly Giving Modal -->
+    <div class="give-modal-overlay" id="giveModal">
+        <div class="give-modal-wrapper">
+            <button class="give-modal-close" id="giveModalClose" aria-label="Close">&times;</button>
+            <div class="give-modal">
+                <iframe id="giveModalIframe" class="give-modal-iframe" title="Tithe.ly Giving" allow="payment"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tithe.ly Modal
+        (function() {
+            var modal = document.getElementById('giveModal');
+            var iframe = document.getElementById('giveModalIframe');
+            var closeBtn = document.getElementById('giveModalClose');
+            var giveUrl = 'https://give.tithe.ly/?formId=25af70b1-a353-4cd7-a9f2-dad5c435f43c&context=modal';
+
+            document.getElementById('giveNowBtn').addEventListener('click', function() {
+                iframe.src = giveUrl;
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+
+            function closeModal() {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+                iframe.src = '';
+            }
+
+            closeBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) closeModal();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
+            });
+        })();
+
+    </script>
+    <script>
+            window.__turnstileReady = false;
+            window.__turnstileQueue = [];
+            window.turnstileOnLoad = function() {
+                window.__turnstileReady = true;
+                window.__turnstileQueue.forEach(function(el) { try { turnstile.render(el); } catch (e) {} });
+                window.__turnstileQueue = [];
+            };
+            window.renderTurnstile = function(el) {
+                if (!el) return;
+                if (window.__turnstileReady && window.turnstile) { try { turnstile.render(el); } catch (e) {} }
+                else { window.__turnstileQueue.push(el); }
+            };
+        </script>
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=turnstileOnLoad&render=explicit" async defer></script>
+    <script src="js/components.js"></script>
+</body>
+</html>

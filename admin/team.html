@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<title>Team — Christ Church Bluffton Admin</title>
+<link rel="stylesheet" href="css/shared.css">
+<style>
+  .team-card {
+    border-radius: 14px;
+    overflow: hidden;
+    border-color: transparent;
+    box-shadow: 0 2px 10px rgba(48,59,106,0.07);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }
+  .team-card:hover { box-shadow: 0 8px 22px rgba(48,59,106,0.12); transform: translateY(-1px); }
+  .team-card-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 16px 22px;
+    background: linear-gradient(135deg, rgba(195,163,85,0.12) 0%, rgba(195,163,85,0.04) 100%);
+    border-bottom: 2px solid var(--gold);
+  }
+  .team-card-title { font-family: Georgia, 'Times New Roman', serif; font-size: 16px; color: var(--navy-blue); }
+  .team-card-count {
+    font-size: 10.5px; font-weight: bold; color: var(--gold-text); text-transform: uppercase; letter-spacing: 0.5px;
+    background: rgba(195,163,85,0.18); padding: 3px 10px; border-radius: 100px;
+  }
+  .team-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--white);
+  }
+  .team-table th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    padding: 12px 22px;
+    background: var(--lightest-gray);
+    border-bottom: 1px solid var(--border-gray);
+  }
+  .team-table tr { transition: background 0.12s ease; }
+  .team-table tbody tr:hover { background: rgba(195,163,85,0.05); }
+  .team-table td {
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--border-gray);
+    vertical-align: middle;
+    font-size: 13px;
+  }
+  .team-table tr:last-child td { border-bottom: none; }
+  .member-cell { display: flex; align-items: center; gap: 10px; }
+  .member-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--gold); color: var(--navy-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 13px; flex-shrink: 0;
+  }
+  .member-name { font-weight: bold; color: var(--text-dark); }
+  .member-email { font-size: 12px; color: var(--text-muted); }
+  .perm-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .perm-chip {
+    font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.3px;
+    background: rgba(48,59,106,0.08); color: var(--navy-blue);
+    padding: 2px 8px; border-radius: 100px;
+  }
+  .perm-chip.none { color: var(--text-muted); background: transparent; text-transform: none; font-weight: normal; letter-spacing: 0; }
+  .row-actions { display: flex; gap: 6px; }
+  .icon-btn {
+    width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-gray);
+    background: var(--white); display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); cursor: pointer; padding: 0; flex-shrink: 0;
+  }
+  .icon-btn svg { width: 14px; height: 14px; }
+  .icon-btn:hover { border-color: var(--navy-blue); color: var(--navy-blue); background: rgba(48,59,106,0.05); }
+  .icon-btn.danger:hover { border-color: var(--danger); color: var(--danger); background: rgba(177,67,67,0.05); }
+  .you-tag { font-size: 10px; color: var(--gold-text); font-weight: bold; margin-left: 6px; }
+
+  /* Below this width there isn't room for fixed columns without things getting squeezed —
+     switch each row into a single-row card (member, role, status, actions side by side),
+     with permissions on its own row beneath since it can wrap to a variable number of chips. */
+  @media (max-width: 1700px) {
+    .team-table, .team-table tbody, .team-table td { display: block; }
+    .team-table thead { display: none; }
+    .team-table tr {
+      display: grid;
+      grid-template-columns: 2fr 0.7fr 0.7fr 0.7fr;
+      grid-template-areas: "member role status actions" "perms perms perms perms";
+      column-gap: 16px; row-gap: 6px; align-items: center;
+      border: 1px solid var(--border-gray); border-radius: 10px; margin: 12px 16px; padding: 12px 16px;
+    }
+    .team-table tbody tr:hover { background: none; }
+    .team-table td {
+      width: auto !important; white-space: normal !important; word-break: break-word;
+      border-bottom: none; padding: 0; box-sizing: border-box;
+    }
+    .team-table td::before {
+      content: attr(data-label); display: block; font-size: 11px; font-weight: bold;
+      text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-bottom: 4px;
+    }
+    .team-table td:nth-child(1) { grid-area: member; }
+    .team-table td:nth-child(1)::before { display: none; }
+    .team-table td:nth-child(2) { grid-area: role; }
+    .team-table td:nth-child(3) { grid-area: status; }
+    .team-table td:nth-child(4) { grid-area: perms; }
+    .team-table td:last-child { grid-area: actions; justify-self: end; }
+  }
+  @media (max-width: 640px) {
+    .team-table tr {
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas: "member member" "role status" "perms perms" "actions actions";
+    }
+    .team-table td:last-child {
+      justify-self: start; padding-top: 10px !important; margin-top: 4px;
+      border-top: 1px solid var(--border-gray);
+    }
+  }
+
+  /* ---- Modal (shared shell pattern) ---- */
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0; background: rgba(30,37,71,0.55);
+    z-index: 1000; align-items: center; justify-content: center; padding: 24px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-box {
+    background: var(--white); border-radius: 14px; width: 100%; max-width: 460px;
+    max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+  }
+  .modal-header { padding: 20px 26px; border-bottom: 1px solid var(--border-gray); display: flex; align-items: center; justify-content: space-between; }
+  .modal-header .modal-title { font-family: Georgia, 'Times New Roman', serif; font-size: 20px; color: var(--navy-blue); }
+  .modal-header .modal-subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .modal-close { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border-gray); background: var(--white); color: var(--text-muted); font-size: 16px; cursor: pointer; flex-shrink: 0; }
+  .modal-close:hover { border-color: var(--navy-blue); color: var(--navy-blue); }
+  .modal-body { padding: 22px 26px; overflow-y: auto; }
+  .modal-footer { padding: 16px 26px; border-top: 1px solid var(--border-gray); display: flex; justify-content: flex-end; gap: 10px; }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 13px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; }
+  .field input[type="text"], .field input[type="email"], .field input[type="password"] {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
+    font-family: inherit; font-size: 14px; background: var(--lightest-gray);
+  }
+  .field input:focus { outline: none; border-color: var(--gold); background: var(--white); }
+
+  .log-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; padding: 18px 22px; }
+  .log-controls .field { margin-bottom: 0; }
+  .log-controls .field input[type="date"] {
+    padding: 9px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
+    font-family: inherit; font-size: 13px; background: var(--lightest-gray); color: var(--text-dark);
+  }
+  .log-controls .field input[type="date"]:focus { outline: none; border-color: var(--gold); background: var(--white); }
+  .log-note { padding: 0 22px 18px; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+  .role-radio-group {
+    display: inline-flex; width: 100%; border: 1px solid var(--border-gray); border-radius: 8px; overflow: hidden;
+  }
+  .role-radio-group label {
+    position: relative; flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 9px 10px; cursor: pointer; font-size: 13px; font-weight: bold; color: var(--text-muted);
+    background: var(--white); text-transform: none; transition: background 0.12s ease, color 0.12s ease;
+  }
+  .role-radio-group label + label { border-left: 1px solid var(--border-gray); }
+  .role-radio-group input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+  .role-radio-group label.selected { border-left-color: transparent; background: var(--navy-blue); color: var(--white); }
+  .perm-checklist { display: flex; flex-direction: column; gap: 10px; }
+  .perm-checklist label { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: normal; color: var(--text-dark); cursor: pointer; }
+  .perm-checklist input { width: 16px; height: 16px; accent-color: var(--gold-text); }
+  .admin-perm-note { font-size: 12px; color: var(--text-muted); font-style: italic; }
+  .form-error { background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; }
+  .form-error.visible { display: block; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    max-width: 480px; background: var(--navy-dark); color: var(--white);
+    padding: 14px 20px; border-radius: 10px; font-size: 13px; line-height: 1.5;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3); border: 1px solid var(--gold);
+    opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 2000;
+  }
+  .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body data-page="team" data-admin-only="true">
+  <div class="toast" id="toast"></div>
+  <div class="app-shell">
+    <div id="sidebar-mount">
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img class="brand-crest" src="assets/site-images/logo-dark-bg.png" alt="Christ Church Bluffton crest">
+    <div>
+      <div class="title">Christ Church Bluffton</div>
+      <div class="label">Admin Panel</div>
+    </div>
+    <button type="button" class="hamburger-btn" id="hamburger-btn" aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+    </button>
+  </div>
+  <div class="sidebar-collapsible" id="sidebar-collapsible">
+    <nav>
+      <a href="dashboard.html" data-page="dashboard">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Dashboard
+      </a>
+      <a href="staff.html" data-page="staff">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Staff
+      </a>
+      <a href="congregants.html" data-page="congregants" data-permission="congregants">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+        Congregants
+      </a>
+      <a href="prayers.html" data-page="prayers" data-permission="prayers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+        Prayer Requests
+      </a>
+      <a href="volunteers.html" data-page="volunteers" data-permission="signups">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Volunteers
+      </a>
+      <a href="subscribers.html" data-page="subscribers" data-permission="subscribers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h4M15 12h4M6 16h12"/></svg>
+        Subscribers
+      </a>
+      <a href="newsletter.html" data-page="newsletter" data-permission="newsletter" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        Newsletter
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="events.html" data-page="events" data-permission="events">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Events
+      </a>
+      <a href="content.html" data-page="content" data-permission="contentEditor" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Content Editor
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="photos.html" data-page="photos" data-permission="photos">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg>
+        Photos
+      </a>
+      <a href="team.html" data-page="team" data-admin-only="true">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M19 8h4M21 6v4"/></svg>
+        Team
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="reading-mode-row" id="reading-mode-row" style="display:none;">
+        <button type="button" class="reading-mode-btn" id="reading-mode-btn" title="Toggle easier-to-read text">
+          <span class="aa-icon">Aa</span> Reading Mode
+        </button>
+        <div class="reading-tint-swatches" id="reading-tint-swatches" style="display:none;">
+          <button type="button" class="tint-swatch tint-cream" data-tint="cream" title="Cream background"></button>
+          <button type="button" class="tint-swatch tint-blue" data-tint="blue" title="Light blue background"></button>
+          <button type="button" class="tint-swatch tint-green" data-tint="green" title="Light green background"></button>
+        </div>
+      </div>
+      <a href="account.html" class="user-chip" id="user-chip-link" title="Account Settings">
+        <div class="avatar" id="sidebar-avatar">?</div>
+        <div class="user-chip-info">
+          <div class="name" id="sidebar-name">—</div>
+          <div class="role" id="sidebar-role">—</div>
+        </div>
+        <svg class="chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+      <a href="#" class="logout-link" id="logout-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Log out
+      </a>
+    </div>
+  </div>
+</aside>
+  </div>
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <h1>Team</h1>
+          <div class="subtitle" id="team-subtitle">Manage staff accounts and what each one can access</div>
+        </div>
+        <button class="btn btn-gold" id="invite-btn">+ Invite Team Member</button>
+      </div>
+      <div class="content" id="page-body">
+        <div class="card team-card">
+          <div class="team-card-head">
+            <div class="team-card-title">All Team Members</div>
+            <div class="team-card-count" id="team-card-count">— members</div>
+          </div>
+          <div class="table-scroll">
+          <table class="team-table">
+            <thead>
+              <tr>
+                <th>Member</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Permissions</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="team-rows"></tbody>
+          </table>
+          </div>
+        </div>
+
+        <div class="card team-card" style="margin-top:22px;">
+          <div class="team-card-head">
+            <div class="team-card-title">Activity Log</div>
+            <div class="team-card-count" id="log-entry-count">— entries</div>
+          </div>
+          <div class="log-controls">
+            <div class="field">
+              <label for="log-from">From</label>
+              <input type="date" id="log-from">
+            </div>
+            <div class="field">
+              <label for="log-to">To</label>
+              <input type="date" id="log-to">
+            </div>
+            <button type="button" class="btn btn-gold" id="download-log-btn">Download Log (CSV)</button>
+          </div>
+          <p class="log-note">Tracks sign-ins, failed sign-ins, blocked access attempts, and every add/edit/remove across Staff, Volunteers, Photos, Newsletter, Content, and Team. Raw CSV export — no formatting, dates optional (leave blank for the full log).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="modal-title">Invite Team Member</div>
+          <div class="modal-subtitle" id="modal-subtitle"></div>
+        </div>
+        <button type="button" class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    let session = null;
+    let currentTeam = [];
+
+    function escapeHtml(str) {
+      return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    async function renderTeam() {
+      const team = await getTeam();
+      currentTeam = team;
+      document.getElementById('team-card-count').textContent = `${team.length} member${team.length === 1 ? '' : 's'}`;
+      const rows = document.getElementById('team-rows');
+      rows.innerHTML = team.map(m => {
+        const permChips = m.role === 'admin'
+          ? PERMISSIONS.map(p => `<span class="perm-chip">${p.label}</span>`).join('') + `<span class="perm-chip">Team</span>`
+          : (PERMISSIONS.filter(p => m.permissions && m.permissions[p.key]).map(p => `<span class="perm-chip">${p.label}</span>`).join('') || `<span class="perm-chip none">No access granted</span>`);
+        return `
+          <tr>
+            <td data-label="Member">
+              <div class="member-cell">
+                <div class="member-avatar">${escapeHtml(m.name.charAt(0).toUpperCase())}</div>
+                <div>
+                  <div class="member-name">${escapeHtml(m.name)}${m.email === session.email ? '<span class="you-tag">YOU</span>' : ''}</div>
+                  <div class="member-email">${escapeHtml(m.email)}</div>
+                </div>
+              </div>
+            </td>
+            <td data-label="Role"><span class="badge ${m.role === 'admin' ? 'badge-admin' : 'badge-staff'}">${m.role === 'admin' ? 'Admin' : 'Staff'}</span></td>
+            <td data-label="Status"><span class="badge ${m.status === 'invited' ? 'badge-invited' : 'badge-admin'}" style="${m.status === 'invited' ? '' : 'background:rgba(46,125,50,0.12);color:#2e7d32;'}">${m.status === 'invited' ? 'Invited' : 'Active'}</span></td>
+            <td data-label="Permissions"><div class="perm-chips">${permChips}</div></td>
+            <td>
+              <div class="row-actions">
+                <button type="button" class="icon-btn" data-action="edit" data-id="${m.id}" title="Edit" aria-label="Edit">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                </button>
+                <button type="button" class="icon-btn" data-action="reset" data-id="${m.id}" title="Reset Password" aria-label="Reset Password">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6"/><path d="M15.5 7.5l3 3L22 7l-3-3"/></svg>
+                </button>
+                <button type="button" class="icon-btn danger" data-action="remove" data-id="${m.id}" title="Remove" aria-label="Remove">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>`;
+      }).join('');
+
+      rows.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          const member = currentTeam.find(m => m.id === id);
+          if (btn.dataset.action === 'edit') openEditModal(member);
+          if (btn.dataset.action === 'reset') openResetModal(member);
+          if (btn.dataset.action === 'remove') openRemoveModal(member);
+        });
+      });
+    }
+
+    function closeModal() {
+      document.getElementById('modal-backdrop').classList.remove('open');
+    }
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    document.getElementById('modal-backdrop').addEventListener('click', (e) => {
+      if (e.target.id === 'modal-backdrop') closeModal();
+    });
+
+    function setModalFooter(buttons) {
+      const footer = document.getElementById('modal-footer');
+      footer.innerHTML = '';
+      buttons.forEach(b => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = b.className;
+        btn.textContent = b.label;
+        btn.addEventListener('click', b.onClick);
+        footer.appendChild(btn);
+      });
+    }
+
+    let toastTimer = null;
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('visible');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('visible'), 5000);
+    }
+
+    function permFieldsHtml(idPrefix, role, permissions) {
+      return `
+        <div class="field" id="${idPrefix}-perm-wrap" style="${role === 'admin' ? 'display:none;' : ''}">
+          <label>Permissions</label>
+          <div class="perm-checklist">
+            ${PERMISSIONS.map(p => `
+              <label>
+                <input type="checkbox" id="${idPrefix}-perm-${p.key}" ${permissions && permissions[p.key] ? 'checked' : ''}>
+                ${p.label}
+              </label>`).join('')}
+          </div>
+        </div>
+        <div class="admin-perm-note" id="${idPrefix}-admin-note" style="${role === 'admin' ? '' : 'display:none;'}">Admins automatically have access to everything, including Team management.</div>`;
+    }
+
+    function wireRoleToggle(idPrefix) {
+      const radios = document.querySelectorAll(`input[name="${idPrefix}-role"]`);
+      radios.forEach(r => {
+        r.closest('label').classList.toggle('selected', r.checked);
+        r.addEventListener('change', () => {
+          radios.forEach(r2 => r2.closest('label').classList.toggle('selected', r2.checked));
+          const isAdmin = document.querySelector(`input[name="${idPrefix}-role"]:checked`).value === 'admin';
+          document.getElementById(`${idPrefix}-perm-wrap`).style.display = isAdmin ? 'none' : '';
+          document.getElementById(`${idPrefix}-admin-note`).style.display = isAdmin ? '' : 'none';
+        });
+      });
+    }
+
+    function readPermFields(idPrefix) {
+      const perms = emptyPermissions();
+      PERMISSIONS.forEach(p => { perms[p.key] = document.getElementById(`${idPrefix}-perm-${p.key}`).checked; });
+      return perms;
+    }
+
+    function openInviteModal() {
+      document.getElementById('modal-title').textContent = 'Invite Team Member';
+      document.getElementById('modal-subtitle').textContent = 'They can sign in with this email once invited';
+      document.getElementById('modal-body').innerHTML = `
+        <div class="form-error" id="invite-error"></div>
+        <div class="field">
+          <label for="invite-name">Name<span class="required-mark">*</span></label>
+          <input type="text" id="invite-name" placeholder="Jane Smith">
+        </div>
+        <div class="field">
+          <label for="invite-email">Email<span class="required-mark">*</span></label>
+          <input type="email" id="invite-email" placeholder="jane@christchurchbluffton.org">
+        </div>
+        <div class="field">
+          <label>Role</label>
+          <div class="role-radio-group">
+            <label><input type="radio" name="invite-role-role" value="staff" checked> Staff</label>
+            <label><input type="radio" name="invite-role-role" value="admin"> Admin</label>
+          </div>
+        </div>
+        ${permFieldsHtml('invite-role', 'staff', null)}`;
+      wireRoleToggle('invite-role');
+      setModalFooter([
+        { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+        { label: 'Send Invite', className: 'btn btn-gold', onClick: submitInvite }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    async function submitInvite() {
+      const name = document.getElementById('invite-name').value.trim();
+      const email = document.getElementById('invite-email').value.trim();
+      const role = document.querySelector('input[name="invite-role-role"]:checked').value;
+      const errorBox = document.getElementById('invite-error');
+      errorBox.classList.remove('visible');
+
+      if (!name || !email) {
+        errorBox.textContent = 'Name and email are required.';
+        errorBox.classList.add('visible');
+        return;
+      }
+      if (await findTeamMember(email)) {
+        errorBox.textContent = 'Someone with that email is already on the team.';
+        errorBox.classList.add('visible');
+        return;
+      }
+
+      const permissions = role === 'admin' ? fullPermissions() : readPermFields('invite-role');
+      const res = await backendFetch('/api/team', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name, role, permissions })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        errorBox.textContent = data.error || 'Could not create this account — the local backend server may not be running.';
+        errorBox.classList.add('visible');
+        return;
+      }
+      await backendFetch(`/api/team/${data.id}/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: 'Temp123!!' })
+      });
+
+      logActivity('team_invite', `${name} (${email}) — ${role}`);
+      closeModal();
+      await renderTeam();
+      // No real email service wired up yet — Kevin hands out the temp password directly.
+      // They're forced to set their own password on first sign-in (see shared.js loadSidebar).
+      showToast(`${name} added with a temporary password (Temp123!!). No email was sent — share the login directly. They'll be asked to set their own password the first time they sign in.`);
+    }
+
+    function openEditModal(member) {
+      document.getElementById('modal-title').textContent = `Edit ${member.name}`;
+      document.getElementById('modal-subtitle').textContent = member.email;
+      document.getElementById('modal-body').innerHTML = `
+        <div class="form-error" id="edit-error"></div>
+        <div class="field">
+          <label for="edit-name">Name<span class="required-mark">*</span></label>
+          <input type="text" id="edit-name" value="${escapeHtml(member.name)}">
+        </div>
+        <div class="field">
+          <label>Role</label>
+          <div class="role-radio-group">
+            <label><input type="radio" name="edit-role-role" value="staff" ${member.role === 'staff' ? 'checked' : ''}> Staff</label>
+            <label><input type="radio" name="edit-role-role" value="admin" ${member.role === 'admin' ? 'checked' : ''}> Admin</label>
+          </div>
+        </div>
+        ${permFieldsHtml('edit-role', member.role, member.permissions)}`;
+      wireRoleToggle('edit-role');
+      setModalFooter([
+        { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+        { label: 'Save Changes', className: 'btn btn-gold', onClick: () => submitEdit(member) }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    async function submitEdit(member) {
+      const name = document.getElementById('edit-name').value.trim();
+      const role = document.querySelector('input[name="edit-role-role"]:checked').value;
+      const errorBox = document.getElementById('edit-error');
+      errorBox.classList.remove('visible');
+
+      if (!name) {
+        errorBox.textContent = 'Name is required.';
+        errorBox.classList.add('visible');
+        return;
+      }
+      if (member.role === 'admin' && role !== 'admin' && currentTeam.filter(m => m.role === 'admin').length <= 1) {
+        errorBox.textContent = 'This is the only Admin account — promote someone else to Admin before demoting this one.';
+        errorBox.classList.add('visible');
+        return;
+      }
+
+      const permissions = role === 'admin' ? fullPermissions() : readPermFields('edit-role');
+      const { error } = await supabaseClient.from('profiles').update({ name, role, permissions }).eq('id', member.id);
+      if (error) {
+        errorBox.textContent = error.message;
+        errorBox.classList.add('visible');
+        return;
+      }
+      logActivity('team_edit', `${name} (${member.email})${member.role !== role ? `, role ${member.role} → ${role}` : ''}`);
+      closeModal();
+      await renderTeam();
+      if (member.email === session.email) session = await syncSessionFromTeam();
+    }
+
+    function openResetModal(member) {
+      document.getElementById('modal-title').textContent = `Reset Password`;
+      document.getElementById('modal-subtitle').textContent = `${member.name} — ${member.email}`;
+      document.getElementById('modal-body').innerHTML = `
+        <div class="form-error" id="reset-error"></div>
+        <div class="field">
+          <label for="reset-pw">New Password<span class="required-mark">*</span></label>
+          <input type="password" id="reset-pw" placeholder="At least 6 characters">
+        </div>
+        <div class="field">
+          <label for="reset-pw-confirm">Confirm New Password<span class="required-mark">*</span></label>
+          <input type="password" id="reset-pw-confirm" placeholder="Repeat password">
+        </div>`;
+      setModalFooter([
+        { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+        { label: 'Set Password', className: 'btn btn-gold', onClick: () => submitReset(member) }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    async function submitReset(member) {
+      const pw = document.getElementById('reset-pw').value;
+      const confirm = document.getElementById('reset-pw-confirm').value;
+      const errorBox = document.getElementById('reset-error');
+      errorBox.classList.remove('visible');
+
+      if (pw.length < 6) {
+        errorBox.textContent = 'Password must be at least 6 characters.';
+        errorBox.classList.add('visible');
+        return;
+      }
+      if (pw !== confirm) {
+        errorBox.textContent = 'Passwords do not match.';
+        errorBox.classList.add('visible');
+        return;
+      }
+      const res = await backendFetch(`/api/team/${member.id}/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        errorBox.textContent = data.error || 'Could not set password — the local backend server may not be running.';
+        errorBox.classList.add('visible');
+        return;
+      }
+      logActivity('team_reset_pw', `${member.name} (${member.email})`);
+      closeModal();
+      await renderTeam();
+    }
+
+    function openRemoveModal(member) {
+      if (member.role === 'admin' && currentTeam.filter(m => m.role === 'admin').length <= 1) {
+        showToast('This is the only Admin account — promote someone else to Admin before removing this one.');
+        return;
+      }
+      document.getElementById('modal-title').textContent = 'Remove Team Member';
+      document.getElementById('modal-subtitle').textContent = '';
+      document.getElementById('modal-body').innerHTML = `<p style="font-size:14px; color:var(--text-dark); line-height:1.6;">Remove <strong>${escapeHtml(member.name)}</strong> (${escapeHtml(member.email)}) from the team? They will lose access immediately.</p>`;
+      setModalFooter([
+        { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+        { label: 'Remove', className: 'btn btn-gold', onClick: () => submitRemove(member) }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    async function submitRemove(member) {
+      const res = await backendFetch(`/api/team/${member.id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        showToast('Could not remove this account — the local backend server may not be running.');
+        return;
+      }
+      logActivity('team_remove', `${member.name} (${member.email})`);
+      closeModal();
+      if (member.email === session.email) {
+        await signOutSession();
+        window.location.href = 'index.html';
+        return;
+      }
+      await renderTeam();
+    }
+
+    document.getElementById('invite-btn').addEventListener('click', openInviteModal);
+
+    document.getElementById('download-log-btn').addEventListener('click', async () => {
+      const fromVal = document.getElementById('log-from').value;
+      const toVal = document.getElementById('log-to').value;
+      const fromMs = fromVal ? new Date(fromVal + 'T00:00:00').getTime() : null;
+      const toMs = toVal ? new Date(toVal + 'T23:59:59').getTime() : null;
+      const csv = await activityLogToCsv(fromMs, toMs);
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ccb-admin-activity-log-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    loadSidebar().then(async () => {
+      session = getSession();
+      if (!session) return;
+      if (document.getElementById('team-rows')) await renderTeam();
+      const log = await getActivityLog();
+      const count = log.length;
+      document.getElementById('log-entry-count').textContent = `${count} entr${count === 1 ? 'y' : 'ies'} logged`;
+    });
+  </script>
+</body>
+</html>

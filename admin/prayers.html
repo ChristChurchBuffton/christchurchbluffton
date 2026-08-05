@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<title>Prayer Requests — Christ Church Bluffton Admin</title>
+<link rel="stylesheet" href="css/shared.css">
+<style>
+  .alpha-banner {
+    background: rgba(46,125,50,0.08);
+    border: 1px solid rgba(46,125,50,0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: var(--text-dark);
+  }
+  .alpha-banner strong { color: #2e7d32; }
+  .info-banner {
+    background: rgba(48,59,106,0.06);
+    border: 1px solid rgba(48,59,106,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: var(--text-dark);
+    line-height: 1.5;
+  }
+
+  .page-width { max-width: 1180px; margin: 0 auto; }
+  .toolbar {
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
+    margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .toolbar-filters { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+  .toolbar .filter-field { display: flex; flex-direction: column; gap: 6px; }
+  .toolbar .filter-field label { font-size: 12px; font-weight: bold; color: var(--text-muted); }
+  .toolbar select, .toolbar input[type="text"] {
+    padding: 8px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
+    font-family: inherit; font-size: 13px; background: var(--white); color: var(--text-dark);
+  }
+  .toolbar input[type="text"] { min-width: 220px; }
+
+  .prayers-card {
+    border-radius: 14px;
+    overflow: hidden;
+    border-color: transparent;
+    box-shadow: 0 2px 10px rgba(48,59,106,0.07);
+  }
+  .prayers-card-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 16px 22px;
+    background: linear-gradient(135deg, rgba(195,163,85,0.12) 0%, rgba(195,163,85,0.04) 100%);
+    border-bottom: 2px solid var(--gold);
+  }
+  .prayers-card-title { font-family: Georgia, 'Times New Roman', serif; font-size: 16px; color: var(--navy-blue); }
+  .prayers-card-count {
+    font-size: 10.5px; font-weight: bold; color: var(--gold-text); text-transform: uppercase; letter-spacing: 0.5px;
+    background: rgba(195,163,85,0.18); padding: 3px 10px; border-radius: 100px;
+  }
+
+  .prayer-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .prayer-table th {
+    text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);
+    padding: 12px 22px; background: var(--lightest-gray); border-bottom: 1px solid var(--border-gray);
+  }
+  .prayer-table tr { transition: background 0.12s ease; }
+  .prayer-table tbody tr:hover { background: rgba(195,163,85,0.05); }
+  .prayer-table td { padding: 13px 22px; border-bottom: 1px solid var(--border-gray); font-size: 13px; vertical-align: top; }
+  .prayer-table tr:last-child td { border-bottom: none; }
+  .prayer-requester { font-weight: bold; color: var(--text-dark); }
+  .prayer-requester .contact-line { font-weight: normal; font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+  .prayer-request-text { color: var(--text-dark); line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+  .status-chip {
+    display: inline-block; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.3px;
+    padding: 3px 9px; border-radius: 100px;
+  }
+  .status-chip.active { background: rgba(195,163,85,0.18); color: var(--gold-text); }
+  .status-chip.answered { background: rgba(46,125,50,0.12); color: #2e7d32; }
+  .status-chip.archived { background: rgba(0,0,0,0.06); color: var(--text-muted); }
+  .prayer-empty { padding: 40px 16px; text-align: center; font-size: 13px; color: var(--text-muted); font-style: italic; }
+  .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+  .icon-btn {
+    width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-gray);
+    background: var(--white); display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); cursor: pointer; padding: 0; flex-shrink: 0;
+  }
+  .icon-btn svg { width: 14px; height: 14px; }
+  .icon-btn:hover { border-color: var(--navy-blue); color: var(--navy-blue); background: rgba(48,59,106,0.05); }
+  .icon-btn.danger:hover { border-color: var(--danger); color: var(--danger); background: rgba(177,67,67,0.05); }
+
+  /* Below this width there isn't room for fixed columns without cramping the request text —
+     switch each row into a stacked card instead. */
+  @media (max-width: 1300px) {
+    .prayer-table, .prayer-table tbody, .prayer-table td { display: block; }
+    .prayer-table thead { display: none; }
+    .prayer-table tr {
+      display: block;
+      border: 1px solid var(--border-gray); border-radius: 10px; margin: 12px 16px; padding: 14px 16px;
+    }
+    .prayer-table tbody tr:hover { background: none; }
+    .prayer-table td {
+      width: auto !important; white-space: normal !important; word-break: break-word;
+      border-bottom: none; padding: 0 0 10px; box-sizing: border-box;
+    }
+    .prayer-table td:last-child { padding-bottom: 0; }
+    .prayer-table td::before {
+      content: attr(data-label); display: block; font-size: 11px; font-weight: bold;
+      text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-bottom: 3px;
+    }
+    .prayer-table td:nth-child(1)::before { display: none; }
+    .prayer-table .row-actions { justify-content: flex-start; padding-top: 6px; border-top: 1px solid var(--border-gray); }
+  }
+
+  /* ---- Modal (shared shell pattern) ---- */
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0; background: rgba(30,37,71,0.55);
+    z-index: 1000; align-items: center; justify-content: center; padding: 24px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-box {
+    background: var(--white); border-radius: 14px; width: 100%; max-width: 480px;
+    max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+  }
+  .modal-header { padding: 20px 26px; border-bottom: 1px solid var(--border-gray); display: flex; align-items: center; justify-content: space-between; }
+  .modal-header .modal-title { font-family: Georgia, 'Times New Roman', serif; font-size: 20px; color: var(--navy-blue); }
+  .modal-header .modal-subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .modal-close { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border-gray); background: var(--white); color: var(--text-muted); font-size: 16px; cursor: pointer; flex-shrink: 0; }
+  .modal-close:hover { border-color: var(--navy-blue); color: var(--navy-blue); }
+  .modal-body { padding: 22px 26px; overflow-y: auto; }
+  .modal-footer { padding: 16px 26px; border-top: 1px solid var(--border-gray); display: flex; justify-content: flex-end; gap: 10px; }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 13px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; }
+  .field input[type="text"], .field input[type="email"], .field input[type="date"], .field select, .field textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
+    font-family: inherit; font-size: 14px; background: var(--lightest-gray); color: var(--text-dark);
+  }
+  .field textarea { min-height: 100px; resize: vertical; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--gold); background: var(--white); }
+  .name-row { display: flex; gap: 12px; }
+  .name-row .field { flex: 1; }
+  .anon-check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dark); cursor: pointer; margin-bottom: 16px; }
+  .anon-check-row input { width: 15px; height: 15px; accent-color: var(--gold-text); }
+
+  .form-error { background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; }
+  .form-error.visible { display: block; }
+</style>
+</head>
+<body data-page="prayers" data-permission="prayers">
+  <div class="app-shell">
+    <div id="sidebar-mount">
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img class="brand-crest" src="assets/site-images/logo-dark-bg.png" alt="Christ Church Bluffton crest">
+    <div>
+      <div class="title">Christ Church Bluffton</div>
+      <div class="label">Admin Panel</div>
+    </div>
+    <button type="button" class="hamburger-btn" id="hamburger-btn" aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+    </button>
+  </div>
+  <div class="sidebar-collapsible" id="sidebar-collapsible">
+    <nav>
+      <a href="dashboard.html" data-page="dashboard">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Dashboard
+      </a>
+      <a href="staff.html" data-page="staff">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Staff
+      </a>
+      <a href="congregants.html" data-page="congregants" data-permission="congregants">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+        Congregants
+      </a>
+      <a href="prayers.html" data-page="prayers" data-permission="prayers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+        Prayer Requests
+      </a>
+      <a href="volunteers.html" data-page="volunteers" data-permission="signups">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Volunteers
+      </a>
+      <a href="subscribers.html" data-page="subscribers" data-permission="subscribers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h4M15 12h4M6 16h12"/></svg>
+        Subscribers
+      </a>
+      <a href="newsletter.html" data-page="newsletter" data-permission="newsletter" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        Newsletter
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="events.html" data-page="events" data-permission="events">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Events
+      </a>
+      <a href="content.html" data-page="content" data-permission="contentEditor" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Content Editor
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="photos.html" data-page="photos" data-permission="photos">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg>
+        Photos
+      </a>
+      <a href="team.html" data-page="team" data-admin-only="true">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M19 8h4M21 6v4"/></svg>
+        Team
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="reading-mode-row" id="reading-mode-row" style="display:none;">
+        <button type="button" class="reading-mode-btn" id="reading-mode-btn" title="Toggle easier-to-read text">
+          <span class="aa-icon">Aa</span> Reading Mode
+        </button>
+        <div class="reading-tint-swatches" id="reading-tint-swatches" style="display:none;">
+          <button type="button" class="tint-swatch tint-cream" data-tint="cream" title="Cream background"></button>
+          <button type="button" class="tint-swatch tint-blue" data-tint="blue" title="Light blue background"></button>
+          <button type="button" class="tint-swatch tint-green" data-tint="green" title="Light green background"></button>
+        </div>
+      </div>
+      <a href="account.html" class="user-chip" id="user-chip-link" title="Account Settings">
+        <div class="avatar" id="sidebar-avatar">?</div>
+        <div class="user-chip-info">
+          <div class="name" id="sidebar-name">—</div>
+          <div class="role" id="sidebar-role">—</div>
+        </div>
+        <svg class="chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+      <a href="#" class="logout-link" id="logout-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Log out
+      </a>
+    </div>
+  </div>
+</aside>
+  </div>
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <h1>Prayer Requests</h1>
+          <div class="subtitle">A record of prayer requests, so they don't just disappear into an inbox</div>
+        </div>
+        <button type="button" class="btn btn-gold" id="add-prayer-btn">+ Add Prayer Request</button>
+      </div>
+      <div class="content" id="page-body">
+        <div class="alpha-banner">
+          <strong>Alpha (Testing)</strong> — all data you enter here is saved.
+        </div>
+
+        <div class="toolbar page-width">
+          <div class="toolbar-filters">
+            <div class="filter-field">
+              <label for="status-filter">Filter by status</label>
+              <select id="status-filter">
+                <option value="">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="answered">Answered</option>
+                <option value="archived">Archived</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="search-input">Search</label>
+              <input type="text" id="search-input" placeholder="Name or request text">
+            </div>
+          </div>
+        </div>
+
+        <div class="page-width">
+          <div class="card prayers-card">
+            <div class="prayers-card-head">
+              <div class="prayers-card-title">Prayer Log</div>
+              <div class="prayers-card-count" id="prayers-count">— requests</div>
+            </div>
+            <div class="table-scroll">
+              <table class="prayer-table">
+                <colgroup>
+                  <col style="width:18%">
+                  <col style="width:40%">
+                  <col style="width:12%">
+                  <col style="width:12%">
+                  <col style="width:18%">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>Requester</th>
+                    <th>Request</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="prayer-rows"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="modal-title">Add Prayer Request</div>
+          <div class="modal-subtitle" id="modal-subtitle"></div>
+        </div>
+        <button type="button" class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    const STATUS_LABELS = { active: 'Active', answered: 'Answered', archived: 'Archived' };
+
+    let prayers = [];
+    let statusFilter = '';
+    let searchTerm = '';
+
+    function escapeHtml(str) {
+      return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    // DB rows are snake_case; every render/UI function below still expects the original
+    // camelCase shape, so normalize right after fetching.
+    function rowToPrayer(row) {
+      return {
+        id: row.id,
+        isAnonymous: row.is_anonymous,
+        requesterName: row.requester_name || '',
+        email: row.email || '',
+        phone: row.phone || '',
+        requestText: row.request_text,
+        status: row.status,
+        submittedAt: row.submitted_at
+      };
+    }
+
+    // Reverse mapping for insert/update — blank optional fields go in as null rather
+    // than empty strings, since the columns are nullable.
+    function prayerToRow(data) {
+      return {
+        is_anonymous: data.isAnonymous,
+        requester_name: data.isAnonymous ? null : (data.requesterName || null),
+        email: data.isAnonymous ? null : (data.email || null),
+        phone: data.isAnonymous ? null : (data.phone || null),
+        request_text: data.requestText,
+        status: data.status,
+        submitted_at: data.submittedAt
+      };
+    }
+
+    async function loadPrayers() {
+      const { data, error } = await supabaseClient
+        .from('prayer_requests')
+        .select('*')
+        .order('submitted_at', { ascending: false });
+      if (error) { console.error('loadPrayers failed:', error.message); prayers = []; return; }
+      prayers = data.map(rowToPrayer);
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    function matchesSearch(p, term) {
+      if (!term) return true;
+      const haystack = `${p.requesterName} ${p.requestText}`.toLowerCase();
+      return haystack.includes(term.toLowerCase());
+    }
+
+    function renderPrayers() {
+      let list = [...prayers];
+      if (statusFilter) list = list.filter(p => p.status === statusFilter);
+      if (searchTerm) list = list.filter(p => matchesSearch(p, searchTerm));
+      list.sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || ''));
+
+      document.getElementById('prayers-count').textContent = `${prayers.length} ${prayers.length === 1 ? 'request' : 'requests'}`;
+
+      const rows = document.getElementById('prayer-rows');
+      if (list.length === 0) {
+        rows.innerHTML = `<tr><td colspan="5" class="prayer-empty">${prayers.length === 0 ? 'No prayer requests logged yet.' : 'No matches for this filter/search.'}</td></tr>`;
+        return;
+      }
+
+      rows.innerHTML = list.map(p => {
+        const contactBits = [p.email, p.phone].filter(Boolean).join(' · ');
+        return `
+        <tr>
+          <td class="prayer-requester" data-label="Requester">
+            ${p.isAnonymous ? 'Anonymous' : escapeHtml(p.requesterName || '—')}
+            ${contactBits ? `<div class="contact-line">${escapeHtml(contactBits)}</div>` : ''}
+          </td>
+          <td class="prayer-request-text" data-label="Request">${escapeHtml(p.requestText)}</td>
+          <td data-label="Status"><span class="status-chip ${p.status}">${STATUS_LABELS[p.status] || p.status}</span></td>
+          <td data-label="Date">${formatDate(p.submittedAt)}</td>
+          <td>
+            <div class="row-actions">
+              <button type="button" class="icon-btn" data-action="edit" data-id="${p.id}" title="Edit" aria-label="Edit">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+              </button>
+              <button type="button" class="icon-btn danger" data-action="remove" data-id="${p.id}" title="Remove" aria-label="Remove">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    function closeModal() { document.getElementById('modal-backdrop').classList.remove('open'); }
+    function setModalFooter(buttons) {
+      const footer = document.getElementById('modal-footer');
+      footer.innerHTML = '';
+      buttons.forEach(b => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = b.className;
+        btn.textContent = b.label;
+        btn.addEventListener('click', b.onClick);
+        footer.appendChild(btn);
+      });
+    }
+
+    function toggleAnonFields(isAnon) {
+      document.getElementById('requester-fields').style.display = isAnon ? 'none' : '';
+    }
+
+    function openPrayerModal(existing) {
+      document.getElementById('modal-title').textContent = existing ? 'Edit Prayer Request' : 'Add Prayer Request';
+      document.getElementById('modal-subtitle').textContent = '';
+      const today = new Date().toISOString().slice(0, 10);
+      document.getElementById('modal-body').innerHTML = `
+        <div class="form-error" id="prayer-error"></div>
+        <label class="anon-check-row">
+          <input type="checkbox" id="prayer-anonymous" ${existing && existing.isAnonymous ? 'checked' : ''}>
+          Keep requester anonymous
+        </label>
+        <div id="requester-fields" style="${existing && existing.isAnonymous ? 'display:none;' : ''}">
+          <div class="field">
+            <label for="requester-name">Requester Name</label>
+            <input type="text" id="requester-name" placeholder="Jane Smith" value="${existing ? escapeHtml(existing.requesterName || '') : ''}">
+          </div>
+          <div class="name-row">
+            <div class="field"><label for="requester-email">Email</label><input type="text" id="requester-email" placeholder="jane@example.com" value="${existing ? escapeHtml(existing.email || '') : ''}"></div>
+            <div class="field"><label for="requester-phone">Phone</label><input type="text" id="requester-phone" placeholder="(843) 555-0100" value="${existing ? escapeHtml(existing.phone || '') : ''}"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="prayer-text">Request<span class="required-mark">*</span></label>
+          <textarea id="prayer-text" placeholder="What should we be praying for?">${existing ? escapeHtml(existing.requestText) : ''}</textarea>
+        </div>
+        <div class="name-row">
+          <div class="field">
+            <label for="prayer-status">Status</label>
+            <select id="prayer-status">
+              <option value="active" ${!existing || existing.status === 'active' ? 'selected' : ''}>Active</option>
+              <option value="answered" ${existing && existing.status === 'answered' ? 'selected' : ''}>Answered</option>
+              <option value="archived" ${existing && existing.status === 'archived' ? 'selected' : ''}>Archived</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="prayer-date">Date</label>
+            <input type="date" id="prayer-date" value="${existing ? existing.submittedAt : today}">
+          </div>
+        </div>`;
+
+      document.getElementById('prayer-anonymous').addEventListener('change', (e) => toggleAnonFields(e.target.checked));
+
+      setModalFooter([
+        { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+        { label: existing ? 'Save Changes' : 'Add Prayer Request', className: 'btn btn-gold', onClick: () => submitPrayerForm(existing ? existing.id : null) }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    async function submitPrayerForm(existingId) {
+      const isAnonymous = document.getElementById('prayer-anonymous').checked;
+      const requesterName = isAnonymous ? '' : document.getElementById('requester-name').value.trim();
+      const email = isAnonymous ? '' : document.getElementById('requester-email').value.trim();
+      const phone = isAnonymous ? '' : document.getElementById('requester-phone').value.trim();
+      const requestText = document.getElementById('prayer-text').value.trim();
+      const status = document.getElementById('prayer-status').value;
+      const submittedAt = document.getElementById('prayer-date').value;
+      const errorBox = document.getElementById('prayer-error');
+      errorBox.classList.remove('visible');
+
+      if (!requestText) {
+        errorBox.textContent = 'The request itself is required.';
+        errorBox.classList.add('visible');
+        return;
+      }
+      if (!isAnonymous && !requesterName) {
+        errorBox.textContent = 'Add a requester name, or check "Keep requester anonymous."';
+        errorBox.classList.add('visible');
+        return;
+      }
+
+      const data = { isAnonymous, requesterName, email, phone, requestText, status, submittedAt };
+      const label = isAnonymous ? 'Anonymous request' : requesterName;
+      const row = prayerToRow(data);
+
+      if (existingId) {
+        const { error } = await supabaseClient.from('prayer_requests').update(row).eq('id', existingId);
+        if (error) {
+          errorBox.textContent = error.message;
+          errorBox.classList.add('visible');
+          return;
+        }
+        logActivity('prayer_edit', label);
+      } else {
+        const { error } = await supabaseClient.from('prayer_requests').insert(row);
+        if (error) {
+          errorBox.textContent = error.message;
+          errorBox.classList.add('visible');
+          return;
+        }
+        logActivity('prayer_add', label);
+      }
+      closeModal();
+      await loadPrayers();
+      renderPrayers();
+    }
+
+    function openRemoveModal(prayer) {
+      document.getElementById('modal-title').textContent = 'Remove Prayer Request';
+      document.getElementById('modal-subtitle').textContent = '';
+      document.getElementById('modal-body').innerHTML = `<p style="font-size:14px; color:var(--text-dark); line-height:1.6;">Remove this prayer request from ${prayer.isAnonymous ? '<strong>an anonymous requester</strong>' : `<strong>${escapeHtml(prayer.requesterName)}</strong>`}? This can't be undone.</p>`;
+      setModalFooter([
+        { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+        { label: 'Remove', className: 'btn btn-gold', onClick: () => submitRemovePrayer(prayer) }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    async function submitRemovePrayer(prayer) {
+      const { error } = await supabaseClient.from('prayer_requests').delete().eq('id', prayer.id);
+      if (error) { console.error('Failed to remove prayer request:', error.message); return; }
+      logActivity('prayer_remove', prayer.isAnonymous ? 'Anonymous request' : prayer.requesterName);
+      closeModal();
+      await loadPrayers();
+      renderPrayers();
+    }
+
+    const dataPromise = loadPrayers();
+
+    loadSidebar().then(async () => {
+      if (!document.getElementById('prayer-rows')) return;
+
+      await dataPromise;
+      renderPrayers();
+
+      document.getElementById('modal-close').addEventListener('click', closeModal);
+      document.getElementById('modal-backdrop').addEventListener('click', (e) => {
+        if (e.target.id === 'modal-backdrop') closeModal();
+      });
+
+      document.getElementById('add-prayer-btn').addEventListener('click', () => openPrayerModal(null));
+      document.getElementById('status-filter').addEventListener('change', (e) => { statusFilter = e.target.value; renderPrayers(); });
+      document.getElementById('search-input').addEventListener('input', (e) => { searchTerm = e.target.value; renderPrayers(); });
+
+      document.getElementById('prayer-rows').addEventListener('click', (e) => {
+        const editBtn = e.target.closest('[data-action="edit"]');
+        if (editBtn) {
+          const p = prayers.find(x => x.id === editBtn.dataset.id);
+          if (p) openPrayerModal(p);
+          return;
+        }
+        const removeBtn = e.target.closest('[data-action="remove"]');
+        if (removeBtn) {
+          const p = prayers.find(x => x.id === removeBtn.dataset.id);
+          if (p) openRemoveModal(p);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

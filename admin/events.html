@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<title>Events — Christ Church Bluffton Admin</title>
+<link rel="stylesheet" href="css/shared.css">
+<style>
+  .alpha-banner {
+    background: rgba(46,125,50,0.08);
+    border: 1px solid rgba(46,125,50,0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: var(--text-dark);
+  }
+  .alpha-banner strong { color: #2e7d32; }
+
+  .page-width { max-width: 900px; margin: 0 auto; }
+
+  .section-heading {
+    font-family: Georgia, 'Times New Roman', serif; font-size: 16px; color: var(--navy-blue);
+    margin: 28px 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--gold);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .section-heading:first-child { margin-top: 0; }
+  .section-count {
+    font-size: 10.5px; font-weight: bold; color: var(--gold-text); text-transform: uppercase; letter-spacing: 0.5px;
+    background: rgba(195,163,85,0.18); padding: 3px 10px; border-radius: 100px;
+  }
+  .month-heading {
+    font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);
+    margin: 18px 0 8px;
+  }
+  .month-heading:first-child { margin-top: 0; }
+
+  .event-card {
+    display: flex; gap: 16px; align-items: flex-start;
+    border-radius: 12px; border-color: transparent;
+    box-shadow: 0 2px 10px rgba(48,59,106,0.07);
+    padding: 16px 18px; margin-bottom: 12px;
+  }
+  .event-card.past { opacity: 0.65; }
+  .event-date-block {
+    flex-shrink: 0; width: 62px; text-align: center;
+    background: var(--lightest-gray); border-radius: 10px; padding: 8px 4px;
+  }
+  .event-date-block .month { font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.4px; color: var(--gold-text); }
+  .event-date-block .day { font-family: Georgia, 'Times New Roman', serif; font-size: 22px; font-weight: bold; color: var(--navy-blue); line-height: 1.1; }
+  .event-date-block .year { font-size: 10px; color: var(--text-muted); }
+  .event-main { flex: 1; min-width: 0; }
+  .event-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .event-title { font-family: Georgia, 'Times New Roman', serif; font-size: 16px; font-weight: bold; color: var(--navy-blue); }
+  .repeat-chip {
+    font-size: 9.5px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.3px;
+    background: rgba(48,59,106,0.08); color: var(--navy-blue); padding: 2px 8px; border-radius: 100px;
+  }
+  .event-meta { font-size: 12.5px; color: var(--text-muted); margin-top: 4px; line-height: 1.6; }
+  .event-meta svg { width: 12px; height: 12px; vertical-align: -1px; margin-right: 4px; }
+  .event-description { font-size: 13px; color: var(--text-dark); margin-top: 8px; line-height: 1.5; }
+  .event-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .icon-btn {
+    width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-gray);
+    background: var(--white); display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); cursor: pointer; padding: 0; flex-shrink: 0;
+  }
+  .icon-btn svg { width: 14px; height: 14px; }
+  .icon-btn:hover { border-color: var(--navy-blue); color: var(--navy-blue); background: rgba(48,59,106,0.05); }
+  .icon-btn.danger:hover { border-color: var(--danger); color: var(--danger); background: rgba(177,67,67,0.05); }
+  .events-empty { padding: 30px 16px; text-align: center; font-size: 13px; color: var(--text-muted); font-style: italic; }
+
+  @media (max-width: 560px) {
+    .event-card { flex-wrap: wrap; }
+    .event-actions { margin-left: auto; }
+  }
+
+  /* ---- Modal (shared shell pattern) ---- */
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0; background: rgba(30,37,71,0.55);
+    z-index: 1000; align-items: center; justify-content: center; padding: 24px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-box {
+    background: var(--white); border-radius: 14px; width: 100%; max-width: 480px;
+    max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+  }
+  .modal-header { padding: 20px 26px; border-bottom: 1px solid var(--border-gray); display: flex; align-items: center; justify-content: space-between; }
+  .modal-header .modal-title { font-family: Georgia, 'Times New Roman', serif; font-size: 20px; color: var(--navy-blue); }
+  .modal-header .modal-subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .modal-close { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border-gray); background: var(--white); color: var(--text-muted); font-size: 16px; cursor: pointer; flex-shrink: 0; }
+  .modal-close:hover { border-color: var(--navy-blue); color: var(--navy-blue); }
+  .modal-body { padding: 22px 26px; overflow-y: auto; }
+  .modal-footer { padding: 16px 26px; border-top: 1px solid var(--border-gray); display: flex; justify-content: flex-end; gap: 10px; }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 13px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; }
+  .field input[type="text"], .field input[type="date"], .field input[type="time"], .field select, .field textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
+    font-family: inherit; font-size: 14px; background: var(--lightest-gray); color: var(--text-dark);
+  }
+  .field textarea { min-height: 80px; resize: vertical; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--gold); background: var(--white); }
+  .two-col-row { display: flex; gap: 12px; }
+  .two-col-row .field { flex: 1; }
+  .repeat-until-wrap { display: none; }
+  .repeat-until-wrap.visible { display: block; }
+  .repeat-hint { font-size: 12px; color: var(--text-muted); margin-top: -10px; margin-bottom: 16px; }
+
+  .form-error { background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; }
+  .form-error.visible { display: block; }
+</style>
+</head>
+<body data-page="events" data-permission="events">
+  <div class="app-shell">
+    <div id="sidebar-mount">
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img class="brand-crest" src="assets/site-images/logo-dark-bg.png" alt="Christ Church Bluffton crest">
+    <div>
+      <div class="title">Christ Church Bluffton</div>
+      <div class="label">Admin Panel</div>
+    </div>
+    <button type="button" class="hamburger-btn" id="hamburger-btn" aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+    </button>
+  </div>
+  <div class="sidebar-collapsible" id="sidebar-collapsible">
+    <nav>
+      <a href="dashboard.html" data-page="dashboard">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Dashboard
+      </a>
+      <a href="staff.html" data-page="staff">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Staff
+      </a>
+      <a href="congregants.html" data-page="congregants" data-permission="congregants">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+        Congregants
+      </a>
+      <a href="prayers.html" data-page="prayers" data-permission="prayers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+        Prayer Requests
+      </a>
+      <a href="volunteers.html" data-page="volunteers" data-permission="signups">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Volunteers
+      </a>
+      <a href="subscribers.html" data-page="subscribers" data-permission="subscribers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h4M15 12h4M6 16h12"/></svg>
+        Subscribers
+      </a>
+      <a href="newsletter.html" data-page="newsletter" data-permission="newsletter" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        Newsletter
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="events.html" data-page="events" data-permission="events">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Events
+      </a>
+      <a href="content.html" data-page="content" data-permission="contentEditor" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Content Editor
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="photos.html" data-page="photos" data-permission="photos">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg>
+        Photos
+      </a>
+      <a href="team.html" data-page="team" data-admin-only="true">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M19 8h4M21 6v4"/></svg>
+        Team
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="reading-mode-row" id="reading-mode-row" style="display:none;">
+        <button type="button" class="reading-mode-btn" id="reading-mode-btn" title="Toggle easier-to-read text">
+          <span class="aa-icon">Aa</span> Reading Mode
+        </button>
+        <div class="reading-tint-swatches" id="reading-tint-swatches" style="display:none;">
+          <button type="button" class="tint-swatch tint-cream" data-tint="cream" title="Cream background"></button>
+          <button type="button" class="tint-swatch tint-blue" data-tint="blue" title="Light blue background"></button>
+          <button type="button" class="tint-swatch tint-green" data-tint="green" title="Light green background"></button>
+        </div>
+      </div>
+      <a href="account.html" class="user-chip" id="user-chip-link" title="Account Settings">
+        <div class="avatar" id="sidebar-avatar">?</div>
+        <div class="user-chip-info">
+          <div class="name" id="sidebar-name">—</div>
+          <div class="role" id="sidebar-role">—</div>
+        </div>
+        <svg class="chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+      <a href="#" class="logout-link" id="logout-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Log out
+      </a>
+    </div>
+  </div>
+</aside>
+  </div>
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <h1>Events</h1>
+          <div class="subtitle">Church event calendar — one-time and recurring</div>
+        </div>
+        <button type="button" class="btn btn-gold" id="add-event-btn">+ Add Event</button>
+      </div>
+      <div class="content" id="page-body">
+        <div class="alpha-banner">
+          <strong>Alpha (Testing)</strong> — all data you enter here is saved.
+        </div>
+
+        <div class="page-width">
+          <div class="section-heading">Upcoming <span class="section-count" id="upcoming-count">— events</span></div>
+          <div id="upcoming-list"></div>
+
+          <div class="section-heading">Past <span class="section-count" id="past-count">— events</span></div>
+          <div id="past-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="modal-title">Add Event</div>
+          <div class="modal-subtitle" id="modal-subtitle"></div>
+        </div>
+        <button type="button" class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    const REPEAT_LABELS = { none: '', daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly' };
+
+    let events = [];
+
+    function escapeHtml(str) {
+      return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    // Supabase row (snake_case) -> the camelCase shape every date-math/render function below
+    // already expects. event_time -> time (DB column avoids the reserved-ish word "time").
+    // Nulls are normalized to '' to match what the old localStorage records always had.
+    function eventRowToCamel(row) {
+      return {
+        id: row.id,
+        title: row.title,
+        startDate: row.start_date,
+        endDate: row.end_date || '',
+        time: row.event_time ? row.event_time.slice(0, 5) : '',
+        location: row.location || '',
+        description: row.description || '',
+        repeat: row.repeat || 'none',
+        repeatUntil: row.repeat_until || '',
+        addedAt: row.added_at
+      };
+    }
+
+    // camelCase form data -> Supabase row (snake_case) for insert/update payloads.
+    function eventDataToRow(data) {
+      return {
+        title: data.title,
+        start_date: data.startDate,
+        end_date: data.endDate || null,
+        event_time: data.time || null,
+        location: data.location || null,
+        description: data.description || null,
+        repeat: data.repeat || 'none',
+        repeat_until: data.repeatUntil || null
+      };
+    }
+
+    async function loadEvents() {
+      const { data, error } = await supabaseClient
+        .from('events')
+        .select('*')
+        .order('start_date', { ascending: true });
+      if (error) {
+        console.error('loadEvents failed:', error.message);
+        events = [];
+        return;
+      }
+      events = (data || []).map(eventRowToCamel);
+    }
+
+    function todayMidnight() {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+
+    // Returns the next occurrence (a Date) on/after today, or null if the event (or its
+    // recurring series) has entirely passed. A multi-day event (endDate set) stays "upcoming"
+    // until it actually finishes, not just until it starts.
+    function nextOccurrence(ev) {
+      const today = todayMidnight();
+      const start = new Date(ev.startDate + 'T00:00:00');
+      if (ev.repeat === 'none' || !ev.repeat) {
+        const effectiveEnd = ev.endDate ? new Date(ev.endDate + 'T00:00:00') : start;
+        return effectiveEnd >= today ? start : null;
+      }
+
+      const until = ev.repeatUntil ? new Date(ev.repeatUntil + 'T00:00:00') : null;
+      if (until && until < today) return null;
+      if (start >= today) return start;
+
+      let cursor = new Date(start);
+      if (ev.repeat === 'daily') {
+        const diffDays = Math.ceil((today - start) / 86400000);
+        cursor.setDate(cursor.getDate() + diffDays);
+      } else if (ev.repeat === 'weekly') {
+        const diffDays = Math.ceil((today - start) / 86400000);
+        const weeks = Math.ceil(diffDays / 7);
+        cursor.setDate(cursor.getDate() + weeks * 7);
+      } else if (ev.repeat === 'monthly') {
+        while (cursor < today) cursor.setMonth(cursor.getMonth() + 1);
+      }
+      if (until && cursor > until) return null;
+      return cursor;
+    }
+
+    // How far ahead to preview additional occurrences of a recurring series beyond just the
+    // "next" one — e.g. 30 shows every upcoming date within the next month. Easy to tune later
+    // if staff feedback wants it shorter/longer; it's just this one number.
+    const OCCURRENCE_PREVIEW_DAYS = 30;
+
+    // All occurrences of a recurring event from its next date through the preview window,
+    // capped by the series' own end date. Returns [] for one-time events.
+    function upcomingOccurrences(ev, anchorDate, windowDays) {
+      if (!ev.repeat || ev.repeat === 'none') return [];
+      const until = ev.repeatUntil ? new Date(ev.repeatUntil + 'T00:00:00') : null;
+      const windowEnd = new Date(anchorDate);
+      windowEnd.setDate(windowEnd.getDate() + windowDays);
+      const results = [];
+      let cursor = new Date(anchorDate);
+      while (cursor <= windowEnd && (!until || cursor <= until)) {
+        results.push(new Date(cursor));
+        if (ev.repeat === 'daily') cursor.setDate(cursor.getDate() + 1);
+        else if (ev.repeat === 'weekly') cursor.setDate(cursor.getDate() + 7);
+        else if (ev.repeat === 'monthly') cursor.setMonth(cursor.getMonth() + 1);
+        else break;
+      }
+      return results;
+    }
+
+    function formatTime(timeStr) {
+      if (!timeStr) return '';
+      const [h, m] = timeStr.split(':').map(Number);
+      const period = h >= 12 ? 'PM' : 'AM';
+      const h12 = h % 12 === 0 ? 12 : h % 12;
+      return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+    }
+
+    function formatFullDate(d) {
+      return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    }
+
+    // Multi-day, non-recurring events show as a range ("July 15 – 19, 2027") instead of a
+    // single date. Recurring events and single-day events fall back to the plain date.
+    function formatDateOrRange(ev, displayDate) {
+      if (!ev.endDate || ev.endDate === ev.startDate || (ev.repeat && ev.repeat !== 'none')) {
+        return formatFullDate(displayDate);
+      }
+      const start = new Date(ev.startDate + 'T00:00:00');
+      const end = new Date(ev.endDate + 'T00:00:00');
+      const sameMonth = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
+      if (sameMonth) {
+        return `${start.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}–${end.getDate()}, ${end.getFullYear()}`;
+      }
+      return `${start.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} – ${end.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+    }
+
+    function eventCardHtml(ev, displayDate, isPast) {
+      const repeatLabel = REPEAT_LABELS[ev.repeat];
+      const untilLine = (ev.repeat && ev.repeat !== 'none' && ev.repeatUntil)
+        ? `<br><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Through ${new Date(ev.repeatUntil + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
+        : '';
+      // The card headline already shows the very next date — this line shows what comes after
+      // it within the preview window, so staff can see "yes, it's really weekly" at a glance.
+      let previewLine = '';
+      if (!isPast && ev.repeat && ev.repeat !== 'none') {
+        const upcoming = upcomingOccurrences(ev, displayDate, OCCURRENCE_PREVIEW_DAYS).slice(1);
+        if (upcoming.length) {
+          const dateList = upcoming.map(d => d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })).join(' &middot; ');
+          previewLine = `<br><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Recurring: ${dateList}`;
+        }
+      }
+      return `
+        <div class="card event-card ${isPast ? 'past' : ''}" data-id="${ev.id}">
+          <div class="event-date-block">
+            <div class="month">${displayDate.toLocaleDateString('en-US', { month: 'short' })}</div>
+            <div class="day">${displayDate.getDate()}</div>
+            <div class="year">${displayDate.getFullYear()}</div>
+          </div>
+          <div class="event-main">
+            <div class="event-title-row">
+              <div class="event-title">${escapeHtml(ev.title)}</div>
+              ${repeatLabel ? `<span class="repeat-chip">${repeatLabel}</span>` : ''}
+            </div>
+            <div class="event-meta">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>${formatDateOrRange(ev, displayDate)}${ev.time ? ` at ${formatTime(ev.time)}` : ''}
+              ${ev.location ? `<br><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>${escapeHtml(ev.location)}` : ''}
+              ${untilLine}
+              ${previewLine}
+            </div>
+            ${ev.description ? `<div class="event-description">${escapeHtml(ev.description)}</div>` : ''}
+          </div>
+          <div class="event-actions">
+            <button type="button" class="icon-btn" data-action="edit" data-id="${ev.id}" title="Edit" aria-label="Edit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            </button>
+            <button type="button" class="icon-btn danger" data-action="remove" data-id="${ev.id}" title="Remove" aria-label="Remove">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            </button>
+          </div>
+        </div>`;
+    }
+
+    // Groups already-sorted {ev, displayDate} entries into month headers, so a big gap between
+    // events (e.g. Nov 2026 to Jul 2027) reads clearly instead of looking like consecutive dates.
+    function renderWithMonthHeadings(list, isPast) {
+      let html = '';
+      let lastMonthKey = null;
+      list.forEach(({ ev, displayDate }) => {
+        const monthKey = `${displayDate.getFullYear()}-${displayDate.getMonth()}`;
+        if (monthKey !== lastMonthKey) {
+          html += `<div class="month-heading">${displayDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</div>`;
+          lastMonthKey = monthKey;
+        }
+        html += eventCardHtml(ev, displayDate, isPast);
+      });
+      return html;
+    }
+
+    function renderEvents() {
+      const upcoming = [];
+      const past = [];
+
+      events.forEach(ev => {
+        const next = nextOccurrence(ev);
+        if (next) {
+          upcoming.push({ ev, displayDate: next });
+        } else {
+          const fallback = (ev.repeat && ev.repeat !== 'none' && ev.repeatUntil) ? ev.repeatUntil : (ev.endDate || ev.startDate);
+          past.push({ ev, displayDate: new Date(fallback + 'T00:00:00') });
+        }
+      });
+
+      upcoming.sort((a, b) => a.displayDate - b.displayDate);
+      past.sort((a, b) => b.displayDate - a.displayDate);
+
+      document.getElementById('upcoming-count').textContent = `${upcoming.length} ${upcoming.length === 1 ? 'event' : 'events'}`;
+      document.getElementById('past-count').textContent = `${past.length} ${past.length === 1 ? 'event' : 'events'}`;
+
+      document.getElementById('upcoming-list').innerHTML = upcoming.length
+        ? renderWithMonthHeadings(upcoming, false)
+        : `<div class="events-empty">Nothing scheduled — add the first event.</div>`;
+
+      document.getElementById('past-list').innerHTML = past.length
+        ? renderWithMonthHeadings(past, true)
+        : `<div class="events-empty">No past events yet.</div>`;
+    }
+
+    function closeModal() { document.getElementById('modal-backdrop').classList.remove('open'); }
+    function setModalFooter(buttons) {
+      const footer = document.getElementById('modal-footer');
+      footer.innerHTML = '';
+      buttons.forEach(b => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = b.className;
+        btn.textContent = b.label;
+        btn.addEventListener('click', b.onClick);
+        footer.appendChild(btn);
+      });
+    }
+
+    function toggleRepeatUntil(repeatValue) {
+      const wrap = document.getElementById('repeat-until-wrap');
+      wrap.classList.toggle('visible', repeatValue !== 'none');
+    }
+
+    function openEventModal(existing) {
+      document.getElementById('modal-title').textContent = existing ? 'Edit Event' : 'Add Event';
+      document.getElementById('modal-subtitle').textContent = '';
+      const repeat = existing ? (existing.repeat || 'none') : 'none';
+      document.getElementById('modal-body').innerHTML = `
+        <div class="form-error" id="event-error"></div>
+        <div class="field">
+          <label for="event-title">Title<span class="required-mark">*</span></label>
+          <input type="text" id="event-title" placeholder="Saturday Worship Service" value="${existing ? escapeHtml(existing.title) : ''}">
+        </div>
+        <div class="two-col-row">
+          <div class="field">
+            <label for="event-date">Start Date<span class="required-mark">*</span></label>
+            <input type="date" id="event-date" value="${existing ? existing.startDate : ''}">
+          </div>
+          <div class="field">
+            <label for="event-end-date">End Date</label>
+            <input type="date" id="event-end-date" value="${existing ? (existing.endDate || '') : ''}">
+          </div>
+        </div>
+        <div class="repeat-hint">Leave End Date blank for a single-day event, or set it for a multi-day event like a camp or retreat.</div>
+        <div class="field">
+          <label for="event-time">Time</label>
+          <input type="time" id="event-time" value="${existing ? (existing.time || '') : ''}">
+        </div>
+        <div class="field">
+          <label for="event-location">Location</label>
+          <input type="text" id="event-location" placeholder="351 Buckwalter Pkwy, Bluffton, SC 29910" value="${existing ? escapeHtml(existing.location || '') : ''}">
+        </div>
+        <div class="field">
+          <label for="event-description">Description</label>
+          <textarea id="event-description" placeholder="Optional details...">${existing ? escapeHtml(existing.description || '') : ''}</textarea>
+        </div>
+        <div class="field">
+          <label for="event-repeat">Repeat</label>
+          <select id="event-repeat">
+            <option value="none" ${repeat === 'none' ? 'selected' : ''}>Does not repeat</option>
+            <option value="daily" ${repeat === 'daily' ? 'selected' : ''}>Daily</option>
+            <option value="weekly" ${repeat === 'weekly' ? 'selected' : ''}>Weekly</option>
+            <option value="monthly" ${repeat === 'monthly' ? 'selected' : ''}>Monthly</option>
+          </select>
+        </div>
+        <div class="repeat-until-wrap ${repeat !== 'none' ? 'visible' : ''}" id="repeat-until-wrap">
+          <div class="field">
+            <label for="event-repeat-until">Repeat Until<span class="required-mark">*</span></label>
+            <input type="date" id="event-repeat-until" value="${existing ? (existing.repeatUntil || '') : ''}">
+          </div>
+          <div class="repeat-hint">One event record covers the whole series — it'll show as a single recurring listing with its next date, not one row per occurrence.</div>
+        </div>`;
+
+      document.getElementById('event-repeat').addEventListener('change', (e) => toggleRepeatUntil(e.target.value));
+
+      setModalFooter([
+        { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+        { label: existing ? 'Save Changes' : 'Add Event', className: 'btn btn-gold', onClick: () => submitEventForm(existing ? existing.id : null) }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    async function submitEventForm(existingId) {
+      const title = document.getElementById('event-title').value.trim();
+      const startDate = document.getElementById('event-date').value;
+      const endDate = document.getElementById('event-end-date').value;
+      const time = document.getElementById('event-time').value;
+      const location = document.getElementById('event-location').value.trim();
+      const description = document.getElementById('event-description').value.trim();
+      const repeat = document.getElementById('event-repeat').value;
+      const repeatUntil = repeat !== 'none' ? document.getElementById('event-repeat-until').value : '';
+      const errorBox = document.getElementById('event-error');
+      errorBox.classList.remove('visible');
+
+      if (!title || !startDate) {
+        errorBox.textContent = 'Title and date are required.';
+        errorBox.classList.add('visible');
+        return;
+      }
+      if (endDate && endDate < startDate) {
+        errorBox.textContent = '"End Date" can\'t be before the start date.';
+        errorBox.classList.add('visible');
+        return;
+      }
+      if (repeat !== 'none' && !repeatUntil) {
+        errorBox.textContent = 'Add a "Repeat Until" date, or set Repeat back to "Does not repeat."';
+        errorBox.classList.add('visible');
+        return;
+      }
+      if (repeat !== 'none' && repeatUntil < startDate) {
+        errorBox.textContent = '"Repeat Until" can\'t be before the start date.';
+        errorBox.classList.add('visible');
+        return;
+      }
+
+      const data = { title, startDate, endDate, time, location, description, repeat, repeatUntil };
+      const payload = eventDataToRow(data);
+
+      if (existingId) {
+        // existingId is the real Supabase uuid for this event (see eventRowToCamel).
+        const { error } = await supabaseClient.from('events').update(payload).eq('id', existingId);
+        if (error) {
+          errorBox.textContent = error.message;
+          errorBox.classList.add('visible');
+          return;
+        }
+        logActivity('event_edit', title);
+      } else {
+        // id is left out of the payload — Postgres generates the real uuid (gen_random_uuid()).
+        const { error } = await supabaseClient.from('events').insert(payload);
+        if (error) {
+          errorBox.textContent = error.message;
+          errorBox.classList.add('visible');
+          return;
+        }
+        logActivity('event_add', title);
+      }
+
+      closeModal();
+      await loadEvents();
+      renderEvents();
+    }
+
+    function openRemoveModal(ev) {
+      document.getElementById('modal-title').textContent = 'Remove Event';
+      document.getElementById('modal-subtitle').textContent = '';
+      const seriesNote = (ev.repeat && ev.repeat !== 'none') ? ' This removes the whole recurring series, not just the next occurrence.' : '';
+      document.getElementById('modal-body').innerHTML = `<p style="font-size:14px; color:var(--text-dark); line-height:1.6;">Remove <strong>${escapeHtml(ev.title)}</strong>?${seriesNote}</p>`;
+      setModalFooter([
+        { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+        { label: 'Remove', className: 'btn btn-gold', onClick: async () => {
+          const { error } = await supabaseClient.from('events').delete().eq('id', ev.id);
+          if (error) {
+            alert('Could not remove this event: ' + error.message);
+            return;
+          }
+          logActivity('event_remove', ev.title);
+          closeModal();
+          await loadEvents();
+          renderEvents();
+        } }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    const dataPromise = loadEvents();
+
+    loadSidebar().then(async () => {
+      if (!document.getElementById('upcoming-list')) return;
+
+      await dataPromise;
+      renderEvents();
+
+      document.getElementById('modal-close').addEventListener('click', closeModal);
+      document.getElementById('modal-backdrop').addEventListener('click', (e) => {
+        if (e.target.id === 'modal-backdrop') closeModal();
+      });
+
+      document.getElementById('add-event-btn').addEventListener('click', () => openEventModal(null));
+
+      document.getElementById('page-body').addEventListener('click', (e) => {
+        const editBtn = e.target.closest('[data-action="edit"]');
+        if (editBtn) {
+          const ev = events.find(x => x.id === editBtn.dataset.id);
+          if (ev) openEventModal(ev);
+          return;
+        }
+        const removeBtn = e.target.closest('[data-action="remove"]');
+        if (removeBtn) {
+          const ev = events.find(x => x.id === removeBtn.dataset.id);
+          if (ev) openRemoveModal(ev);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

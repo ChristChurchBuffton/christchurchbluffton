@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base href="/assets/site-mirror/">
+    <meta charset="UTF-8">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PTWWV0M0DX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-PTWWV0M0DX');
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christ Church Bluffton | Service &amp; Worship</title>
+    <meta name="description" content="Join Christ Church Bluffton for worship services. Historic liturgy rooted in the Book of Common Prayer, hymns, contemporary worship, and Holy Communion.">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Christ Church Bluffton | Service & Worship">
+    <meta property="og:description" content="Join us for worship at Christ Church Bluffton — Saturday evenings at 5:30 PM.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://christchurchbluffton.org/images/og-join-us.jpg">
+    <meta property="og:url" content="https://christchurchbluffton.org/join-us">
+    <meta property="og:site_name" content="Christ Church Bluffton">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Christ Church Bluffton | Service &amp; Worship">
+    <meta name="twitter:description" content="Join us for worship at Christ Church Bluffton — Saturday evenings at 5:30 PM.">
+    <meta name="twitter:image" content="https://christchurchbluffton.org/images/og-join-us.jpg">
+    <link rel="canonical" href="https://christchurchbluffton.org/join-us">
+    <link rel="stylesheet" href="css/fonts.css">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/favicon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#303b6a">
+    <meta name="apple-mobile-web-app-title" content="Christ Church Bluffton">
+    <link rel="stylesheet" href="css/shared.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --navy-blue: #303b6a;
+            --gold: #c3a355;
+            --gold-text: #7F6D34;
+            --white: #FFFFFF;
+            --lightest-gray: #F5F4EF;
+            --light-gray: #E2E0D8;
+            --dark-gray: #333333;
+            --text-gray: #4A4A55;
+            --font-heading: 'Lora', serif;
+            --font-body: 'Lora', serif;
+            --font-accent: 'Lora', serif;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        html { scroll-behavior: smooth; overflow-x: clip; }
+        body {
+            font-family: var(--font-body);
+            line-height: 1.6;
+            color: var(--dark-gray);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--lightest-gray);
+            overflow-x: clip;
+        }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        .main-content { flex: 1; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 30px; }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 32px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 400;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: var(--gold);
+            color: var(--dark-gray);
+            box-shadow: 0 4px 20px rgba(195, 163, 85, 0.3);
+        }
+        .btn-primary:hover {
+            background: var(--gold-text);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(195, 163, 85, 0.4);
+        }
+        .btn-arrow { width: 20px; height: 20px; transition: all 0.3s ease; }
+        .btn:hover .btn-arrow { transform: translateX(5px); }
+
+        /* ── Page Header ── */
+        .page-header {
+            background:
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background-size: 24px 24px, 100% 100%;
+            padding: 120px 30px 100px;
+            text-align: center;
+            position: relative;
+        }
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+        .page-label {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #c9ac66;
+            margin-bottom: 14px;
+        }
+        .page-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            font-weight: 400;
+            color: var(--white);
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        /* ── Sections ── */
+        .section { padding: 100px 0; position: relative; }
+        .section-label {
+            display: inline-block;
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--gold-text);
+            margin-bottom: 15px;
+        }
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: var(--navy-blue);
+            margin-bottom: 20px;
+            font-weight: 400;
+        }
+        .section-title.left-align { text-align: left; }
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 60px;
+        }
+        .section-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .section-divider.left-align { justify-content: flex-start; }
+        .section-divider span {
+            width: 8px; height: 8px;
+            background: var(--gold);
+            border-radius: 50%;
+        }
+        .section-divider span:nth-child(2) {
+            width: 40px;
+            border-radius: 4px;
+        }
+
+        .subsection-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 400;
+            color: var(--navy-blue);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--gold);
+            display: inline-block;
+        }
+
+        /* ── Worship Grid ── */
+        .worship { background: var(--white); }
+        .worship-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: stretch;
+        }
+
+        /* ── Service Notice ── */
+        .service-notice {
+            display: flex;
+            gap: 20px;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(195, 163, 85, 0.12) 0%, rgba(195, 163, 85, 0.05) 100%);
+            border-radius: 16px;
+            border-left: 4px solid var(--gold);
+            margin-bottom: 40px;
+        }
+        .notice-icon {
+            width: 50px; height: 50px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .notice-icon svg { width: 24px; height: 24px; color: var(--white); }
+        .notice-content h4 {
+            font-family: var(--font-heading);
+            font-size: 1.125rem;
+            margin-bottom: 5px;
+            color: var(--navy-blue);
+            font-weight: 400;
+        }
+        .notice-content p {
+            font-family: var(--font-body);
+            color: var(--text-gray);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        /* ── What to Expect ── */
+        .expect-list { margin-bottom: 40px; }
+        .expect-list h4,
+        .expect-list h3 {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            color: var(--navy-blue);
+            font-weight: 400;
+        }
+        .expect-list ul {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .expect-list li {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--text-gray);
+        }
+        .check-icon {
+            width: 28px; height: 28px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        /* ── Placeholder ── */
+        .image-placeholder {
+            background: linear-gradient(135deg, var(--light-gray) 0%, var(--lightest-gray) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            min-height: 350px;
+            color: #777;
+            border: 2px dashed var(--light-gray);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .image-placeholder.large { min-height: 450px; }
+        .image-placeholder.has-image { padding: 0; border: none; min-height: 0; display: block; box-shadow: 0 20px 60px rgba(48, 59, 106, 0.2); border-radius: 16px; }
+        .image-placeholder.has-image img { display: block; width: 100%; height: auto; border-radius: 16px; }
+        .visual-accent {
+            position: absolute;
+            bottom: -20px; right: -20px;
+            width: 150px; height: 150px;
+            background: var(--gold);
+            border-radius: 16px;
+            z-index: -1;
+            opacity: 0.3;
+        }
+        .about-visual { position: relative; }
+        .visual-card { position: relative; }
+
+        /* ── Upcoming Services Layout ── */
+        .upcoming-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+        .service-schedule {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 24px;
+            background: var(--lightest-gray);
+            border-radius: 12px;
+            border-left: 4px solid var(--gold);
+            margin-bottom: 30px;
+        }
+        .service-schedule-icon {
+            width: 50px; height: 50px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .service-schedule-icon svg { width: 24px; height: 24px; color: var(--white); }
+        .service-schedule-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .service-schedule-day {
+            font-family: var(--font-heading);
+            font-size: 1.375rem;
+            color: var(--navy-blue);
+            font-weight: 400;
+            line-height: 1.2;
+        }
+        .service-schedule-time {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--text-gray);
+        }
+        .upcoming-image { position: relative; }
+        .location-card {
+            background: var(--white);
+            border: 1px solid var(--light-gray);
+            border-radius: 16px;
+            padding: 28px;
+            margin-top: 30px;
+            box-shadow: 0 4px 20px rgba(48, 59, 106, 0.08);
+        }
+        .location-card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .location-card-header svg {
+            width: 36px;
+            height: 36px;
+            color: #7F6D34;
+            flex-shrink: 0;
+        }
+        .location-card-header h4 {
+            font-family: var(--font-heading);
+            font-size: 0.875rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--gold-text);
+            margin-bottom: 2px;
+        }
+        .location-name {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            color: var(--navy-blue);
+            font-weight: 400;
+        }
+        .location-address {
+            display: inline-block;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--navy-blue);
+            padding: 10px 0;
+            border-bottom: 2px solid var(--gold);
+            margin-bottom: 20px;
+            transition: color 0.3s ease;
+            text-align: center;
+            width: 100%;
+        }
+        .location-address:hover {
+            color: var(--gold-text);
+        }
+        .provision-box {
+            background: linear-gradient(135deg, rgba(195, 163, 85, 0.10) 0%, rgba(195, 163, 85, 0.04) 100%);
+            border-radius: 12px;
+            padding: 20px 24px;
+        }
+        .provision-box p {
+            font-family: var(--font-body);
+            color: var(--text-gray);
+            font-size: 1rem;
+            line-height: 1.8;
+            margin-bottom: 8px;
+        }
+        .provision-box p:last-child { margin-bottom: 0; }
+        .provision-box .gratitude {
+            font-style: italic;
+            color: var(--gold-text);
+        }
+
+        /* ── Liturgy Section ── */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+        .about-content p {
+            font-family: var(--font-body);
+            color: var(--text-gray);
+            margin-bottom: 20px;
+            line-height: 1.9;
+        }
+        .about-content .lead {
+            font-size: 1.125rem;
+            line-height: 1.8;
+        }
+
+        /* ── Worship Columns ── */
+        .worship-column {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid var(--light-gray);
+            box-shadow: 0 4px 20px rgba(48, 59, 106, 0.08);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .worship-column .image-placeholder {
+            margin-top: auto;
+            padding-top: 20px;
+            min-height: 250px;
+            aspect-ratio: 4 / 3;
+        }
+        .worship-column .image-placeholder.has-image {
+            padding-top: 0;
+            min-height: 0;
+            aspect-ratio: auto;
+        }
+        .worship-column p {
+            font-family: var(--font-body);
+            color: var(--text-gray);
+            line-height: 1.9;
+            margin-bottom: 16px;
+        }
+        .worship-column p:last-child { margin-bottom: 0; }
+        .column-icon {
+            width: 50px; height: 50px;
+            color: #7F6D34;
+            margin-bottom: 20px;
+        }
+        .column-icon svg { width: 100%; height: 100%; }
+
+        /* ── Map Section ── */
+        .map-section {
+            padding: 80px 0;
+            background: var(--white);
+        }
+        .map-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(48, 59, 106, 0.12);
+            border: 1px solid var(--light-gray);
+        }
+        .map-wrapper iframe {
+            width: 100%;
+            height: 350px;
+            border: none;
+            display: block;
+        }
+        .map-info {
+            background: var(--lightest-gray);
+            padding: 20px 24px;
+            text-align: center;
+        }
+        .map-info p {
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            color: var(--text-gray);
+            line-height: 1.6;
+        }
+        .map-info strong {
+            color: var(--navy-blue);
+        }
+
+        /* ── Scripture Banner ── */
+        .scripture-banner {
+            background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            padding: 60px;
+            border-radius: 24px;
+            text-align: center;
+        }
+        .scripture-content { max-width: 800px; margin: 0 auto; }
+        .scripture-verse {
+            font-family: var(--font-accent);
+            font-size: 1.25rem;
+            font-style: italic;
+            color: var(--white);
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+        .scripture-reference {
+            color: #7F6D34;
+            font-family: var(--font-body);
+            font-size: 1rem;
+        }
+
+        /* ── CTA Section ── */
+        .cta-section {
+            background: var(--lightest-gray);
+            padding: 10px 30px 60px;
+            text-align: center;
+        }
+        .cta-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            background:
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background-size: 24px 24px, 100% 100%;
+            border-radius: 60px;
+            padding: 40px 60px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .cta-logo { object-fit: contain; flex-shrink: 0; }
+        .cta-content { flex: 1; text-align: left; }
+        .cta-heading {
+            font-family: var(--font-heading);
+            font-size: 1.125rem;
+            font-weight: 400;
+            color: var(--white);
+            margin-bottom: 6px;
+        }
+        .cta-text {
+            font-family: var(--font-accent);
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.75);
+            line-height: 1.6;
+        }
+        .cta-btn {
+            display: inline-block;
+            padding: 12px 36px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            border: 2px solid var(--gold);
+            border-radius: 50px;
+            font-family: var(--font-heading);
+            font-size: 0.875rem;
+            font-weight: 400;
+            color: #c9ac66;
+            text-decoration: none;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        .cta-btn:hover {
+            background: var(--gold);
+            color: var(--navy-blue);
+        }
+
+        /* ── Responsive — Tablet ── */
+        @media (max-width: 1023px) {
+            .section { padding: 80px 0; }
+            .worship-grid,
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            .upcoming-layout {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            .cta-inner {
+                flex-direction: column;
+                text-align: center;
+                padding: 30px 30px;
+                border-radius: 30px;
+                gap: 20px;
+            }
+            .cta-content { text-align: center; }
+            .worship-grid img { max-height: 250px; max-width: 400px; margin: 0 auto; border-radius: 16px; }
+            .image-placeholder { min-height: 200px; }
+            .worship-column .image-placeholder { aspect-ratio: 3 / 2; min-height: 120px; max-width: 300px; margin-left: auto; margin-right: auto; }
+        }
+
+        /* ── Responsive — Mobile ── */
+        @media (max-width: 768px) {
+            .container { padding: 0 20px; }
+            .page-header { padding: 80px 20px 60px; }
+            .page-title { font-size: 2rem; }
+            .section { padding: 60px 0; }
+            .section-title { font-size: 2rem; }
+            .scripture-banner { padding: 30px 20px; border-radius: 16px; }
+            .scripture-verse { font-size: 1.125rem; }
+            .map-wrapper iframe { height: 280px; }
+            .cta-section { padding: 10px 20px 40px; }
+            .cta-inner { padding: 30px 30px; border-radius: 30px; gap: 20px; }
+            .cta-logo { width: 50px !important; height: 50px !important; }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 0 16px; }
+            .page-header { padding: 60px 16px 50px; }
+            .page-title { font-size: 2rem; }
+            .service-notice { flex-direction: column; gap: 12px; }
+            .map-wrapper iframe { height: 240px; }
+            .cta-section { padding: 10px 16px 30px; }
+            .cta-inner { padding: 22px 20px; border-radius: 24px; }
+        }
+
+        @media (max-width: 360px) {
+            .container { padding: 0 12px; }
+            .page-header { padding: 50px 12px 40px; }
+            .scripture-banner { padding: 24px 16px; border-radius: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header (loaded from includes/header.html) -->
+    <div id="site-header"></div>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+
+        <!-- Page Header -->
+        <section class="page-header">
+            <p class="page-label">Join Us</p>
+            <h1 class="page-title">Join Us For Services</h1>
+            <div class="section-divider">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </section>
+
+        <!-- Worship With Us — Combined Section -->
+        <section class="section" style="background: var(--white);">
+            <div class="container">
+                <div class="section-header animate">
+                    <span class="section-label">Gather With Us</span>
+                    <h2 class="section-title">Worship With Us</h2>
+                    <div class="section-divider">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+
+                <div class="worship-grid">
+                    <!-- Left: Dates + Location -->
+                    <div class="animate">
+                        <h3 class="subsection-title">Our Services</h3>
+                        <div class="service-schedule">
+                            <div class="service-schedule-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            </div>
+                            <div class="service-schedule-details">
+                                <span class="service-schedule-day">Every Saturday</span>
+                                <span class="service-schedule-time">5:30 PM &mdash; Beginning September 5th</span>
+                            </div>
+                        </div>
+
+                        <div class="location-card">
+                            <div class="location-card-header">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                <div>
+                                    <h4>Where We Meet</h4>
+                                    <p class="location-name">Lord of Life Lutheran Church</p>
+                                </div>
+                            </div>
+                            <a href="https://maps.google.com/?q=351+Buckwalter+Pkwy,+Bluffton,+SC+29910" target="_blank" rel="noopener" class="location-address">
+                                351 Buckwalter Pkwy, Bluffton, SC 29910 &rarr;
+                            </a>
+                            <div class="provision-box">
+                                <p>By God's provision, Lord of Life Lutheran Church has graciously opened their sanctuary for our services. We are grateful for their generosity and partnership as we grow together in Christ.</p>
+                                <p class="gratitude">&ldquo;The Lord is faithful, and He provides.&rdquo;</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: What to Expect + CTA -->
+                    <div class="animate animate-delay-1">
+                        <div class="expect-list">
+                            <h3 class="subsection-title">What to Expect</h3>
+                            <ul>
+                                <li>
+                                    <span class="check-icon">&#10003;</span>
+                                    <span>Come as you are — whether you're exploring Christianity or have followed Jesus for years.</span>
+                                </li>
+                                <li>
+                                    <span class="check-icon">&#10003;</span>
+                                    <span>Ancient prayers, timeless hymns, and contemporary worship.</span>
+                                </li>
+                                <li>
+                                    <span class="check-icon">&#10003;</span>
+                                    <span>Biblical teaching that connects God's Word to everyday life.</span>
+                                </li>
+                                <li>
+                                    <span class="check-icon">&#10003;</span>
+                                    <span>Weekly Communion centered on God's grace through Jesus Christ.</span>
+                                </li>
+                                <li>
+                                    <span class="check-icon">&#10003;</span>
+                                    <span>A community where you'll be known, valued, and encouraged.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div style="margin-top: 30px; border-radius: 16px; overflow: hidden;">
+                            <img src="images/worship-with-us-sermon.webp" alt="Pastor Jonathan preaching before the cross at Christ Church Bluffton, congregation standing in worship" loading="lazy" width="962" height="1010" style="display: block; width: 100%; height: 100%; object-fit: cover; min-height: 200px;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate" style="text-align: center; margin-top: 50px;">
+                    <a href="/contact" class="btn btn-primary">
+                        Get Service Updates
+                        <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Liturgy & Music Section -->
+        <section class="section" style="background: var(--lightest-gray);">
+            <div class="container">
+                <div class="section-header animate">
+                    <span class="section-label">How We Worship</span>
+                    <h2 class="section-title">Liturgy &amp; Music</h2>
+                    <div class="section-divider">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+
+                <div class="worship-grid">
+                    <div class="worship-column animate">
+                        <div class="column-icon">
+                            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="12" y="8" width="40" height="48" rx="2"/>
+                                <line x1="20" y1="20" x2="44" y2="20"/>
+                                <line x1="20" y1="28" x2="44" y2="28"/>
+                                <line x1="20" y1="36" x2="44" y2="36"/>
+                                <line x1="20" y1="44" x2="36" y2="44"/>
+                            </svg>
+                        </div>
+                        <h3 class="subsection-title">Our Liturgy</h3>
+                        <p>Our worship follows the historic patterns found in the Book of Common Prayer, connecting us to Christians across centuries and continents.</p>
+                        <p>The liturgy guides us through confession, Scripture readings, prayers, and the celebration of Holy Communion. This rhythm of worship shapes our hearts and minds toward God week after week.</p>
+                        <p>Whether you're new to liturgical worship or have been practicing it your whole life, you'll find our services accessible and meaningful. We provide service bulletins to help everyone follow along and participate fully.</p>
+                        <div class="image-placeholder has-image">
+                            <img src="images/book-of-common-prayer.webp" srcset="images/book-of-common-prayer-592.webp 592w, images/book-of-common-prayer.webp 1184w" sizes="(max-width: 768px) 100vw, 50vw" alt="An open Book of Common Prayer resting on a church pew" width="1184" height="672" loading="lazy">
+                        </div>
+                    </div>
+
+                    <div class="worship-column animate animate-delay-1">
+                        <div class="column-icon">
+                            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 48V16l24-6v32"/>
+                                <circle cx="16" cy="48" r="6"/>
+                                <circle cx="40" cy="42" r="6"/>
+                            </svg>
+                        </div>
+                        <h3 class="subsection-title">Worship Music</h3>
+                        <p>Music is an integral part of our worship. We draw from a rich heritage of historic hymnody while embracing contemporary worship that speaks to the heart.</p>
+                        <p>From timeless hymns to modern songs of praise, our music lifts hearts to God and unites us in worship. Whether you grew up singing from a hymnal or find your voice in contemporary worship, you will find a place here.</p>
+                        <div class="image-placeholder has-image">
+                            <img src="images/worship-piano-keys.webp" srcset="images/worship-piano-keys-576.webp 576w, images/worship-piano-keys.webp 1152w" sizes="(max-width: 768px) 100vw, 50vw" alt="Piano keys in the sanctuary at Christ Church Bluffton" width="1152" height="654" loading="lazy">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Map Section -->
+        <section class="map-section">
+            <div class="container">
+                <div class="section-header animate" style="margin-bottom: 30px;">
+                    <span class="section-label">Find Us</span>
+                    <h2 class="section-title">Service Location</h2>
+                    <div class="section-divider">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                <div class="map-wrapper animate">
+                    <iframe
+                        src="https://www.google.com/maps?q=Lord+of+Life+Lutheran+Church,+351+Buckwalter+Pkwy,+Bluffton,+SC+29910&output=embed"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title="Lord of Life Lutheran Church - 351 Buckwalter Pkwy, Bluffton, SC"></iframe>
+                    <div class="map-info">
+                        <p><strong>Lord of Life Lutheran Church</strong><br>351 Buckwalter Pkwy, Bluffton, SC 29910</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Banner -->
+        <section class="cta-section" style="padding-top: 60px; background: var(--white);">
+            <div class="cta-inner animate">
+                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60" loading="lazy">
+                <div class="cta-content">
+                    <h2 class="cta-heading">Questions About Our Services?</h2>
+                    <p class="cta-text">We would love to hear from you. Reach out anytime &mdash; whether you are planning your first visit or just want to learn more.</p>
+                </div>
+                <a href="/contact" class="cta-btn">Get in Touch</a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer (loaded from includes/footer.html) -->
+    <div id="site-footer"></div>
+
+    <!-- Prayer FAB (loaded from includes/prayer-fab.html) -->
+    <div id="site-prayer"></div>
+
+    <script>
+            window.__turnstileReady = false;
+            window.__turnstileQueue = [];
+            window.turnstileOnLoad = function() {
+                window.__turnstileReady = true;
+                window.__turnstileQueue.forEach(function(el) { try { turnstile.render(el); } catch (e) {} });
+                window.__turnstileQueue = [];
+            };
+            window.renderTurnstile = function(el) {
+                if (!el) return;
+                if (window.__turnstileReady && window.turnstile) { try { turnstile.render(el); } catch (e) {} }
+                else { window.__turnstileQueue.push(el); }
+            };
+        </script>
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=turnstileOnLoad&render=explicit" async defer></script>
+    <script src="js/components.js"></script>
+</body>
+</html>

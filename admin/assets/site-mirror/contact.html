@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base href="/assets/site-mirror/">
+    <meta charset="UTF-8">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PTWWV0M0DX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-PTWWV0M0DX');
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christ Church Bluffton | Contact</title>
+    <meta name="description" content="Get in touch with Christ Church Bluffton. We would love to hear from you.">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Christ Church Bluffton | Contact">
+    <meta property="og:description" content="Connect with Christ Church Bluffton. We would love to hear from you.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://christchurchbluffton.org/images/og-image.jpg">
+    <meta property="og:url" content="https://christchurchbluffton.org/contact">
+    <meta property="og:site_name" content="Christ Church Bluffton">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Christ Church Bluffton | Contact">
+    <meta name="twitter:description" content="Connect with Christ Church Bluffton. We would love to hear from you.">
+    <meta name="twitter:image" content="https://christchurchbluffton.org/images/og-image.jpg">
+    <link rel="canonical" href="https://christchurchbluffton.org/contact">
+    <link rel="stylesheet" href="css/fonts.css">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/favicon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#303b6a">
+    <meta name="apple-mobile-web-app-title" content="Christ Church Bluffton">
+    <link rel="stylesheet" href="css/shared.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --navy-blue: #303b6a;
+            --gold: #c3a355;
+            --gold-text: #7F6D34;
+            --white: #FFFFFF;
+            --lightest-gray: #F5F4EF;
+            --light-gray: #E2E0D8;
+            --dark-gray: #333333;
+            --text-gray: #4A4A55;
+            --font-heading: 'Lora', serif;
+            --font-body: 'Lora', serif;
+            --font-accent: 'Lora', serif;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        html { scroll-behavior: smooth; overflow-x: clip; }
+
+        body {
+            font-family: var(--font-body);
+            line-height: 1.6;
+            color: var(--dark-gray);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--lightest-gray);
+            overflow-x: clip;
+        }
+
+        /* ── Main Content ── */
+        .main-content { flex: 1; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+        /* ── Page Header ── */
+        .page-header {
+            background:
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background-size: 24px 24px, 100% 100%;
+            padding: 120px 30px 100px;
+            text-align: center;
+            position: relative;
+        }
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        .page-label {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #c9ac66;
+            margin-bottom: 14px;
+        }
+
+        .page-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            font-weight: 400;
+            color: var(--white);
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        /* ── Contact Section ── */
+        .contact-section {
+            padding: 50px 0;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: start;
+        }
+
+        /* Left: Info */
+        .contact-info h2 {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 400;
+            color: var(--navy-blue);
+            margin-bottom: 20px;
+        }
+
+        .contact-intro {
+            font-family: var(--font-body);
+            font-size: 1.125rem;
+            color: var(--text-gray);
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .contact-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .contact-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            background: #FAF8F3;
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .contact-card-icon {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--navy-blue);
+            border-radius: 10px;
+            color: var(--gold);
+        }
+
+        .contact-card-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .contact-card-content h3 {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 400;
+            color: var(--navy-blue);
+            margin-bottom: 4px;
+        }
+
+        .contact-card-content p,
+        .contact-card-content a {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--text-gray);
+            text-decoration: none;
+            line-height: 1.6;
+        }
+
+        .contact-card-content a:hover {
+            color: var(--gold-text);
+        }
+
+        /* Right: Form */
+        .form-card {
+            background: #FAF8F3;
+            border: 1px solid var(--light-gray);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .form-card h3 {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--navy-blue);
+            margin-bottom: 8px;
+        }
+
+        .form-card > p {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--text-gray);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            color: var(--navy-blue);
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .required { color: #c0392b; }
+        .optional { color: var(--text-gray); font-size: 0.875rem; }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            color: var(--dark-gray);
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            background: var(--white);
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--navy-blue);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-submit {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 36px;
+            background: linear-gradient(135deg, #303b6a 0%, #3d4a7a 100%);
+            color: var(--white);
+            font-family: var(--font-heading);
+            font-size: 0.875rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(48, 59, 106, 0.25);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(48, 59, 106, 0.35);
+        }
+
+        .btn-submit svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .form-success {
+            display: none;
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .form-success.show {
+            display: block;
+        }
+
+        .form-success h4 {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--navy-blue);
+            margin-bottom: 8px;
+        }
+
+        .form-success p {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--text-gray);
+        }
+
+        /* ── CTA Section ── */
+        .cta-section {
+            background: transparent;
+            padding: 10px 30px 60px;
+            text-align: center;
+        }
+
+        .cta-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            background:
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
+            background-size: 24px 24px, 100% 100%;
+            border-radius: 60px;
+            padding: 40px 60px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .cta-logo {
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .cta-content {
+            flex: 1;
+            text-align: left;
+        }
+
+        .cta-heading {
+            font-family: var(--font-heading);
+            font-size: 1.125rem;
+            font-weight: 400;
+            color: var(--white);
+            margin-bottom: 6px;
+        }
+
+        .cta-text {
+            font-family: var(--font-accent);
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.75);
+            line-height: 1.6;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            padding: 12px 36px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            border: 2px solid var(--gold);
+            border-radius: 50px;
+            font-family: var(--font-heading);
+            font-size: 0.875rem;
+            font-weight: 400;
+            color: #c9ac66;
+            text-decoration: none;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .cta-btn:hover {
+            background: var(--gold);
+            color: var(--navy-blue);
+        }
+
+        /* ── Tablet ── */
+        @media (max-width: 900px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .cta-inner {
+                flex-direction: column;
+                text-align: center;
+                padding: 30px 30px;
+                border-radius: 30px;
+                gap: 20px;
+            }
+
+            .cta-content { text-align: center; }
+        }
+
+        /* ── Mobile ── */
+        @media (max-width: 768px) {
+            .container { padding: 0 20px; }
+            .page-header { padding: 80px 20px 60px; }
+            .page-title { font-size: 2rem; }
+            .contact-section { padding: 35px 0; }
+            .form-card { padding: 24px; }
+            .cta-section { padding: 10px 20px 40px; }
+            .cta-inner { padding: 30px 30px; border-radius: 30px; gap: 20px; }
+            .cta-logo { width: 50px !important; height: 50px !important; }
+            .cta-heading { font-size: 1rem; }
+            .cta-text { font-size: 0.875rem; }
+            .cta-btn { padding: 10px 28px; font-size: 0.875rem; }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 0 16px; }
+            .page-header { padding: 60px 16px 50px; }
+            .page-title { font-size: 2rem; }
+            .contact-section { padding: 25px 0; }
+            .form-card { padding: 18px; }
+            .contact-card { padding: 16px; }
+            .cta-section { padding: 10px 16px 30px; }
+            .cta-inner { padding: 22px 20px; border-radius: 24px; }
+        }
+
+        @media (max-width: 360px) {
+            .container { padding: 0 10px; }
+            .page-header { padding: 50px 12px 40px; }
+            .form-card { padding: 12px; }
+            .contact-card { padding: 10px; }
+            .contact-grid { gap: 24px; }
+            .cta-inner { padding: 20px 14px; }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                font-size: 0.75rem;
+                padding: 8px 10px;
+            }
+
+            .btn-submit {
+                padding: 10px 24px;
+                font-size: 0.75rem;
+            }
+
+            .cf-turnstile {
+                transform: scale(0.85);
+                transform-origin: left top;
+                margin-bottom: -8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header (loaded from includes/header.html) -->
+    <div id="site-header"></div>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+
+        <!-- Page Header -->
+        <section class="page-header">
+            <p class="page-label">Get In Touch</p>
+            <h1 class="page-title">Contact Us</h1>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="contact-section">
+            <div class="container">
+                <div class="contact-grid">
+
+                    <!-- Left: Contact Info -->
+                    <div class="contact-info animate">
+                        <h2>Connect With Us</h2>
+                        <p class="contact-intro">We would love to hear from you. Whether you have questions about Christ Church Bluffton, want to learn more about our vision, or simply want to say hello &mdash; we are here for you.</p>
+
+                        <div class="contact-cards">
+                            <div class="contact-card">
+                                <div class="contact-card-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                </div>
+                                <div class="contact-card-content">
+                                    <h3>Location</h3>
+                                    <p>Bluffton, South Carolina</p>
+                                    <p>Serving Bluffton, Okatie, Hardeeville, Hilton Head, and greater Beaufort County</p>
+                                </div>
+                            </div>
+
+                            <div class="contact-card">
+                                <div class="contact-card-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                </div>
+                                <div class="contact-card-content">
+                                    <h3>Email</h3>
+                                    <a href="mailto:info@christchurchbluffton.org">info@christchurchbluffton.org</a>
+                                </div>
+                            </div>
+
+                            <div class="contact-card">
+                                <div class="contact-card-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 12h.01"/><path d="M17 12h.01"/><path d="M7 12h.01"/></svg>
+                                </div>
+                                <div class="contact-card-content">
+                                    <h3>Mailing Address</h3>
+                                    <p>Christ Church Bluffton<br>7 Venture Drive<br>Suite 104, PMB 267<br>Bluffton, SC 29910</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Contact Form -->
+                    <div class="form-card animate animate-delay-1">
+                        <h3>Send Us a Message</h3>
+                        <p>Have a question or want to stay connected? Fill out the form below and we will get back to you.</p>
+                        <form class="contact-form" id="contactForm">
+                            <div class="form-group">
+                                <label for="fullName">Full Name <span class="required">*</span></label>
+                                <input type="text" id="fullName" name="fullName" placeholder="Your full name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email Address <span class="required">*</span></label>
+                                <input type="email" id="email" name="email" placeholder="Your email address" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone <span class="optional">(optional)</span></label>
+                                <input type="tel" id="phone" name="phone" placeholder="Your phone number">
+                            </div>
+                            <div class="form-group">
+                                <label for="interest">I'm Interested In <span class="required">*</span></label>
+                                <select id="interest" name="interest" required>
+                                    <option value="" disabled selected>Select an option</option>
+                                    <option value="updates">Receiving Updates</option>
+                                    <option value="visiting">Planning to Visit</option>
+                                    <option value="volunteering">Volunteering</option>
+                                    <option value="prayer">Prayer Request</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="message">Message <span class="optional">(optional)</span></label>
+                                <textarea id="message" name="message" rows="4" placeholder="How can we help you?"></textarea>
+                            </div>
+                            <input type="text" name="website_url_confirm" style="position:absolute;left:-9999px;" tabindex="-1" autocomplete="new-password" aria-hidden="true">
+                            <div class="cf-turnstile" data-sitekey="0x4AAAAAACneNwgE844_oOI-" data-size="flexible"></div>
+                            <button type="submit" class="btn-submit">
+                                Send Message
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                            </button>
+                        </form>
+                        <div class="form-success" id="formSuccess">
+                            <h4>Message Sent</h4>
+                            <p>Thank you for reaching out. We will be in touch soon.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Donate CTA -->
+        <section class="cta-section animate">
+            <div class="cta-inner">
+                <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="cta-logo" width="60" height="60" loading="lazy">
+                <div class="cta-content">
+                    <h2 class="cta-heading">Support Our Mission</h2>
+                    <p class="cta-text">Your generosity helps build a Christ-centered community in the Lowcountry. Every gift makes a difference.</p>
+                </div>
+                <a href="/give" class="cta-btn">Donate Now</a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Prayer FAB (loaded from includes/prayer-fab.html) -->
+    <div id="site-prayer"></div>
+
+    <!-- Footer (loaded from includes/footer.html) -->
+    <div id="site-footer"></div>
+
+    <script>
+            window.__turnstileReady = false;
+            window.__turnstileQueue = [];
+            window.turnstileOnLoad = function() {
+                window.__turnstileReady = true;
+                window.__turnstileQueue.forEach(function(el) { try { turnstile.render(el); } catch (e) {} });
+                window.__turnstileQueue = [];
+            };
+            window.renderTurnstile = function(el) {
+                if (!el) return;
+                if (window.__turnstileReady && window.turnstile) { try { turnstile.render(el); } catch (e) {} }
+                else { window.__turnstileQueue.push(el); }
+            };
+        </script>
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=turnstileOnLoad&render=explicit" async defer></script>
+    <script>
+        // Contact form handler
+        if (window.renderTurnstile) renderTurnstile(document.querySelector('.cf-turnstile'));
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Check honeypot
+            var hp = this.querySelector('[name="website_url_confirm"]');
+            if (hp && hp.value) return;
+
+            var form = this;
+            var btn = form.querySelector('.btn-submit');
+            btn.textContent = 'Sending...';
+            btn.disabled = true;
+
+            var token = '';
+            try { token = turnstile.getResponse(form.querySelector('.cf-turnstile')); } catch(e) {}
+
+            var data = {
+                fullName: form.fullName.value,
+                email: form.email.value,
+                phone: form.phone.value || '',
+                interest: form.interest.value,
+                message: form.message.value || '',
+                website_url_confirm: hp ? hp.value : '',
+                turnstileToken: token
+            };
+
+            fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(function(res) {
+                if (res.ok) {
+                    form.style.display = 'none';
+                    document.getElementById('formSuccess').classList.add('show');
+                    try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch(e) {}
+                    try { gtag('event', 'generate_lead', { form_name: 'contact_form' }); } catch(e) {}
+                } else {
+                    btn.textContent = 'Send Message';
+                    btn.disabled = false;
+                    try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch(e) {}
+                    alert('Something went wrong. Please try again or email us directly.');
+                }
+            })
+            .catch(function() {
+                btn.textContent = 'Send Message';
+                btn.disabled = false;
+                try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch(e) {}
+                alert('Something went wrong. Please try again or email us directly.');
+            });
+        });
+
+    </script>
+    <script src="js/components.js"></script>
+</body>
+</html>

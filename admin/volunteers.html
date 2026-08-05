@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<title>Volunteers — Christ Church Bluffton Admin</title>
+<link rel="stylesheet" href="css/shared.css">
+<style>
+  .alpha-banner {
+    background: rgba(46,125,50,0.08);
+    border: 1px solid rgba(46,125,50,0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: var(--text-dark);
+  }
+  .alpha-banner strong { color: #2e7d32; }
+
+  .page-width { max-width: 1220px; margin: 0 auto; }
+  .toolbar {
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
+    margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .toolbar-filters { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+  .toolbar .filter-field { display: flex; flex-direction: column; gap: 6px; }
+  .toolbar .filter-field label { font-size: 12px; font-weight: bold; color: var(--text-muted); }
+  .toolbar select {
+    padding: 8px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
+    font-family: inherit; font-size: 13px; background: var(--white); color: var(--text-dark);
+  }
+  .btn-sm { padding: 8px 14px; font-size: 12px; }
+
+  .team-lead-indicator { padding: 8px 12px; font-size: 13px; font-weight: bold; color: var(--text-dark); }
+  .team-lead-indicator.unassigned { color: var(--text-muted); font-weight: normal; font-style: italic; }
+
+  .volunteers-card {
+    margin-bottom: 22px;
+    border-radius: 14px;
+    overflow: hidden;
+    border-color: transparent;
+    box-shadow: 0 2px 10px rgba(48,59,106,0.07);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }
+  .subteam-group-label {
+    padding: 9px 22px;
+    font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.4px;
+    color: var(--gold-text); background: rgba(195,163,85,0.07); border-bottom: 1px solid var(--border-gray);
+  }
+  .volunteers-card:hover { box-shadow: 0 8px 22px rgba(48,59,106,0.12); transform: translateY(-1px); }
+  .volunteers-card-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 16px 22px;
+    background: linear-gradient(135deg, rgba(195,163,85,0.12) 0%, rgba(195,163,85,0.04) 100%);
+    border-bottom: 2px solid var(--gold);
+  }
+  .volunteers-card-title { font-family: Georgia, 'Times New Roman', serif; font-size: 21px; font-weight: bold; color: var(--navy-blue); }
+  .volunteers-card-count {
+    font-size: 10.5px; font-weight: bold; color: var(--gold-text); text-transform: uppercase; letter-spacing: 0.5px;
+    background: rgba(195,163,85,0.18); padding: 3px 10px; border-radius: 100px;
+  }
+
+  .volunteer-table { width: 100%; border-collapse: collapse; background: var(--white); table-layout: fixed; }
+  .volunteer-table th {
+    text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);
+    padding: 12px 22px; background: var(--lightest-gray); border-bottom: 1px solid var(--border-gray);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .volunteer-table tr { transition: background 0.12s ease; }
+  .volunteer-table tbody tr:hover { background: rgba(195,163,85,0.05); }
+  .volunteer-table td { padding: 13px 22px; border-bottom: 1px solid var(--border-gray); font-size: 13px; vertical-align: middle; }
+  .volunteer-table tr:last-child td { border-bottom: none; }
+  .volunteer-table td.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .volunteer-empty { border-radius: 0; border: none; }
+  .volunteer-name { font-weight: bold; color: var(--text-dark); }
+  .youth-badge {
+    display: inline-block; margin-left: 6px; font-size: 9px; font-weight: bold; text-transform: uppercase;
+    letter-spacing: 0.4px; background: rgba(195,163,85,0.18); color: var(--gold-text); padding: 2px 7px; border-radius: 100px;
+    vertical-align: middle;
+  }
+  .subteam-flag {
+    display: inline-block; font-size: 9px; font-weight: bold; text-transform: uppercase;
+    letter-spacing: 0.3px; background: rgba(177,67,67,0.1); color: var(--danger); padding: 2px 7px; border-radius: 100px;
+  }
+  .lead-badge {
+    display: inline-block; margin-left: 6px; font-size: 9px; font-weight: bold; text-transform: uppercase;
+    letter-spacing: 0.4px; background: rgba(195,163,85,0.2); color: var(--gold-text); padding: 2px 7px; border-radius: 100px;
+    vertical-align: middle;
+  }
+  .parent-info { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .parent-info .parent-name { color: var(--text-dark); font-weight: bold; }
+  .volunteer-empty { padding: 40px 16px; text-align: center; font-size: 13px; color: var(--text-muted); font-style: italic; background: var(--white); border: 1px solid var(--border-gray); border-radius: 12px; }
+  .row-actions { display: flex; gap: 6px; }
+  .icon-btn {
+    width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-gray);
+    background: var(--white); display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); cursor: pointer; padding: 0; flex-shrink: 0;
+  }
+  .icon-btn svg { width: 14px; height: 14px; }
+  .icon-btn:hover { border-color: var(--navy-blue); color: var(--navy-blue); background: rgba(48,59,106,0.05); }
+  .icon-btn.danger:hover { border-color: var(--danger); color: var(--danger); background: rgba(177,67,67,0.05); }
+
+  /* Below this width there isn't room for 6 fixed columns without truncating email/phone/etc —
+     switch each row into a 2-row grid card (name/sub-team/phone/email on row 1,
+     parent-guardian + actions on row 2) instead of 6 stacked full-width lines. */
+  @media (max-width: 1700px) {
+    .volunteer-table, .volunteer-table tbody, .volunteer-table td { display: block; }
+    .volunteer-table thead { display: none; }
+    .volunteer-table tr {
+      display: grid;
+      grid-template-columns: 1.5fr 0.7fr 0.9fr 1.5fr 0.6fr;
+      grid-template-areas: "name subteam phone email actions" "parent parent parent parent parent";
+      column-gap: 16px; row-gap: 4px; align-items: start;
+      border: 1px solid var(--border-gray); border-radius: 10px; margin: 12px 16px; padding: 12px 16px;
+    }
+    .volunteer-table tbody tr:hover { background: none; }
+    .volunteer-table td {
+      width: auto !important; white-space: normal !important; overflow: visible !important;
+      text-overflow: clip !important; word-break: break-word; border-bottom: none; padding: 0;
+      box-sizing: border-box;
+    }
+    .volunteer-table td::before {
+      content: attr(data-label); display: block; font-size: 11px; font-weight: bold;
+      text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-bottom: 2px;
+    }
+    .volunteer-table td:nth-child(1) { grid-area: name; font-size: 15px; }
+    .volunteer-table td:nth-child(1)::before { display: none; }
+    .volunteer-table td:nth-child(2) { grid-area: subteam; }
+    .volunteer-table td:nth-child(3) { grid-area: phone; }
+    .volunteer-table td:nth-child(4) { grid-area: email; }
+    .volunteer-table td:nth-child(5) {
+      grid-area: parent; padding-top: 10px !important; margin-top: 6px;
+      border-top: 1px solid var(--border-gray);
+    }
+    .volunteer-table td:nth-child(5):empty { padding-top: 0 !important; margin-top: 0; border-top: none; }
+    .volunteer-table td:last-child { grid-area: actions; text-align: right; }
+    .volunteer-table .row-actions { justify-content: flex-end; }
+  }
+  /* Not enough room left for 5 columns on one line without squeezing email into an awkward
+     mid-word wrap — give email its own full-width row instead. */
+  @media (max-width: 1150px) {
+    .volunteer-table tr {
+      grid-template-columns: 1.4fr 0.8fr 1fr 0.5fr;
+      grid-template-areas: "name subteam phone actions" "email email email email" "parent parent parent parent";
+    }
+    .volunteer-table td:nth-child(4) { grid-area: email; padding-top: 4px !important; }
+  }
+  @media (max-width: 640px) {
+    .volunteer-table tr {
+      grid-template-columns: 0.8fr 1.2fr;
+      grid-template-areas: "name name" "subteam subteam" "phone email" "parent parent" "actions actions";
+    }
+    .volunteer-table td:last-child {
+      padding-top: 10px !important; margin-top: 6px; border-top: 1px solid var(--border-gray);
+      text-align: left;
+    }
+    .volunteer-table td:nth-child(5) { text-align: left; }
+    .volunteer-table .row-actions { justify-content: flex-start; }
+  }
+
+  /* ---- Modal (shared shell pattern, matches team.html) ---- */
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0; background: rgba(30,37,71,0.55);
+    z-index: 1000; align-items: center; justify-content: center; padding: 24px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-box {
+    background: var(--white); border-radius: 14px; width: 100%; max-width: 460px;
+    max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+  }
+  .modal-header { padding: 20px 26px; border-bottom: 1px solid var(--border-gray); display: flex; align-items: center; justify-content: space-between; }
+  .modal-header .modal-title { font-family: Georgia, 'Times New Roman', serif; font-size: 20px; color: var(--navy-blue); }
+  .modal-header .modal-subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .modal-close { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border-gray); background: var(--white); color: var(--text-muted); font-size: 16px; cursor: pointer; flex-shrink: 0; }
+  .modal-close:hover { border-color: var(--navy-blue); color: var(--navy-blue); }
+  .modal-body { padding: 22px 26px; overflow-y: auto; }
+  .modal-footer { padding: 16px 26px; border-top: 1px solid var(--border-gray); display: flex; justify-content: flex-end; gap: 10px; }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 13px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; }
+  .field input[type="text"], .field input[type="email"], .field select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
+    font-family: inherit; font-size: 14px; background: var(--lightest-gray);
+  }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--gold); background: var(--white); }
+  .name-row { display: flex; gap: 12px; }
+  .name-row .field { flex: 1; }
+
+  .team-checklist { display: flex; flex-direction: column; gap: 10px; max-height: 280px; overflow-y: auto; }
+  .team-row label { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: normal; color: var(--text-dark); cursor: pointer; }
+  .team-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--gold-text); flex-shrink: 0; }
+  .sub-team-select { display: none; margin: 6px 0 0 26px; width: calc(100% - 26px); font-size: 13px; padding: 7px 10px; }
+  .lead-check-row { display: none; align-items: center; gap: 8px; margin: 6px 0 0 26px; font-size: 12px; color: var(--gold-text); cursor: pointer; }
+  .lead-check-row input { width: 14px; height: 14px; accent-color: var(--gold-text); flex-shrink: 0; }
+
+  .youth-section { border-top: 1px solid var(--border-gray); margin-top: 16px; padding-top: 16px; }
+  .youth-check-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-dark); cursor: pointer; }
+  .youth-check-row input { width: 16px; height: 16px; accent-color: var(--gold-text); flex-shrink: 0; }
+  .youth-safety-note { font-size: 12px; color: var(--text-muted); font-style: italic; margin-top: 6px; display: none; }
+  .youth-safety-note.visible { display: block; }
+  .parent-fields { display: none; margin-top: 14px; padding: 14px; background: var(--lightest-gray); border-radius: 8px; border: 1px solid var(--border-gray); }
+  .parent-fields.visible { display: block; }
+  .parent-fields .field:last-child { margin-bottom: 0; }
+
+  .subteam-manage-row {
+    display: flex; align-items: center; justify-content: space-between; padding: 8px 10px;
+    border: 1px solid var(--border-gray); border-radius: 8px; margin-bottom: 6px; font-size: 13px;
+  }
+  .subteam-manage-empty { font-size: 12px; color: var(--text-muted); font-style: italic; }
+  .add-subteam-row { display: flex; gap: 8px; align-items: flex-end; }
+  .add-subteam-row .field { flex: 1; margin-bottom: 0; }
+  .add-subteam-row button { padding: 10px 16px; flex-shrink: 0; }
+
+  .form-error { background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; }
+  .form-error.visible { display: block; }
+</style>
+</head>
+<body data-page="volunteers">
+  <div class="app-shell">
+    <div id="sidebar-mount">
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img class="brand-crest" src="assets/site-images/logo-dark-bg.png" alt="Christ Church Bluffton crest">
+    <div>
+      <div class="title">Christ Church Bluffton</div>
+      <div class="label">Admin Panel</div>
+    </div>
+    <button type="button" class="hamburger-btn" id="hamburger-btn" aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+    </button>
+  </div>
+  <div class="sidebar-collapsible" id="sidebar-collapsible">
+    <nav>
+      <a href="dashboard.html" data-page="dashboard">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Dashboard
+      </a>
+      <a href="staff.html" data-page="staff">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Staff
+      </a>
+      <a href="congregants.html" data-page="congregants" data-permission="congregants">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+        Congregants
+      </a>
+      <a href="prayers.html" data-page="prayers" data-permission="prayers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+        Prayer Requests
+      </a>
+      <a href="volunteers.html" data-page="volunteers" data-permission="signups">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Volunteers
+      </a>
+      <a href="subscribers.html" data-page="subscribers" data-permission="subscribers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h4M15 12h4M6 16h12"/></svg>
+        Subscribers
+      </a>
+      <a href="newsletter.html" data-page="newsletter" data-permission="newsletter" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        Newsletter
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="events.html" data-page="events" data-permission="events">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Events
+      </a>
+      <a href="content.html" data-page="content" data-permission="contentEditor" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Content Editor
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="photos.html" data-page="photos" data-permission="photos">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg>
+        Photos
+      </a>
+      <a href="team.html" data-page="team" data-admin-only="true">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M19 8h4M21 6v4"/></svg>
+        Team
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="reading-mode-row" id="reading-mode-row" style="display:none;">
+        <button type="button" class="reading-mode-btn" id="reading-mode-btn" title="Toggle easier-to-read text">
+          <span class="aa-icon">Aa</span> Reading Mode
+        </button>
+        <div class="reading-tint-swatches" id="reading-tint-swatches" style="display:none;">
+          <button type="button" class="tint-swatch tint-cream" data-tint="cream" title="Cream background"></button>
+          <button type="button" class="tint-swatch tint-blue" data-tint="blue" title="Light blue background"></button>
+          <button type="button" class="tint-swatch tint-green" data-tint="green" title="Light green background"></button>
+        </div>
+      </div>
+      <a href="account.html" class="user-chip" id="user-chip-link" title="Account Settings">
+        <div class="avatar" id="sidebar-avatar">?</div>
+        <div class="user-chip-info">
+          <div class="name" id="sidebar-name">—</div>
+          <div class="role" id="sidebar-role">—</div>
+        </div>
+        <svg class="chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+      <a href="#" class="logout-link" id="logout-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Log out
+      </a>
+    </div>
+  </div>
+</aside>
+  </div>
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <h1>Volunteers</h1>
+          <div class="subtitle">Track volunteers and which ministry teams they're part of</div>
+        </div>
+        <button type="button" class="btn btn-gold" id="add-volunteer-btn">+ Add Volunteer</button>
+      </div>
+      <div class="content" id="page-body">
+        <div class="alpha-banner">
+          <strong>Alpha (Testing)</strong> — all data you enter here is saved.
+        </div>
+
+        <div class="toolbar page-width">
+          <div class="toolbar-filters">
+            <div class="filter-field">
+              <label for="team-filter">Filter by team</label>
+              <select id="team-filter">
+                <option value="">All Teams</option>
+              </select>
+            </div>
+            <div class="filter-field" id="team-lead-indicator-wrap" style="display:none;">
+              <label>Team Lead</label>
+              <div class="team-lead-indicator" id="team-lead-indicator">—</div>
+            </div>
+            <div class="filter-field" id="subteam-filter-wrap" style="display:none;">
+              <label for="subteam-filter">Sub-team</label>
+              <select id="subteam-filter">
+                <option value="">All Sub-Teams</option>
+              </select>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" id="manage-subteams-btn">Manage Sub-Teams</button>
+          </div>
+        </div>
+
+        <div id="volunteers-wrap" class="page-width"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="modal-title">Add Volunteer</div>
+          <div class="modal-subtitle" id="modal-subtitle"></div>
+        </div>
+        <button type="button" class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    // Seeded from the real ministry teams on the live site's Serve page (content.html pageContent['Serve']),
+    // with Greeters/Ushers split into two separate teams per Kevin's request (they aren't the same team).
+    const TEAMS = [
+      'Greeters', 'Ushers', 'Altar Guild', 'Communion', 'Lay Readers', 'Nursery',
+      'Musical Worship', 'Technology & Social Media', 'Safety', 'Refreshments & Hospitality'
+    ];
+    // Safety requires adult volunteers, so the Youth option doesn't apply there.
+    const YOUTH_EXCLUDED_TEAM = 'Safety';
+
+    let volunteers = [];
+    let subTeamsData = {}; // { teamName: [sub-team names] } — editable per team via "Manage Sub-Teams"
+    let subTeamRowIds = {}; // { teamName: sub_teams.id } — tracks each team's row in Supabase (undefined until a first sub-team is added for that team)
+    let teamFilter = '';
+    let subTeamFilterValue = '';
+
+    function escapeHtml(str) {
+      return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    // Formats any phone input — typed live or already stored as raw digits — as (XXX) XXX-XXXX.
+    function formatPhone(value) {
+      const digits = (value || '').replace(/\D/g, '').slice(0, 10);
+      const len = digits.length;
+      if (len === 0) return '';
+      if (len < 4) return `(${digits}`;
+      if (len < 7) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+
+    function wireLivePhoneFormat(inputEl) {
+      inputEl.addEventListener('input', (e) => {
+        const pos = e.target.selectionStart;
+        const before = e.target.value.length;
+        e.target.value = formatPhone(e.target.value);
+        const after = e.target.value.length;
+        e.target.selectionEnd = Math.max(0, pos + (after - before));
+      });
+    }
+
+    // Maps a Supabase `volunteers` row (snake_case) to the camelCase shape every render/
+    // form function in this file already expects. `teams` is jsonb ({name, subTeam, isLead})
+    // and passes straight through with no key conversion needed.
+    function rowToVolunteer(row) {
+      return {
+        id: row.id,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        phone: row.phone || '',
+        email: row.email || '',
+        teams: Array.isArray(row.teams) ? row.teams : [],
+        isYouth: !!row.is_youth,
+        parentName: row.parent_name,
+        parentPhone: row.parent_phone,
+        parentEmail: row.parent_email,
+        addedAt: row.added_at ? new Date(row.added_at).getTime() : null
+      };
+    }
+
+    async function loadVolunteers() {
+      const { data, error } = await supabaseClient.from('volunteers').select('*').order('added_at');
+      if (error) { console.error('loadVolunteers failed:', error.message); volunteers = []; return; }
+      volunteers = (data || []).map(rowToVolunteer);
+    }
+
+    // Sub-teams are editable per team (not hardcoded) — every team can have its own list, some
+    // with none at all. Every team starts empty until an admin adds some via "Manage Sub-Teams"
+    // (no seed data is written to Supabase — a team only gets a row once its first sub-team is added).
+    async function loadSubTeams() {
+      const { data, error } = await supabaseClient.from('sub_teams').select('*');
+      if (error) console.error('loadSubTeams failed:', error.message);
+      subTeamsData = {};
+      subTeamRowIds = {};
+      TEAMS.forEach(t => { subTeamsData[t] = []; });
+      (data || []).forEach(row => {
+        subTeamsData[row.team_name] = Array.isArray(row.sub_team_names) ? row.sub_team_names : [];
+        subTeamRowIds[row.team_name] = row.id;
+      });
+    }
+
+    // Persists the current in-memory sub-team list for one team — updates its existing
+    // sub_teams row, or inserts a new row (and remembers the returned id) the first time
+    // that team gets a sub-team added.
+    async function persistSubTeams(team) {
+      const names = subTeamsData[team] || [];
+      const rowId = subTeamRowIds[team];
+      if (rowId) {
+        const { error } = await supabaseClient.from('sub_teams').update({ sub_team_names: names }).eq('id', rowId);
+        if (error) console.error('persistSubTeams (update) failed:', error.message);
+        return;
+      }
+      const { data, error } = await supabaseClient.from('sub_teams').insert({ team_name: team, sub_team_names: names }).select().single();
+      if (error) { console.error('persistSubTeams (insert) failed:', error.message); return; }
+      subTeamRowIds[team] = data.id;
+    }
+
+    function renderTeamFilterOptions() {
+      const sel = document.getElementById('team-filter');
+      sel.innerHTML = `<option value="">All Teams</option>` + TEAMS.map(t => `<option value="${t}">${t}</option>`).join('');
+      sel.value = teamFilter;
+      updateSubTeamFilterVisibility();
+    }
+
+    // The sub-team filter only appears once a specific team is selected AND that team actually
+    // has sub-teams defined — otherwise it'd just be an empty, useless dropdown.
+    function updateSubTeamFilterVisibility() {
+      const wrap = document.getElementById('subteam-filter-wrap');
+      const sel = document.getElementById('subteam-filter');
+      const subTeams = teamFilter ? (subTeamsData[teamFilter] || []) : [];
+      if (subTeams.length === 0) {
+        wrap.style.display = 'none';
+        subTeamFilterValue = '';
+        return;
+      }
+      wrap.style.display = 'flex';
+      sel.innerHTML = `<option value="">All Sub-Teams</option>` + subTeams.map(s => `<option value="${s}">${s}</option>`).join('');
+      sel.value = subTeamFilterValue;
+    }
+
+    // Shows the current team's lead (if any) inline in the filter row — only relevant once a
+    // specific team is selected, so it stays hidden otherwise.
+    function updateTeamLeadIndicator() {
+      const wrap = document.getElementById('team-lead-indicator-wrap');
+      const el = document.getElementById('team-lead-indicator');
+      if (!teamFilter) {
+        wrap.style.display = 'none';
+        return;
+      }
+      wrap.style.display = 'flex';
+      const leadVolunteer = volunteers.find(v => v.teams.some(t => t.name === teamFilter && t.isLead));
+      if (leadVolunteer) {
+        el.textContent = `${leadVolunteer.firstName} ${leadVolunteer.lastName}`;
+        el.classList.remove('unassigned');
+      } else {
+        el.textContent = 'No lead assigned';
+        el.classList.add('unassigned');
+      }
+    }
+
+    // Alphabetical by last name within a team, but that team's lead (if any) always comes first.
+    function sortByLeadThenLastName(list, team) {
+      return [...list].sort((a, b) => {
+        const aLead = a.teams.some(t => t.name === team && t.isLead) ? 0 : 1;
+        const bLead = b.teams.some(t => t.name === team && t.isLead) ? 0 : 1;
+        if (aLead !== bLead) return aLead - bLead;
+        return (a.lastName || '').localeCompare(b.lastName || '');
+      });
+    }
+
+    // A team can have sub-teams defined without every member being assigned one yet — flag those
+    // so it's obvious at a glance, instead of just showing a blank dash.
+    function subTeamCellHtml(v) {
+      const parts = v.teams.map(t => {
+        if (t.subTeam) return escapeHtml(t.subTeam);
+        const teamHasSubTeams = (subTeamsData[t.name] || []).length > 0;
+        return teamHasSubTeams ? `<span class="subteam-flag" title="No sub-team assigned for ${escapeHtml(t.name)}">Needs Sub-Team</span>` : null;
+      }).filter(Boolean);
+      return parts.length ? parts.join(', ') : '—';
+    }
+
+    // `teamContext` is the team this row is being listed under (every render path is already
+    // scoped to one team, so re-showing the team name/chip on each row would just repeat the
+    // card header) — used only to know whether to show the "Team Lead" badge under the name.
+    function volunteerRowHtml(v, teamContext) {
+      const subTeamTitle = v.teams.filter(t => t.subTeam).map(t => t.subTeam).join(', ');
+      const isLeadHere = v.teams.some(t => t.name === teamContext && t.isLead);
+      return `
+        <tr>
+          <td class="volunteer-name" data-label="Name">${escapeHtml(v.firstName)} ${escapeHtml(v.lastName)}${v.isYouth ? '<span class="youth-badge">Youth</span>' : ''}${isLeadHere ? '<span class="lead-badge">&#9733; Team Lead</span>' : ''}</td>
+          <td class="truncate" data-label="Sub-Team" title="${escapeHtml(subTeamTitle)}">${subTeamCellHtml(v)}</td>
+          <td class="truncate" data-label="Phone" title="${v.phone ? escapeHtml(formatPhone(v.phone)) : ''}">${v.phone ? escapeHtml(formatPhone(v.phone)) : '—'}</td>
+          <td class="truncate" data-label="Email" title="${escapeHtml(v.email)}">${escapeHtml(v.email)}</td>
+          <td${v.isYouth ? ' data-label="Parent / Guardian"' : ''}>${v.isYouth ? `<div class="parent-info"><span class="parent-name">${escapeHtml(v.parentName || '(no name)')}</span><br>${escapeHtml(formatPhone(v.parentPhone))}${v.parentPhone && v.parentEmail ? ' &middot; ' : ''}${escapeHtml(v.parentEmail || '')}</div>` : ''}</td>
+          <td>
+            <div class="row-actions">
+              <button type="button" class="icon-btn" data-action="edit" data-id="${v.id}" title="Edit" aria-label="Edit">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+              </button>
+              <button type="button" class="icon-btn danger" data-action="remove" data-id="${v.id}" title="Remove" aria-label="Remove">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+    }
+
+    // Fixed column widths (same colgroup on every table instance) so columns line up from one
+    // team's card to the next regardless of how long any individual entry's text happens to be.
+    const VOLUNTEER_COLGROUP = `
+      <colgroup>
+        <col style="width:220px;"><col style="width:120px;"><col style="width:130px;">
+        <col style="width:230px;"><col style="width:200px;"><col style="width:90px;">
+      </colgroup>`;
+
+    function volunteerTableHtml(list, teamContext) {
+      if (list.length === 0) return `<div class="volunteer-empty">No volunteers here yet.</div>`;
+      return `
+        <div class="table-scroll">
+        <table class="volunteer-table">
+          ${VOLUNTEER_COLGROUP}
+          <thead><tr><th>Name</th><th>Sub-Team</th><th>Phone</th><th>Email</th><th>Parent / Guardian</th><th></th></tr></thead>
+          <tbody>${list.map(v => volunteerRowHtml(v, teamContext)).join('')}</tbody>
+        </table>
+        </div>`;
+    }
+
+    // With no team filter, group volunteers by team card-by-card (same pattern as the Staff page's
+    // Church Staff groups) — and within a team that has sub-teams defined, split further into a
+    // mini-section per sub-team so a team with rotating groups stays organized at a glance.
+    function renderVolunteers() {
+      updateTeamLeadIndicator();
+      const wrap = document.getElementById('volunteers-wrap');
+
+      if (!teamFilter) {
+        wrap.innerHTML = TEAMS.map(team => {
+          const teamVolunteers = sortByLeadThenLastName(volunteers.filter(v => v.teams.some(t => t.name === team)), team);
+          const teamSubTeams = subTeamsData[team] || [];
+          let bodyHtml;
+
+          if (teamVolunteers.length === 0) {
+            bodyHtml = `<div class="volunteer-empty">No volunteers on this team yet.</div>`;
+          } else if (teamSubTeams.length > 0) {
+            const buckets = [...teamSubTeams, null]; // null = catch-all for no sub-team assigned
+            bodyHtml = buckets.map(st => {
+              const inBucket = teamVolunteers.filter(v => {
+                const assignment = v.teams.find(t => t.name === team);
+                return (assignment.subTeam || null) === st;
+              });
+              if (inBucket.length === 0) return '';
+              return `
+                <div class="subteam-group">
+                  <div class="subteam-group-label">${st ? escapeHtml(st) : 'No Sub-Team Assigned'}</div>
+                  ${volunteerTableHtml(inBucket, team)}
+                </div>`;
+            }).join('');
+          } else {
+            bodyHtml = volunteerTableHtml(teamVolunteers, team);
+          }
+
+          return `
+            <div class="card volunteers-card">
+              <div class="volunteers-card-head">
+                <div class="volunteers-card-title">${escapeHtml(team)}</div>
+                <div class="volunteers-card-count">${teamVolunteers.length} ${teamVolunteers.length === 1 ? 'volunteer' : 'volunteers'}</div>
+              </div>
+              ${bodyHtml}
+            </div>`;
+        }).join('');
+        return;
+      }
+
+      // Filtered to one team — single card, that team's lead sorted to the top, then A-Z by last name.
+      const list = sortByLeadThenLastName(
+        volunteers.filter(v => v.teams.some(t => t.name === teamFilter && (!subTeamFilterValue || t.subTeam === subTeamFilterValue))),
+        teamFilter
+      );
+
+      wrap.innerHTML = `
+        <div class="card volunteers-card">
+          <div class="volunteers-card-head">
+            <div class="volunteers-card-title">${escapeHtml(teamFilter)}${subTeamFilterValue ? ' — ' + escapeHtml(subTeamFilterValue) : ''}</div>
+            <div class="volunteers-card-count">${list.length} ${list.length === 1 ? 'volunteer' : 'volunteers'}</div>
+          </div>
+          ${volunteerTableHtml(list, teamFilter)}
+        </div>`;
+    }
+
+    function closeModal() {
+      document.getElementById('modal-backdrop').classList.remove('open');
+    }
+    function setModalFooter(buttons) {
+      const footer = document.getElementById('modal-footer');
+      footer.innerHTML = '';
+      buttons.forEach(b => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = b.className;
+        btn.textContent = b.label;
+        btn.addEventListener('click', b.onClick);
+        footer.appendChild(btn);
+      });
+    }
+
+    // ---- Manage Sub-Teams ----
+    function openManageSubTeamsModal() {
+      document.getElementById('modal-title').textContent = 'Manage Sub-Teams';
+      document.getElementById('modal-subtitle').textContent = "Some teams split into smaller rotating groups — set that up here";
+      document.getElementById('modal-body').innerHTML = `
+        <div class="field">
+          <label for="manage-team-select">Team</label>
+          <select id="manage-team-select">
+            ${TEAMS.map(t => `<option value="${escapeHtml(t)}" ${t === teamFilter ? 'selected' : ''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label>Sub-Teams</label>
+          <div id="subteam-manage-list"></div>
+        </div>
+        <div class="add-subteam-row">
+          <div class="field">
+            <label for="new-subteam-input">Add a sub-team</label>
+            <input type="text" id="new-subteam-input" placeholder="e.g. Team 5">
+          </div>
+          <button type="button" class="btn btn-gold" id="add-subteam-inline-btn">Add</button>
+        </div>`;
+
+      const teamSelect = document.getElementById('manage-team-select');
+      renderSubTeamManageList(teamSelect.value);
+      teamSelect.addEventListener('change', () => renderSubTeamManageList(teamSelect.value));
+
+      const addSubTeam = async () => {
+        const input = document.getElementById('new-subteam-input');
+        const name = input.value.trim();
+        if (!name) return;
+        const team = teamSelect.value;
+        if (subTeamsData[team].some(s => s.toLowerCase() === name.toLowerCase())) { input.value = ''; return; }
+        subTeamsData[team] = [...subTeamsData[team], name];
+        await persistSubTeams(team);
+        input.value = '';
+        renderSubTeamManageList(team);
+      };
+      document.getElementById('add-subteam-inline-btn').addEventListener('click', addSubTeam);
+      document.getElementById('new-subteam-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); addSubTeam(); }
+      });
+
+      setModalFooter([{
+        label: 'Done', className: 'btn btn-gold',
+        onClick: () => { closeModal(); renderTeamFilterOptions(); renderVolunteers(); }
+      }]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    function renderSubTeamManageList(team) {
+      const list = subTeamsData[team] || [];
+      const wrap = document.getElementById('subteam-manage-list');
+      wrap.innerHTML = list.length
+        ? list.map(name => `
+          <div class="subteam-manage-row">
+            <span>${escapeHtml(name)}</span>
+            <button type="button" class="danger-link" data-subteam-remove="${escapeHtml(name)}">Remove</button>
+          </div>`).join('')
+        : `<div class="subteam-manage-empty">No sub-teams yet for ${escapeHtml(team)}.</div>`;
+
+      wrap.querySelectorAll('[data-subteam-remove]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          // Matches the previous localStorage behavior exactly: removing a sub-team here does
+          // NOT block on it being in use, and does NOT strip the stale subTeam value from any
+          // volunteer's teams array — a volunteer can still show a now-deleted sub-team name
+          // until they're edited again. Preserved as-is rather than adding new cascade behavior.
+          subTeamsData[team] = subTeamsData[team].filter(s => s !== btn.dataset.subteamRemove);
+          await persistSubTeams(team);
+          renderSubTeamManageList(team);
+        });
+      });
+    }
+
+    // ---- Add / Edit Volunteer ----
+    // Shared by both — `existing` is null for a new volunteer, or the volunteer object being
+    // edited (pre-fills every field, including team/sub-team/lead checkboxes).
+    function openVolunteerModal(existing) {
+      const teamOf = (name) => existing && existing.teams.find(t => t.name === name);
+
+      document.getElementById('modal-title').textContent = existing ? 'Edit Volunteer' : 'Add Volunteer';
+      document.getElementById('modal-subtitle').textContent = existing ? '' : 'Manually add someone interested in serving';
+      document.getElementById('modal-body').innerHTML = `
+        <div class="form-error" id="vol-error"></div>
+        <div class="name-row">
+          <div class="field">
+            <label for="vol-first-name">First Name<span class="required-mark">*</span></label>
+            <input type="text" id="vol-first-name" placeholder="Jane" value="${existing ? escapeHtml(existing.firstName) : ''}">
+          </div>
+          <div class="field">
+            <label for="vol-last-name">Last Name<span class="required-mark">*</span></label>
+            <input type="text" id="vol-last-name" placeholder="Smith" value="${existing ? escapeHtml(existing.lastName) : ''}">
+          </div>
+        </div>
+        <div class="field">
+          <label for="vol-phone">Phone Number</label>
+          <input type="text" id="vol-phone" placeholder="(843) 555-0100" value="${existing ? escapeHtml(formatPhone(existing.phone)) : ''}">
+        </div>
+        <div class="field">
+          <label for="vol-email">Email<span class="required-mark">*</span></label>
+          <input type="email" id="vol-email" placeholder="jane@example.com" value="${existing ? escapeHtml(existing.email || '') : ''}">
+        </div>
+        <div class="field">
+          <label>Teams (optional — choose any that apply)</label>
+          <div class="team-checklist">
+            ${TEAMS.map((t, i) => {
+              const assignment = teamOf(t);
+              const teamSubTeams = subTeamsData[t] || [];
+              return `
+              <div class="team-row">
+                <label><input type="checkbox" class="team-check" data-team="${t}" id="vol-team-${i}" ${assignment ? 'checked' : ''}>${t}</label>
+                ${teamSubTeams.length ? `<select class="sub-team-select" id="vol-subteam-${i}" style="${assignment ? 'display:block;' : ''}">
+                  <option value="">No sub-team</option>
+                  ${teamSubTeams.map(st => `<option value="${st}" ${assignment && assignment.subTeam === st ? 'selected' : ''}>${st}</option>`).join('')}
+                </select>` : ''}
+                <label class="lead-check-row" id="vol-lead-row-${i}" style="${assignment ? 'display:flex;' : ''}">
+                  <input type="checkbox" id="vol-lead-${i}" ${assignment && assignment.isLead ? 'checked' : ''}> Make this volunteer the ${t} team lead
+                </label>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+        <div class="youth-section">
+          <label class="youth-check-row"><input type="checkbox" id="vol-is-youth" ${existing && existing.isYouth ? 'checked' : ''}>This volunteer is a youth (under 18)</label>
+          <div class="youth-safety-note" id="youth-safety-note">Not available — Safety team requires adult volunteers. Uncheck Safety above to mark this volunteer as a youth.</div>
+          <div class="parent-fields" id="parent-fields">
+            <div class="field">
+              <label for="vol-parent-name">Parent / Guardian Name<span class="required-mark">*</span></label>
+              <input type="text" id="vol-parent-name" placeholder="John Smith" value="${existing ? escapeHtml(existing.parentName || '') : ''}">
+            </div>
+            <div class="field">
+              <label for="vol-parent-phone">Parent / Guardian Phone</label>
+              <input type="text" id="vol-parent-phone" placeholder="(843) 555-0100" value="${existing ? escapeHtml(formatPhone(existing.parentPhone)) : ''}">
+            </div>
+            <div class="field">
+              <label for="vol-parent-email">Parent / Guardian Email</label>
+              <input type="email" id="vol-parent-email" placeholder="john@example.com" value="${existing ? escapeHtml(existing.parentEmail || '') : ''}">
+            </div>
+          </div>
+        </div>`;
+
+      wireLivePhoneFormat(document.getElementById('vol-phone'));
+      wireLivePhoneFormat(document.getElementById('vol-parent-phone'));
+
+      // Toggle a team's sub-team dropdown + "make lead" option as it's checked/unchecked.
+      document.querySelectorAll('.team-check').forEach((cb, i) => {
+        cb.addEventListener('change', () => {
+          const sel = document.getElementById(`vol-subteam-${i}`);
+          if (sel) sel.style.display = cb.checked ? 'block' : 'none';
+          const leadRow = document.getElementById(`vol-lead-row-${i}`);
+          leadRow.style.display = cb.checked ? 'flex' : 'none';
+          if (!cb.checked) document.getElementById(`vol-lead-${i}`).checked = false;
+          if (cb.dataset.team === YOUTH_EXCLUDED_TEAM) updateYouthAvailability();
+        });
+      });
+
+      const youthCheck = document.getElementById('vol-is-youth');
+      document.getElementById('parent-fields').classList.toggle('visible', youthCheck.checked);
+      youthCheck.addEventListener('change', () => {
+        document.getElementById('parent-fields').classList.toggle('visible', youthCheck.checked);
+      });
+      updateYouthAvailability();
+
+      setModalFooter([
+        { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+        { label: existing ? 'Save Changes' : 'Add Volunteer', className: 'btn btn-gold', onClick: () => submitVolunteerForm(existing ? existing.id : null) }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    // Safety team members must be adults — disable and clear the Youth option while Safety is checked.
+    function updateYouthAvailability() {
+      const safetyCheck = Array.from(document.querySelectorAll('.team-check')).find(cb => cb.dataset.team === YOUTH_EXCLUDED_TEAM);
+      const youthCheck = document.getElementById('vol-is-youth');
+      const note = document.getElementById('youth-safety-note');
+      const safetyChecked = safetyCheck && safetyCheck.checked;
+      youthCheck.disabled = safetyChecked;
+      note.classList.toggle('visible', safetyChecked);
+      if (safetyChecked && youthCheck.checked) {
+        youthCheck.checked = false;
+        document.getElementById('parent-fields').classList.remove('visible');
+      }
+    }
+
+    // Only one volunteer can be the lead of a given team — unset that team's lead flag on
+    // everyone else when this volunteer is saved as its new lead. Each affected volunteer's
+    // `teams` jsonb is persisted individually since there's no bulk-overwrite anymore.
+    async function enforceLeadUniqueness(savingVolunteerId, teams) {
+      const leadTeams = teams.filter(t => t.isLead).map(t => t.name);
+      if (leadTeams.length === 0) return;
+      const affected = volunteers.filter(v => v.id !== savingVolunteerId && v.teams.some(t => leadTeams.includes(t.name) && t.isLead));
+      for (const v of affected) {
+        v.teams = v.teams.map(t => (leadTeams.includes(t.name) && t.isLead) ? { ...t, isLead: false } : t);
+        const { error } = await supabaseClient.from('volunteers').update({ teams: v.teams }).eq('id', v.id);
+        if (error) console.error('enforceLeadUniqueness update failed:', error.message);
+      }
+    }
+
+    async function submitVolunteerForm(existingId) {
+      const firstName = document.getElementById('vol-first-name').value.trim();
+      const lastName = document.getElementById('vol-last-name').value.trim();
+      const phone = document.getElementById('vol-phone').value.trim();
+      const email = document.getElementById('vol-email').value.trim();
+      const teams = [];
+      TEAMS.forEach((t, i) => {
+        const cb = document.getElementById(`vol-team-${i}`);
+        if (cb.checked) {
+          const sel = document.getElementById(`vol-subteam-${i}`);
+          const leadCb = document.getElementById(`vol-lead-${i}`);
+          teams.push({ name: t, subTeam: sel && sel.value ? sel.value : null, isLead: leadCb.checked });
+        }
+      });
+      const isYouth = document.getElementById('vol-is-youth').checked;
+      const parentName = document.getElementById('vol-parent-name').value.trim();
+      const parentPhone = document.getElementById('vol-parent-phone').value.trim();
+      const parentEmail = document.getElementById('vol-parent-email').value.trim();
+      const errorBox = document.getElementById('vol-error');
+      errorBox.classList.remove('visible');
+
+      if (!firstName || !lastName) {
+        errorBox.textContent = 'First name and last name are required.';
+        errorBox.classList.add('visible');
+        return;
+      }
+      // A youth volunteer often has no email/phone of their own — the parent/guardian contact
+      // info covers that instead, so their own email isn't required in that case.
+      if (!isYouth && !email) {
+        errorBox.textContent = 'Email is required (or check "This volunteer is a youth" and use parent/guardian contact info instead).';
+        errorBox.classList.add('visible');
+        return;
+      }
+      if (isYouth && (!parentName || (!parentPhone && !parentEmail))) {
+        errorBox.textContent = 'For a youth volunteer, add a parent/guardian name and at least one contact method.';
+        errorBox.classList.add('visible');
+        return;
+      }
+
+      await enforceLeadUniqueness(existingId, teams);
+
+      const dbData = {
+        first_name: firstName,
+        last_name: lastName,
+        phone: phone || null,
+        email: email || null,
+        teams,
+        is_youth: isYouth,
+        parent_name: isYouth ? (parentName || null) : null,
+        parent_phone: isYouth ? (parentPhone || null) : null,
+        parent_email: isYouth ? (parentEmail || null) : null
+      };
+
+      const fullName = `${firstName} ${lastName}`;
+      if (existingId) {
+        const { error } = await supabaseClient.from('volunteers').update(dbData).eq('id', existingId);
+        if (error) {
+          errorBox.textContent = error.message;
+          errorBox.classList.add('visible');
+          return;
+        }
+        logActivity('volunteer_edit', fullName);
+      } else {
+        const { error } = await supabaseClient.from('volunteers').insert(dbData);
+        if (error) {
+          errorBox.textContent = error.message;
+          errorBox.classList.add('visible');
+          return;
+        }
+        logActivity('volunteer_add', fullName);
+      }
+      await loadVolunteers();
+      closeModal();
+      renderVolunteers();
+    }
+
+    function openRemoveModal(volunteer) {
+      document.getElementById('modal-title').textContent = 'Remove Volunteer';
+      document.getElementById('modal-subtitle').textContent = '';
+      document.getElementById('modal-body').innerHTML = `<p style="font-size:14px; color:var(--text-dark); line-height:1.6;">Remove <strong>${escapeHtml(volunteer.firstName)} ${escapeHtml(volunteer.lastName)}</strong> (${escapeHtml(volunteer.email)}) from the volunteer list? This can't be undone.</p>`;
+      setModalFooter([
+        { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+        { label: 'Remove', className: 'btn btn-gold', onClick: () => submitRemove(volunteer.id) }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    async function submitRemove(id) {
+      const removed = volunteers.find(v => v.id === id);
+      const { error } = await supabaseClient.from('volunteers').delete().eq('id', id);
+      if (error) { console.error('submitRemove failed:', error.message); return; }
+      if (removed) logActivity('volunteer_remove', `${removed.firstName} ${removed.lastName}`);
+      await loadVolunteers();
+      closeModal();
+      renderVolunteers();
+    }
+
+    const dataPromise = Promise.all([loadVolunteers(), loadSubTeams()]);
+
+    loadSidebar().then(async () => {
+      if (!document.getElementById('volunteers-wrap')) return;
+      await dataPromise;
+      renderTeamFilterOptions();
+      renderVolunteers();
+
+      document.getElementById('modal-close').addEventListener('click', closeModal);
+      document.getElementById('modal-backdrop').addEventListener('click', (e) => {
+        if (e.target.id === 'modal-backdrop') closeModal();
+      });
+
+      document.getElementById('add-volunteer-btn').addEventListener('click', () => openVolunteerModal(null));
+      document.getElementById('manage-subteams-btn').addEventListener('click', openManageSubTeamsModal);
+
+      document.getElementById('team-filter').addEventListener('change', (e) => {
+        teamFilter = e.target.value;
+        subTeamFilterValue = '';
+        updateSubTeamFilterVisibility();
+        renderVolunteers();
+      });
+      document.getElementById('subteam-filter').addEventListener('change', (e) => {
+        subTeamFilterValue = e.target.value;
+        renderVolunteers();
+      });
+
+      document.getElementById('volunteers-wrap').addEventListener('click', (e) => {
+        const editBtn = e.target.closest('[data-action="edit"]');
+        if (editBtn) {
+          const volunteer = volunteers.find(v => v.id === editBtn.dataset.id);
+          if (volunteer) openVolunteerModal(volunteer);
+          return;
+        }
+        const removeBtn = e.target.closest('[data-action="remove"]');
+        if (removeBtn) {
+          const volunteer = volunteers.find(v => v.id === removeBtn.dataset.id);
+          if (volunteer) openRemoveModal(volunteer);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

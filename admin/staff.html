@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<title>Staff — Christ Church Bluffton Admin</title>
+<link rel="stylesheet" href="css/shared.css">
+<style>
+  .staff-toolbar-actions { display: flex; gap: 10px; }
+  .btn-sm { padding: 8px 14px; font-size: 12px; }
+
+  #staff-groups { max-width: 1180px; margin: 0 auto; }
+  .position-group {
+    margin-bottom: 22px;
+    border-radius: 14px;
+    overflow: hidden;
+    border-color: transparent;
+    box-shadow: 0 2px 10px rgba(48,59,106,0.07);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }
+  .position-group:hover { box-shadow: 0 8px 22px rgba(48,59,106,0.12); transform: translateY(-1px); }
+  .position-group .card-body { padding: 0; }
+  .position-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 16px 22px;
+    background: linear-gradient(135deg, rgba(195,163,85,0.12) 0%, rgba(195,163,85,0.04) 100%);
+    border-bottom: 2px solid var(--gold);
+  }
+  .position-head-left { display: flex; align-items: center; gap: 12px; }
+  .position-icon {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    background: var(--navy-blue); color: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-family: Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold;
+  }
+  .position-title { font-family: Georgia, 'Times New Roman', serif; font-size: 16px; color: var(--navy-blue); }
+  .position-count {
+    font-size: 10.5px; font-weight: bold; color: var(--gold-text); text-transform: uppercase; letter-spacing: 0.5px;
+    background: rgba(195,163,85,0.18); padding: 3px 10px; border-radius: 100px;
+  }
+
+  .staff-table { width: 100%; border-collapse: collapse; }
+  .staff-table tr { transition: background 0.12s ease; }
+  .staff-table tr:hover { background: rgba(195,163,85,0.05); }
+  .staff-table td { padding: 13px 22px; border-bottom: 1px solid var(--border-gray); font-size: 13px; vertical-align: middle; }
+  .staff-table tr:last-child td { border-bottom: none; }
+  .staff-name { font-weight: bold; color: var(--text-dark); }
+  .staff-empty { padding: 18px 22px; font-size: 13px; color: var(--text-muted); font-style: italic; }
+  .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+  .icon-btn {
+    width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-gray);
+    background: var(--white); display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); cursor: pointer; padding: 0; flex-shrink: 0;
+  }
+  .icon-btn svg { width: 14px; height: 14px; }
+  .icon-btn:hover { border-color: var(--navy-blue); color: var(--navy-blue); background: rgba(48,59,106,0.05); }
+  .icon-btn.danger:hover { border-color: var(--danger); color: var(--danger); background: rgba(177,67,67,0.05); }
+
+  /* Below this width there isn't room for fixed columns without truncating email/phone —
+     switch each row into a single-row card: name, email, phone, and actions all side by side
+     instead of one field per full-width line (too tall) or truncated text. */
+  @media (max-width: 1700px) {
+    .staff-table, .staff-table tbody, .staff-table td { display: block; }
+    .staff-table tr {
+      display: grid;
+      grid-template-columns: 1.4fr 1.6fr 1fr 0.5fr;
+      column-gap: 16px; row-gap: 10px; align-items: center;
+      border: 1px solid var(--border-gray); border-radius: 10px; margin: 12px 16px; padding: 12px 16px;
+    }
+    .staff-table tr:hover { background: none; }
+    .staff-table td {
+      width: auto !important; white-space: normal !important; word-break: break-word;
+      border-bottom: none; padding: 0; box-sizing: border-box;
+    }
+    .staff-table td::before {
+      content: attr(data-label); display: block; font-size: 11px; font-weight: bold;
+      text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-bottom: 2px;
+    }
+    .staff-table td:nth-child(1) { font-size: 15px; }
+    .staff-table td:nth-child(1)::before { display: none; }
+    .staff-table td:last-child { text-align: right !important; }
+  }
+  @media (max-width: 640px) {
+    .staff-table tr { grid-template-columns: 1fr 1fr; }
+    .staff-table td:nth-child(1) { grid-column: 1 / -1; }
+    .staff-table td:last-child {
+      grid-column: 1 / -1; text-align: left !important;
+      padding-top: 10px !important; margin-top: 4px; border-top: 1px solid var(--border-gray);
+    }
+    .staff-table .row-actions { justify-content: flex-start; }
+  }
+
+  /* ---- Modal (shared shell pattern, matches team.html) ---- */
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0; background: rgba(30,37,71,0.55);
+    z-index: 1000; align-items: center; justify-content: center; padding: 24px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-box {
+    background: var(--white); border-radius: 14px; width: 100%; max-width: 440px;
+    max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+  }
+  .modal-header { padding: 20px 26px; border-bottom: 1px solid var(--border-gray); display: flex; align-items: center; justify-content: space-between; }
+  .modal-header .modal-title { font-family: Georgia, 'Times New Roman', serif; font-size: 20px; color: var(--navy-blue); }
+  .modal-header .modal-subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .modal-close { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border-gray); background: var(--white); color: var(--text-muted); font-size: 16px; cursor: pointer; flex-shrink: 0; }
+  .modal-close:hover { border-color: var(--navy-blue); color: var(--navy-blue); }
+  .modal-body { padding: 22px 26px; overflow-y: auto; }
+  .modal-footer { padding: 16px 26px; border-top: 1px solid var(--border-gray); display: flex; justify-content: flex-end; gap: 10px; }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 13px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; }
+  .field input[type="text"], .field input[type="email"], .field select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
+    font-family: inherit; font-size: 14px; background: var(--lightest-gray);
+  }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--gold); background: var(--white); }
+
+  .position-manage-row {
+    display: flex; align-items: center; justify-content: space-between; padding: 8px 10px;
+    border: 1px solid var(--border-gray); border-radius: 8px; margin-bottom: 6px; font-size: 13px;
+  }
+  .position-manage-row .move-btns { display: flex; gap: 4px; margin-right: 10px; }
+  .position-manage-row .move-btns button {
+    width: 22px; height: 22px; border-radius: 5px; border: 1px solid var(--border-gray);
+    background: var(--white); font-size: 11px; cursor: pointer; color: var(--text-muted);
+  }
+  .position-manage-row .move-btns button:hover { border-color: var(--navy-blue); color: var(--navy-blue); }
+  .position-manage-row .move-btns button:disabled { opacity: 0.3; cursor: default; }
+  .position-manage-row .pos-name { flex: 1; }
+  .add-position-row { display: flex; gap: 8px; align-items: flex-end; }
+  .add-position-row .field { flex: 1; margin-bottom: 0; }
+  .add-position-row button { padding: 10px 16px; flex-shrink: 0; }
+
+  .form-error { background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; }
+  .form-error.visible { display: block; }
+
+  .church-header {
+    display: flex; align-items: center; gap: 18px;
+    padding: 22px 26px;
+    background: linear-gradient(135deg, var(--navy-blue) 0%, var(--navy-dark) 100%);
+    border-radius: 16px;
+    margin: 0 auto 24px;
+    max-width: 1180px;
+  }
+  .church-header-logo { width: 58px; height: 58px; flex-shrink: 0; }
+  .church-header-title { font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: var(--white); }
+  .church-header-sub { font-family: Arial, Helvetica, sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-top: 5px; }
+</style>
+</head>
+<body data-page="staff">
+  <div class="app-shell">
+    <div id="sidebar-mount">
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img class="brand-crest" src="assets/site-images/logo-dark-bg.png" alt="Christ Church Bluffton crest">
+    <div>
+      <div class="title">Christ Church Bluffton</div>
+      <div class="label">Admin Panel</div>
+    </div>
+    <button type="button" class="hamburger-btn" id="hamburger-btn" aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+    </button>
+  </div>
+  <div class="sidebar-collapsible" id="sidebar-collapsible">
+    <nav>
+      <a href="dashboard.html" data-page="dashboard">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Dashboard
+      </a>
+      <a href="staff.html" data-page="staff">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Staff
+      </a>
+      <a href="congregants.html" data-page="congregants" data-permission="congregants">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+        Congregants
+      </a>
+      <a href="prayers.html" data-page="prayers" data-permission="prayers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+        Prayer Requests
+      </a>
+      <a href="volunteers.html" data-page="volunteers" data-permission="signups">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Volunteers
+      </a>
+      <a href="subscribers.html" data-page="subscribers" data-permission="subscribers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h4M15 12h4M6 16h12"/></svg>
+        Subscribers
+      </a>
+      <a href="newsletter.html" data-page="newsletter" data-permission="newsletter" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        Newsletter
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="events.html" data-page="events" data-permission="events">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Events
+      </a>
+      <a href="content.html" data-page="content" data-permission="contentEditor" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Content Editor
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="photos.html" data-page="photos" data-permission="photos">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg>
+        Photos
+      </a>
+      <a href="team.html" data-page="team" data-admin-only="true">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M19 8h4M21 6v4"/></svg>
+        Team
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="reading-mode-row" id="reading-mode-row" style="display:none;">
+        <button type="button" class="reading-mode-btn" id="reading-mode-btn" title="Toggle easier-to-read text">
+          <span class="aa-icon">Aa</span> Reading Mode
+        </button>
+        <div class="reading-tint-swatches" id="reading-tint-swatches" style="display:none;">
+          <button type="button" class="tint-swatch tint-cream" data-tint="cream" title="Cream background"></button>
+          <button type="button" class="tint-swatch tint-blue" data-tint="blue" title="Light blue background"></button>
+          <button type="button" class="tint-swatch tint-green" data-tint="green" title="Light green background"></button>
+        </div>
+      </div>
+      <a href="account.html" class="user-chip" id="user-chip-link" title="Account Settings">
+        <div class="avatar" id="sidebar-avatar">?</div>
+        <div class="user-chip-info">
+          <div class="name" id="sidebar-name">—</div>
+          <div class="role" id="sidebar-role">—</div>
+        </div>
+        <svg class="chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+      <a href="#" class="logout-link" id="logout-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Log out
+      </a>
+    </div>
+  </div>
+</aside>
+  </div>
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <h1>Staff</h1>
+          <div class="subtitle" id="welcome-line">Welcome back</div>
+        </div>
+        <div class="staff-toolbar-actions">
+          <button type="button" class="btn btn-outline btn-sm" id="manage-positions-btn">Manage Positions</button>
+          <button type="button" class="btn btn-gold btn-sm" id="add-staff-btn">+ Add Staff Member</button>
+        </div>
+      </div>
+      <div class="content" id="page-body">
+        <div class="church-header">
+          <img class="church-header-logo" src="assets/site-images/logo-dark-bg.png" alt="Christ Church Bluffton">
+          <div>
+            <div class="church-header-title">Christ Church Bluffton</div>
+            <div class="church-header-sub">Staff Directory</div>
+          </div>
+        </div>
+        <div id="staff-groups"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="modal-title">Add Staff Member</div>
+          <div class="modal-subtitle" id="modal-subtitle"></div>
+        </div>
+        <button type="button" class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    // `staff` holds real rows fetched from the `staff` table, mapped to the same camelCase-ish
+    // shape the render code already expects (`position` = the position's NAME string, `positionId`
+    // = its real uuid FK for persistence). `positions` stays a plain array of position NAME strings
+    // (in sort_order) so the existing render/UI code below — which was built around plain name
+    // strings, not id-based objects — doesn't need to change. `positionRows` is the internal-only
+    // array of real {id, name, sortOrder} rows from `staff_positions`, used to translate between
+    // the UI's name strings and the DB's uuid ids.
+    let staff = [];
+    let positions = [];
+    let positionRows = [];
+
+    function escapeHtml(str) {
+      return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    // Formats any phone input — typed live or already stored as raw digits — as (XXX) XXX-XXXX.
+    function formatPhone(value) {
+      const digits = (value || '').replace(/\D/g, '').slice(0, 10);
+      const len = digits.length;
+      if (len === 0) return '';
+      if (len < 4) return `(${digits}`;
+      if (len < 7) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+
+    function positionNameById(id) {
+      if (!id) return null;
+      const row = positionRows.find(r => r.id === id);
+      return row ? row.name : null;
+    }
+    function positionIdByName(name) {
+      const row = positionRows.find(r => r.name === name);
+      return row ? row.id : null;
+    }
+
+    async function loadPositions() {
+      const { data, error } = await supabaseClient
+        .from('staff_positions')
+        .select('*')
+        .order('sort_order', { ascending: true });
+      if (error) { console.error('loadPositions failed:', error.message); positionRows = []; positions = []; return; }
+      positionRows = (data || []).map(r => ({ id: r.id, name: r.name, sortOrder: r.sort_order }));
+      positions = positionRows.map(r => r.name);
+    }
+
+    async function loadStaff() {
+      const { data, error } = await supabaseClient
+        .from('staff')
+        .select('*')
+        .order('name', { ascending: true });
+      if (error) { console.error('loadStaff failed:', error.message); staff = []; return; }
+      staff = (data || []).map(s => ({
+        id: s.id,
+        name: s.name,
+        email: s.email || '',
+        phone: s.phone || '',
+        position: positionNameById(s.position_id),
+        positionId: s.position_id,
+        addedAt: s.added_at ? new Date(s.added_at).getTime() : null
+      }));
+    }
+
+    // "Kevin McCartney" -> "McCartney" for last-name sorting.
+    function lastNameOf(fullName) {
+      const parts = (fullName || '').trim().split(/\s+/);
+      return parts[parts.length - 1] || '';
+    }
+
+    function renderStaffGroups() {
+      const wrap = document.getElementById('staff-groups');
+      wrap.innerHTML = positions.map(position => {
+        const members = staff.filter(s => s.position === position)
+          .sort((a, b) => lastNameOf(a.name).localeCompare(lastNameOf(b.name)));
+        return `
+          <div class="card position-group">
+            <div class="position-head">
+              <div class="position-head-left">
+                <div class="position-icon">${escapeHtml(position.charAt(0))}</div>
+                <div class="position-title">${escapeHtml(position)}</div>
+              </div>
+              <div class="position-count">${members.length} ${members.length === 1 ? 'person' : 'people'}</div>
+            </div>
+            ${members.length === 0 ? `<div class="staff-empty">No one assigned yet.</div>` : `
+            <div class="table-scroll">
+            <table class="staff-table">
+              <tbody>
+                ${members.map(m => `
+                  <tr>
+                    <td class="staff-name" data-label="Name" style="width:190px; white-space:nowrap;">${escapeHtml(m.name)}</td>
+                    <td data-label="Email" style="width:380px; white-space:nowrap;">${escapeHtml(m.email || '—')}</td>
+                    <td data-label="Phone" style="width:150px; white-space:nowrap;">${escapeHtml(formatPhone(m.phone) || '—')}</td>
+                    <td style="text-align:right; white-space:nowrap;">
+                      <div class="row-actions">
+                        <button type="button" class="icon-btn" data-action="edit" data-id="${m.id}" title="Edit" aria-label="Edit">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                        </button>
+                        <button type="button" class="icon-btn danger" data-action="remove" data-id="${m.id}" title="Remove" aria-label="Remove">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+            </div>`}
+          </div>`;
+      }).join('');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-backdrop').classList.remove('open');
+    }
+    function setModalFooter(buttons) {
+      const footer = document.getElementById('modal-footer');
+      footer.innerHTML = '';
+      buttons.forEach(b => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = b.className;
+        btn.textContent = b.label;
+        btn.addEventListener('click', b.onClick);
+        footer.appendChild(btn);
+      });
+    }
+
+    // ---- Add / Edit Staff Member ----
+    function openStaffModal(existing) {
+      document.getElementById('modal-title').textContent = existing ? 'Edit Staff Member' : 'Add Staff Member';
+      document.getElementById('modal-subtitle').textContent = '';
+      document.getElementById('modal-body').innerHTML = `
+        <div class="form-error" id="staff-error"></div>
+        <div class="field">
+          <label for="staff-name">Name<span class="required-mark">*</span></label>
+          <input type="text" id="staff-name" placeholder="Jane Smith" value="${existing ? escapeHtml(existing.name) : ''}">
+        </div>
+        <div class="field">
+          <label for="staff-email">Email</label>
+          <input type="email" id="staff-email" placeholder="jane@christchurchbluffton.org" value="${existing ? escapeHtml(existing.email || '') : ''}">
+        </div>
+        <div class="field">
+          <label for="staff-phone">Phone Number</label>
+          <input type="text" id="staff-phone" placeholder="(843) 555-0100" value="${existing ? escapeHtml(formatPhone(existing.phone)) : ''}">
+        </div>
+        <div class="field">
+          <label for="staff-position">Position</label>
+          <select id="staff-position">
+            ${positions.map(p => `<option value="${escapeHtml(p)}" ${existing && existing.position === p ? 'selected' : ''}>${p}</option>`).join('')}
+          </select>
+        </div>`;
+
+      // Reformat to (XXX) XXX-XXXX live as they type, however they enter it (raw digits included).
+      document.getElementById('staff-phone').addEventListener('input', (e) => {
+        const pos = e.target.selectionStart;
+        const before = e.target.value.length;
+        e.target.value = formatPhone(e.target.value);
+        const after = e.target.value.length;
+        e.target.selectionEnd = Math.max(0, pos + (after - before));
+      });
+
+      setModalFooter([
+        { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+        { label: existing ? 'Save Changes' : 'Add Staff Member', className: 'btn btn-gold', onClick: () => submitStaffForm(existing ? existing.id : null) }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    async function submitStaffForm(existingId) {
+      const name = document.getElementById('staff-name').value.trim();
+      const email = document.getElementById('staff-email').value.trim();
+      const phone = document.getElementById('staff-phone').value.trim();
+      const position = document.getElementById('staff-position').value;
+      const errorBox = document.getElementById('staff-error');
+      errorBox.classList.remove('visible');
+
+      if (!name) {
+        errorBox.textContent = 'Name is required.';
+        errorBox.classList.add('visible');
+        return;
+      }
+
+      const payload = { name, email: email || null, phone: phone || null, position_id: positionIdByName(position) };
+
+      if (existingId) {
+        const { error } = await supabaseClient.from('staff').update(payload).eq('id', existingId);
+        if (error) {
+          errorBox.textContent = error.message;
+          errorBox.classList.add('visible');
+          return;
+        }
+        logActivity('staff_edit', name);
+      } else {
+        const { error } = await supabaseClient.from('staff').insert(payload);
+        if (error) {
+          errorBox.textContent = error.message;
+          errorBox.classList.add('visible');
+          return;
+        }
+        logActivity('staff_add', name);
+      }
+      closeModal();
+      await loadStaff();
+      renderStaffGroups();
+    }
+
+    function openRemoveStaffModal(member) {
+      document.getElementById('modal-title').textContent = 'Remove Staff Member';
+      document.getElementById('modal-subtitle').textContent = '';
+      document.getElementById('modal-body').innerHTML = `
+        <div class="form-error" id="staff-remove-error"></div>
+        <p style="font-size:14px; color:var(--text-dark); line-height:1.6;">Remove <strong>${escapeHtml(member.name)}</strong> from ${escapeHtml(member.position || '—')}?</p>`;
+      setModalFooter([
+        { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+        { label: 'Remove', className: 'btn btn-gold', onClick: () => submitRemoveStaff(member) }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    async function submitRemoveStaff(member) {
+      const errorBox = document.getElementById('staff-remove-error');
+      const { error } = await supabaseClient.from('staff').delete().eq('id', member.id);
+      if (error) {
+        errorBox.textContent = error.message;
+        errorBox.classList.add('visible');
+        return;
+      }
+      logActivity('staff_remove', member.name);
+      closeModal();
+      await loadStaff();
+      renderStaffGroups();
+    }
+
+    // ---- Manage Positions ----
+    function openManagePositionsModal() {
+      document.getElementById('modal-title').textContent = 'Manage Positions';
+      document.getElementById('modal-subtitle').textContent = 'Controls the order staff groups appear in';
+      document.getElementById('modal-body').innerHTML = `
+        <div class="form-error" id="positions-error"></div>
+        <div id="positions-manage-list"></div>
+        <div class="add-position-row" style="margin-top:14px;">
+          <div class="field">
+            <label for="new-position-input">Add a position</label>
+            <input type="text" id="new-position-input" placeholder="e.g. Youth Director">
+          </div>
+          <button type="button" class="btn btn-gold" id="add-position-inline-btn">Add</button>
+        </div>`;
+      renderPositionsManageList();
+
+      const addPosition = async () => {
+        const input = document.getElementById('new-position-input');
+        const name = input.value.trim();
+        if (!name) return;
+        if (positions.some(p => p.toLowerCase() === name.toLowerCase())) { input.value = ''; return; }
+        const errorBox = document.getElementById('positions-error');
+        const { data, error } = await supabaseClient
+          .from('staff_positions')
+          .insert({ name, sort_order: positionRows.length })
+          .select()
+          .single();
+        if (error) {
+          errorBox.textContent = error.message;
+          errorBox.classList.add('visible');
+          return;
+        }
+        errorBox.classList.remove('visible');
+        positionRows.push({ id: data.id, name: data.name, sortOrder: data.sort_order });
+        positions = positionRows.map(r => r.name);
+        input.value = '';
+        renderPositionsManageList();
+      };
+      document.getElementById('add-position-inline-btn').addEventListener('click', addPosition);
+      document.getElementById('new-position-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); addPosition(); }
+      });
+
+      setModalFooter([{
+        label: 'Done', className: 'btn btn-gold',
+        onClick: () => { closeModal(); renderStaffGroups(); }
+      }]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    function renderPositionsManageList() {
+      const wrap = document.getElementById('positions-manage-list');
+      wrap.innerHTML = positionRows.map((r, i) => `
+        <div class="position-manage-row">
+          <div class="move-btns">
+            <button type="button" data-move="up" data-index="${i}" ${i === 0 ? 'disabled' : ''}>&uarr;</button>
+            <button type="button" data-move="down" data-index="${i}" ${i === positionRows.length - 1 ? 'disabled' : ''}>&darr;</button>
+          </div>
+          <span class="pos-name">${escapeHtml(r.name)}</span>
+          <button type="button" class="danger-link" data-remove-position="${i}">Remove</button>
+        </div>`).join('');
+
+      wrap.querySelectorAll('[data-move]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const i = parseInt(btn.dataset.index, 10);
+          const dir = btn.dataset.move === 'up' ? -1 : 1;
+          const swap = i + dir;
+          if (swap < 0 || swap >= positionRows.length) return;
+          [positionRows[i], positionRows[swap]] = [positionRows[swap], positionRows[i]];
+          positions = positionRows.map(r => r.name);
+          renderPositionsManageList();
+          // Persist the new sort_order for every row so future loads keep this order.
+          await Promise.all(positionRows.map((r, idx) => supabaseClient.from('staff_positions').update({ sort_order: idx }).eq('id', r.id)));
+          positionRows.forEach((r, idx) => { r.sortOrder = idx; });
+        });
+      });
+      wrap.querySelectorAll('[data-remove-position]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const i = parseInt(btn.dataset.removePosition, 10);
+          const removed = positionRows[i];
+          const inUse = staff.some(s => s.positionId === removed.id);
+          const errorBox = document.getElementById('positions-error');
+          if (inUse) {
+            errorBox.textContent = `"${removed.name}" still has staff assigned to it — move or remove them first.`;
+            errorBox.classList.add('visible');
+            return;
+          }
+          const { error } = await supabaseClient.from('staff_positions').delete().eq('id', removed.id);
+          if (error) {
+            errorBox.textContent = error.message;
+            errorBox.classList.add('visible');
+            return;
+          }
+          errorBox.classList.remove('visible');
+          positionRows.splice(i, 1);
+          positions = positionRows.map(r => r.name);
+          renderPositionsManageList();
+        });
+      });
+    }
+
+    // Fired immediately, in parallel with loadSidebar()'s session check below, rather
+    // than waiting for it — RLS enforces access at the database level regardless, so
+    // there's no need for this to wait in line behind the sidebar/permission check.
+    // loadStaff() itself must still run AFTER loadPositions() finishes (not parallel
+    // with it) — it resolves each staff member's position name from positionRows,
+    // which loadPositions() populates; running both at once raced and left every
+    // staff member showing as unassigned.
+    const dataPromise = loadPositions().then(() => loadStaff());
+
+    loadSidebar().then(async () => {
+      const session = getSession();
+      if (!session) return;
+      document.getElementById('welcome-line').textContent = `Welcome back, ${session.name}`;
+      if (!document.getElementById('staff-groups')) return;
+
+      await dataPromise;
+      renderStaffGroups();
+
+      document.getElementById('modal-close').addEventListener('click', closeModal);
+      document.getElementById('modal-backdrop').addEventListener('click', (e) => {
+        if (e.target.id === 'modal-backdrop') closeModal();
+      });
+
+      document.getElementById('add-staff-btn').addEventListener('click', () => openStaffModal(null));
+      document.getElementById('manage-positions-btn').addEventListener('click', openManagePositionsModal);
+
+      document.getElementById('staff-groups').addEventListener('click', (e) => {
+        const editBtn = e.target.closest('[data-action="edit"]');
+        if (editBtn) {
+          const member = staff.find(s => s.id === editBtn.dataset.id);
+          if (member) openStaffModal(member);
+          return;
+        }
+        const removeBtn = e.target.closest('[data-action="remove"]');
+        if (removeBtn) {
+          const member = staff.find(s => s.id === removeBtn.dataset.id);
+          if (member) openRemoveStaffModal(member);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<title>Content Editor — Christ Church Bluffton Admin</title>
+<link rel="stylesheet" href="css/shared.css">
+<style>
+  .editor-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .page-list {
+    background: var(--white);
+    border: 1px solid var(--border-gray);
+    border-radius: 12px;
+    overflow: hidden;
+    align-self: start;
+    position: sticky;
+    top: 32px;
+  }
+  .page-item { border-bottom: 1px solid var(--border-gray); }
+  .page-item:last-child { border-bottom: none; }
+  .page-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 16px;
+    border: none;
+    background: none;
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--text-dark);
+    cursor: pointer;
+  }
+  .page-item.active .page-btn {
+    background: rgba(48,59,106,0.06);
+    color: var(--navy-blue);
+    box-shadow: inset 3px 0 0 var(--gold);
+  }
+  /* Stack the page-list above the preview instead of beside it whenever the viewport is
+     notably taller than wide (e.g. a tablet held in portrait, even a wide one like the
+     iPad Pro 12.9" at 1024x1366) — otherwise the preview stays capped to a narrow leftover
+     column while most of the tall viewport below it sits empty, since the preview's scaled
+     size is driven by its width, not the space available. */
+  @media (max-width: 900px), (max-aspect-ratio: 1/1) {
+    .editor-layout { grid-template-columns: 1fr; }
+    .page-list { position: static; }
+  }
+
+  /* ---- Preview pane ---- */
+  .preview-pane {
+    background: var(--white);
+    border: 1px solid var(--border-gray);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .preview-pane .preview-header {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border-gray);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--gold-text);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .preview-pane .preview-header .live-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #3d9a5c;
+    margin-right: 6px;
+  }
+  .preview-pane .preview-note {
+    font-weight: normal;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--text-muted);
+    font-size: 11px;
+  }
+  .preview-pane .preview-hint {
+    padding: 9px 18px;
+    background: rgba(195,163,85,0.08);
+    border-bottom: 1px solid var(--border-gray);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    color: var(--gold-text);
+  }
+  .preview-pane .popout-link {
+    font-weight: bold;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--navy-blue);
+    font-size: 12px;
+    text-decoration: none;
+    border: 1px solid var(--border-gray);
+    border-radius: 6px;
+    padding: 4px 10px;
+  }
+  .preview-pane .popout-link:hover { border-color: var(--navy-blue); }
+  .preview-frame-wrap {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: var(--lightest-gray);
+  }
+  .preview-frame-scaler {
+    transform-origin: top left;
+  }
+  .preview-pane iframe {
+    width: 1440px;
+    height: 900px;
+    border: none;
+    display: block;
+  }
+  /* The Save Changes bar staying visible while scrolling is now handled by the shared
+     .topbar sticky rule in shared.css (applies to every page, desktop and mobile alike). */
+
+  .live-url-banner {
+    background: rgba(177,67,67,0.08);
+    border: 1px solid rgba(177,67,67,0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: var(--text-dark);
+  }
+  .live-url-banner strong { color: var(--danger); }
+
+  /* ---- Save button / change log link ---- */
+  .topbar-actions { display: flex; align-items: center; gap: 10px; }
+  .save-btn.dirty {
+    background: #b3924a;
+    box-shadow: 0 0 0 3px rgba(195,163,85,0.35);
+  }
+  .log-link {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--text-muted);
+    border: 1px solid var(--border-gray);
+    border-radius: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    background: var(--white);
+  }
+  .log-link:hover { border-color: var(--navy-blue); color: var(--navy-blue); }
+
+  /* Editing is disabled at the same narrow/portrait breakpoint as the sidebar nav warning —
+     landscape tablet widths overlap real laptop widths too much to block reliably by screen
+     size alone. There's nothing to save at that narrow width, and the click-to-edit
+     instructions don't apply — but the change log is just a read-only list and still works. */
+  @media (max-width: 900px) {
+    .save-btn { display: none; }
+    .topbar .subtitle { display: none; }
+  }
+
+  /* ---- Edit modal (reused for unsaved-changes confirm, image replace, change log) ---- */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(30,37,71,0.55);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-box {
+    background: var(--white);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 640px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+  }
+  .modal-header {
+    padding: 20px 26px;
+    border-bottom: 1px solid var(--border-gray);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .modal-header .modal-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    color: var(--navy-blue);
+  }
+  .modal-header .modal-subtitle {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .modal-close {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--border-gray);
+    background: var(--white);
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .modal-close:hover { border-color: var(--navy-blue); color: var(--navy-blue); }
+  .modal-body {
+    padding: 22px 26px;
+    overflow-y: auto;
+  }
+  .modal-footer {
+    padding: 16px 26px;
+    border-top: 1px solid var(--border-gray);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  /* ---- Unsaved-changes confirm dialog ---- */
+  .confirm-text {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    color: var(--text-dark);
+    line-height: 1.7;
+  }
+  .confirm-text strong { color: var(--navy-blue); }
+
+  /* ---- Change log ---- */
+  .log-empty {
+    color: var(--text-muted);
+    font-size: 13px;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .log-line {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-gray);
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .log-line:last-child { border-bottom: none; }
+  .log-line .log-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+  }
+  .log-line .log-field {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--navy-blue);
+    margin-bottom: 3px;
+  }
+  .log-line .log-change {
+    font-size: 13px;
+    color: var(--text-dark);
+    line-height: 1.6;
+  }
+  .log-line .log-old { color: var(--danger); text-decoration: line-through; }
+  .log-line .log-new { color: #2e7d32; font-weight: bold; }
+
+  /* ---- Single-image edit popover ---- */
+  .image-popover-tile { text-align: center; }
+  .image-popover-tile .thumb {
+    width: 100%;
+    max-height: 260px;
+    object-fit: contain;
+    background: var(--lightest-gray);
+    border-radius: 10px;
+    border: 1px solid var(--border-gray);
+    display: block;
+    margin-bottom: 14px;
+  }
+  .image-popover-tile .tile-filename {
+    font-size: 12px;
+    font-family: monospace;
+    color: var(--text-muted);
+    word-break: break-all;
+    margin-bottom: 8px;
+  }
+  .image-popover-tile .rec-size {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--gold-text);
+    background: rgba(195,163,85,0.12);
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-bottom: 16px;
+  }
+  .image-popover-tile .tile-actions { display: flex; gap: 10px; }
+  .image-popover-tile .tile-actions button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-gray);
+    background: var(--white);
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .image-popover-tile .tile-actions button:hover { border-color: var(--navy-blue); color: var(--navy-blue); }
+</style>
+</head>
+<body data-page="content">
+  <div class="app-shell">
+    <div id="sidebar-mount">
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img class="brand-crest" src="assets/site-images/logo-dark-bg.png" alt="Christ Church Bluffton crest">
+    <div>
+      <div class="title">Christ Church Bluffton</div>
+      <div class="label">Admin Panel</div>
+    </div>
+    <button type="button" class="hamburger-btn" id="hamburger-btn" aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+    </button>
+  </div>
+  <div class="sidebar-collapsible" id="sidebar-collapsible">
+    <nav>
+      <a href="dashboard.html" data-page="dashboard">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Dashboard
+      </a>
+      <a href="staff.html" data-page="staff">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Staff
+      </a>
+      <a href="congregants.html" data-page="congregants" data-permission="congregants">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+        Congregants
+      </a>
+      <a href="prayers.html" data-page="prayers" data-permission="prayers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+        Prayer Requests
+      </a>
+      <a href="volunteers.html" data-page="volunteers" data-permission="signups">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Volunteers
+      </a>
+      <a href="subscribers.html" data-page="subscribers" data-permission="subscribers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h4M15 12h4M6 16h12"/></svg>
+        Subscribers
+      </a>
+      <a href="newsletter.html" data-page="newsletter" data-permission="newsletter" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        Newsletter
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="events.html" data-page="events" data-permission="events">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Events
+      </a>
+      <a href="content.html" data-page="content" data-permission="contentEditor" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Content Editor
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="photos.html" data-page="photos" data-permission="photos">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg>
+        Photos
+      </a>
+      <a href="team.html" data-page="team" data-admin-only="true">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M19 8h4M21 6v4"/></svg>
+        Team
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="reading-mode-row" id="reading-mode-row" style="display:none;">
+        <button type="button" class="reading-mode-btn" id="reading-mode-btn" title="Toggle easier-to-read text">
+          <span class="aa-icon">Aa</span> Reading Mode
+        </button>
+        <div class="reading-tint-swatches" id="reading-tint-swatches" style="display:none;">
+          <button type="button" class="tint-swatch tint-cream" data-tint="cream" title="Cream background"></button>
+          <button type="button" class="tint-swatch tint-blue" data-tint="blue" title="Light blue background"></button>
+          <button type="button" class="tint-swatch tint-green" data-tint="green" title="Light green background"></button>
+        </div>
+      </div>
+      <a href="account.html" class="user-chip" id="user-chip-link" title="Account Settings">
+        <div class="avatar" id="sidebar-avatar">?</div>
+        <div class="user-chip-info">
+          <div class="name" id="sidebar-name">—</div>
+          <div class="role" id="sidebar-role">—</div>
+        </div>
+        <svg class="chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+      <a href="#" class="logout-link" id="logout-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Log out
+      </a>
+    </div>
+  </div>
+</aside>
+  </div>
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <h1>Content Editor</h1>
+          <div class="subtitle">Click any text or photo in the preview to edit it directly — then hit Save Changes</div>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" class="log-link" id="log-link">View Change Log</button>
+          <button class="btn btn-gold save-btn" id="save-btn" disabled title="Not connected to the live site yet — edits won't be enabled until this panel can push changes to christchurchbluffton.org">Save Changes</button>
+        </div>
+      </div>
+      <div class="content" id="page-body">
+        <div class="live-url-banner">
+          <strong>Work In Progress — Not Live</strong>
+        </div>
+        <div class="editor-layout">
+          <div class="page-list" id="page-list"></div>
+          <div class="preview-pane" id="preview-pane">
+            <div class="preview-header">
+              <span><span class="live-dot"></span>Live Preview <span class="preview-note" id="preview-page-label">Home</span></span>
+            </div>
+            <div class="preview-frame-wrap" id="preview-frame-wrap">
+              <div class="preview-frame-scaler" id="preview-frame-scaler">
+                <iframe id="preview-iframe"></iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="modal-title">Section</div>
+          <div class="modal-subtitle" id="modal-subtitle"></div>
+        </div>
+        <button type="button" class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    function escapeHtml(str) {
+      return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    // pageContent is now loaded from Supabase (site_content_sections/fields/images/repeats) —
+    // see loadContentFromDb() below. It starts empty and is populated inside the
+    // loadSidebar().then(...) bootstrap before the first render.
+    let pageContent = {};
+
+    const CURRENT_PAGE_KEY = 'ccb_admin_content_page';
+    // The 'Home' fallback if this page/currentPage combo turns out invalid is validated
+    // after pageContent loads from Supabase — see the loadSidebar().then(...) bootstrap.
+    let currentPage = localStorage.getItem(CURRENT_PAGE_KEY) || 'Home';
+    let fieldCounter = 0;
+    let currentFlatFields = [];   // [{id, value}] — every text field on the page, flat
+    let fieldRefs = {};           // id -> live field object from pageContent (write-back target)
+    let fieldMeta = {};           // id -> {label, section}
+    let imageRegistry = [];       // [{id, ref, file, label, size, section}] — every image on the page
+    let boundMap = {};            // id -> bound text node in the preview iframe
+    let pendingChanges = {};      // id -> {type, label, section, oldValue, newValue, apply()}
+    // Loaded from Supabase (content_change_log) inside the loadSidebar().then(...) bootstrap —
+    // starts empty here, includes a real baseline entry inserted by supabase/seed-content.js.
+    let changeLog = [];
+
+    const PREVIEW_WIDTH = 1440;
+    const PREVIEW_HEIGHT = 900;
+
+    const pageFileMap = {
+      'Home': 'index.html',
+      'About': 'about.html',
+      'Join Us': 'join-us.html',
+      'Groups': 'groups.html',
+      'Serve': 'serve.html',
+      'Give': 'give.html',
+      'Contact': 'contact.html',
+      'Privacy': 'privacy.html',
+      'Terms': 'terms.html',
+      'Site-Wide': 'index.html'
+    };
+
+    // Rebuilds the exact nested pageContent shape (page -> sections[] -> {name, fields[],
+    // images[], repeats[]}) from the four flat Supabase tables. Section order and field
+    // order come from each row's sort_order; page order comes from pageFileMap's key
+    // order (site_content_sections has no cross-page ordering concept). Top-level section
+    // fields are tagged with __dbTable:'field'/__dbId so commitPendingChanges() knows how
+    // to write a single field back; repeat fields are tagged with __dbTable:'repeatField'
+    // plus __repeatDbId/__repeatFieldsRef since a repeat's fields live together as one
+    // jsonb blob on its own row, not as individual field rows.
+    async function loadContentFromDb() {
+      const [{ data: sections, error: e1 }, { data: fields, error: e2 }, { data: images, error: e3 }, { data: repeats, error: e4 }] = await Promise.all([
+        supabaseClient.from('site_content_sections').select('*').order('sort_order'),
+        supabaseClient.from('site_content_fields').select('*').order('sort_order'),
+        supabaseClient.from('site_content_images').select('*'),
+        supabaseClient.from('site_content_repeats').select('*').order('sort_order')
+      ]);
+      if (e1 || e2 || e3 || e4) {
+        console.error('loadContentFromDb failed:', (e1 || e2 || e3 || e4).message);
+        return {};
+      }
+
+      const result = {};
+      Object.keys(pageFileMap).forEach(page => { result[page] = []; });
+
+      const sectionLookup = {};
+      (sections || []).forEach(sec => {
+        if (!result[sec.page]) result[sec.page] = [];
+        const secObj = { name: sec.section_name, fields: [], images: [], repeats: [] };
+        result[sec.page].push(secObj);
+        sectionLookup[sec.page + '|' + sec.section_name] = secObj;
+      });
+
+      (fields || []).forEach(f => {
+        const sec = sectionLookup[f.page + '|' + f.section_name];
+        if (!sec) return;
+        sec.fields.push({ label: f.field_label, type: f.field_type, value: f.field_value, original: f.original_value, __dbTable: 'field', __dbId: f.id });
+      });
+
+      (images || []).forEach(img => {
+        const sec = sectionLookup[img.page + '|' + img.section_name];
+        if (!sec) return;
+        sec.images.push({ file: img.file, label: img.label, size: img.size });
+      });
+
+      (repeats || []).forEach(r => {
+        const sec = sectionLookup[r.page + '|' + r.section_name];
+        if (!sec) return;
+        const fieldsArr = (r.fields || []).map(f => ({ label: f.label, type: f.type, value: f.value, original: f.original !== undefined ? f.original : f.value }));
+        fieldsArr.forEach(f => { f.__dbTable = 'repeatField'; f.__repeatDbId = r.id; f.__repeatFieldsRef = fieldsArr; });
+        sec.repeats.push({ title: r.repeat_title, fields: fieldsArr, image: r.image || undefined });
+      });
+
+      return result;
+    }
+
+    async function loadChangeLogFromDb() {
+      const { data, error } = await supabaseClient.from('content_change_log').select('*').order('occurred_at', { ascending: false });
+      if (error) { console.error('loadChangeLogFromDb failed:', error.message); return []; }
+      return data.map(e => ({
+        timestamp: formatLogTimestamp(new Date(e.occurred_at)),
+        user: e.actor_name, email: e.actor_email, page: e.page, section: e.section,
+        field: e.field, oldValue: e.old_value, newValue: e.new_value
+      }));
+    }
+
+    function renderPageList() {
+      const list = document.getElementById('page-list');
+      list.innerHTML = '';
+      Object.keys(pageContent).forEach(page => {
+        if (page === 'Site-Wide') return; // Footer/logo fields are folded into every page instead — see prepareFields()
+        const item = document.createElement('div');
+        item.className = 'page-item';
+        if (page === currentPage) item.classList.add('active');
+
+        const btn = document.createElement('button');
+        btn.className = 'page-btn';
+        btn.textContent = page;
+        btn.addEventListener('click', () => {
+          if (page === currentPage) return;
+          requestPageSwitch(page);
+        });
+        item.appendChild(btn);
+        list.appendChild(item);
+      });
+    }
+
+    // Switching pages is blocked while there are unsaved edits — staff must save (or
+    // explicitly stay put) before moving to a different page.
+    function requestPageSwitch(targetPage) {
+      if (Object.keys(pendingChanges).length === 0) {
+        switchToPage(targetPage);
+        return;
+      }
+      openConfirmDialog({
+        title: 'Unsaved Changes',
+        bodyHtml: `<p class="confirm-text">You have unsaved changes on the <strong>${currentPage}</strong> page. Save them before switching to <strong>${targetPage}</strong>?</p>`,
+        buttons: [
+          { label: 'Stay on This Page', className: 'btn btn-outline', onClick: closeModal },
+          { label: 'Save & Continue', className: 'btn btn-gold', onClick: async () => { await commitPendingChanges(); switchToPage(targetPage); closeModal(); } }
+        ]
+      });
+    }
+
+    function switchToPage(page) {
+      currentPage = page;
+      localStorage.setItem(CURRENT_PAGE_KEY, page);
+      renderPageList();
+      loadPreview();
+    }
+
+    // The mirror HTML files never change — they still contain the as-shipped site text. Once a
+    // field is saved with edited text, we can no longer find it there by matching on the CURRENT
+    // value, so we remember each field's original (as-shipped) text the first time we see it and
+    // always match against that, then immediately overwrite the matched node to the current value.
+    const originalTextMap = new WeakMap();
+    function getOriginalValue(ref) {
+      // Supabase-sourced fields already carry the true as-shipped text (frozen at seed
+      // time, never touched by edits) — prefer that. The WeakMap is only a fallback for
+      // any field that somehow lacks it.
+      if (ref.original !== undefined) return ref.original;
+      if (!originalTextMap.has(ref)) originalTextMap.set(ref, ref.value);
+      return originalTextMap.get(ref);
+    }
+
+    // Builds the flat field/image registry for the current page, with write-back references
+    // into the live pageContent objects so Save can commit edits back to the source of truth.
+    function prepareFields() {
+      fieldCounter = 0;
+      currentFlatFields = [];
+      fieldRefs = {};
+      fieldMeta = {};
+      imageRegistry = [];
+      let imgCounter = 0;
+
+      const registerField = (f, sectionName) => {
+        const id = 'f' + (fieldCounter++);
+        currentFlatFields.push({ id, value: f.value, original: getOriginalValue(f) });
+        fieldRefs[id] = f;
+        fieldMeta[id] = { label: f.label, section: sectionName };
+      };
+      const registerImage = (img, sectionName) => {
+        imageRegistry.push({ id: 'img' + (imgCounter++), ref: img, file: img.file, label: img.label, size: img.size, section: sectionName });
+      };
+
+      // Footer content ("Site-Wide") appears on every page's mirror, so it's registered alongside
+      // whatever page is currently loaded rather than needing its own menu entry. The site's logos
+      // are excluded on purpose — those are brand assets, not staff-editable content.
+      const siteWide = currentPage === 'Site-Wide' ? [] : pageContent['Site-Wide'].filter(s => s.name !== 'Logos');
+      const sections = pageContent[currentPage].concat(siteWide);
+      sections.forEach(section => {
+        (section.fields || []).forEach(f => registerField(f, section.name));
+        (section.repeats || []).forEach(block => {
+          (block.fields || []).forEach(f => registerField(f, section.name + ' — ' + block.title));
+          if (block.image) registerImage(block.image, section.name + ' — ' + block.title);
+        });
+        (section.images || []).forEach(img => registerImage(img, section.name));
+      });
+    }
+
+    function closeModal() {
+      document.getElementById('modal-backdrop').classList.remove('open');
+    }
+
+    function setModalFooter(buttons) {
+      const footer = document.getElementById('modal-footer');
+      footer.innerHTML = '';
+      buttons.forEach(b => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = b.className;
+        btn.textContent = b.label;
+        btn.addEventListener('click', b.onClick);
+        footer.appendChild(btn);
+      });
+    }
+
+    function openConfirmDialog({ title, subtitle, bodyHtml, buttons }) {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-subtitle').textContent = subtitle || '';
+      document.getElementById('modal-body').innerHTML = bodyHtml;
+      setModalFooter(buttons);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    document.getElementById('modal-backdrop').addEventListener('click', (e) => {
+      if (e.target.id === 'modal-backdrop') closeModal();
+    });
+
+    function getTextNodes(root) {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+          const tag = node.parentElement && node.parentElement.tagName;
+          if (tag === 'SCRIPT' || tag === 'STYLE') return NodeFilter.FILTER_REJECT;
+          if (!node.textContent.trim()) return NodeFilter.FILTER_REJECT;
+          if (node.parentElement && node.parentElement.closest('#loader, #site-header, nav, .footer-links-list, .footer-legal, .footer-powered')) return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      });
+      const nodes = [];
+      let n;
+      while ((n = walker.nextNode())) nodes.push(n);
+      return nodes;
+    }
+
+    const INLINE_EDIT_STYLE = `
+      .cms-field {
+        outline: 1px dashed rgba(195,163,85,0.55);
+        outline-offset: 2px;
+        border-radius: 3px;
+        cursor: text;
+        transition: outline-color 0.15s, background-color 0.15s;
+      }
+      .cms-field:hover { outline: 1px dashed #303b6a; background: rgba(195,163,85,0.08); }
+      .cms-field:focus { outline: 2px solid #303b6a; background: rgba(195,163,85,0.14); }
+      /* Inline text-carrier tags (span/em/strong/etc.) can't always be promoted to their
+         block-level parent — e.g. a quote whose citation lives in a sibling <span>, or a
+         <br>-separated address line. Left at the default display:inline, a dashed outline
+         around text that wraps across multiple lines fragments into one disjointed box per
+         line (each with its own gap). inline-block keeps the element flowing normally in
+         place, but makes it a single atomic box so the outline wraps the whole thing —
+         however many lines — as ONE clean rectangle, matching the promoted block-level boxes.
+         Deliberately excludes <a>/<button> — those are usually flex-laid-out site buttons
+         (icon + label) where forcing inline-block would break their internal alignment. */
+      span.cms-field, em.cms-field, strong.cms-field, b.cms-field, i.cms-field,
+      cite.cms-field, small.cms-field, u.cms-field, mark.cms-field {
+        display: inline-block;
+        max-width: 100%;
+      }
+      .cms-image-editable { outline: 2px dashed rgba(195,163,85,0.65); outline-offset: 2px; }
+      .cms-image-btn {
+        position: absolute;
+        z-index: 9999;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border-radius: 100px;
+        border: none;
+        background: rgba(30,37,71,0.88);
+        color: #fff;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 12px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+        border: 1px solid #c3a355;
+        transition: background 0.15s;
+      }
+      .cms-image-btn:hover { background: #303b6a; }
+    `;
+
+    function bindPreview() {
+      const iframe = document.getElementById('preview-iframe');
+      const doc = iframe.contentDocument;
+      if (!doc || !doc.body) return;
+
+      // Chrome sometimes restores this iframe's previous internal scroll position across a
+      // reload (same-origin src, same document) — force it back to the top before measuring
+      // anything, or the "Change Photo" button math below ends up using stale coordinates.
+      doc.defaultView.scrollTo(0, 0);
+
+      const styleEl = doc.createElement('style');
+      styleEl.textContent = INLINE_EDIT_STYLE;
+      doc.head.appendChild(styleEl);
+
+      const nodes = getTextNodes(doc.body);
+      const used = new Set();
+      boundMap = {};
+      currentFlatFields.forEach(f => {
+        const target = (f.original || '').trim();
+        if (!target) return;
+        const match = nodes.find(n => !used.has(n) && n.textContent.trim() === target);
+        if (!match) return;
+        used.add(match);
+        if (f.value !== f.original) match.textContent = f.value;
+
+        // Prefer binding to the smallest ELEMENT that fully owns this text (its whole trimmed
+        // content is exactly the field value) over the raw text node — a contenteditable text
+        // node fragments its outline across every wrapped line, while the owning element (e.g.
+        // the <p> itself) gets one clean box. Climb while each parent still owns nothing but
+        // this text; stop at anything structural so we never claim a shared/layout container.
+        let boundEl = match;
+        let owner = match.parentElement;
+        let levels = 0;
+        while (owner && levels < 3) {
+          const tag = owner.tagName;
+          if (tag === 'BODY' || tag === 'MAIN' || tag === 'HTML' || tag === 'SECTION') break;
+          if (owner.textContent.trim() !== target) break;
+          // Don't climb into a container that also holds a sibling icon/svg/img alongside the
+          // text (e.g. an SVG lock icon next to "Secure giving powered by Tithe.ly") — the icon
+          // contributes no text so the equality check above doesn't catch it, but swallowing it
+          // into the editable box is still wrong.
+          if (owner.children.length > 1) break;
+          boundEl = owner;
+          // Never promote PAST a link/button — e.g. a mailto link that wraps an icon + the email
+          // text (siblings, so the checks above don't stop there) must end up bound to the <a>
+          // itself, not its wrapper div, or the button/link-exclusion check below (which walks
+          // UP from the bound element) would never see it and wrongly treat it as plain text.
+          if (tag === 'A' || tag === 'BUTTON') break;
+          owner = owner.parentElement;
+          levels++;
+        }
+        boundMap[f.id] = boundEl;
+      });
+
+      // Animated stat counters (e.g. "2.4B+") start their DOM life as "0" and only reach their
+      // real text once scrolled into view — match these by reconstructing the expected text from
+      // their data-count/data-suffix attributes, and unstall them to their final value immediately.
+      const counters = Array.from(doc.querySelectorAll('.stat-number[data-count]'));
+      currentFlatFields.forEach(f => {
+        if (boundMap[f.id]) return;
+        const target = (f.original || '').trim();
+        const counterEl = counters.find(el => {
+          const decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+          const suffix = el.getAttribute('data-suffix') || '';
+          const expected = parseFloat(el.getAttribute('data-count')).toFixed(decimals) + suffix;
+          return expected === target;
+        });
+        if (counterEl) {
+          counterEl.textContent = f.value;
+          boundMap[f.id] = counterEl.firstChild;
+        }
+      });
+
+      // Paragraphs with an inline citation or link (e.g. "...(<em>State of the Church</em>, 2025)")
+      // split their text across several text nodes, so no single node matches the field's full
+      // value. Fall back to binding the whole element when its FLATTENED text matches exactly —
+      // editing it will lose the inline formatting, but that beats it being uneditable at all.
+      const usedElements = new Set();
+      currentFlatFields.forEach(f => {
+        if (boundMap[f.id]) return;
+        const target = (f.original || '').trim();
+        if (!target) return;
+        const candidates = Array.from(doc.querySelectorAll('p, li, h1, h2, h3, h4, h5, h6, blockquote'));
+        const match = candidates.find(el => {
+          if (usedElements.has(el)) return false;
+          if (el.children.length === 0) return false; // plain elements were already handled above
+          if (el.closest('#loader, #site-header, nav, .footer-links-list, .footer-legal, .footer-powered')) return false;
+          return el.textContent.trim() === target;
+        });
+        if (match) {
+          usedElements.add(match);
+          if (f.value !== f.original) match.textContent = f.value;
+          boundMap[f.id] = match;
+        }
+      });
+
+      wireInlineTextEditing(doc);
+      wireInlineImages(doc);
+    }
+
+    function wireFieldEvents(el, id) {
+      // Trim before comparing/storing — contenteditable's textContent includes the surrounding
+      // source HTML's indentation whitespace, which made reverting a field back to its original
+      // text still register as a pending change (oldValue has no whitespace, raw textContent did).
+      el.addEventListener('input', () => onFieldEdited(id, el.textContent.trim()));
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !(fieldRefs[id] && fieldRefs[id].type === 'textarea')) {
+          e.preventDefault();
+          el.blur();
+        }
+      });
+    }
+
+    // Strips leading/trailing whitespace that came from the HTML source's own indentation
+    // (a run that includes a newline) while preserving a plain, meaningful single space —
+    // e.g. the space between "A Christ-centered community" and an adjacent inline
+    // "<span>Bluffton, South Carolina.</span>" sibling, which a blind .trim() would delete
+    // and glue the two fields together with no space between them.
+    function stripSourceWhitespace(raw) {
+      return raw.replace(/^[ \t]*\n\s*/, '').replace(/\s*\n[ \t]*$/, '');
+    }
+
+    // Replaces each matched text node with a contenteditable span scoped to just that field, so
+    // editing one field can never bleed into a sibling field sharing the same parent element.
+    // Whole-element matches (see the fallback pass above) are made editable directly instead,
+    // since there's no single text node to isolate.
+    function wireInlineTextEditing(doc) {
+      Object.keys(boundMap).forEach(id => {
+        const node = boundMap[id];
+        if (!node) return;
+
+        // Button labels (e.g. "Get Connected" in a CTA banner) are intentionally left
+        // un-editable — they read as functional site controls, not body copy. Real <button>
+        // elements and pill/CTA-styled links (class contains "btn", e.g. btn-primary, cta-btn,
+        // give-btn-custom) are excluded this way; plain inline links like a mailto: email address
+        // (e.g. "connect-email", no "btn" in the class) are left editable like normal text.
+        const ownerEl = node.nodeType === 3 ? node.parentElement : node;
+        if (ownerEl && ownerEl.closest('button, input[type="submit"], a[class*="btn"]')) return;
+
+        if (node.nodeType === 3) {
+          if (!node.parentNode) return;
+          const span = doc.createElement('span');
+          span.className = 'cms-field';
+          span.setAttribute('data-bind-id', id);
+          span.setAttribute('contenteditable', 'plaintext-only');
+          span.setAttribute('spellcheck', 'false');
+          // The matched text node often carries the source HTML's leading/trailing indentation
+          // whitespace (e.g. a <br>-separated address line). Left as-is, that whitespace becomes
+          // part of the editable span's own content — it renders as a stray zero-width fragment
+          // ahead of the visible text (splitting the dashed outline into two boxes) and, worse,
+          // would get saved back into the field's value verbatim if a staff member edited the
+          // text without noticing it. stripSourceWhitespace() removes that formatting noise
+          // while keeping a real single space intact (see its comment above).
+          span.textContent = stripSourceWhitespace(node.textContent);
+          node.parentNode.replaceChild(span, node);
+          boundMap[id] = span.firstChild || span;
+          wireFieldEvents(span, id);
+        } else if (node.nodeType === 1) {
+          node.classList.add('cms-field');
+          node.setAttribute('data-bind-id', id);
+          node.setAttribute('contenteditable', 'plaintext-only');
+          node.setAttribute('spellcheck', 'false');
+          wireFieldEvents(node, id);
+        }
+      });
+    }
+
+    function onFieldEdited(id, newText) {
+      const ref = fieldRefs[id];
+      const meta = fieldMeta[id];
+      if (!ref || !meta) return;
+      if (newText === ref.value) {
+        delete pendingChanges[id];
+      } else {
+        pendingChanges[id] = {
+          type: 'text',
+          label: meta.label,
+          section: meta.section,
+          oldValue: ref.value,
+          newValue: newText,
+          apply: () => { ref.value = newText; }
+        };
+      }
+      updateSaveButtonState();
+    }
+
+    // Matches each of this page's known images to the real <img> in the preview by filename, and
+    // drops a small "Change Photo" button in its bottom-left corner. A button beats making the
+    // whole image clickable — it's a visible, obvious affordance (staff shouldn't have to guess
+    // a photo is editable), and it sits above any decorative overlay (e.g. the Hero's dark tint)
+    // that would otherwise sit on top of the image and swallow a click aimed at it.
+    // Several photo "cards" site-wide render the <img> itself larger than its frame
+    // (object-fit: cover cropping inside a smaller overflow:hidden container — e.g. the
+    // Home Mission photo and every Serve ministry photo) so the raw img.getBoundingClientRect()
+    // reports a box bigger than what's actually visible on screen. Positioning the button off
+    // that raw rect can drop it below/outside the visible photo entirely. Walk up the ancestor
+    // chain and clamp the image's rect to every overflow:hidden container along the way, so the
+    // button always lands inside the frame that's actually visible, not the cropped-off part.
+    function getVisibleImageRect(el, doc) {
+      const r = el.getBoundingClientRect();
+      let visible = { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
+      let ancestor = el.parentElement;
+      while (ancestor && ancestor !== doc.body && ancestor !== doc.documentElement) {
+        const cs = doc.defaultView.getComputedStyle(ancestor);
+        if (cs.overflow === 'hidden' || cs.overflowX === 'hidden' || cs.overflowY === 'hidden') {
+          const ar = ancestor.getBoundingClientRect();
+          visible.left = Math.max(visible.left, ar.left);
+          visible.top = Math.max(visible.top, ar.top);
+          visible.right = Math.min(visible.right, ar.right);
+          visible.bottom = Math.min(visible.bottom, ar.bottom);
+        }
+        ancestor = ancestor.parentElement;
+      }
+      return { left: visible.left, top: visible.top, width: visible.right - visible.left, height: visible.bottom - visible.top };
+    }
+
+    function wireInlineImages(doc) {
+      const imgs = Array.from(doc.querySelectorAll('img'));
+      imageRegistry.forEach(info => {
+        const match = imgs.find(im => (im.getAttribute('src') || '').split('/').pop() === info.file);
+        if (!match) return;
+        match.classList.add('cms-image-editable');
+
+        const rect = getVisibleImageRect(match, doc);
+        const scrollTop = doc.defaultView.scrollY;
+        const scrollLeft = doc.defaultView.scrollX;
+        const btn = doc.createElement('button');
+        btn.type = 'button';
+        btn.className = 'cms-image-btn';
+        btn.innerHTML = '&#9998; Change Photo';
+        // Clamp so a very short/clipped visible area never pushes the button above the frame.
+        const btnTop = rect.top + Math.max(rect.height - 40, Math.min(rect.height, 6));
+        btn.style.top = (btnTop + scrollTop) + 'px';
+        btn.style.left = (rect.left + scrollLeft + 10) + 'px';
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openImagePopover(info, match);
+        });
+        doc.body.appendChild(btn);
+      });
+    }
+
+    function openImagePopover(info, imgEl) {
+      document.getElementById('modal-title').textContent = info.label;
+      document.getElementById('modal-subtitle').textContent = info.section;
+      document.getElementById('modal-body').innerHTML = `
+        <div class="image-popover-tile">
+          <img class="thumb" id="popover-thumb" src="assets/site-images/${info.file}" alt="${info.file}">
+          <div class="tile-filename" id="popover-filename">${info.file}</div>
+          <div class="rec-size">Recommended: ${info.size}px</div>
+          <div class="tile-actions">
+            <button type="button" id="popover-replace">Replace Photo</button>
+          </div>
+          <input type="file" accept="image/*" id="popover-file-input" style="display:none;">
+        </div>`;
+
+      const fileInput = document.getElementById('popover-file-input');
+      document.getElementById('popover-replace').addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          document.getElementById('popover-thumb').src = ev.target.result;
+          imgEl.src = ev.target.result;
+          pendingChanges[info.id] = {
+            type: 'image',
+            label: info.label,
+            section: info.section,
+            oldValue: info.file,
+            newValue: file.name,
+            apply: () => {}
+          };
+          updateSaveButtonState();
+        };
+        reader.readAsDataURL(file);
+      });
+
+      setModalFooter([{ label: 'Done', className: 'btn btn-gold', onClick: closeModal }]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    function updateSaveButtonState() {
+      const btn = document.getElementById('save-btn');
+      const count = Object.keys(pendingChanges).length;
+      btn.classList.toggle('dirty', count > 0);
+      btn.textContent = count > 0 ? `Save Changes (${count})` : 'Save Changes';
+    }
+
+    function formatLogTimestamp(date) {
+      const datePart = date.toLocaleDateString('en-US');
+      const timePart = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      return `${datePart}, ${timePart}`;
+    }
+
+    async function commitPendingChanges() {
+      const ids = Object.keys(pendingChanges);
+      if (ids.length === 0) return;
+      const session = getSession();
+      const who = (session && session.name) || 'Unknown';
+      const whoEmail = (session && session.email) || '';
+      const stamp = formatLogTimestamp(new Date());
+
+      const saveBtn = document.getElementById('save-btn');
+      saveBtn.disabled = true;
+      try {
+        for (const id of ids) {
+          const change = pendingChanges[id];
+          const ref = fieldRefs[id];
+          change.apply();
+
+          // Image changes stay a no-op here too (matching the prior mock behavior) — only
+          // text-field edits actually persist. See the "Change Photo" popover handler above.
+          if (ref && ref.__dbTable === 'field') {
+            const { error } = await supabaseClient.from('site_content_fields').update({ field_value: ref.value }).eq('id', ref.__dbId);
+            if (error) throw error;
+          } else if (ref && ref.__dbTable === 'repeatField') {
+            const plainFields = ref.__repeatFieldsRef.map(f => ({ label: f.label, type: f.type, value: f.value, original: f.original }));
+            const { error } = await supabaseClient.from('site_content_repeats').update({ fields: plainFields }).eq('id', ref.__repeatDbId);
+            if (error) throw error;
+          }
+
+          const { error: logErr } = await supabaseClient.from('content_change_log').insert({
+            actor_name: who, actor_email: whoEmail, page: currentPage,
+            section: change.section, field: change.label,
+            old_value: String(change.oldValue), new_value: String(change.newValue)
+          });
+          if (logErr) throw logErr;
+
+          changeLog.unshift({
+            timestamp: stamp,
+            user: who,
+            email: whoEmail,
+            page: currentPage,
+            section: change.section,
+            field: change.label,
+            oldValue: change.oldValue,
+            newValue: change.newValue
+          });
+        }
+      } catch (err) {
+        alert('Could not save all changes: ' + err.message);
+      }
+
+      logActivity('content_save', `${ids.length} field${ids.length === 1 ? '' : 's'} on ${currentPage}`);
+      pendingChanges = {};
+      saveBtn.disabled = false;
+      updateSaveButtonState();
+    }
+
+    const LOG_PAGE_SIZE = 10;
+    let changeLogVisibleCount = LOG_PAGE_SIZE;
+
+    function openChangeLogModal() {
+      changeLogVisibleCount = LOG_PAGE_SIZE;
+      renderChangeLogModal();
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    function renderChangeLogModal() {
+      document.getElementById('modal-title').textContent = 'Change Log';
+      document.getElementById('modal-subtitle').textContent = 'Most recent first';
+      const body = document.getElementById('modal-body');
+      if (changeLog.length === 0) {
+        body.innerHTML = `<div class="log-empty">No changes logged yet.</div>`;
+      } else {
+        const visible = changeLog.slice(0, changeLogVisibleCount);
+        body.innerHTML = visible.map(entry => `
+          <div class="log-line">
+            <div class="log-meta">${escapeHtml(entry.timestamp)} — ${escapeHtml(entry.user)}${entry.email ? ' (' + escapeHtml(entry.email) + ')' : ''} — ${escapeHtml(entry.page)}${entry.section ? ' / ' + escapeHtml(entry.section) : ''}</div>
+            <div class="log-field">${escapeHtml(entry.field)}</div>
+            <div class="log-change"><span class="log-old">${escapeHtml(entry.oldValue)}</span> → <span class="log-new">${escapeHtml(entry.newValue)}</span></div>
+          </div>`).join('');
+      }
+
+      const footerButtons = [{ label: 'Close', className: 'btn btn-outline', onClick: closeModal }];
+      if (changeLogVisibleCount < changeLog.length) {
+        const remaining = changeLog.length - changeLogVisibleCount;
+        footerButtons.unshift({
+          label: `Show ${Math.min(LOG_PAGE_SIZE, remaining)} More`,
+          className: 'btn btn-outline',
+          onClick: () => { changeLogVisibleCount += LOG_PAGE_SIZE; renderChangeLogModal(); }
+        });
+      }
+      setModalFooter(footerButtons);
+    }
+
+    document.getElementById('log-link').addEventListener('click', openChangeLogModal);
+    document.getElementById('save-btn').addEventListener('click', () => commitPendingChanges());
+
+    function fitPreviewScale() {
+      const wrap = document.getElementById('preview-frame-wrap');
+      const scaler = document.getElementById('preview-frame-scaler');
+      const scale = wrap.clientWidth / PREVIEW_WIDTH;
+      scaler.style.transform = `scale(${scale})`;
+      wrap.style.height = Math.round(PREVIEW_HEIGHT * scale) + 'px';
+    }
+
+    function loadPreview() {
+      const iframe = document.getElementById('preview-iframe');
+      const wrap = document.getElementById('preview-frame-wrap');
+      const label = document.getElementById('preview-page-label');
+      const file = pageFileMap[currentPage];
+      boundMap = {};
+
+      prepareFields();
+
+      if (!file) {
+        wrap.style.display = 'none';
+        label.textContent = '(no page for this section)';
+        return;
+      }
+      wrap.style.display = 'block';
+      label.textContent = currentPage;
+      iframe.onload = async () => {
+        // Header/footer are injected async via fetch() after load — wait for the footer
+        // to actually be populated before binding, or footer fields will find nothing.
+        const doc = iframe.contentDocument;
+        for (let i = 0; i < 20; i++) {
+          const footer = doc.getElementById('site-footer');
+          if (footer && footer.children.length > 0) break;
+          await new Promise(r => setTimeout(r, 50));
+        }
+        bindPreview();
+        fitPreviewScale();
+        // Block link/button clicks (this is a static preview, not a working page) — the
+        // "Change Photo" buttons handle their own clicks. Editable text fields are exempted too,
+        // but some (e.g. button/link labels like "Get in Touch") sit INSIDE a real <a>/<button>,
+        // so a plain exemption isn't enough — the click would still bubble up and navigate. In
+        // that case we stop just the navigation with preventDefault, without stopping the click
+        // itself, so contenteditable focus still lands normally. Scrolling is left untouched.
+        iframe.contentDocument.addEventListener('click', (e) => {
+          if (e.target.closest('.cms-image-btn')) return;
+          if (e.target.closest('.cms-field')) {
+            if (e.target.closest('a, button, input[type="submit"]')) e.preventDefault();
+            return;
+          }
+          if (e.target.closest('a, button, input[type="submit"]')) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }, true);
+      };
+      iframe.src = 'assets/site-mirror/' + file;
+    }
+
+    window.addEventListener('resize', () => fitPreviewScale());
+
+    window.addEventListener('beforeunload', (e) => {
+      if (Object.keys(pendingChanges).length > 0) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
+    // Fired immediately, in parallel with loadSidebar()'s session check below, instead of
+    // waiting for it to finish first — these two Supabase queries don't need the session
+    // cache to be ready (RLS enforces access at the database level either way), so there's
+    // no real reason to make the content wait in line behind the sidebar/permission check.
+    const contentPromise = loadContentFromDb();
+    const changeLogPromise = loadChangeLogFromDb();
+
+    loadSidebar().then(async () => {
+      if (!document.getElementById('page-list')) return;
+      // Click-to-edit relies on precise clicks and hover affordances that don't translate to
+      // touch — block direct URL access here too, not just the (already-disabled) nav link.
+      if (window.innerWidth <= 900) {
+        document.getElementById('page-body').innerHTML = `
+          <div class="restricted-panel">
+            <div class="icon">🖥️</div>
+            <h2>Desktop only</h2>
+            <p>The Content Editor isn't available on tablet or mobile — please use a PC.</p>
+          </div>`;
+        return;
+      }
+      pageContent = await contentPromise;
+      if (currentPage === 'Site-Wide' || !pageContent[currentPage]) currentPage = 'Home';
+      changeLog = await changeLogPromise;
+      renderPageList();
+      loadPreview();
+    });
+  </script>
+</body>
+</html>

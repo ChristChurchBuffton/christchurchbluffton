@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<title>Newsletter — Christ Church Bluffton Admin</title>
+<link rel="stylesheet" href="css/shared.css">
+<style>
+  .topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+  /* Composing is disabled entirely at this width, so there's nothing to save or send. */
+  @media (max-width: 900px) {
+    .topbar-actions { display: none; }
+    .topbar .subtitle { display: none; }
+  }
+
+  .live-url-banner {
+    background: rgba(177,67,67,0.08);
+    border: 1px solid rgba(177,67,67,0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: var(--text-dark);
+    line-height: 1.6;
+  }
+  .live-url-banner strong { color: var(--danger); }
+
+  .newsletter-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 1100px) {
+    .newsletter-layout { grid-template-columns: 1fr; }
+  }
+
+  /* ---- Drafts column ---- */
+  .drafts-card { position: sticky; top: 32px; }
+  .drafts-card .card-body { padding: 20px; }
+  .drafts-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .drafts-empty { font-size: 13px; color: var(--text-muted); font-style: italic; text-align: center; padding: 14px 4px; }
+  .drafts-divider { border: none; border-top: 1px solid var(--border-gray); margin: 18px 0; }
+  .drafts-subhead { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-bottom: 10px; }
+  .draft-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px; border-radius: 8px; margin-bottom: 6px;
+    border: 1px solid var(--border-gray);
+  }
+  .draft-item.active { border-color: var(--gold); background: rgba(195,163,85,0.08); }
+  .draft-item-main { flex: 1; min-width: 0; cursor: pointer; }
+  .draft-subject { font-size: 13px; font-weight: bold; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .draft-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .draft-delete {
+    flex-shrink: 0; width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border-gray);
+    background: var(--white); color: var(--text-muted); font-size: 12px; cursor: pointer;
+  }
+  .draft-delete:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* ---- Composer ---- */
+  .composer-card { margin-bottom: 24px; }
+  .composer-card .card-body { padding: 22px; }
+  .subject-field { margin-bottom: 4px; }
+  .subject-field input { font-size: 15px; padding: 11px 13px; }
+  .from-line {
+    font-size: 12px; color: var(--text-muted); margin-bottom: 20px;
+  }
+  .from-line strong { color: var(--text-dark); font-weight: bold; }
+
+  .compose-mode-toggle {
+    display: inline-flex; border: 1px solid var(--border-gray); border-radius: 8px;
+    overflow: hidden; margin-bottom: 18px;
+  }
+  .compose-mode-toggle button {
+    padding: 7px 16px; font-size: 12.5px; font-weight: bold; border: none;
+    background: var(--white); color: var(--text-muted); cursor: pointer;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .compose-mode-toggle button + button { border-left: 1px solid var(--border-gray); }
+  .compose-mode-toggle button.active { background: var(--navy-blue); color: var(--white); }
+  .mode-panel { display: none; }
+  .mode-panel.active { display: block; }
+  .html-textarea {
+    width: 100%; min-height: 320px; padding: 14px; border: 1px solid var(--border-gray); border-radius: 8px;
+    font-family: 'Courier New', monospace; font-size: 12.5px; line-height: 1.6; background: var(--lightest-gray); resize: vertical;
+  }
+  .html-textarea:focus { outline: none; border-color: var(--gold); background: var(--white); }
+
+  .add-block-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 14px; }
+  .add-block-label { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-right: 4px; }
+  .add-block-btn {
+    padding: 6px 12px; border-radius: 100px; border: 1px dashed var(--border-gray); background: var(--white);
+    font-size: 11.5px; font-weight: bold; color: var(--navy-blue); cursor: pointer;
+  }
+  .add-block-btn:hover { border-color: var(--gold); border-style: solid; color: var(--gold-text); background: rgba(195,163,85,0.08); }
+
+  .blocks-list { display: flex; flex-direction: column; gap: 12px; }
+  .block-item { border: 1px solid var(--border-gray); border-radius: 10px; overflow: hidden; }
+  .block-item-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 14px; background: var(--lightest-gray); border-bottom: 1px solid var(--border-gray);
+  }
+  .block-type-tag { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.4px; color: var(--gold-text); }
+  .block-item-actions { display: flex; gap: 4px; }
+  .block-item-actions button {
+    width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border-gray);
+    background: var(--white); font-size: 12px; cursor: pointer; color: var(--text-muted);
+  }
+  .block-item-actions button:hover { border-color: var(--navy-blue); color: var(--navy-blue); }
+  .block-item-actions button.danger:hover { border-color: var(--danger); color: var(--danger); }
+  .block-item-actions button:disabled { opacity: 0.35; cursor: default; }
+  .block-item-actions button:disabled:hover { border-color: var(--border-gray); color: var(--text-muted); }
+  .block-item-body { padding: 14px; }
+  .block-input, .block-textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
+    font-family: inherit; font-size: 14px; background: var(--lightest-gray);
+  }
+  .block-textarea { min-height: 80px; resize: vertical; }
+  .block-input:focus, .block-textarea:focus { outline: none; border-color: var(--gold); background: var(--white); }
+  .button-block-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .button-block-row .field { flex: 1; min-width: 180px; margin-bottom: 0; }
+
+  .image-block-row { display: flex; gap: 14px; align-items: center; }
+  .image-block-preview {
+    width: 120px; height: 90px; flex-shrink: 0; border-radius: 8px; border: 1px solid var(--border-gray);
+    background: var(--white); display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  .image-block-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .image-block-empty { font-size: 11px; color: var(--text-muted); text-align: center; padding: 0 8px; }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 13px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; }
+  .field input[type="text"], .field input[type="email"], .field select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
+    font-family: inherit; font-size: 14px; background: var(--lightest-gray); color: var(--text-dark);
+  }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--gold); background: var(--white); }
+
+  .send-to-row {
+    display: flex; align-items: flex-end; gap: 10px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--border-gray);
+    flex-wrap: wrap;
+  }
+  .send-to-row .field { flex: 1; min-width: 220px; margin-bottom: 0; }
+  .send-to-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+  .test-send-row {
+    display: flex; align-items: flex-end; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-gray);
+    flex-wrap: wrap;
+  }
+  .test-send-row .field { flex: 1; min-width: 220px; margin-bottom: 0; }
+  .test-send-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+  .form-msg { border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; line-height: 1.6; }
+  .form-msg.error { background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger); }
+  .form-msg.success { background: rgba(46,125,50,0.08); border: 1px solid rgba(46,125,50,0.3); color: #2e7d32; }
+  .form-msg.info { background: rgba(195,163,85,0.1); border: 1px solid rgba(195,163,85,0.3); color: var(--gold-text); }
+  .form-msg.visible { display: block; }
+
+  /* ---- Preview ---- */
+  .preview-frame-wrap {
+    margin-top: 24px; padding: 8px 0 32px; display: flex; justify-content: center;
+    overflow-x: auto;
+  }
+  .preview-frame-wrap iframe {
+    width: 600px; max-width: 100%; height: 720px; border: none; background: transparent;
+    overflow: auto; flex-shrink: 0;
+  }
+</style>
+</head>
+<body data-page="newsletter">
+  <div class="app-shell">
+    <div id="sidebar-mount">
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img class="brand-crest" src="assets/site-images/logo-dark-bg.png" alt="Christ Church Bluffton crest">
+    <div>
+      <div class="title">Christ Church Bluffton</div>
+      <div class="label">Admin Panel</div>
+    </div>
+    <button type="button" class="hamburger-btn" id="hamburger-btn" aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+    </button>
+  </div>
+  <div class="sidebar-collapsible" id="sidebar-collapsible">
+    <nav>
+      <a href="dashboard.html" data-page="dashboard">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Dashboard
+      </a>
+      <a href="staff.html" data-page="staff">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Staff
+      </a>
+      <a href="congregants.html" data-page="congregants" data-permission="congregants">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+        Congregants
+      </a>
+      <a href="prayers.html" data-page="prayers" data-permission="prayers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+        Prayer Requests
+      </a>
+      <a href="volunteers.html" data-page="volunteers" data-permission="signups">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Volunteers
+      </a>
+      <a href="subscribers.html" data-page="subscribers" data-permission="subscribers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h4M15 12h4M6 16h12"/></svg>
+        Subscribers
+      </a>
+      <a href="newsletter.html" data-page="newsletter" data-permission="newsletter" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        Newsletter
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="events.html" data-page="events" data-permission="events">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Events
+      </a>
+      <a href="content.html" data-page="content" data-permission="contentEditor" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Content Editor
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="photos.html" data-page="photos" data-permission="photos">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg>
+        Photos
+      </a>
+      <a href="team.html" data-page="team" data-admin-only="true">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M19 8h4M21 6v4"/></svg>
+        Team
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="reading-mode-row" id="reading-mode-row" style="display:none;">
+        <button type="button" class="reading-mode-btn" id="reading-mode-btn" title="Toggle easier-to-read text">
+          <span class="aa-icon">Aa</span> Reading Mode
+        </button>
+        <div class="reading-tint-swatches" id="reading-tint-swatches" style="display:none;">
+          <button type="button" class="tint-swatch tint-cream" data-tint="cream" title="Cream background"></button>
+          <button type="button" class="tint-swatch tint-blue" data-tint="blue" title="Light blue background"></button>
+          <button type="button" class="tint-swatch tint-green" data-tint="green" title="Light green background"></button>
+        </div>
+      </div>
+      <a href="account.html" class="user-chip" id="user-chip-link" title="Account Settings">
+        <div class="avatar" id="sidebar-avatar">?</div>
+        <div class="user-chip-info">
+          <div class="name" id="sidebar-name">—</div>
+          <div class="role" id="sidebar-role">—</div>
+        </div>
+        <svg class="chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+      <a href="#" class="logout-link" id="logout-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Log out
+      </a>
+    </div>
+  </div>
+</aside>
+  </div>
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <h1>Newsletter</h1>
+          <div class="subtitle">Compose an email newsletter — draft now, connect to Resend later</div>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" class="btn btn-outline" id="save-draft-btn">Save Draft</button>
+          <button type="button" class="btn btn-gold" id="send-newsletter-btn" disabled title="Not connected yet — sending will be enabled once this panel is wired up to Resend">Send Newsletter</button>
+        </div>
+      </div>
+      <div class="content" id="page-body">
+        <div class="live-url-banner">
+          <strong>Work In Progress — Not Live</strong>
+        </div>
+        <div class="newsletter-layout">
+          <div class="drafts-col">
+            <div class="card drafts-card">
+              <div class="card-body">
+                <div class="drafts-head">
+                  <h2 class="section-title" style="margin:0;">Saved Drafts</h2>
+                  <button type="button" class="btn btn-outline btn-sm" id="new-draft-btn">+ New</button>
+                </div>
+                <div class="drafts-empty" id="drafts-empty">No saved drafts yet.</div>
+                <div id="drafts-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="composer-col">
+            <div class="card composer-card">
+              <div class="card-body">
+                <div class="form-msg" id="newsletter-msg"></div>
+
+                <div class="field subject-field">
+                  <label for="subject-input">Subject Line<span class="required-mark">*</span></label>
+                  <input type="text" id="subject-input" placeholder="e.g. Christ Church Bluffton — August Update">
+                </div>
+                <div class="from-line">From <strong>info@christchurchbluffton.org</strong></div>
+
+                <div class="compose-mode-toggle">
+                  <button type="button" class="mode-tab-btn active" data-mode="visual">Build Visually</button>
+                  <button type="button" class="mode-tab-btn" data-mode="html">Paste HTML</button>
+                </div>
+
+                <div class="mode-panel active" id="visual-panel">
+                  <div class="blocks-list" id="blocks-list"></div>
+                  <div class="add-block-row">
+                    <span class="add-block-label">Add Block:</span>
+                    <button type="button" class="add-block-btn" data-type="heading">+ Heading</button>
+                    <button type="button" class="add-block-btn" data-type="paragraph">+ Paragraph</button>
+                    <button type="button" class="add-block-btn" data-type="image">+ Image</button>
+                    <button type="button" class="add-block-btn" data-type="button">+ Button/Link</button>
+                  </div>
+                </div>
+
+                <div class="mode-panel" id="html-panel">
+                  <div class="field">
+                    <label for="html-code-input">HTML Source</label>
+                    <textarea class="html-textarea" id="html-code-input" placeholder="Paste a full HTML email template here..."></textarea>
+                  </div>
+                </div>
+
+                <div class="send-to-row">
+                  <div class="field">
+                    <label for="send-to-select">Send to</label>
+                    <select id="send-to-select">
+                      <option value="all">All Subscribers</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="send-to-hint" id="send-to-hint">—</div>
+
+                <div class="test-send-row">
+                  <div class="field">
+                    <label for="test-email-input">Send a test copy to<span class="required-mark">*</span></label>
+                    <input type="email" id="test-email-input" placeholder="you@christchurchbluffton.org">
+                  </div>
+                  <button type="button" class="btn btn-outline" id="send-test-btn">Send Test</button>
+                </div>
+                <div class="test-send-hint">Test sends go only to the address above, not the full list.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="preview-frame-wrap">
+          <iframe id="preview-iframe" title="Newsletter preview" sandbox="" scrolling="auto"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    let session = null;
+    let drafts = [];
+    let currentDraftId = null;
+    let mode = 'visual';
+    let blocks = [];
+    let blockIdCounter = 0;
+    let previewTimer = null;
+
+    function escapeHtml(str) {
+      return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    // Maps a newsletter_drafts row (snake_case) to the camelCase shape every render/editor
+    // function in this file already expects.
+    function draftFromRow(row) {
+      return {
+        id: row.id,
+        subject: row.subject,
+        mode: row.mode,
+        htmlCode: row.html_code,
+        blocks: row.blocks || [],
+        savedAt: row.saved_at ? new Date(row.saved_at).getTime() : Date.now()
+      };
+    }
+
+    async function getDraftsFromDb() {
+      const { data, error } = await supabaseClient
+        .from('newsletter_drafts')
+        .select('*')
+        .order('saved_at', { ascending: false });
+      if (error) { console.error('getDraftsFromDb failed:', error.message); return []; }
+      return data.map(draftFromRow);
+    }
+
+    async function getSubscriberCount() {
+      const { data, error } = await supabaseClient.from('subscribers').select('id');
+      if (error) { console.error('getSubscriberCount failed:', error.message); return 0; }
+      return data.length;
+    }
+
+    function showMsg(text, type) {
+      const el = document.getElementById('newsletter-msg');
+      el.textContent = text;
+      el.className = 'form-msg visible ' + type;
+    }
+    function clearMsg() {
+      document.getElementById('newsletter-msg').className = 'form-msg';
+    }
+
+    function newBlockId() { return 'b' + (blockIdCounter++); }
+
+    function addBlock(type) {
+      const base = { id: newBlockId(), type };
+      if (type === 'heading' || type === 'paragraph') base.text = '';
+      if (type === 'image') { base.dataUrl = ''; base.caption = ''; }
+      if (type === 'button') { base.text = ''; base.url = ''; }
+      blocks.push(base);
+      renderBlocks();
+      updatePreview();
+    }
+
+    function moveBlock(id, dir) {
+      const idx = blocks.findIndex(b => b.id === id);
+      const swap = idx + dir;
+      if (idx < 0 || swap < 0 || swap >= blocks.length) return;
+      const tmp = blocks[idx]; blocks[idx] = blocks[swap]; blocks[swap] = tmp;
+      renderBlocks();
+      updatePreview();
+    }
+
+    function removeBlock(id) {
+      blocks = blocks.filter(b => b.id !== id);
+      renderBlocks();
+      updatePreview();
+    }
+
+    function blockTypeLabel(type) {
+      return { heading: 'Heading', paragraph: 'Paragraph', image: 'Image', button: 'Button / Link' }[type] || type;
+    }
+
+    function blockBodyHtml(b) {
+      if (b.type === 'heading') {
+        return `<input type="text" class="block-input" data-field="text" value="${escapeHtml(b.text)}" placeholder="Heading text">`;
+      }
+      if (b.type === 'paragraph') {
+        return `<textarea class="block-textarea" data-field="text" placeholder="Paragraph text">${escapeHtml(b.text)}</textarea>`;
+      }
+      if (b.type === 'image') {
+        return `
+          <div class="image-block-row">
+            <div class="image-block-preview">${b.dataUrl ? `<img src="${b.dataUrl}" alt="">` : `<div class="image-block-empty">No image selected</div>`}</div>
+            <div>
+              <button type="button" class="btn btn-outline" data-action="choose-image">${b.dataUrl ? 'Replace Image' : 'Choose Image'}</button>
+              <input type="file" accept="image/*" class="image-file-input" style="display:none;">
+            </div>
+          </div>
+          <div class="field" style="margin-top:12px;">
+            <label>Caption (optional)</label>
+            <input type="text" class="block-input" data-field="caption" value="${escapeHtml(b.caption)}" placeholder="Caption text">
+          </div>`;
+      }
+      if (b.type === 'button') {
+        return `
+          <div class="button-block-row">
+            <div class="field">
+              <label>Button Text</label>
+              <input type="text" class="block-input" data-field="text" value="${escapeHtml(b.text)}" placeholder="Learn More">
+            </div>
+            <div class="field">
+              <label>Link URL</label>
+              <input type="text" class="block-input" data-field="url" value="${escapeHtml(b.url)}" placeholder="https://christchurchbluffton.org">
+            </div>
+          </div>`;
+      }
+      return '';
+    }
+
+    function renderBlocks() {
+      const list = document.getElementById('blocks-list');
+      if (blocks.length === 0) {
+        list.innerHTML = `<div class="drafts-empty">No content blocks yet — add one below.</div>`;
+        return;
+      }
+      list.innerHTML = blocks.map((b, i) => `
+        <div class="block-item" data-id="${b.id}">
+          <div class="block-item-head">
+            <span class="block-type-tag">${blockTypeLabel(b.type)}</span>
+            <div class="block-item-actions">
+              <button type="button" data-action="up" ${i === 0 ? 'disabled' : ''} title="Move up">&uarr;</button>
+              <button type="button" data-action="down" ${i === blocks.length - 1 ? 'disabled' : ''} title="Move down">&darr;</button>
+              <button type="button" class="danger" data-action="remove" title="Remove">&times;</button>
+            </div>
+          </div>
+          <div class="block-item-body">${blockBodyHtml(b)}</div>
+        </div>`).join('');
+    }
+
+    // ---- Branded HTML shell — same visual language as the live site's contact.js emailShell():
+    // navy header band, gold accents, Georgia headings / Arial body, table-based layout for email clients.
+    function buildEmailHtml(subject, rowsHtml) {
+      const heading = escapeHtml(subject) || 'Newsletter';
+      return `<!DOCTYPE html>
+<html>
+<body style="margin:0; padding:0; background-color:#F5F4EF;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F5F4EF; padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background-color:#FFFFFF; border-radius:12px; overflow:hidden;">
+        <tr><td style="background-color:#303b6a; padding:28px 32px 22px;">
+          <div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#A9B3D6;">Christ Church Bluffton</div>
+          <div style="font-family:Georgia,'Times New Roman',serif; font-size:24px; color:#FFFFFF; margin-top:8px;">${heading}</div>
+        </td></tr>
+        <tr><td style="padding:28px 32px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rowsHtml}
+          </table>
+        </td></tr>
+        <tr><td style="padding:18px 32px 28px; border-top:1px solid #E5E3DB;">
+          <div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; color:#6B6B6B; line-height:1.6;">Christ Church Bluffton &middot; 7 Venture Drive, Suite 104, PMB 267 &middot; Bluffton, SC 29910<br>You're receiving this because you're connected with Christ Church Bluffton.</div>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+    }
+
+    function blockRowHtml(b) {
+      if (b.type === 'heading') {
+        return `<tr><td style="padding:0 0 14px;"><div style="font-family:Georgia,'Times New Roman',serif; font-size:20px; color:#303b6a;">${escapeHtml(b.text) || '(empty heading)'}</div></td></tr>`;
+      }
+      if (b.type === 'paragraph') {
+        const html = escapeHtml(b.text).replace(/\n/g, '<br>');
+        return `<tr><td style="padding:0 0 16px;"><div style="font-family:Arial,Helvetica,sans-serif; font-size:15px; color:#2B2B2B; line-height:1.7;">${html || '(empty paragraph)'}</div></td></tr>`;
+      }
+      if (b.type === 'image') {
+        if (!b.dataUrl) return `<tr><td style="padding:0 0 16px;"><div style="font-family:Arial,Helvetica,sans-serif; font-size:12px; color:#6B6B6B; font-style:italic;">(image block — no image selected yet)</div></td></tr>`;
+        return `<tr><td style="padding:0 0 16px;" align="center">
+          <img src="${b.dataUrl}" style="max-width:100%; border-radius:8px; display:block;" alt="${escapeHtml(b.caption)}">
+          ${b.caption ? `<div style="font-family:Arial,Helvetica,sans-serif; font-size:12px; color:#6B6B6B; margin-top:6px;">${escapeHtml(b.caption)}</div>` : ''}
+        </td></tr>`;
+      }
+      if (b.type === 'button') {
+        if (!b.text) return '';
+        return `<tr><td style="padding:8px 0 16px;" align="center">
+          <table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="background-color:#c3a355; border-radius:8px;">
+            <a href="${escapeHtml(b.url) || '#'}" style="display:inline-block; padding:12px 28px; font-family:Arial,Helvetica,sans-serif; font-size:14px; font-weight:bold; color:#1e2547; text-decoration:none;">${escapeHtml(b.text)}</a>
+          </td></tr></table>
+        </td></tr>`;
+      }
+      return '';
+    }
+
+    function generateVisualHtml(subject) {
+      const rows = blocks.length
+        ? blocks.map(blockRowHtml).join('')
+        : `<tr><td style="padding:0;"><div style="font-family:Arial,Helvetica,sans-serif; font-size:13px; color:#6B6B6B; font-style:italic;">This newsletter doesn't have any content blocks yet. Add one below.</div></td></tr>`;
+      return buildEmailHtml(subject, rows);
+    }
+
+    // Same final HTML regardless of which mode is active — Paste HTML uses the raw textarea
+    // content as-is, Build Visually assembles it from blocks using the same branded shell.
+    function getFinalHtml() {
+      const subject = document.getElementById('subject-input').value.trim();
+      if (mode === 'html') {
+        const code = document.getElementById('html-code-input').value;
+        return code.trim() ? code : buildEmailHtml(subject, `<tr><td style="padding:0;"><div style="font-family:Arial,Helvetica,sans-serif; font-size:13px; color:#6B6B6B; font-style:italic;">Paste your HTML on the left to see it here.</div></td></tr>`);
+      }
+      return generateVisualHtml(subject);
+    }
+
+    function updatePreview() {
+      document.getElementById('preview-iframe').srcdoc = getFinalHtml();
+    }
+    function schedulePreviewUpdate() {
+      clearTimeout(previewTimer);
+      previewTimer = setTimeout(updatePreview, 300);
+    }
+
+    function setMode(newMode) {
+      mode = newMode;
+      document.querySelectorAll('.mode-tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === newMode));
+      document.getElementById('visual-panel').classList.toggle('active', newMode === 'visual');
+      document.getElementById('html-panel').classList.toggle('active', newMode === 'html');
+      updatePreview();
+    }
+
+    function resetComposer() {
+      currentDraftId = null;
+      document.getElementById('subject-input').value = '';
+      document.getElementById('html-code-input').value = '';
+      blocks = [];
+      setMode('visual');
+      renderBlocks();
+      updatePreview();
+      clearMsg();
+      renderDraftsList();
+    }
+
+    function renderDraftsList() {
+      const listEl = document.getElementById('drafts-list');
+      const emptyEl = document.getElementById('drafts-empty');
+      if (drafts.length === 0) {
+        emptyEl.style.display = 'block';
+        listEl.innerHTML = '';
+        return;
+      }
+      emptyEl.style.display = 'none';
+      const sorted = [...drafts].sort((a, b) => b.savedAt - a.savedAt);
+      listEl.innerHTML = sorted.map(d => `
+        <div class="draft-item ${d.id === currentDraftId ? 'active' : ''}" data-id="${d.id}">
+          <div class="draft-item-main" data-action="open">
+            <div class="draft-subject">${escapeHtml(d.subject) || '(untitled)'}</div>
+            <div class="draft-meta">${d.mode === 'html' ? 'HTML' : 'Visual'} &middot; ${new Date(d.savedAt).toLocaleDateString()}</div>
+          </div>
+          <button type="button" class="draft-delete" data-action="delete" title="Delete draft">&times;</button>
+        </div>`).join('');
+    }
+
+    function openDraft(id) {
+      const d = drafts.find(x => x.id === id);
+      if (!d) return;
+      currentDraftId = d.id;
+      document.getElementById('subject-input').value = d.subject || '';
+      document.getElementById('html-code-input').value = d.htmlCode || '';
+      blocks = (d.blocks || []).map(b => ({ ...b }));
+      blockIdCounter = blocks.length ? Math.max(...blocks.map(b => parseInt((b.id || 'b0').slice(1)) || 0)) + 1 : 0;
+      setMode(d.mode || 'visual');
+      renderBlocks();
+      updatePreview();
+      clearMsg();
+      renderDraftsList();
+    }
+
+    // Native confirm() blocks the whole page (and even browser-automation input) until dismissed —
+    // a click-to-arm delete button is a lighter-weight, non-blocking way to guard against a
+    // mis-click on a low-stakes single-item delete.
+    async function deleteDraft(id, btnEl) {
+      const d = drafts.find(x => x.id === id);
+      if (!d) return;
+      if (!btnEl || btnEl.dataset.armed !== 'true') {
+        if (btnEl) {
+          btnEl.dataset.armed = 'true';
+          btnEl.textContent = '✓';
+          btnEl.title = 'Click again to confirm delete';
+          clearTimeout(btnEl._armTimer);
+          btnEl._armTimer = setTimeout(() => {
+            btnEl.dataset.armed = 'false';
+            btnEl.textContent = '×';
+            btnEl.title = 'Delete draft';
+          }, 3000);
+        }
+        return;
+      }
+      const { error } = await supabaseClient.from('newsletter_drafts').delete().eq('id', id);
+      if (error) { showMsg('Could not delete draft: ' + error.message, 'error'); return; }
+      drafts = drafts.filter(x => x.id !== id);
+      logActivity('draft_delete', d.subject || '(untitled)');
+      if (currentDraftId === id) resetComposer();
+      else renderDraftsList();
+    }
+
+    async function saveDraft() {
+      const subject = document.getElementById('subject-input').value.trim();
+      const htmlCode = document.getElementById('html-code-input').value;
+      const nowIso = new Date().toISOString();
+      if (currentDraftId) {
+        const { data, error } = await supabaseClient
+          .from('newsletter_drafts')
+          .update({ subject, mode, html_code: htmlCode, blocks, saved_at: nowIso })
+          .eq('id', currentDraftId)
+          .select()
+          .single();
+        if (error) { showMsg('Could not save draft: ' + error.message, 'error'); return; }
+        const updated = draftFromRow(data);
+        drafts = drafts.map(d => d.id === currentDraftId ? updated : d);
+      } else {
+        const { data, error } = await supabaseClient
+          .from('newsletter_drafts')
+          .insert({ subject, mode, html_code: htmlCode, blocks, saved_at: nowIso })
+          .select()
+          .single();
+        if (error) { showMsg('Could not save draft: ' + error.message, 'error'); return; }
+        const inserted = draftFromRow(data);
+        currentDraftId = inserted.id;
+        drafts.push(inserted);
+      }
+      logActivity('draft_save', subject || '(untitled)');
+      renderDraftsList();
+      showMsg('Draft saved.', 'success');
+    }
+
+    function sendTest() {
+      const subject = document.getElementById('subject-input').value.trim();
+      const testEmail = document.getElementById('test-email-input').value.trim();
+      if (!subject) { showMsg('Add a subject line before sending a test.', 'error'); return; }
+      if (!testEmail) { showMsg('Enter a test email address first.', 'error'); return; }
+      showMsg(`This would send a test copy of "${subject}" from info@christchurchbluffton.org to ${testEmail} once this panel is connected to Resend — not wired up yet. Nothing was actually sent.`, 'info');
+    }
+
+    const dataPromise = Promise.all([getDraftsFromDb(), getSubscriberCount()]);
+
+    loadSidebar().then(async () => {
+      if (!document.getElementById('blocks-list')) return;
+      // Composing a newsletter (block editing, HTML paste, live preview) isn't a comfortable
+      // touch task — block it on tablet/mobile the same way Content Editor is blocked.
+      if (window.innerWidth <= 900) {
+        document.getElementById('page-body').innerHTML = `
+          <div class="restricted-panel">
+            <div class="icon">🖥️</div>
+            <h2>Desktop only</h2>
+            <p>The Newsletter composer isn't available on tablet or mobile — please use a PC.</p>
+          </div>`;
+        return;
+      }
+      session = getSession();
+      const [draftsResult, subCount] = await dataPromise;
+      drafts = draftsResult;
+      document.getElementById('test-email-input').value = 'info@christchurchbluffton.org';
+
+      document.getElementById('send-to-hint').textContent =
+        `${subCount} ${subCount === 1 ? 'person' : 'people'} on the Subscribers list right now.`;
+
+      document.getElementById('subject-input').addEventListener('input', schedulePreviewUpdate);
+      document.getElementById('html-code-input').addEventListener('input', schedulePreviewUpdate);
+
+      document.querySelectorAll('.mode-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => setMode(btn.dataset.mode));
+      });
+
+      document.querySelectorAll('.add-block-btn').forEach(btn => {
+        btn.addEventListener('click', () => addBlock(btn.dataset.type));
+      });
+
+      document.getElementById('blocks-list').addEventListener('click', (e) => {
+        const actionBtn = e.target.closest('button[data-action]');
+        if (!actionBtn) return;
+        const item = e.target.closest('.block-item');
+        const id = item.dataset.id;
+        const action = actionBtn.dataset.action;
+        if (action === 'up') moveBlock(id, -1);
+        if (action === 'down') moveBlock(id, 1);
+        if (action === 'remove') removeBlock(id);
+        if (action === 'choose-image') item.querySelector('.image-file-input').click();
+      });
+
+      document.getElementById('blocks-list').addEventListener('change', (e) => {
+        if (!e.target.classList.contains('image-file-input')) return;
+        const file = e.target.files[0];
+        if (!file) return;
+        const item = e.target.closest('.block-item');
+        const id = item.dataset.id;
+        const block = blocks.find(b => b.id === id);
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          block.dataUrl = ev.target.result;
+          renderBlocks();
+          updatePreview();
+        };
+        reader.readAsDataURL(file);
+      });
+
+      document.getElementById('blocks-list').addEventListener('input', (e) => {
+        const field = e.target.dataset.field;
+        if (!field) return;
+        const item = e.target.closest('.block-item');
+        const id = item.dataset.id;
+        const block = blocks.find(b => b.id === id);
+        if (!block) return;
+        block[field] = e.target.value;
+        schedulePreviewUpdate();
+      });
+
+      document.getElementById('new-draft-btn').addEventListener('click', resetComposer);
+      document.getElementById('save-draft-btn').addEventListener('click', saveDraft);
+      document.getElementById('send-test-btn').addEventListener('click', sendTest);
+
+      document.getElementById('drafts-list').addEventListener('click', (e) => {
+        const item = e.target.closest('.draft-item');
+        if (!item) return;
+        const id = item.dataset.id;
+        const deleteBtn = e.target.closest('[data-action="delete"]');
+        if (deleteBtn) { deleteDraft(id, deleteBtn); return; }
+        if (e.target.closest('[data-action="open"]')) { openDraft(id); }
+      });
+
+      renderBlocks();
+      renderDraftsList();
+      updatePreview();
+    });
+  </script>
+</body>
+</html>

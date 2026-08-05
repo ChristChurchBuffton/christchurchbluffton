@@ -8,6 +8,7 @@ Explanations to the user should be to the point and in plain language — no jar
 - Never delete files without explicit user confirmation
 - Never push to remote without explicit user confirmation
 - Do not add Co-Authored-By tags to git commits
+- **Supabase admin backend now lives in `admin/`, inside this repo** (moved 2026-08-05 — previously a separate standalone repo). It has its own `server/` (Express backend, port 8099) distinct from the public site's `server/` (port 3002, contact/prayer/newsletter forms) — don't confuse the two. Credentials for the admin backend live in `admin/server/.env` only (gitignored) — see `christ-church-bluffton-notes` memory for project ref/keys.
 
 ## Tech Stack
 - Static HTML / CSS / JavaScript
@@ -20,6 +21,7 @@ Explanations to the user should be to the point and in plain language — no jar
 
 ## Folder Structure
 - `src/` — Deployable site code (Netlify publish directory)
+- `admin/` — Supabase-backed admin panel (separate app, own `server/`, own `netlify.toml` — not part of the public site's Netlify deploy)
 - `reference/` — Original site build for content/design reference (not deployed, gitignored)
 - `assets/` — Logos, business docs, flyers
 - `workflow/` — Project workflows and dev notes

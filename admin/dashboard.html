@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<title>Dashboard — Christ Church Bluffton Admin</title>
+<link rel="stylesheet" href="css/shared.css">
+<style>
+  .dashboard-grid { max-width: 1180px; margin: 0 auto; }
+  .stat-card { text-decoration: none; display: block; transition: box-shadow 0.15s ease, transform 0.15s ease; }
+  a.stat-card:hover { box-shadow: 0 8px 22px rgba(48,59,106,0.12); transform: translateY(-1px); }
+  .stat-card .stat-empty { font-size: 13px; color: var(--text-muted); }
+  /* Event titles are text, not a number — the shared .stat-value size (30px) is tuned for
+     short counts and wraps badly on a full event name. Only this card needs the override. */
+  .stat-card.text-stat .stat-value { font-size: 18px; line-height: 1.35; }
+
+  .activity-card { margin-top: 22px; }
+  .activity-card .card-body { padding: 0; }
+  .activity-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 16px 22px;
+    background: linear-gradient(135deg, rgba(195,163,85,0.12) 0%, rgba(195,163,85,0.04) 100%);
+    border-bottom: 2px solid var(--gold);
+  }
+  .activity-title { font-family: Georgia, 'Times New Roman', serif; font-size: 16px; color: var(--navy-blue); }
+  .activity-list { list-style: none; margin: 0; padding: 0; }
+  .activity-list li {
+    padding: 12px 22px;
+    border-bottom: 1px solid var(--border-gray);
+    font-size: 13px;
+    color: var(--text-dark);
+    display: flex; justify-content: space-between; gap: 12px;
+  }
+  .activity-list li:last-child { border-bottom: none; }
+  .activity-list .activity-when { color: var(--text-muted); white-space: nowrap; }
+  .activity-empty { padding: 18px 22px; font-size: 13px; color: var(--text-muted); }
+</style>
+</head>
+<body data-page="dashboard">
+  <div class="app-shell">
+    <div id="sidebar-mount">
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img class="brand-crest" src="assets/site-images/logo-dark-bg.png" alt="Christ Church Bluffton crest">
+    <div>
+      <div class="title">Christ Church Bluffton</div>
+      <div class="label">Admin Panel</div>
+    </div>
+    <button type="button" class="hamburger-btn" id="hamburger-btn" aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+    </button>
+  </div>
+  <div class="sidebar-collapsible" id="sidebar-collapsible">
+    <nav>
+      <a href="dashboard.html" data-page="dashboard">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Dashboard
+      </a>
+      <a href="staff.html" data-page="staff">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Staff
+      </a>
+      <a href="congregants.html" data-page="congregants" data-permission="congregants">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+        Congregants
+      </a>
+      <a href="prayers.html" data-page="prayers" data-permission="prayers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+        Prayer Requests
+      </a>
+      <a href="volunteers.html" data-page="volunteers" data-permission="signups">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Volunteers
+      </a>
+      <a href="subscribers.html" data-page="subscribers" data-permission="subscribers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h4M15 12h4M6 16h12"/></svg>
+        Subscribers
+      </a>
+      <a href="newsletter.html" data-page="newsletter" data-permission="newsletter" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        Newsletter
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="events.html" data-page="events" data-permission="events">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Events
+      </a>
+      <a href="content.html" data-page="content" data-permission="contentEditor" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Content Editor
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="photos.html" data-page="photos" data-permission="photos">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg>
+        Photos
+      </a>
+      <a href="team.html" data-page="team" data-admin-only="true">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M19 8h4M21 6v4"/></svg>
+        Team
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="reading-mode-row" id="reading-mode-row" style="display:none;">
+        <button type="button" class="reading-mode-btn" id="reading-mode-btn" title="Toggle easier-to-read text">
+          <span class="aa-icon">Aa</span> Reading Mode
+        </button>
+        <div class="reading-tint-swatches" id="reading-tint-swatches" style="display:none;">
+          <button type="button" class="tint-swatch tint-cream" data-tint="cream" title="Cream background"></button>
+          <button type="button" class="tint-swatch tint-blue" data-tint="blue" title="Light blue background"></button>
+          <button type="button" class="tint-swatch tint-green" data-tint="green" title="Light green background"></button>
+        </div>
+      </div>
+      <a href="account.html" class="user-chip" id="user-chip-link" title="Account Settings">
+        <div class="avatar" id="sidebar-avatar">?</div>
+        <div class="user-chip-info">
+          <div class="name" id="sidebar-name">—</div>
+          <div class="role" id="sidebar-role">—</div>
+        </div>
+        <svg class="chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+      <a href="#" class="logout-link" id="logout-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Log out
+      </a>
+    </div>
+  </div>
+</aside>
+  </div>
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <h1>Dashboard</h1>
+          <div class="subtitle" id="dash-subtitle">Welcome back</div>
+        </div>
+      </div>
+      <div class="content" id="page-body">
+        <div class="stat-grid dashboard-grid" id="stat-grid"></div>
+        <div class="card activity-card" id="activity-card" style="display:none;">
+          <div class="activity-head">
+            <div class="activity-title">Recent Activity</div>
+          </div>
+          <div class="card-body">
+            <ul class="activity-list" id="activity-list"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    function escapeHtml(str) {
+      return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    function todayMidnight() {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+
+    // Same recurrence math as events.html — kept self-contained per this app's page-independence
+    // convention rather than shared, since only this card needs a single "what's next" answer.
+    function nextOccurrence(ev) {
+      const today = todayMidnight();
+      const start = new Date(ev.start_date + 'T00:00:00');
+      if (ev.repeat === 'none' || !ev.repeat) {
+        const effectiveEnd = ev.end_date ? new Date(ev.end_date + 'T00:00:00') : start;
+        return effectiveEnd >= today ? start : null;
+      }
+      const until = ev.repeat_until ? new Date(ev.repeat_until + 'T00:00:00') : null;
+      if (until && until < today) return null;
+      if (start >= today) return start;
+
+      let cursor = new Date(start);
+      if (ev.repeat === 'daily') {
+        const diffDays = Math.ceil((today - start) / 86400000);
+        cursor.setDate(cursor.getDate() + diffDays);
+      } else if (ev.repeat === 'weekly') {
+        const diffDays = Math.ceil((today - start) / 86400000);
+        const weeks = Math.ceil(diffDays / 7);
+        cursor.setDate(cursor.getDate() + weeks * 7);
+      } else if (ev.repeat === 'monthly') {
+        while (cursor < today) cursor.setMonth(cursor.getMonth() + 1);
+      }
+      if (until && cursor > until) return null;
+      return cursor;
+    }
+
+    function formatCardDate(d) {
+      return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+
+    async function nextEventCard() {
+      const { data, error } = await supabaseClient.from('events').select('*');
+      if (error || !data || data.length === 0) {
+        return { label: 'Next Upcoming Event', value: '—', hint: 'Nothing scheduled', href: 'events.html', textStat: true };
+      }
+      let soonest = null;
+      data.forEach(ev => {
+        const occ = nextOccurrence(ev);
+        if (occ && (!soonest || occ < soonest.date)) soonest = { date: occ, ev };
+      });
+      if (!soonest) return { label: 'Next Upcoming Event', value: '—', hint: 'Nothing scheduled', href: 'events.html', textStat: true };
+      return { label: 'Next Upcoming Event', value: soonest.ev.title, hint: formatCardDate(soonest.date), href: 'events.html', textStat: true };
+    }
+
+    async function activePrayersCard() {
+      const { count } = await supabaseClient.from('prayer_requests').select('id', { count: 'exact', head: true }).eq('status', 'active');
+      return { label: 'Open Prayer Requests', value: String(count || 0), hint: 'Active', href: 'prayers.html' };
+    }
+
+    async function newSubscribersCard() {
+      const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+      const { count } = await supabaseClient.from('subscribers').select('id', { count: 'exact', head: true }).gte('added_at', weekAgo);
+      return { label: 'New Subscribers', value: String(count || 0), hint: 'Last 7 days', href: 'subscribers.html' };
+    }
+
+    async function congregantFamiliesCard() {
+      const { count } = await supabaseClient.from('congregant_families').select('id', { count: 'exact', head: true });
+      return { label: 'Congregant Families', value: String(count || 0), hint: 'On file', href: 'congregants.html' };
+    }
+
+    async function pendingInvitesCard() {
+      const { count } = await supabaseClient.from('profiles').select('id', { count: 'exact', head: true }).eq('status', 'invited');
+      return { label: 'Pending Team Invites', value: String(count || 0), hint: "Haven't signed in yet", href: 'team.html' };
+    }
+
+    function statCardHtml(card) {
+      return `
+        <a class="stat-card${card.textStat ? ' text-stat' : ''}" href="${escapeHtml(card.href)}">
+          <div class="stat-label">${escapeHtml(card.label)}</div>
+          <div class="stat-value">${escapeHtml(card.value)}</div>
+          <div class="stat-hint">${escapeHtml(card.hint)}</div>
+        </a>`;
+    }
+
+    function renderActivity(log) {
+      const list = document.getElementById('activity-list');
+      const recent = log.slice(-8).reverse();
+      if (recent.length === 0) {
+        list.innerHTML = `<li class="activity-empty">No activity logged yet.</li>`;
+        return;
+      }
+      list.innerHTML = recent.map(e => `
+        <li>
+          <span>${escapeHtml(ACTIVITY_LABELS[e.action] || e.action)}${e.target ? ' — ' + escapeHtml(e.target) : ''} <span style="color:var(--text-muted);">(${escapeHtml(e.actor)})</span></span>
+          <span class="activity-when">${escapeHtml(new Date(e.t).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}</span>
+        </li>`).join('');
+    }
+
+    // Fired immediately, in parallel with loadSidebar()'s session check — this is the
+    // landing page everyone hits after login, so it's the highest-value place to not
+    // make people wait for permissions to resolve before the actual queries even start.
+    // None of these card builders touch the session; RLS on each table already decides
+    // what a given person can actually see, so firing all of them unconditionally (even
+    // for cards that turn out unused because of a permission check below) is harmless.
+    const allCardPromises = {
+      events: nextEventCard(),
+      prayers: activePrayersCard(),
+      subscribers: newSubscribersCard(),
+      congregants: congregantFamiliesCard(),
+      pendingInvites: pendingInvitesCard()
+    };
+    const activityLogPromise = getActivityLog();
+
+    loadSidebar().then(async () => {
+      const session = getSession();
+      if (!session) return;
+      document.getElementById('dash-subtitle').textContent = `Welcome back, ${session.name}`;
+
+      const cardKeys = [];
+      if (hasPermission(session, 'events')) cardKeys.push('events');
+      if (hasPermission(session, 'prayers')) cardKeys.push('prayers');
+      if (hasPermission(session, 'subscribers')) cardKeys.push('subscribers');
+      if (hasPermission(session, 'congregants')) cardKeys.push('congregants');
+      if (session.role === 'admin') cardKeys.push('pendingInvites');
+
+      const grid = document.getElementById('stat-grid');
+      if (cardKeys.length === 0) {
+        grid.innerHTML = `<div class="stat-card"><div class="stat-empty">Nothing to show yet — ask an admin to turn on access to a page for your account.</div></div>`;
+      } else {
+        const cards = await Promise.all(cardKeys.map(k => allCardPromises[k]));
+        grid.innerHTML = cards.map(statCardHtml).join('');
+      }
+
+      if (session.role === 'admin') {
+        document.getElementById('activity-card').style.display = '';
+        const log = await activityLogPromise;
+        renderActivity(log);
+      }
+    });
+  </script>
+</body>
+</html>

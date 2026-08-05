@@ -1,0 +1,27 @@
+<div class="prayer-overlay" id="prayerOverlay"></div>
+<button class="prayer-fab" id="prayerFab" aria-label="Prayer Request" aria-expanded="false" aria-controls="prayerPopup">Prayer Request</button>
+<div class="prayer-popup" id="prayerPopup" role="dialog" aria-modal="true" aria-labelledby="prayerPopupTitle">
+    <div class="prayer-popup-header">
+        <h4 id="prayerPopupTitle">Prayer Request</h4>
+        <button class="prayer-popup-close" id="prayerClose" aria-label="Close">&times;</button>
+    </div>
+    <div id="prayerFormBody">
+        <form class="prayer-popup-body" id="prayerForm">
+            <div class="form-group">
+                <label for="prayerName">Name <span style="font-size: 0.75rem;color:var(--text-gray);">(optional)</span></label>
+                <input type="text" id="prayerName" name="name" placeholder="Your name">
+            </div>
+            <div class="form-group">
+                <label for="prayerText">Your Prayer <span style="color:#c0392b;">*</span></label>
+                <textarea id="prayerText" name="prayer" placeholder="Share your prayer request..." required></textarea>
+            </div>
+            <input type="text" name="website_url_confirm" style="position:absolute;left:-9999px;" tabindex="-1" autocomplete="new-password" aria-hidden="true">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAD8314cvz8A6O5m4" data-size="flexible"></div>
+            <button type="submit" class="prayer-submit-btn">Submit Prayer</button>
+        </form>
+    </div>
+    <div class="prayer-success" id="prayerSuccess">
+        <h4>Prayer Received</h4>
+        <p>Thank you for sharing your prayer. Our community will be lifting you up.</p>
+    </div>
+</div>

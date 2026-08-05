@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<title>Photos — Christ Church Bluffton Admin</title>
+<link rel="stylesheet" href="css/shared.css">
+<style>
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+  }
+  .photo-card {
+    background: var(--white);
+    border: 1px solid var(--border-gray);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .photo-card .thumb {
+    width: 100%;
+    height: 160px;
+    object-fit: contain;
+    background: var(--lightest-gray);
+    display: block;
+  }
+  .photo-card .meta {
+    padding: 12px 14px;
+  }
+  .photo-card .filename {
+    font-size: 12px;
+    font-family: monospace;
+    color: var(--text-muted);
+    word-break: break-all;
+    margin-bottom: 10px;
+  }
+  .photo-card .actions {
+    display: flex;
+    gap: 8px;
+  }
+  .photo-card .actions button {
+    flex: 1;
+    padding: 7px;
+    border-radius: 6px;
+    border: 1px solid var(--border-gray);
+    background: var(--white);
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .photo-card .actions button.copy:hover { border-color: var(--gold); color: var(--gold-text); }
+  .photo-card .actions button.copy.copied { border-color: #2e7d32; color: #2e7d32; }
+  .photo-card .actions button.remove { color: var(--danger); }
+  .photo-card .actions button.remove:hover { border-color: var(--danger); }
+  .upload-tile {
+    border: 2px dashed var(--border-gray);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 16px;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-align: center;
+    min-height: 218px;
+    background: none;
+    width: 100%;
+    font-family: inherit;
+  }
+  .upload-tile:hover { border-color: var(--gold); color: var(--gold-text); }
+  .upload-tile .plus { font-size: 28px; margin-bottom: 6px; }
+  .live-url-banner {
+    background: rgba(195,163,85,0.08);
+    border: 1px solid var(--border-gray);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .live-url-banner a {
+    font-weight: bold;
+    color: var(--navy-blue);
+  }
+  .alpha-banner {
+    background: rgba(46,125,50,0.08);
+    border: 1px solid rgba(46,125,50,0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: var(--text-dark);
+    line-height: 1.6;
+  }
+  .alpha-banner strong { color: #2e7d32; }
+</style>
+</head>
+<body data-page="photos">
+  <div class="app-shell">
+    <div id="sidebar-mount">
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img class="brand-crest" src="assets/site-images/logo-dark-bg.png" alt="Christ Church Bluffton crest">
+    <div>
+      <div class="title">Christ Church Bluffton</div>
+      <div class="label">Admin Panel</div>
+    </div>
+    <button type="button" class="hamburger-btn" id="hamburger-btn" aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+    </button>
+  </div>
+  <div class="sidebar-collapsible" id="sidebar-collapsible">
+    <nav>
+      <a href="dashboard.html" data-page="dashboard">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Dashboard
+      </a>
+      <a href="staff.html" data-page="staff">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Staff
+      </a>
+      <a href="congregants.html" data-page="congregants" data-permission="congregants">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+        Congregants
+      </a>
+      <a href="prayers.html" data-page="prayers" data-permission="prayers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+        Prayer Requests
+      </a>
+      <a href="volunteers.html" data-page="volunteers" data-permission="signups">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Volunteers
+      </a>
+      <a href="subscribers.html" data-page="subscribers" data-permission="subscribers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h4M15 12h4M6 16h12"/></svg>
+        Subscribers
+      </a>
+      <a href="newsletter.html" data-page="newsletter" data-permission="newsletter" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        Newsletter
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="events.html" data-page="events" data-permission="events">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Events
+      </a>
+      <a href="content.html" data-page="content" data-permission="contentEditor" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Content Editor
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="photos.html" data-page="photos" data-permission="photos">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg>
+        Photos
+      </a>
+      <a href="team.html" data-page="team" data-admin-only="true">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M19 8h4M21 6v4"/></svg>
+        Team
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="reading-mode-row" id="reading-mode-row" style="display:none;">
+        <button type="button" class="reading-mode-btn" id="reading-mode-btn" title="Toggle easier-to-read text">
+          <span class="aa-icon">Aa</span> Reading Mode
+        </button>
+        <div class="reading-tint-swatches" id="reading-tint-swatches" style="display:none;">
+          <button type="button" class="tint-swatch tint-cream" data-tint="cream" title="Cream background"></button>
+          <button type="button" class="tint-swatch tint-blue" data-tint="blue" title="Light blue background"></button>
+          <button type="button" class="tint-swatch tint-green" data-tint="green" title="Light green background"></button>
+        </div>
+      </div>
+      <a href="account.html" class="user-chip" id="user-chip-link" title="Account Settings">
+        <div class="avatar" id="sidebar-avatar">?</div>
+        <div class="user-chip-info">
+          <div class="name" id="sidebar-name">—</div>
+          <div class="role" id="sidebar-role">—</div>
+        </div>
+        <svg class="chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+      <a href="#" class="logout-link" id="logout-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Log out
+      </a>
+    </div>
+  </div>
+</aside>
+  </div>
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <h1>Photos</h1>
+          <div class="subtitle">Church photos available for newsletters, social media, flyers, and other church uses</div>
+        </div>
+        <button class="btn btn-gold" id="upload-btn">+ Upload Photo</button>
+        <input type="file" accept="image/*" id="upload-input" style="display:none;">
+      </div>
+      <div class="content" id="page-body">
+        <div class="alpha-banner">
+          <strong>Alpha (Testing)</strong> — all data you enter here is saved.
+        </div>
+        <div class="live-url-banner">
+          All images can be accessed live at <a href="https://christchurchbluffton.org/a34317d8" target="_blank">christchurchbluffton.org/a34317d8</a>
+        </div>
+        <div class="photo-grid" id="photo-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    const LIVE_BASE_URL = 'https://christchurchbluffton.org/a34317d8/';
+
+    // The 4 images genuinely live on christchurchbluffton.org/a34317d8 today — seeded into the
+    // `photos` table (sentinel `external:` storage_path, no real Storage object behind them) the
+    // first time the table is empty, so the admin view matches reality on first load. Not mock data.
+    const SEED_PHOTOS = [
+      { filename: 'church-commitments.jpg' },
+      { filename: 'ministry-opportunities.jpg' },
+      { filename: 'worship-service-communion.jpg' },
+      { filename: 'knowing-jesus-sharing-life-bringing-hope.jpg' }
+    ];
+
+    let photos = [];
+
+    function escapeHtml(str) {
+      return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    function isExternal(storagePath) {
+      return typeof storagePath === 'string' && storagePath.startsWith('external:');
+    }
+
+    async function seedIfEmpty() {
+      const rows = SEED_PHOTOS.map(p => ({ filename: p.filename, storage_path: 'external:' + p.filename }));
+      const { error } = await supabaseClient.from('photos').insert(rows);
+      if (error) console.error('seedIfEmpty failed:', error.message);
+    }
+
+    async function loadPhotos() {
+      let { data, error } = await supabaseClient.from('photos').select('*').order('added_at', { ascending: false });
+      if (error) { console.error('loadPhotos failed:', error.message); photos = []; return; }
+
+      if (data.length === 0) {
+        await seedIfEmpty();
+        ({ data, error } = await supabaseClient.from('photos').select('*').order('added_at', { ascending: false }));
+        if (error) { console.error('loadPhotos failed:', error.message); photos = []; return; }
+      }
+
+      photos = data.map(row => {
+        const external = isExternal(row.storage_path);
+        // External seed rows have no real Storage object — keep pointing at the local mock
+        // thumbnail and the real production URL, exactly as before migration. Real uploads get
+        // their actual public Storage URL.
+        const src = external
+          ? `assets/mock-photos/${row.filename}`
+          : supabaseClient.storage.from('photos').getPublicUrl(row.storage_path).data.publicUrl;
+        return {
+          id: row.id,
+          filename: row.filename,
+          src,
+          addedAt: new Date(row.added_at).getTime(),
+          storagePath: row.storage_path,
+          external
+        };
+      });
+    }
+
+    // Pure render from whatever's already in `photos` — callers load fresh data first
+    // (await loadPhotos(); renderPhotos();). Kept separate so the very first page load
+    // can fire loadPhotos() early, in parallel with loadSidebar()'s session check,
+    // instead of both waiting for one another.
+    function renderPhotos() {
+      const grid = document.getElementById('photo-grid');
+      const sorted = [...photos].sort((a, b) => b.addedAt - a.addedAt);
+      grid.innerHTML = `
+        <button type="button" class="upload-tile" id="upload-tile-btn">
+          <div class="plus">+</div>
+          Click to upload a photo
+        </button>` + sorted.map(p => `
+          <div class="photo-card">
+            <img class="thumb" src="${escapeHtml(p.src)}" alt="${escapeHtml(p.filename)}">
+            <div class="meta">
+              <div class="filename">${escapeHtml(p.filename)}</div>
+              <div class="actions">
+                <button type="button" class="copy" data-action="copy" data-id="${p.id}">Copy Link</button>
+                <button type="button" class="remove" data-action="remove" data-id="${p.id}">Delete</button>
+              </div>
+            </div>
+          </div>`).join('');
+    }
+
+    async function handleFile(file) {
+      if (!file || !file.type.startsWith('image/')) return;
+      const path = `${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabaseClient.storage.from('photos').upload(path, file);
+      if (uploadError) {
+        alert('Could not upload photo: ' + uploadError.message);
+        return;
+      }
+      const { error: insertError } = await supabaseClient.from('photos').insert({ filename: file.name, storage_path: path });
+      if (insertError) {
+        alert('Could not save photo record: ' + insertError.message);
+        return;
+      }
+      logActivity('photo_add', file.name);
+      await loadPhotos();
+      renderPhotos();
+    }
+
+    const dataPromise = loadPhotos();
+
+    loadSidebar().then(async () => {
+      if (!document.getElementById('photo-grid')) return;
+      await dataPromise;
+      renderPhotos();
+
+      const fileInput = document.getElementById('upload-input');
+      document.getElementById('upload-btn').addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', async (e) => { await handleFile(e.target.files[0]); fileInput.value = ''; });
+
+      document.getElementById('photo-grid').addEventListener('click', async (e) => {
+        if (e.target.closest('#upload-tile-btn')) { fileInput.click(); return; }
+
+        const copyBtn = e.target.closest('[data-action="copy"]');
+        if (copyBtn) {
+          const p = photos.find(x => x.id === copyBtn.dataset.id);
+          if (!p) return;
+          // External seed rows: keep copying the real production URL. Real uploads: p.src is
+          // already the real Supabase Storage public URL (same one used for the thumbnail).
+          const linkToCopy = p.external ? (LIVE_BASE_URL + p.filename) : p.src;
+          navigator.clipboard.writeText(linkToCopy).then(() => {
+            copyBtn.textContent = 'Copied!';
+            copyBtn.classList.add('copied');
+            setTimeout(() => { copyBtn.textContent = 'Copy Link'; copyBtn.classList.remove('copied'); }, 1500);
+          });
+          return;
+        }
+
+        // Click-to-arm delete (a blocking native confirm() would freeze the page).
+        const removeBtn = e.target.closest('[data-action="remove"]');
+        if (removeBtn) {
+          if (removeBtn.dataset.armed !== 'true') {
+            removeBtn.dataset.armed = 'true';
+            removeBtn.textContent = 'Confirm?';
+            clearTimeout(removeBtn._armTimer);
+            removeBtn._armTimer = setTimeout(() => { removeBtn.dataset.armed = 'false'; removeBtn.textContent = 'Delete'; }, 3000);
+            return;
+          }
+          const removed = photos.find(x => x.id === removeBtn.dataset.id);
+          if (!removed) return;
+          // Real uploads: remove the Storage object too. External seed rows have no Storage
+          // object to remove — deleting just drops this panel's reference to it; the image
+          // stays live on production regardless (this panel isn't its source of truth).
+          if (!removed.external) {
+            await supabaseClient.storage.from('photos').remove([removed.storagePath]);
+          }
+          const { error } = await supabaseClient.from('photos').delete().eq('id', removed.id);
+          if (error) {
+            alert('Could not delete photo: ' + error.message);
+            return;
+          }
+          logActivity('photo_remove', removed.filename);
+          await loadPhotos();
+          renderPhotos();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

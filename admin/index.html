@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<title>Sign In — Christ Church Bluffton Admin</title>
+<link rel="stylesheet" href="css/shared.css">
+<style>
+  .auth-error {
+    display: none;
+    background: rgba(177,67,67,0.08);
+    border: 1px solid rgba(177,67,67,0.3);
+    color: var(--danger);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .auth-error.visible { display: block; }
+  .auth-bootstrap-note {
+    display: none;
+    background: rgba(195,163,85,0.1);
+    border: 1px solid rgba(195,163,85,0.3);
+    color: var(--gold-text);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .auth-bootstrap-note.visible { display: block; }
+</style>
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-header">
+        <img class="crest" src="assets/site-images/logo-dark-bg.png" alt="Christ Church Bluffton crest">
+        <div class="label">Christ Church Bluffton</div>
+        <h1>Admin Panel</h1>
+      </div>
+
+      <form class="auth-form" id="login-form">
+        <div class="auth-bootstrap-note" id="bootstrap-note">
+          No accounts exist yet — signing in here creates the first Admin account for this church.
+        </div>
+        <div class="auth-error" id="auth-error"></div>
+        <div class="field">
+          <label for="email">Email<span class="required-mark">*</span></label>
+          <input type="email" id="email" placeholder="you@christchurchbluffton.org" required>
+        </div>
+        <div class="field">
+          <label for="password">Password<span class="required-mark">*</span></label>
+          <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn-primary" id="submit-btn">Sign In</button>
+        <div class="auth-footnote">Access is by invitation only. Contact an admin if you need an account.</div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    // Real accounts are seeded via the Supabase migration + server/server.js's
+    // /api/team endpoint (see supabase/migrations/) — there's no more "first sign-in
+    // bootstraps an admin" path, since accounts always exist before anyone logs in now.
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errorBox = document.getElementById('auth-error');
+      errorBox.classList.remove('visible');
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.disabled = true;
+
+      const { session, error } = await signIn(email, password);
+      submitBtn.disabled = false;
+
+      if (error) {
+        errorBox.textContent = 'Incorrect email or password.';
+        errorBox.classList.add('visible');
+        logActivity('login_fail', error, email);
+        return;
+      }
+
+      logActivity('login', '', session.email);
+      window.location.href = 'dashboard.html';
+    });
+  </script>
+</body>
+</html>
