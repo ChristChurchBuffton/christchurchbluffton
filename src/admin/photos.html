@@ -103,6 +103,36 @@
     line-height: 1.6;
   }
   .alpha-banner strong { color: #2e7d32; }
+
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0; background: rgba(30,37,71,0.55);
+    z-index: 1000; align-items: center; justify-content: center; padding: 24px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-box {
+    background: var(--white); border-radius: 14px; width: 100%; max-width: 480px;
+    max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+  }
+  .modal-header { padding: 20px 26px; border-bottom: 1px solid var(--border-gray); display: flex; align-items: center; justify-content: space-between; }
+  .modal-header .modal-title { font-family: Georgia, 'Times New Roman', serif; font-size: 20px; color: var(--navy-blue); }
+  .modal-header .modal-subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .modal-close { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border-gray); background: var(--white); color: var(--text-muted); font-size: 16px; cursor: pointer; flex-shrink: 0; }
+  .modal-close:hover { border-color: var(--navy-blue); color: var(--navy-blue); }
+  .modal-body { padding: 22px 26px; overflow-y: auto; }
+  .modal-footer { padding: 16px 26px; border-top: 1px solid var(--border-gray); display: flex; justify-content: flex-end; gap: 10px; }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 13px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; }
+  .field input[type="text"] {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
+    font-family: inherit; font-size: 14px; background: var(--lightest-gray); color: var(--text-dark);
+  }
+  .field input:focus { outline: none; border-color: var(--gold); background: var(--white); }
+  .upload-name-preview { margin-top: 8px; font-size: 12px; font-family: monospace; color: var(--text-muted); }
+
+  .form-error { background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; }
+  .form-error.visible { display: block; }
 </style>
 </head>
 <body data-page="photos">
@@ -202,7 +232,7 @@
           <div class="subtitle">Church photos available for newsletters, social media, flyers, and other church uses</div>
         </div>
         <button class="btn btn-gold" id="upload-btn">+ Upload Photo</button>
-        <input type="file" accept="image/*" id="upload-input" style="display:none;">
+        <input type="file" accept="image/jpeg" id="upload-input" style="display:none;">
       </div>
       <div class="content" id="page-body">
         <div class="alpha-banner">
@@ -213,6 +243,20 @@
         </div>
         <div class="photo-grid" id="photo-grid"></div>
       </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="modal-title">Name This Photo</div>
+          <div class="modal-subtitle" id="modal-subtitle"></div>
+        </div>
+        <button type="button" class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
     </div>
   </div>
 
@@ -240,6 +284,12 @@
 
     function isExternal(storagePath) {
       return typeof storagePath === 'string' && storagePath.startsWith('external:');
+    }
+
+    // "Church Crew!" -> "church-crew" — matches the plain, readable naming already used by
+    // the 5 seed photos (no timestamp prefixes, no spaces/punctuation in a public URL).
+    function slugify(str) {
+      return (str || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
     }
 
     async function seedIfEmpty() {
@@ -301,22 +351,79 @@
           </div>`).join('');
     }
 
-    async function handleFile(file) {
-      if (!file || !file.type.startsWith('image/')) return;
-      const path = `${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabaseClient.storage.from('photos').upload(path, file);
+    async function handleFile(file, finalName) {
+      const { error: uploadError } = await supabaseClient.storage.from('photos').upload(finalName, file);
       if (uploadError) {
         alert('Could not upload photo: ' + uploadError.message);
         return;
       }
-      const { error: insertError } = await supabaseClient.from('photos').insert({ filename: file.name, storage_path: path });
+      const { error: insertError } = await supabaseClient.from('photos').insert({ filename: finalName, storage_path: finalName });
       if (insertError) {
         alert('Could not save photo record: ' + insertError.message);
         return;
       }
-      logActivity('photo_add', file.name);
+      logActivity('photo_add', finalName);
       await loadPhotos();
       renderPhotos();
+    }
+
+    function closeModal() { document.getElementById('modal-backdrop').classList.remove('open'); }
+    function setModalFooter(buttons) {
+      const footer = document.getElementById('modal-footer');
+      footer.innerHTML = '';
+      buttons.forEach(b => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = b.className;
+        btn.textContent = b.label;
+        btn.addEventListener('click', b.onClick);
+        footer.appendChild(btn);
+      });
+    }
+
+    // Asks for a friendly display name before the actual upload — "Church Crew" becomes both
+    // the Storage filename and the DB filename column ("church-crew.jpg"), matching the plain
+    // readable naming the 5 seed photos already use.
+    function openUploadModal(file) {
+      document.getElementById('modal-title').textContent = 'Name This Photo';
+      document.getElementById('modal-subtitle').textContent = 'Used for the file name and the link you copy';
+      const baseName = file.name.replace(/\.[^.]+$/, '');
+      document.getElementById('modal-body').innerHTML = `
+        <div class="form-error" id="upload-error"></div>
+        <div class="field">
+          <label for="upload-name">Photo Name<span class="required-mark">*</span></label>
+          <input type="text" id="upload-name" placeholder="Church Crew" value="${escapeHtml(baseName)}">
+          <div class="upload-name-preview" id="upload-name-preview"></div>
+        </div>`;
+      const nameInput = document.getElementById('upload-name');
+      const preview = document.getElementById('upload-name-preview');
+      const updatePreview = () => { preview.textContent = (slugify(nameInput.value) || '—') + '.jpg'; };
+      nameInput.addEventListener('input', updatePreview);
+      updatePreview();
+
+      setModalFooter([
+        { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+        { label: 'Upload', className: 'btn btn-gold', onClick: async () => {
+            const slug = slugify(nameInput.value);
+            const errorEl = document.getElementById('upload-error');
+            if (!slug) {
+              errorEl.textContent = 'Please enter a name.';
+              errorEl.classList.add('visible');
+              return;
+            }
+            const finalName = slug + '.jpg';
+            if (photos.some(p => p.filename.toLowerCase() === finalName.toLowerCase())) {
+              errorEl.textContent = `A photo named "${finalName}" already exists — pick a different name.`;
+              errorEl.classList.add('visible');
+              return;
+            }
+            closeModal();
+            await handleFile(file, finalName);
+          } }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+      nameInput.focus();
+      nameInput.select();
     }
 
     const dataPromise = loadPhotos();
@@ -328,7 +435,20 @@
 
       const fileInput = document.getElementById('upload-input');
       document.getElementById('upload-btn').addEventListener('click', () => fileInput.click());
-      fileInput.addEventListener('change', async (e) => { await handleFile(e.target.files[0]); fileInput.value = ''; });
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        fileInput.value = '';
+        if (!file) return;
+        if (file.type !== 'image/jpeg') {
+          alert('Please choose a JPG photo — other file types aren\'t supported here yet (JPG keeps these consistent with email clients like Outlook).');
+          return;
+        }
+        openUploadModal(file);
+      });
+      document.getElementById('modal-close').addEventListener('click', closeModal);
+      document.getElementById('modal-backdrop').addEventListener('click', (e) => {
+        if (e.target.id === 'modal-backdrop') closeModal();
+      });
 
       document.getElementById('photo-grid').addEventListener('click', async (e) => {
         if (e.target.closest('#upload-tile-btn')) { fileInput.click(); return; }
