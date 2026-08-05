@@ -1,6 +1,15 @@
 # Christ Church Bluffton — TODO
 
-## STATUS (2026-07-27): ON STANDBY TO GO LIVE. Code/backend is fully confirmed launch-ready — client will trigger the actual domain cutover on their own timing. See "Go-Live / Domain Cutover" below for the exact checklist for that moment.
+## STATUS (2026-08-03): LIVE, no open blockers. Commits `245a8b3` + `2b83e0d` pushed to both `origin` and `production`.
+
+## 2026-08-03 — Notification emails, contact routing, volunteer image page
+- [x] Contact/Prayer/Newsletter notification emails now send styled HTML (navy/gold, matches site) instead of plain text — plain-text fallback kept for non-HTML email clients
+- [x] Sender display name is now per-form (`Contact Form Submission` / `Prayer Request` / `Newsletter Submission`) instead of one generic `Christ Church Bluffton <notifications@...>` name for all three
+- [x] Contact form routing simplified — every submission now goes to **both `info@` and `admin@christchurchbluffton.org`**, regardless of the "I'm Interested In" dropdown (an interim conditional-by-interest version was built, then replaced same-day before ever going live, per Kevin's follow-up decision)
+- [x] Built an unlisted, non-indexed image page at `christchurchbluffton.org/a34317d8` for a volunteer's HTML flyer emails — see [[christ-church-bluffton-notes]] memory for full detail (robots.txt disallow + noindex meta, 4 flyer images standardized to 1200px/JPG for email compatibility, easy to add/remove images later)
+- [x] GSC "Blocked by robots.txt" / "Indexed, though blocked by robots.txt" legacy warnings (line below, previously open) — clicked Validate Fix on both in GSC during this session; confirmed these are stale pre-launch crawl data (current live robots.txt is fully open), not a real bug. Validation in progress as of 8/3, should clear within ~2 weeks — check back mid-to-late August.
+
+## STATUS (2026-07-27, historical): ON STANDBY TO GO LIVE. Code/backend is fully confirmed launch-ready — client will trigger the actual domain cutover on their own timing. See "Go-Live / Domain Cutover" below for the exact checklist for that moment.
 
 ## Post-Launch Site/GA4/GSC Audit (2026-08-01, second full pass after go-live)
 - [x] Live Lighthouse re-run against production (not local dev server): Performance 93, Accessibility 100, Best Practices 96, SEO 100. Core Web Vitals all "good" except CLS at 0.129 (borderline, minor, not urgent). One console error (Turnstile code 600010) only appears under Lighthouse's own headless/automated browser — real-browser tests today got clean 773-char tokens, not a real user-facing issue.
@@ -9,7 +18,7 @@
 - [x] GA4 data caveat noted: current 28-day numbers mix real launch traffic with weeks of internal dev/testing traffic on the same property (100% "(direct)/(none)" source, Ashburn VA in top cities = automation signature). Filter any real reporting to 8/1/26 onward.
 - [x] GSC sitemap confirmed "Success" status, 9 discovered pages (matches real page count exactly). Homepage individually confirmed indexed via URL Inspection.
 - [x] GSC's aggregate Pages/Indexing chart and Core Web Vitals report both show stale/no data — expected lag, not a real issue, will catch up over the next 1-2 weeks as Google recrawls.
-- [ ] **Legacy GSC warning to validate**: "Indexed, though blocked by robots.txt" (2 affected pages, first detected 4/11/26, all affected dates before the 8/1/26 launch) — this is the old pre-launch robots.txt `Disallow: /` issue, already fixed. Kevin clicking "Validate Fix" in GSC to clear it.
+- [x] **Legacy GSC warning validated**: "Indexed, though blocked by robots.txt" + "Blocked by robots.txt" (both pre-launch robots.txt `Disallow: /` issue, already fixed) — Validate Fix clicked on both 2026-08-03, see 2026-08-03 section above.
 
 ## Pre-Launch Punch List (2026-07-31) — working one at a time before tomorrow's push
 Blocking:
