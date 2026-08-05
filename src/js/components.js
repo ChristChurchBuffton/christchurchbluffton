@@ -176,6 +176,16 @@
             fab.setAttribute('aria-expanded', 'false');
             document.removeEventListener('keydown', prayerKeydown);
             fab.focus();
+
+            // Reset back to a fresh fillable form for next time — without this, the success
+            // confirmation stayed showing indefinitely (even across close/reopen) until a full
+            // page reload, so a visitor couldn't submit a second prayer in the same visit.
+            document.getElementById('prayerSuccess').classList.remove('active');
+            document.getElementById('prayerFormBody').style.display = '';
+            form.reset();
+            var btn = form.querySelector('.prayer-submit-btn');
+            btn.textContent = 'Submit Prayer';
+            btn.disabled = false;
         }
 
         fab.addEventListener('click', openPrayer);
@@ -211,6 +221,8 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: form.querySelector('[name="name"]').value || 'Anonymous',
+                    email: form.querySelector('[name="email"]').value,
+                    phone: form.querySelector('[name="phone"]').value,
                     prayer: form.querySelector('[name="prayer"]').value,
                     website_url_confirm: hp ? hp.value : '',
                     turnstileToken: token

@@ -99,8 +99,8 @@ exports.handler = async (event) => {
     }
 
     // Add to the admin panel's Subscribers list (Supabase) — best-effort like the Breeze
-    // block above. This form only ever collects an email, no name, so first/last name are
-    // left blank (the columns are NOT NULL, so empty strings rather than null).
+    // block above. This form only ever collects an email, no name — "Unknown" is a visible
+    // placeholder staff can edit later, rather than a blank name column.
     if (process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
       try {
         const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/subscribers`, {
@@ -111,7 +111,7 @@ exports.handler = async (event) => {
             'Content-Type': 'application/json',
             'Prefer': 'return=minimal'
           },
-          body: JSON.stringify({ first_name: '', last_name: '', email, source: 'newsletter' }),
+          body: JSON.stringify({ first_name: 'Unknown', last_name: '', email, source: 'newsletter' }),
           signal: AbortSignal.timeout(10000)
         });
         if (!res.ok) console.error('[Stay Updated] Supabase insert failed:', res.status, await res.text());

@@ -65,7 +65,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { fullName, email, phone, interest, message, website_url_confirm, turnstileToken } = JSON.parse(event.body);
+    const { fullName, email, phone, interest, message, prayerContact, website_url_confirm, turnstileToken } = JSON.parse(event.body);
 
     // Honeypot — bots fill this hidden field, real users don't
     if (website_url_confirm) {
@@ -123,6 +123,35 @@ exports.handler = async (event) => {
       } catch (supabaseErr) {
         console.error('[Contact] Supabase error:', supabaseErr.message);
       }
+
+      // "Prayer Request" + the follow-up checkbox also adds a real row to the admin panel's
+      // Prayer Requests log — in addition to the Subscribers row above, not instead of it.
+      if (interest === 'prayer' && prayerContact) {
+        try {
+          const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/prayer_requests`, {
+            method: 'POST',
+            headers: {
+              'apikey': process.env.SUPABASE_SECRET_KEY,
+              'Authorization': `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+              is_anonymous: false,
+              requester_name: fullName,
+              email,
+              phone: phone || null,
+              request_text: message || 'Submitted via the contact form — no details given, please follow up.',
+              status: 'active',
+              submitted_at: new Date().toISOString().slice(0, 10)
+            }),
+            signal: AbortSignal.timeout(10000)
+          });
+          if (!res.ok) console.error('[Contact] Prayer request insert failed:', res.status, await res.text());
+        } catch (supabaseErr) {
+          console.error('[Contact] Prayer request insert error:', supabaseErr.message);
+        }
+      }
     }
 
     // Send email notification via Resend
@@ -142,6 +171,7 @@ exports.handler = async (event) => {
         fieldRow('Email', `<a href="mailto:${email}" style="color:#303b6a;">${email}</a>`),
         fieldRow('Phone', phone || '(none)'),
         fieldRow('Interested In', interestLabels[interest] || interest),
+        interest === 'prayer' ? fieldRow('Wants Follow-Up', prayerContact ? 'Yes — please reach out' : 'No') : '',
         fieldRow('Message', (message || '(none)').replace(/\n/g, '<br>'))
       ].join('');
 

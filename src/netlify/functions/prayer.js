@@ -49,7 +49,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { name, prayer, website_url_confirm, turnstileToken } = JSON.parse(event.body);
+    const { name, email, phone, prayer, website_url_confirm, turnstileToken } = JSON.parse(event.body);
 
     // Honeypot — bots fill this hidden field, real users don't
     if (website_url_confirm) {
@@ -69,8 +69,7 @@ exports.handler = async (event) => {
 
     // Add to the admin panel's Prayer Requests log (Supabase) — best-effort, mirrors the
     // Breeze block pattern elsewhere: a failure here shouldn't block the email below or the
-    // pastoral "always succeed" response. This form only ever collects name + prayer text,
-    // no email/phone.
+    // pastoral "always succeed" response. Name, email, and phone are all optional on this form.
     if (process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
       try {
         const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/prayer_requests`, {
@@ -84,6 +83,8 @@ exports.handler = async (event) => {
           body: JSON.stringify({
             is_anonymous: !name,
             requester_name: name || null,
+            email: email || null,
+            phone: phone || null,
             request_text: prayer,
             status: 'active',
             submitted_at: new Date().toISOString().slice(0, 10)
@@ -105,9 +106,11 @@ exports.handler = async (event) => {
           from: process.env.EMAIL_FROM || 'Prayer Request <notifications@christchurchbluffton.org>',
           to: ['admin@christchurchbluffton.org', 'jonathan@christchurchbluffton.org'],
           subject: `New Prayer Request — ${name || 'Anonymous'}`,
-          text: `New prayer request:\n\nName: ${name || 'Anonymous'}\nPrayer: ${prayer}`,
+          text: `New prayer request:\n\nName: ${name || 'Anonymous'}${email ? `\nEmail: ${email}` : ''}${phone ? `\nPhone: ${phone}` : ''}\nPrayer: ${prayer}`,
           html: emailShell('Prayer Request', [
             fieldRow('Name', name || 'Anonymous'),
+            email ? fieldRow('Email', `<a href="mailto:${email}" style="color:#303b6a;">${email}</a>`) : '',
+            phone ? fieldRow('Phone', phone) : '',
             fieldRow('Prayer', prayer.replace(/\n/g, '<br>'))
           ].join(''))
         }),
