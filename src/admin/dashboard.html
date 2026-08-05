@@ -37,6 +37,13 @@
   .activity-list li:last-child { border-bottom: none; }
   .activity-list .activity-when { color: var(--text-muted); white-space: nowrap; }
   .activity-empty { padding: 18px 22px; font-size: 13px; color: var(--text-muted); }
+  .activity-more { padding: 14px 22px; text-align: center; border-top: 1px solid var(--border-gray); }
+  .activity-more-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 13px; font-weight: 600; color: var(--navy-blue);
+    padding: 6px 14px; border-radius: 6px;
+  }
+  .activity-more-btn:hover { background: rgba(195,163,85,0.12); }
 </style>
 </head>
 <body data-page="dashboard">
@@ -144,6 +151,9 @@
           </div>
           <div class="card-body">
             <ul class="activity-list" id="activity-list"></ul>
+            <div class="activity-more" id="activity-more" style="display:none;">
+              <button type="button" class="activity-more-btn" id="activity-more-btn">Load 10 more</button>
+            </div>
           </div>
         </div>
       </div>
@@ -239,11 +249,24 @@
         </a>`;
     }
 
+    // Starts at the 12 most recent entries; each "Load 10 more" click reveals 10 older
+    // ones from the same already-fetched log (no extra round-trip per click).
+    let activityLog = [];
+    let activityShown = 0;
+
     function renderActivity(log) {
+      activityLog = log;
+      activityShown = Math.min(12, log.length);
+      renderActivityList();
+    }
+
+    function renderActivityList() {
       const list = document.getElementById('activity-list');
-      const recent = log.slice(-8).reverse();
+      const more = document.getElementById('activity-more');
+      const recent = activityLog.slice(-activityShown).reverse();
       if (recent.length === 0) {
         list.innerHTML = `<li class="activity-empty">No activity logged yet.</li>`;
+        more.style.display = 'none';
         return;
       }
       list.innerHTML = recent.map(e => `
@@ -251,7 +274,13 @@
           <span>${escapeHtml(ACTIVITY_LABELS[e.action] || e.action)}${e.target ? ' — ' + escapeHtml(e.target) : ''} <span style="color:var(--text-muted);">(${escapeHtml(e.actor)})</span></span>
           <span class="activity-when">${escapeHtml(new Date(e.t).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}</span>
         </li>`).join('');
+      more.style.display = activityShown < activityLog.length ? '' : 'none';
     }
+
+    document.getElementById('activity-more-btn').addEventListener('click', () => {
+      activityShown = Math.min(activityShown + 10, activityLog.length);
+      renderActivityList();
+    });
 
     // Fired immediately, in parallel with loadSidebar()'s session check — this is the
     // landing page everyone hits after login, so it's the highest-value place to not

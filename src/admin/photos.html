@@ -19,6 +19,9 @@
     border: 1px solid var(--border-gray);
     border-radius: 12px;
     overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
   .photo-card .thumb {
     width: 100%;
@@ -26,9 +29,13 @@
     object-fit: contain;
     background: var(--lightest-gray);
     display: block;
+    flex-shrink: 0;
   }
   .photo-card .meta {
     padding: 12px 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
   .photo-card .filename {
     font-size: 12px;
@@ -40,6 +47,7 @@
   .photo-card .actions {
     display: flex;
     gap: 8px;
+    margin-top: auto;
   }
   .photo-card .actions button {
     flex: 1;
@@ -73,6 +81,8 @@
   }
   .upload-tile:hover { border-color: var(--gold); color: var(--gold-text); }
   .upload-tile .plus { font-size: 28px; margin-bottom: 6px; }
+  .upload-tile-hint { font-size: 11px; margin-top: 6px; color: var(--text-muted); }
+  .photo-card .thumb { cursor: pointer; }
   .live-url-banner {
     background: rgba(195,163,85,0.08);
     border: 1px solid var(--border-gray);
@@ -239,7 +249,7 @@
           <strong>Alpha (Testing)</strong> — all data you enter here is saved.
         </div>
         <div class="live-url-banner">
-          All images can be accessed live at <a href="https://christchurchbluffton.org/a34317d8" target="_blank">christchurchbluffton.org/a34317d8</a>
+          All images can be accessed live at <a href="https://christchurchbluffton.org/a34317d8" target="_blank">christchurchbluffton.org/a34317d8</a> — "Copy Link" copies the full, ready-to-paste URL for that photo. Click any photo to open its link directly.
         </div>
         <div class="photo-grid" id="photo-grid"></div>
       </div>
@@ -327,6 +337,13 @@
       });
     }
 
+    // The same full, ready-to-paste URL "Copy Link" copies and clicking a thumbnail opens —
+    // one source of truth so both stay in sync. External seed rows point at the real
+    // production URL; real uploads use their actual Supabase Storage public URL.
+    function photoLink(p) {
+      return p.external ? (LIVE_BASE_URL + p.filename) : p.src;
+    }
+
     // Pure render from whatever's already in `photos` — callers load fresh data first
     // (await loadPhotos(); renderPhotos();). Kept separate so the very first page load
     // can fire loadPhotos() early, in parallel with loadSidebar()'s session check,
@@ -338,9 +355,12 @@
         <button type="button" class="upload-tile" id="upload-tile-btn">
           <div class="plus">+</div>
           Click to upload a photo
+          <div class="upload-tile-hint">JPG only</div>
         </button>` + sorted.map(p => `
           <div class="photo-card">
-            <img class="thumb" src="${escapeHtml(p.src)}" alt="${escapeHtml(p.filename)}">
+            <a href="${escapeHtml(photoLink(p))}" target="_blank" rel="noopener">
+              <img class="thumb" src="${escapeHtml(p.src)}" alt="${escapeHtml(p.filename)}">
+            </a>
             <div class="meta">
               <div class="filename">${escapeHtml(p.filename)}</div>
               <div class="actions">
@@ -457,10 +477,7 @@
         if (copyBtn) {
           const p = photos.find(x => x.id === copyBtn.dataset.id);
           if (!p) return;
-          // External seed rows: keep copying the real production URL. Real uploads: p.src is
-          // already the real Supabase Storage public URL (same one used for the thumbnail).
-          const linkToCopy = p.external ? (LIVE_BASE_URL + p.filename) : p.src;
-          navigator.clipboard.writeText(linkToCopy).then(() => {
+          navigator.clipboard.writeText(photoLink(p)).then(() => {
             copyBtn.textContent = 'Copied!';
             copyBtn.classList.add('copied');
             setTimeout(() => { copyBtn.textContent = 'Copy Link'; copyBtn.classList.remove('copied'); }, 1500);
