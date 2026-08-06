@@ -503,65 +503,14 @@
       document.getElementById('modal-backdrop').classList.add('open');
     }
 
-// Matches the navy/gold shell used by the site's own transactional emails
-    // (see emailShell()/fieldRow() in netlify/functions/contact.js etc.) — kept as a
-    // literal copy here since this is browser code with no shared module system.
-    function buildInviteEmailHtml(name, email, actionLink, inviterEmail) {
-      const fieldRow = (label, value) => `
-        <tr><td style="padding:0 0 14px;">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-            <tr><td style="background-color:#F5F4EF; border-left:4px solid #c3a355; border-radius:6px; padding:12px 16px;">
-              <div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#7F6D34;">${label}</div>
-              <div style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; margin-top:3px; line-height:1.5;">${value}</div>
-            </td></tr>
-          </table>
-        </td></tr>`;
-      return `<!DOCTYPE html>
-<html>
-<body style="margin:0; padding:0; background-color:#F5F4EF;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F5F4EF; padding:32px 16px;">
-    <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; background-color:#FFFFFF; border-radius:12px; overflow:hidden;">
-        <tr><td style="background-color:#303b6a; padding:28px 32px 22px;">
-          <div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#A9B3D6;">Christ Church Bluffton</div>
-          <div style="font-family:Georgia,'Times New Roman',serif; font-size:24px; color:#FFFFFF; margin-top:8px;">You're Invited to the Admin Panel</div>
-        </td></tr>
-        <tr><td style="padding:28px 32px;">
-          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">Hi ${escapeHtml(name)},</p>
-          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">You've been given access to the Christ Church Bluffton admin panel — the tool we use to manage prayer requests, newsletter signups, events, and photos for the website. Click below to accept your invite and set your own password — you'll be signed in automatically.</p>
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${fieldRow('Email', escapeHtml(email))}</table>
-          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px auto 8px;">
-            <tr><td style="background-color:#303b6a; border-radius:8px;">
-              <a href="${actionLink}" style="display:inline-block; padding:14px 32px; font-family:Arial,Helvetica,sans-serif; font-size:15px; font-weight:bold; color:#FFFFFF; text-decoration:none;">Accept Invite &amp; Set Password</a>
-            </td></tr>
-          </table>
-          <p style="font-family:Arial,Helvetica,sans-serif; font-size:12px; color:#999999; text-align:center; margin:10px 0 0;">This link is single-use and expires after a while — if it's stopped working, send a fresh invite.</p>
-          <p style="font-family:Georgia,'Times New Roman',serif; font-size:14px; color:#666666; line-height:1.6; margin:28px 0 0; padding-top:20px; border-top:1px solid #EEEEEE;">If you have any trouble, please contact me at <a href="mailto:${escapeHtml(inviterEmail)}" style="color:#303b6a;">${escapeHtml(inviterEmail)}</a>.</p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`;
-    }
-
     function openInviteResultModal(name, email, actionLink, emailSent) {
-      const emailHtml = buildInviteEmailHtml(name, email, actionLink, session.email);
-      document.getElementById('modal-title').textContent = emailSent ? 'Invite Sent' : 'Invite Email Ready';
+      document.getElementById('modal-title').textContent = emailSent ? 'Invite Sent' : 'Invite Not Sent';
       document.getElementById('modal-subtitle').textContent = `${name} — ${email}`;
       document.getElementById('modal-body').innerHTML = `
         <p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin:0 0 16px;">${emailSent
-          ? `This account has been created and the invite email was just sent to ${escapeHtml(email)}. It contains a one-click sign-in link — a copy is below if you need it.`
-          : `This account has been created, but the invite email could not be sent automatically — copy the email below and send it to ${escapeHtml(email)} yourself.`}</p>`;
+          ? `This account has been created and the invite email was just sent to ${escapeHtml(email)}. It contains a one-click sign-in link.`
+          : `This account has been created, but the invite email could not be sent automatically. Try inviting this person again in a moment, or check the email service if it keeps failing.`}</p>`;
       setModalFooter([
-        { label: 'Copy Email HTML', className: 'btn btn-outline', onClick: () => {
-          navigator.clipboard.writeText(emailHtml);
-          showToast('Email HTML copied to clipboard.');
-        } },
-        { label: 'Preview Email', className: 'btn btn-outline', onClick: () => {
-          const blob = new Blob([emailHtml], { type: 'text/html' });
-          window.open(URL.createObjectURL(blob), '_blank');
-        } },
         { label: 'Done', className: 'btn btn-gold', onClick: closeModal }
       ]);
       document.getElementById('modal-backdrop').classList.add('open');
@@ -667,17 +616,19 @@
         <div class="form-error" id="reset-error"></div>
         <div class="field">
           <label for="reset-pw">New Password<span class="required-mark">*</span></label>
-          <input type="password" id="reset-pw" placeholder="At least 6 characters">
+          <input type="password" id="reset-pw" placeholder="At least 6 characters" autocomplete="new-password">
         </div>
         <div class="field">
           <label for="reset-pw-confirm">Confirm New Password<span class="required-mark">*</span></label>
-          <input type="password" id="reset-pw-confirm" placeholder="Repeat password">
+          <input type="password" id="reset-pw-confirm" placeholder="Repeat password" autocomplete="new-password">
         </div>`;
       setModalFooter([
         { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
         { label: 'Set Password', className: 'btn btn-gold', onClick: () => submitReset(member) }
       ]);
       document.getElementById('modal-backdrop').classList.add('open');
+      addPasswordToggle(document.getElementById('reset-pw'));
+      addPasswordToggle(document.getElementById('reset-pw-confirm'));
     }
 
     async function submitReset(member) {

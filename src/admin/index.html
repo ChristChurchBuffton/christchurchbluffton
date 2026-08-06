@@ -54,10 +54,11 @@
         </div>
         <div class="field">
           <label for="password">Password<span class="required-mark">*</span></label>
-          <input type="password" id="password" placeholder="••••••••" required>
+          <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
         </div>
         <button type="submit" class="btn-primary" id="submit-btn">Sign In</button>
         <div class="auth-footnote">Access is by invitation only. Contact an admin if you need an account.</div>
+        <div class="auth-footnote">If you have forgotten your password, please contact <a href="mailto:kevin@forgeddigitaldesign.com" style="color:var(--navy-blue);">kevin@forgeddigitaldesign.com</a>.</div>
       </form>
     </div>
   </div>
@@ -65,6 +66,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/shared.js"></script>
   <script>
+    addPasswordToggle(document.getElementById('password'));
+
     // Real accounts are seeded via the Supabase migration + server/server.js's
     // /api/team endpoint (see supabase/migrations/) — there's no more "first sign-in
     // bootstraps an admin" path, since accounts always exist before anyone logs in now.

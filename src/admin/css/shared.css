@@ -555,6 +555,19 @@ body.reading-mode.tint-green .main { background: #E1F0E1; }
 
 .table-scroll { overflow-x: auto; }
 
+/* Show/hide toggle added to every password field by addPasswordToggle() in
+   shared.js — wraps the input so the eye icon can sit inside its right edge. */
+.password-toggle-wrap { position: relative; }
+.password-toggle-wrap input { padding-right: 42px !important; box-sizing: border-box; }
+.password-toggle-btn {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; padding: 6px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted); border-radius: 6px;
+}
+.password-toggle-btn:hover { color: var(--navy-blue); background: rgba(48,59,106,0.06); }
+.password-toggle-btn svg { width: 18px; height: 18px; pointer-events: none; }
+
 /* Blocking first-login password-reset modal — injected on any page by
    showForcedPasswordResetModal() in shared.js. No close button, no
    click-outside-to-dismiss — the only ways out are completing it or logging out. */

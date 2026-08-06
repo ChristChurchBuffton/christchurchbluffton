@@ -371,6 +371,33 @@ function setupReadingModeControls(session) {
   });
 }
 
+// ---- Password show/hide toggle (every password field sitewide) ----
+const _EYE_OPEN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>';
+const _EYE_OFF_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>';
+
+// Wraps a password <input> with a show/hide eye-icon button. Safe to call more than
+// once on the same input (e.g. a modal reopened) — it no-ops if already wired.
+function addPasswordToggle(input) {
+  if (!input || input.dataset.toggleWired) return;
+  input.dataset.toggleWired = 'true';
+  const wrap = document.createElement('div');
+  wrap.className = 'password-toggle-wrap';
+  input.parentNode.insertBefore(wrap, input);
+  wrap.appendChild(input);
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'password-toggle-btn';
+  btn.setAttribute('aria-label', 'Show password');
+  btn.innerHTML = _EYE_OPEN_SVG;
+  wrap.appendChild(btn);
+  btn.addEventListener('click', () => {
+    const nowShowing = input.type === 'password';
+    input.type = nowShowing ? 'text' : 'password';
+    btn.innerHTML = nowShowing ? _EYE_OFF_SVG : _EYE_OPEN_SVG;
+    btn.setAttribute('aria-label', nowShowing ? 'Hide password' : 'Show password');
+  });
+}
+
 // ---- Forced first-login password reset ----
 // A blocking modal (not a page redirect) so there's no way to end up "on" the
 // panel without having actually set a real password — it's injected on top of
@@ -389,11 +416,11 @@ function showForcedPasswordResetModal(session) {
       <div class="forced-reset-error" id="forced-reset-error"></div>
       <div class="field">
         <label for="forced-reset-pw">New Password</label>
-        <input type="password" id="forced-reset-pw" placeholder="At least 6 characters">
+        <input type="password" id="forced-reset-pw" placeholder="At least 6 characters" autocomplete="new-password">
       </div>
       <div class="field">
         <label for="forced-reset-pw-confirm">Confirm New Password</label>
-        <input type="password" id="forced-reset-pw-confirm" placeholder="Repeat password">
+        <input type="password" id="forced-reset-pw-confirm" placeholder="Repeat password" autocomplete="new-password">
       </div>
       <div class="forced-reset-actions">
         <button type="button" class="forced-reset-logout" id="forced-reset-logout">Log out instead</button>
@@ -401,6 +428,8 @@ function showForcedPasswordResetModal(session) {
       </div>
     </div>`;
   document.body.appendChild(overlay);
+  addPasswordToggle(document.getElementById('forced-reset-pw'));
+  addPasswordToggle(document.getElementById('forced-reset-pw-confirm'));
 
   document.getElementById('forced-reset-logout').addEventListener('click', async () => {
     await signOutSession();
@@ -435,6 +464,7 @@ function showForcedPasswordResetModal(session) {
       errorBox.classList.add('visible');
       return;
     }
+    logActivity('team_reset_pw', `${session.name} (${session.email}) — self, first sign-in`);
     window.location.reload();
   });
 }

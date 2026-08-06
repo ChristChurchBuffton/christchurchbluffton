@@ -168,11 +168,11 @@
               <div class="form-msg" id="password-msg"></div>
               <div class="field">
                 <label for="new-pw">New Password<span class="required-mark">*</span></label>
-                <input type="password" id="new-pw" placeholder="At least 6 characters">
+                <input type="password" id="new-pw" placeholder="At least 6 characters" autocomplete="new-password">
               </div>
               <div class="field">
                 <label for="new-pw-confirm">Confirm New Password<span class="required-mark">*</span></label>
-                <input type="password" id="new-pw-confirm" placeholder="Repeat password">
+                <input type="password" id="new-pw-confirm" placeholder="Repeat password" autocomplete="new-password">
               </div>
             </div>
             <div class="card-foot">
@@ -277,6 +277,9 @@
       if (!res.ok) { showMsg('delete-msg', 'Could not delete your account.', 'error'); return; }
       window.location.href = 'index.html';
     });
+
+    addPasswordToggle(document.getElementById('new-pw'));
+    addPasswordToggle(document.getElementById('new-pw-confirm'));
 
     loadSidebar().then(() => {
       session = getSession();

@@ -48,11 +48,11 @@
         <div class="auth-error" id="accept-error"></div>
         <div class="field">
           <label for="accept-pw">New Password<span class="required-mark">*</span></label>
-          <input type="password" id="accept-pw" placeholder="At least 6 characters" required>
+          <input type="password" id="accept-pw" placeholder="At least 6 characters" required autocomplete="new-password">
         </div>
         <div class="field">
           <label for="accept-pw-confirm">Confirm New Password<span class="required-mark">*</span></label>
-          <input type="password" id="accept-pw-confirm" placeholder="Repeat password" required>
+          <input type="password" id="accept-pw-confirm" placeholder="Repeat password" required autocomplete="new-password">
         </div>
         <button type="submit" class="btn-primary" id="accept-submit">Set Password &amp; Continue</button>
       </form>
@@ -81,6 +81,8 @@
         return;
       }
       document.getElementById('accept-form').style.display = 'block';
+      addPasswordToggle(document.getElementById('accept-pw'));
+      addPasswordToggle(document.getElementById('accept-pw-confirm'));
 
       document.getElementById('accept-form').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -117,6 +119,7 @@
           errorBox.classList.add('visible');
           return;
         }
+        logActivity('team_reset_pw', `${session.user.email} — self, accepted invite`);
         logActivity('login', 'accepted invite', session.user.email);
         window.location.href = 'dashboard.html';
       });
