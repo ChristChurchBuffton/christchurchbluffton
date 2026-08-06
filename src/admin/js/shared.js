@@ -25,6 +25,14 @@ const PERMISSIONS = [
   { key: 'signups', label: 'Volunteers' }
 ];
 
+// Permissions Staff can never be granted, even if their permissions object somehow has
+// one of these set true (e.g. a row saved before this restriction existed) — Kevin's
+// call 2026-08-06: Newsletter, Subscribers, Content Editor, Congregants, and Events touch
+// either sensitive/pastoral data or site-wide publishing, neither of which Staff should
+// have regardless of what's toggled on their account. This is the real enforcement, on
+// top of team.html's Edit form only letting Site Admins check these boxes for Staff at all.
+const STAFF_ALLOWED_PERMISSIONS = ['photos', 'prayers', 'signups'];
+
 // ---- Session ----
 // getSession() stays SYNCHRONOUS on purpose — nearly every page's existing code calls
 // it that way. Supabase's own session check is async, so we resolve it once up front
@@ -159,6 +167,7 @@ function isSiteAdmin(session) {
 function hasPermission(session, key) {
   if (!session) return false;
   if (isSiteAdmin(session)) return true;
+  if (session.role === 'staff' && !STAFF_ALLOWED_PERMISSIONS.includes(key)) return false;
   return !!(session.permissions && session.permissions[key]);
 }
 

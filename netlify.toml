@@ -24,6 +24,19 @@
   to = "/.netlify/functions/stay-updated"
   status = 200
 
+# The bare folder path (no photo filename) has nothing to show — send it to the
+# normal 404 page instead of letting the proxy rule below hit Supabase with an empty
+# path. Must come before the wildcard rule; Netlify uses the first matching redirect.
+[[redirects]]
+  from = "/a34317d8"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/a34317d8/"
+  to = "/404.html"
+  status = 404
+
 # Photos uploaded through the admin panel live in Supabase Storage, not in this git repo —
 # this makes them resolve at the same christchurchbluffton.org/a34317d8/ URL as the images
 # that ARE real files here. Netlify checks for a real static file at the exact path first;

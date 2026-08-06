@@ -169,6 +169,9 @@
   .perm-checklist { display: flex; flex-direction: column; gap: 10px; }
   .perm-checklist label { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: normal; color: var(--text-dark); cursor: pointer; }
   .perm-checklist input { width: 16px; height: 16px; accent-color: var(--gold-text); }
+  .perm-checklist label.perm-locked { color: var(--text-muted); cursor: not-allowed; }
+  .perm-checklist label.perm-locked input { cursor: not-allowed; }
+  .perm-locked-note { font-size: 11px; font-style: italic; }
   .admin-perm-note { font-size: 12px; color: var(--text-muted); font-style: italic; }
   .form-error { background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; }
   .form-error.visible { display: block; }
@@ -434,15 +437,20 @@
 
     function permFieldsHtml(idPrefix, role, permissions) {
       const isSA = role === 'site_admin';
+      const isStaff = role === 'staff';
       return `
         <div class="field" id="${idPrefix}-perm-wrap" style="${isSA ? 'display:none;' : ''}">
           <label>Permissions</label>
           <div class="perm-checklist">
-            ${PERMISSIONS.map(p => `
-              <label>
-                <input type="checkbox" id="${idPrefix}-perm-${p.key}" ${permissions && permissions[p.key] ? 'checked' : ''}>
-                ${p.label}
-              </label>`).join('')}
+            ${PERMISSIONS.map(p => {
+              const locked = isStaff && !STAFF_ALLOWED_PERMISSIONS.includes(p.key);
+              const checked = permissions && permissions[p.key] && !locked;
+              return `
+              <label class="${locked ? 'perm-locked' : ''}">
+                <input type="checkbox" id="${idPrefix}-perm-${p.key}" ${checked ? 'checked' : ''} ${locked ? 'disabled' : ''}>
+                ${p.label}${locked ? ' <span class="perm-locked-note">(not available to Staff)</span>' : ''}
+              </label>`;
+            }).join('')}
           </div>
         </div>
         <div class="admin-perm-note" id="${idPrefix}-admin-note" style="${isSA ? '' : 'display:none;'}">Site Admins automatically have access to everything, including Accounts.</div>`;
@@ -458,11 +466,18 @@
           const isSA = newRole === 'site_admin';
           document.getElementById(`${idPrefix}-perm-wrap`).style.display = isSA ? 'none' : '';
           document.getElementById(`${idPrefix}-admin-note`).style.display = isSA ? '' : 'none';
-          // Switching to Admin defaults to full access (matching today's behavior) —
-          // still individually editable from there, same checklist Staff already uses.
-          if (newRole === 'admin') {
-            PERMISSIONS.forEach(p => { document.getElementById(`${idPrefix}-perm-${p.key}`).checked = true; });
-          }
+          // Switching to Admin defaults to full access (matching today's behavior) — still
+          // individually editable from there. Switching to Staff locks (and force-unchecks)
+          // the permissions Staff can never have, regardless of what was checked before.
+          PERMISSIONS.forEach(p => {
+            const cb = document.getElementById(`${idPrefix}-perm-${p.key}`);
+            const label = cb.closest('label');
+            const locked = newRole === 'staff' && !STAFF_ALLOWED_PERMISSIONS.includes(p.key);
+            cb.disabled = locked;
+            label.classList.toggle('perm-locked', locked);
+            if (locked) cb.checked = false;
+            else if (newRole === 'admin') cb.checked = true;
+          });
         });
       });
     }

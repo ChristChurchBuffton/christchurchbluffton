@@ -369,6 +369,9 @@
             gap: 80px;
             align-items: center;
         }
+        .pastor-grid.reverse { grid-template-columns: 1.2fr 1fr; }
+        .pastor-grid.reverse .pastor-image { order: 2; }
+        .pastor-grid.reverse .pastor-content { order: 1; }
         .image-frame {
             position: relative;
             padding: 20px;
@@ -514,9 +517,14 @@
         @media (max-width: 1023px) {
             .section { padding: 80px 0; }
             .about-grid,
-            .pastor-grid {
+            .pastor-grid,
+            .pastor-grid.reverse {
                 grid-template-columns: 1fr;
                 gap: 40px;
+            }
+            .pastor-grid.reverse .pastor-image,
+            .pastor-grid.reverse .pastor-content {
+                order: initial;
             }
             .pastor-placeholder { min-height: 400px; max-width: 400px; margin: 0 auto; }
             .pastor-placeholder img { min-height: 400px; }
@@ -751,6 +759,44 @@
                         </div>
                         <div class="pastor-quote animate">
                             <p>&ldquo;We are planting Christ Church Bluffton because we believe God is calling us to bring the beauty of historic worship and the power of the Gospel to this growing community. Come and see what God is doing.&rdquo;</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider" style="padding: 40px 0;">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <!-- Worship Pastor Section -->
+        <section id="worship-pastor" class="section">
+            <div class="container">
+                <div class="pastor-grid reverse">
+                    <div class="pastor-image animate">
+                        <div class="image-frame">
+                            <div class="pastor-placeholder">
+                                <img src="images/chestnut-headshot.webp" alt="Rev. Dr. Bradley Chestnut, Pastor of Worship and Ministry Development at Christ Church Bluffton" width="1145" height="1126" loading="lazy">
+                            </div>
+                            <div class="frame-accent top-left"></div>
+                            <div class="frame-accent bottom-right"></div>
+                        </div>
+                    </div>
+                    <div class="pastor-content">
+                        <span class="section-label animate">Meet Our Worship Pastor</span>
+                        <h2 class="section-title left-align animate">Rev. Dr. Bradley Chestnut</h2>
+                        <span class="pastor-role animate">Pastor of Worship &amp; Ministry Development</span>
+                        <p class="pastor-bio animate">The Rev. Dr. Bradley Chestnut serves Christ Church as Pastor of Worship and Ministry Development. Together with his wife, Caitlin, and their children, Liam and Raelyn, he is grateful to call Bluffton home and to raise his family within the faithful community of Christ Church.</p>
+                        <p class="pastor-bio animate">For nearly two decades, Bradley has served the Church through worship leadership, pastoral ministry, and the formation of Christian leaders. Holding both a Ph.D. in Psychology and a Doctor of Ministry, he seeks to unite thoughtful theological reflection with faithful pastoral practice. His ministry has also been shaped by service as a clinical psychologist, hospital chaplain, and member of hospital ethics and review boards in North Carolina, where he cultivated pastoral wisdom in addressing questions of suffering, conscience, and human dignity.</p>
+                        <p class="pastor-bio animate">Bradley&rsquo;s desire is to partner with ministry leaders to help the vision of Christ Church find faithful expression through strategic leadership, thoughtful planning, and Christ-centered worship. His desire is to equip leaders, strengthen the ministries of the church, and foster a culture in which the Gospel shapes every aspect of congregational life.</p>
+                        <p class="pastor-bio animate">When he&rsquo;s not in a meeting or leading worship, you&rsquo;ll likely find Bradley with a book in one hand and a cup of coffee in the other&mdash;or happily serving as a jungle gym for Liam and Raelyn.</p>
+                        <div class="pastor-contact animate">
+                            <a href="mailto:bradley@christchurchbluffton.org" class="contact-link">
+                                <span class="link-icon">&#9993;</span>
+                                bradley@christchurchbluffton.org
+                            </a>
                         </div>
                     </div>
                 </div>
