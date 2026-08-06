@@ -704,14 +704,15 @@
         errorBox.classList.add('visible');
         return;
       }
-      const res = await backendFetch(`/api/team/${member.id}/reset-password`, {
+      const token = await getAccessToken();
+      const res = await fetch('/.netlify/functions/admin-team', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: pw })
+        headers: { 'Content-Type': 'application/json', Authorization: token ? `Bearer ${token}` : '' },
+        body: JSON.stringify({ action: 'reset-password', id: member.id, password: pw })
       });
       const data = await res.json();
       if (!res.ok) {
-        errorBox.textContent = data.error || 'Could not set password — the local backend server may not be running.';
+        errorBox.textContent = data.error || 'Could not set password.';
         errorBox.classList.add('visible');
         return;
       }
@@ -736,9 +737,15 @@
     }
 
     async function submitRemove(member) {
-      const res = await backendFetch(`/api/team/${member.id}`, { method: 'DELETE' });
+      const token = await getAccessToken();
+      const res = await fetch('/.netlify/functions/admin-team', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: token ? `Bearer ${token}` : '' },
+        body: JSON.stringify({ action: 'remove', id: member.id })
+      });
       if (!res.ok) {
-        showToast('Could not remove this account — the local backend server may not be running.');
+        const data = await res.json().catch(() => ({}));
+        showToast(data.error || 'Could not remove this account.');
         return;
       }
       logActivity('team_remove', `${member.name} (${member.email})`);

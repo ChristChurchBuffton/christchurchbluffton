@@ -268,8 +268,13 @@
       document.getElementById('modal-backdrop').classList.remove('open');
     });
     document.getElementById('modal-confirm').addEventListener('click', async () => {
-      const res = await backendFetch(`/api/team/${session.id}`, { method: 'DELETE' });
-      if (!res.ok) { showMsg('delete-msg', 'Could not delete your account — the local backend server may not be running.', 'error'); return; }
+      const token = await getAccessToken();
+      const res = await fetch('/.netlify/functions/admin-team', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: token ? `Bearer ${token}` : '' },
+        body: JSON.stringify({ action: 'remove', id: session.id })
+      });
+      if (!res.ok) { showMsg('delete-msg', 'Could not delete your account.', 'error'); return; }
       window.location.href = 'index.html';
     });
 
