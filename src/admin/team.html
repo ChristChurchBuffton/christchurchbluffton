@@ -549,12 +549,14 @@
 </html>`;
     }
 
-    function openInviteResultModal(name, email, tempPassword) {
+    function openInviteResultModal(name, email, tempPassword, emailSent) {
       const emailHtml = buildInviteEmailHtml(name, email, tempPassword, session.email);
-      document.getElementById('modal-title').textContent = 'Invite Email Ready';
+      document.getElementById('modal-title').textContent = emailSent ? 'Invite Sent' : 'Invite Email Ready';
       document.getElementById('modal-subtitle').textContent = `${name} — ${email}`;
       document.getElementById('modal-body').innerHTML = `
-        <p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin:0 0 16px;">This account has been created. Nothing has been sent yet — preview the email below, then copy it into your email client and send it to ${escapeHtml(email)} yourself.</p>
+        <p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin:0 0 16px;">${emailSent
+          ? `This account has been created and the invite email was just sent to ${escapeHtml(email)}. A copy is below if you need it.`
+          : `This account has been created, but the invite email could not be sent automatically — copy it below and send it to ${escapeHtml(email)} yourself.`}</p>
         <div class="field">
           <label>Temporary Password</label>
           <input type="text" id="invite-result-pw" value="${escapeHtml(tempPassword)}" readonly>
@@ -607,7 +609,7 @@
 
       logActivity('team_invite', `${name} (${email}) — ${role}`);
       await renderTeam();
-      openInviteResultModal(name, email, data.tempPassword);
+      openInviteResultModal(name, email, data.tempPassword, data.emailSent);
     }
 
     function openEditModal(member) {

@@ -21,6 +21,55 @@ function randomTempPassword() {
   return pw;
 }
 
+function fieldRow(label, valueHtml) {
+  return `
+    <tr><td style="padding:0 0 14px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="background-color:#F5F4EF; border-left:4px solid #c3a355; border-radius:6px; padding:12px 16px;">
+          <div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#7F6D34;">${label}</div>
+          <div style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; margin-top:3px; line-height:1.5;">${valueHtml}</div>
+        </td></tr>
+      </table>
+    </td></tr>`;
+}
+
+// Same navy/gold shell as team.html's buildInviteEmailHtml() and the site's other
+// transactional emails (contact.js etc.) — kept as a literal copy since this is a
+// separate serverless function with no shared module system.
+function buildInviteEmailHtml(name, email, tempPassword, inviterEmail) {
+  return `<!DOCTYPE html>
+<html>
+<body style="margin:0; padding:0; background-color:#F5F4EF;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F5F4EF; padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; background-color:#FFFFFF; border-radius:12px; overflow:hidden;">
+        <tr><td style="background-color:#303b6a; padding:28px 32px 22px;">
+          <div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#A9B3D6;">Christ Church Bluffton</div>
+          <div style="font-family:Georgia,'Times New Roman',serif; font-size:24px; color:#FFFFFF; margin-top:8px;">You're Invited to the Admin Panel</div>
+        </td></tr>
+        <tr><td style="padding:28px 32px;">
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">Hi ${name},</p>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">You've been given access to the Christ Church Bluffton admin panel — the tool used to manage prayer requests, newsletter signups, events, and photos for the website. Here's what you need to sign in for the first time:</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            ${fieldRow('Email', email)}
+            ${fieldRow('Temporary Password', tempPassword)}
+          </table>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:6px 0 24px;">Sign in with the email and temporary password above, and you'll be asked to create your own password right away — after that, the temporary one won't be needed.</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 8px;">
+            <tr><td style="background-color:#303b6a; border-radius:8px;">
+              <a href="https://christchurchbluffton.org/admin" style="display:inline-block; padding:14px 32px; font-family:Arial,Helvetica,sans-serif; font-size:15px; font-weight:bold; color:#FFFFFF; text-decoration:none;">Sign In to the Admin Panel</a>
+            </td></tr>
+          </table>
+          <p style="font-family:Arial,Helvetica,sans-serif; font-size:12px; color:#999999; text-align:center; margin:10px 0 0;">Or go to christchurchbluffton.org/admin directly</p>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:14px; color:#666666; line-height:1.6; margin:28px 0 0; padding-top:20px; border-top:1px solid #EEEEEE;">If you have any trouble, please contact me at <a href="mailto:${inviterEmail}" style="color:#303b6a;">${inviterEmail}</a>.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
@@ -90,7 +139,31 @@ exports.handler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: errText || 'Could not create that account.' }) };
     }
 
-    return { statusCode: 200, body: JSON.stringify({ id: created.id, tempPassword }) };
+    // Actually send the invite — best-effort. The account is already real at this
+    // point regardless of whether this succeeds, so a Resend hiccup never blocks
+    // account creation; the client just gets told whether the email went out.
+    let emailSent = false;
+    if (process.env.RESEND_API_KEY) {
+      try {
+        const emailRes = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: process.env.EMAIL_FROM || 'Christ Church Bluffton <notifications@christchurchbluffton.org>',
+            to: [email],
+            subject: "You're Invited to the Christ Church Bluffton Admin Panel",
+            html: buildInviteEmailHtml(name, email, tempPassword, me.email)
+          }),
+          signal: AbortSignal.timeout(10000)
+        });
+        emailSent = emailRes.ok;
+        if (!emailRes.ok) console.error('[AdminInvite] Resend failed:', emailRes.status, await emailRes.text());
+      } catch (emailErr) {
+        console.error('[AdminInvite] Resend error:', emailErr.message);
+      }
+    }
+
+    return { statusCode: 200, body: JSON.stringify({ id: created.id, tempPassword, emailSent }) };
   } catch (err) {
     console.error('[AdminInvite] Error:', err.message);
     return { statusCode: 500, body: JSON.stringify({ error: 'Something went wrong.' }) };
