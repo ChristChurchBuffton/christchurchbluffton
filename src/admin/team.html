@@ -506,7 +506,7 @@
 // Matches the navy/gold shell used by the site's own transactional emails
     // (see emailShell()/fieldRow() in netlify/functions/contact.js etc.) — kept as a
     // literal copy here since this is browser code with no shared module system.
-    function buildInviteEmailHtml(name, email, tempPassword, inviterEmail) {
+    function buildInviteEmailHtml(name, email, actionLink, inviterEmail) {
       const fieldRow = (label, value) => `
         <tr><td style="padding:0 0 14px;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
@@ -528,18 +528,14 @@
         </td></tr>
         <tr><td style="padding:28px 32px;">
           <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">Hi ${escapeHtml(name)},</p>
-          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">You've been given access to the Christ Church Bluffton admin panel — the tool we use to manage prayer requests, newsletter signups, events, and photos for the website. Here's what you need to sign in for the first time:</p>
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-            ${fieldRow('Email', escapeHtml(email))}
-            ${fieldRow('Temporary Password', escapeHtml(tempPassword))}
-          </table>
-          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:6px 0 24px;">Sign in with the email and temporary password above, and you'll be asked to create your own password right away — after that, the temporary one won't be needed.</p>
-          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 8px;">
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">You've been given access to the Christ Church Bluffton admin panel — the tool we use to manage prayer requests, newsletter signups, events, and photos for the website. Click below to accept your invite and set your own password — you'll be signed in automatically.</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${fieldRow('Email', escapeHtml(email))}</table>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px auto 8px;">
             <tr><td style="background-color:#303b6a; border-radius:8px;">
-              <a href="https://christchurchbluffton.org/admin" style="display:inline-block; padding:14px 32px; font-family:Arial,Helvetica,sans-serif; font-size:15px; font-weight:bold; color:#FFFFFF; text-decoration:none;">Sign In to the Admin Panel</a>
+              <a href="${actionLink}" style="display:inline-block; padding:14px 32px; font-family:Arial,Helvetica,sans-serif; font-size:15px; font-weight:bold; color:#FFFFFF; text-decoration:none;">Accept Invite &amp; Set Password</a>
             </td></tr>
           </table>
-          <p style="font-family:Arial,Helvetica,sans-serif; font-size:12px; color:#999999; text-align:center; margin:10px 0 0;">Or go to christchurchbluffton.org/admin directly</p>
+          <p style="font-family:Arial,Helvetica,sans-serif; font-size:12px; color:#999999; text-align:center; margin:10px 0 0;">This link is single-use and expires after a while — if it's stopped working, send a fresh invite.</p>
           <p style="font-family:Georgia,'Times New Roman',serif; font-size:14px; color:#666666; line-height:1.6; margin:28px 0 0; padding-top:20px; border-top:1px solid #EEEEEE;">If you have any trouble, please contact me at <a href="mailto:${escapeHtml(inviterEmail)}" style="color:#303b6a;">${escapeHtml(inviterEmail)}</a>.</p>
         </td></tr>
       </table>
@@ -549,18 +545,14 @@
 </html>`;
     }
 
-    function openInviteResultModal(name, email, tempPassword, emailSent) {
-      const emailHtml = buildInviteEmailHtml(name, email, tempPassword, session.email);
+    function openInviteResultModal(name, email, actionLink, emailSent) {
+      const emailHtml = buildInviteEmailHtml(name, email, actionLink, session.email);
       document.getElementById('modal-title').textContent = emailSent ? 'Invite Sent' : 'Invite Email Ready';
       document.getElementById('modal-subtitle').textContent = `${name} — ${email}`;
       document.getElementById('modal-body').innerHTML = `
         <p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin:0 0 16px;">${emailSent
-          ? `This account has been created and the invite email was just sent to ${escapeHtml(email)}. A copy is below if you need it.`
-          : `This account has been created, but the invite email could not be sent automatically — copy it below and send it to ${escapeHtml(email)} yourself.`}</p>
-        <div class="field">
-          <label>Temporary Password</label>
-          <input type="text" id="invite-result-pw" value="${escapeHtml(tempPassword)}" readonly>
-        </div>`;
+          ? `This account has been created and the invite email was just sent to ${escapeHtml(email)}. It contains a one-click sign-in link — a copy is below if you need it.`
+          : `This account has been created, but the invite email could not be sent automatically — copy the email below and send it to ${escapeHtml(email)} yourself.`}</p>`;
       setModalFooter([
         { label: 'Copy Email HTML', className: 'btn btn-outline', onClick: () => {
           navigator.clipboard.writeText(emailHtml);
@@ -609,7 +601,7 @@
 
       logActivity('team_invite', `${name} (${email}) — ${role}`);
       await renderTeam();
-      openInviteResultModal(name, email, data.tempPassword, data.emailSent);
+      openInviteResultModal(name, email, data.actionLink, data.emailSent);
     }
 
     function openEditModal(member) {

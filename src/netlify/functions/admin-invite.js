@@ -1,9 +1,12 @@
-// Creates a new admin-panel team member: a real Supabase Auth user (no confirmation
-// email — email_confirm:true skips that) plus their profiles row. Mirrors what the old
-// local-only admin/server/server.js did for Kevin's own dev testing, but this is the
-// version that actually runs on the deployed site — team.html's "Invite Team Member"
-// button was calling http://localhost:8100 before, which only ever worked on Kevin's
-// own machine with the dev server running.
+// Creates a new admin-panel team member using Supabase's real invite-link flow —
+// the polished, industry-standard pattern (Slack/Notion-style): the person clicks
+// one link in their email and lands already signed in, straight into "set your
+// password." No temp password to type, no separate manual login step first.
+//
+// Mirrors what the old local-only admin/server/server.js did for Kevin's own dev
+// testing, but this is the version that actually runs on the deployed site —
+// team.html's "Invite Team Member" button was calling http://localhost:8100 before,
+// which only ever worked on Kevin's own machine with the dev server running.
 //
 // The secret key lives ONLY here, server-side, via raw REST calls (same pattern as
 // contact.js/prayer.js) — no @supabase/supabase-js dependency needed for this.
@@ -13,13 +16,6 @@
 // in the panel but cannot invite new accounts or touch other Admin/Site Admin rows;
 // see admin/supabase/migrations/0008_site_admin_role.sql for the DB-level enforcement
 // this mirrors.
-
-function randomTempPassword() {
-  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
-  let pw = '';
-  for (let i = 0; i < 14; i++) pw += chars[Math.floor(Math.random() * chars.length)];
-  return pw;
-}
 
 function fieldRow(label, valueHtml) {
   return `
@@ -35,8 +31,9 @@ function fieldRow(label, valueHtml) {
 
 // Same navy/gold shell as team.html's buildInviteEmailHtml() and the site's other
 // transactional emails (contact.js etc.) — kept as a literal copy since this is a
-// separate serverless function with no shared module system.
-function buildInviteEmailHtml(name, email, tempPassword, inviterEmail) {
+// separate serverless function with no shared module system. No temp password field
+// anymore — the button IS the login, a real single-use Supabase invite link.
+function buildInviteEmailHtml(name, email, actionLink, inviterEmail) {
   return `<!DOCTYPE html>
 <html>
 <body style="margin:0; padding:0; background-color:#F5F4EF;">
@@ -49,18 +46,14 @@ function buildInviteEmailHtml(name, email, tempPassword, inviterEmail) {
         </td></tr>
         <tr><td style="padding:28px 32px;">
           <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">Hi ${name},</p>
-          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">You've been given access to the Christ Church Bluffton admin panel — the tool used to manage prayer requests, newsletter signups, events, and photos for the website. Here's what you need to sign in for the first time:</p>
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-            ${fieldRow('Email', email)}
-            ${fieldRow('Temporary Password', tempPassword)}
-          </table>
-          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:6px 0 24px;">Sign in with the email and temporary password above, and you'll be asked to create your own password right away — after that, the temporary one won't be needed.</p>
-          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 8px;">
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">You've been given access to the Christ Church Bluffton admin panel — the tool used to manage prayer requests, newsletter signups, events, and photos for the website. Click below to accept your invite and set your own password — you'll be signed in automatically.</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${fieldRow('Email', email)}</table>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px auto 8px;">
             <tr><td style="background-color:#303b6a; border-radius:8px;">
-              <a href="https://christchurchbluffton.org/admin" style="display:inline-block; padding:14px 32px; font-family:Arial,Helvetica,sans-serif; font-size:15px; font-weight:bold; color:#FFFFFF; text-decoration:none;">Sign In to the Admin Panel</a>
+              <a href="${actionLink}" style="display:inline-block; padding:14px 32px; font-family:Arial,Helvetica,sans-serif; font-size:15px; font-weight:bold; color:#FFFFFF; text-decoration:none;">Accept Invite &amp; Set Password</a>
             </td></tr>
           </table>
-          <p style="font-family:Arial,Helvetica,sans-serif; font-size:12px; color:#999999; text-align:center; margin:10px 0 0;">Or go to christchurchbluffton.org/admin directly</p>
+          <p style="font-family:Arial,Helvetica,sans-serif; font-size:12px; color:#999999; text-align:center; margin:10px 0 0;">This link is single-use and expires after a while — if it's stopped working, ask for a new invite.</p>
           <p style="font-family:Georgia,'Times New Roman',serif; font-size:14px; color:#666666; line-height:1.6; margin:28px 0 0; padding-top:20px; border-top:1px solid #EEEEEE;">If you have any trouble, please contact me at <a href="mailto:${inviterEmail}" style="color:#303b6a;">${inviterEmail}</a>.</p>
         </td></tr>
       </table>
@@ -80,6 +73,7 @@ exports.handler = async (event) => {
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
+  const SITE_URL = event.headers.origin || 'https://christchurchbluffton.org';
 
   try {
     const authHeader = event.headers.authorization || event.headers.Authorization || '';
@@ -110,27 +104,31 @@ exports.handler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: 'Name, email, and a role of site_admin, admin, or staff are required.' }) };
     }
 
-    const tempPassword = randomTempPassword();
-    const createRes = await fetch(`${SUPABASE_URL}/auth/v1/admin/users`, {
+    // Creates the auth user AND returns a real, single-use sign-in link — no
+    // password to generate or type. Clicking it authenticates automatically and
+    // lands on accept-invite.html with a live session already established.
+    const linkRes = await fetch(`${SUPABASE_URL}/auth/v1/admin/generate_link`, {
       method: 'POST',
       headers: { apikey: SECRET_KEY, Authorization: `Bearer ${SECRET_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: tempPassword, email_confirm: true }),
+      body: JSON.stringify({ type: 'invite', email, options: { redirect_to: `${SITE_URL}/admin/accept-invite.html` } }),
       signal: AbortSignal.timeout(10000)
     });
-    const created = await createRes.json();
-    if (!createRes.ok) {
-      return { statusCode: 400, body: JSON.stringify({ error: created.msg || created.error_description || 'Could not create that account.' }) };
+    const linkData = await linkRes.json();
+    if (!linkRes.ok) {
+      return { statusCode: 400, body: JSON.stringify({ error: linkData.msg || linkData.error_description || 'Could not create that account.' }) };
     }
+    const newUserId = (linkData.user && linkData.user.id) || linkData.id;
+    const actionLink = linkData.action_link;
 
     const profileInsertRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
       method: 'POST',
       headers: { apikey: SECRET_KEY, Authorization: `Bearer ${SECRET_KEY}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-      body: JSON.stringify({ id: created.id, email, name, role, permissions: permissions || {}, status: 'invited' }),
+      body: JSON.stringify({ id: newUserId, email, name, role, permissions: permissions || {}, status: 'invited' }),
       signal: AbortSignal.timeout(10000)
     });
     if (!profileInsertRes.ok) {
       // Roll back the auth user so we don't leave an orphaned login with no profile.
-      await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${created.id}`, {
+      await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${newUserId}`, {
         method: 'DELETE',
         headers: { apikey: SECRET_KEY, Authorization: `Bearer ${SECRET_KEY}` },
         signal: AbortSignal.timeout(10000)
@@ -152,7 +150,7 @@ exports.handler = async (event) => {
             from: process.env.EMAIL_FROM || 'Christ Church Bluffton <notifications@christchurchbluffton.org>',
             to: [email],
             subject: "You're Invited to the Christ Church Bluffton Admin Panel",
-            html: buildInviteEmailHtml(name, email, tempPassword, me.email)
+            html: buildInviteEmailHtml(name, email, actionLink, me.email)
           }),
           signal: AbortSignal.timeout(10000)
         });
@@ -163,7 +161,7 @@ exports.handler = async (event) => {
       }
     }
 
-    return { statusCode: 200, body: JSON.stringify({ id: created.id, tempPassword, emailSent }) };
+    return { statusCode: 200, body: JSON.stringify({ id: newUserId, actionLink, emailSent }) };
   } catch (err) {
     console.error('[AdminInvite] Error:', err.message);
     return { statusCode: 500, body: JSON.stringify({ error: 'Something went wrong.' }) };

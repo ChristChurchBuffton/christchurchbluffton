@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<title>Accept Invite — Christ Church Bluffton Admin</title>
+<link rel="stylesheet" href="css/shared.css">
+<style>
+  .auth-error {
+    display: none;
+    background: rgba(177,67,67,0.08);
+    border: 1px solid rgba(177,67,67,0.3);
+    color: var(--danger);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .auth-error.visible { display: block; }
+  .auth-note {
+    background: rgba(195,163,85,0.1);
+    border: 1px solid rgba(195,163,85,0.3);
+    color: var(--gold-text);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-header">
+        <img class="crest" src="assets/site-images/logo-dark-bg.png" alt="Christ Church Bluffton crest">
+        <div class="label">Christ Church Bluffton</div>
+        <h1>Welcome</h1>
+      </div>
+
+      <div id="accept-loading" style="padding:20px 0; text-align:center; color:var(--text-muted); font-size:13px;">Checking your invite...</div>
+
+      <form class="auth-form" id="accept-form" style="display:none;">
+        <p style="font-size:14px; color:var(--text-dark); line-height:1.6; margin:0 0 18px;">You're signed in — set a password to finish setting up your account.</p>
+        <div class="auth-error" id="accept-error"></div>
+        <div class="field">
+          <label for="accept-pw">New Password<span class="required-mark">*</span></label>
+          <input type="password" id="accept-pw" placeholder="At least 6 characters" required>
+        </div>
+        <div class="field">
+          <label for="accept-pw-confirm">Confirm New Password<span class="required-mark">*</span></label>
+          <input type="password" id="accept-pw-confirm" placeholder="Repeat password" required>
+        </div>
+        <button type="submit" class="btn-primary" id="accept-submit">Set Password &amp; Continue</button>
+      </form>
+
+      <div id="accept-invalid" style="display:none;">
+        <div class="auth-note">This invite link is invalid or has already been used. Ask a Site Admin to send you a fresh invite.</div>
+        <a href="index.html" class="btn-primary" style="display:block; text-align:center; text-decoration:none; box-sizing:border-box;">Go to Sign In</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    // The invite link's #access_token=...&type=invite fragment is consumed
+    // automatically by the Supabase client on load (detectSessionInUrl, on by
+    // default) — by the time _sessionReady resolves, either a real session exists
+    // (link was valid) or it doesn't (expired/already used/tampered with).
+    (async function () {
+      await _sessionReady;
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      document.getElementById('accept-loading').style.display = 'none';
+
+      if (!session) {
+        document.getElementById('accept-invalid').style.display = 'block';
+        return;
+      }
+      document.getElementById('accept-form').style.display = 'block';
+
+      document.getElementById('accept-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const pw = document.getElementById('accept-pw').value;
+        const confirmPw = document.getElementById('accept-pw-confirm').value;
+        const errorBox = document.getElementById('accept-error');
+        errorBox.classList.remove('visible');
+
+        if (pw.length < 6) {
+          errorBox.textContent = 'Password must be at least 6 characters.';
+          errorBox.classList.add('visible');
+          return;
+        }
+        if (pw !== confirmPw) {
+          errorBox.textContent = 'Passwords do not match.';
+          errorBox.classList.add('visible');
+          return;
+        }
+
+        const submitBtn = document.getElementById('accept-submit');
+        submitBtn.disabled = true;
+
+        const { error: pwError } = await supabaseClient.auth.updateUser({ password: pw });
+        if (pwError) {
+          submitBtn.disabled = false;
+          errorBox.textContent = pwError.message;
+          errorBox.classList.add('visible');
+          return;
+        }
+        const { error: statusError } = await supabaseClient.from('profiles').update({ status: 'active' }).eq('id', session.user.id);
+        if (statusError) {
+          submitBtn.disabled = false;
+          errorBox.textContent = statusError.message;
+          errorBox.classList.add('visible');
+          return;
+        }
+        logActivity('login', 'accepted invite', session.user.email);
+        window.location.href = 'dashboard.html';
+      });
+    })();
+  </script>
+</body>
+</html>
