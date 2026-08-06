@@ -140,9 +140,25 @@ function requireSession() {
   return session;
 }
 
+// Site Admin sits above Admin — has every Admin capability plus team management
+// (invite/edit/remove Admin accounts). Most of the app only needs "is this person
+// an Admin or above," which isAdminTier() covers; isSiteAdmin() is only for the
+// narrower team-management actions on team.html.
+function isAdminTier(session) {
+  return !!session && (session.role === 'admin' || session.role === 'site_admin');
+}
+
+function isSiteAdmin(session) {
+  return !!session && session.role === 'site_admin';
+}
+
+// Only Site Admin gets blanket access to every data page regardless of the
+// permissions object. Admin's page access is individually dial-able by a Site
+// Admin (same checklist Staff already used) — it just defaults to everything
+// checked when someone's promoted, so nobody's access silently changes.
 function hasPermission(session, key) {
   if (!session) return false;
-  if (session.role === 'admin') return true;
+  if (isSiteAdmin(session)) return true;
   return !!(session.permissions && session.permissions[key]);
 }
 
@@ -271,17 +287,19 @@ const PAGE_PERMISSION_MAP = {
 // first), then again once the real session check resolves (corrects anything stale —
 // a no-op in the common case since the values are almost always identical, so nothing
 // visibly changes the second time).
+const ROLE_LABELS = { site_admin: 'Site Admin', admin: 'Admin', staff: 'Staff' };
+
 function _renderSidebarChrome(session) {
   const currentPage = document.body.dataset.page;
   document.getElementById('sidebar-name').textContent = session.name;
-  document.getElementById('sidebar-role').textContent = session.role === 'admin' ? 'Admin' : 'Staff';
-  document.getElementById('sidebar-role').className = 'role ' + (session.role === 'admin' ? 'role-admin' : 'role-staff');
+  document.getElementById('sidebar-role').textContent = ROLE_LABELS[session.role] || 'Staff';
+  document.getElementById('sidebar-role').className = 'role ' + (isAdminTier(session) ? 'role-admin' : 'role-staff');
   document.getElementById('sidebar-avatar').textContent = session.name.charAt(0).toUpperCase();
 
   document.querySelectorAll('.sidebar nav a').forEach(link => {
     link.classList.toggle('active', link.dataset.page === currentPage);
-    if (link.dataset.adminOnly === 'true') {
-      link.style.display = session.role === 'admin' ? 'flex' : 'none';
+    if (link.dataset.siteAdminOnly === 'true') {
+      link.style.display = isSiteAdmin(session) ? 'flex' : 'none';
       return;
     }
     const permKey = link.dataset.permission;
@@ -408,8 +426,8 @@ async function loadSidebar() {
   // the cache above only ever affects what's shown a moment early, never what's allowed.
   const currentPage = document.body.dataset.page;
   const requiredPerm = PAGE_PERMISSION_MAP[currentPage];
-  const isAdminOnlyPage = document.body.dataset.adminOnly === 'true';
-  const blocked = (isAdminOnlyPage && session.role !== 'admin') || (requiredPerm && !hasPermission(session, requiredPerm));
+  const isSiteAdminOnlyPage = document.body.dataset.siteAdminOnly === 'true';
+  const blocked = (isSiteAdminOnlyPage && !isSiteAdmin(session)) || (requiredPerm && !hasPermission(session, requiredPerm));
   if (blocked) {
     logActivity('access_denied', currentPage);
     document.getElementById('page-body').innerHTML = `

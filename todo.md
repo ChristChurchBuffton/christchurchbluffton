@@ -1,6 +1,20 @@
 # Christ Church Bluffton — TODO
 
-## STATUS (2026-08-03): LIVE, no open blockers. Commits `245a8b3` + `2b83e0d` pushed to both `origin` and `production`.
+## STATUS (2026-08-05): LIVE, no open blockers on the public site. 11 commits pushed to both `origin` and `production` today.
+
+## 2026-08-05 — Admin panel merged into this repo, LIVE at /admin, live-site forms now feed it
+- [x] Admin panel moved from a standalone repo into `src/admin/` in this repo, deployed as part of the normal site build, reachable at `christchurchbluffton.org/admin`
+- [x] Fixed real bugs surfaced by the merge: Content Editor's live preview was completely broken (CSP `frame-src` blocking its own iframe, then a stale `<base href>` breaking every image inside it once the iframe itself loaded), Photos page thumbnails were broken (files existed locally but were gitignored, never actually deployed)
+- [x] Photos page: uploads now go through a naming step (auto-slugified filename, JPG-only), and every photo link — old or new — resolves at the same `christchurchbluffton.org/a34317d8/<filename>` URL via a Netlify proxy redirect, so new uploads work instantly with no deploy needed
+- [x] Newsletter footer form, contact form, and the floating prayer request popup all now write into the admin panel automatically (Subscribers / Prayer Requests) — previously completely disconnected, only sent email + wrote to Breeze
+- [x] Contact form: new "Would you like someone to follow up with you about this?" checkbox when "Prayer Request" is selected, adds a real Prayer Requests entry in addition to the Subscribers entry
+- [x] Prayer popup: added optional Email/Phone fields; fixed a bug where it got stuck on the "Thank you" screen after submitting instead of resetting for a second use
+- [x] Netlify environment variables (`SUPABASE_URL`, `SUPABASE_SECRET_KEY`) added to both the testing and production Netlify sites (separate accounts) so the live forms can actually write to the database
+- [x] Added 2 new real admin-panel team members: Bradley Chestnut, and a generic Treasurer account. Every account's password reset to a real distribution temp password and status set to "invited" (except Kevin's own), so each person is forced to set their own password the first time they sign in
+- [ ] Dashboard's Recent Activity list (12 entries + "Load 10 more") is built and tested but not yet pushed — small, no rush
+- [ ] Drafted a team-explainer email and an admin-panel-invite email template — see `comm/client/` — not sent yet
+
+## STATUS (2026-08-03, historical): LIVE, no open blockers. Commits `245a8b3` + `2b83e0d` pushed to both `origin` and `production`.
 
 ## 2026-08-03 — Notification emails, contact routing, volunteer image page
 - [x] Contact/Prayer/Newsletter notification emails now send styled HTML (navy/gold, matches site) instead of plain text — plain-text fallback kept for non-HTML email clients

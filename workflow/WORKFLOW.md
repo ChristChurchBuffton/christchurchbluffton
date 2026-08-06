@@ -166,6 +166,23 @@
 
 ---
 
+## Phase 8: Admin Panel Merge, Live-Form Integration & Team Onboarding (2026-08-03 → 2026-08-05) ✅ COMPLETE
+> The Supabase-backed admin panel (built over several earlier sessions as a standalone project) was merged fully into this repo and deployed live at `christchurchbluffton.org/admin`, then connected to the public site's real forms for the first time.
+
+- [x] **Repo merge** (2026-08-03) — admin panel moved from its own separate repo into `src/admin/` here, deployed by the same Netlify build as the public site. Dev-only tooling (`server/`, `supabase/` migrations, `build-sidebar.js`) stays at repo-root `admin/`, outside the deploy path.
+- [x] **Performance fix** — page-to-page nav delay traced to a duplicate Supabase profile fetch (`onAuthStateChange` firing both `SIGNED_IN` and `INITIAL_SESSION` on subscribe); fixed with an in-flight guard in `js/shared.js`.
+- [x] **Post-merge bugs found & fixed** (2026-08-05) — Content Editor's live preview iframe was fully broken (CSP `frame-src` missing `'self'`, then a stale `<base href>` in 9 site-mirror files once the iframe itself loaded), Photos thumbnails were silently gitignored and never actually deployed.
+- [x] **Photos page rebuild** — upload now goes through a naming modal (auto-slugify, JPG-only), and every photo (seeded or uploaded) resolves at `christchurchbluffton.org/a34317d8/<filename>` via a Netlify proxy redirect to Supabase Storage — no deploy needed for new uploads. Copy Link/Delete buttons now pinned to the bottom of every card regardless of filename length.
+- [x] **Live site forms wired into the admin panel** — newsletter footer form, contact form, and the prayer request popup all now insert into the real `subscribers`/`prayer_requests` tables (previously only sent email + wrote to Breeze, totally disconnected from this panel). Contact form gained a "would you like someone to follow up?" checkbox (shown only for "Prayer Request") that also logs a prayer request. Prayer popup gained optional email/phone fields and a bug fix so it resets after a successful submission instead of getting stuck on the confirmation screen.
+- [x] **Netlify env vars** — `SUPABASE_URL` + `SUPABASE_SECRET_KEY` set on both the `origin` (staging) and `production` Netlify sites (separate accounts/logins) so the live Functions can write to the database.
+- [x] **Production deploy** — all of the above pushed to both `origin` and `production`, verified live on the real domain.
+- [x] **Team onboarding** — added 2 new real admin accounts (Bradley Chestnut, Treasurer), reset every account's password to a shared distribution temp password except Kevin's own, and set every account's status to "invited" so each person is forced through the real set-your-own-password flow on first login.
+- [ ] Dashboard's Recent Activity pagination (12 entries + "Load 10 more") — built, verified on localhost, not yet pushed.
+- [ ] `prayers.html` has an uncommitted, unfinished CSS change (3-line text clamp with no way to view the rest) — do not commit as-is.
+- [ ] Team-explainer email + admin-panel invite-email template drafted — see `comm/client/` — not sent.
+
+---
+
 ## Quick Reference
 | Item | Value |
 |---|---|

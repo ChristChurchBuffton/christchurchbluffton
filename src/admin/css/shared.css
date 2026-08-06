@@ -545,6 +545,7 @@ body.reading-mode.tint-green .main { background: #E1F0E1; }
   letter-spacing: 0.4px;
 }
 
+.badge-site-admin { background: var(--navy-blue); color: var(--white); }
 .badge-admin { background: rgba(195,163,85,0.18); color: var(--gold-text); }
 .badge-staff { background: rgba(48,59,106,0.1); color: var(--navy-blue); }
 

@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow, noarchive">
 <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
 <link rel="apple-touch-icon" href="assets/favicon.png">
-<title>Team — Christ Church Bluffton Admin</title>
+<title>Accounts — Christ Church Bluffton Admin</title>
 <link rel="stylesheet" href="css/shared.css">
 <style>
   .team-card {
@@ -183,7 +183,7 @@
   .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
-<body data-page="team" data-admin-only="true">
+<body data-page="team" data-site-admin-only="true">
   <div class="toast" id="toast"></div>
   <div class="app-shell">
     <div id="sidebar-mount">
@@ -242,9 +242,9 @@
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg>
         Photos
       </a>
-      <a href="team.html" data-page="team" data-admin-only="true">
+      <a href="team.html" data-page="team" data-site-admin-only="true">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M19 8h4M21 6v4"/></svg>
-        Team
+        Accounts
       </a>
     </nav>
     <div class="sidebar-footer">
@@ -277,7 +277,7 @@
     <div class="main">
       <div class="topbar">
         <div>
-          <h1>Team</h1>
+          <h1>Accounts</h1>
           <div class="subtitle" id="team-subtitle">Manage staff accounts and what each one can access</div>
         </div>
         <button class="btn btn-gold" id="invite-btn">+ Invite Team Member</button>
@@ -285,7 +285,7 @@
       <div class="content" id="page-body">
         <div class="card team-card">
           <div class="team-card-head">
-            <div class="team-card-title">All Team Members</div>
+            <div class="team-card-title">All Accounts</div>
             <div class="team-card-count" id="team-card-count">— members</div>
           </div>
           <div class="table-scroll">
@@ -356,8 +356,10 @@
       document.getElementById('team-card-count').textContent = `${team.length} member${team.length === 1 ? '' : 's'}`;
       const rows = document.getElementById('team-rows');
       rows.innerHTML = team.map(m => {
-        const permChips = m.role === 'admin'
-          ? PERMISSIONS.map(p => `<span class="perm-chip">${p.label}</span>`).join('') + `<span class="perm-chip">Team</span>`
+        const roleBadgeClass = m.role === 'site_admin' ? 'badge-site-admin' : (m.role === 'admin' ? 'badge-admin' : 'badge-staff');
+        const roleLabel = m.role === 'site_admin' ? 'Site Admin' : (m.role === 'admin' ? 'Admin' : 'Staff');
+        const permChips = m.role === 'site_admin'
+          ? PERMISSIONS.map(p => `<span class="perm-chip">${p.label}</span>`).join('') + `<span class="perm-chip">Accounts</span>`
           : (PERMISSIONS.filter(p => m.permissions && m.permissions[p.key]).map(p => `<span class="perm-chip">${p.label}</span>`).join('') || `<span class="perm-chip none">No access granted</span>`);
         return `
           <tr>
@@ -370,7 +372,7 @@
                 </div>
               </div>
             </td>
-            <td data-label="Role"><span class="badge ${m.role === 'admin' ? 'badge-admin' : 'badge-staff'}">${m.role === 'admin' ? 'Admin' : 'Staff'}</span></td>
+            <td data-label="Role"><span class="badge ${roleBadgeClass}">${roleLabel}</span></td>
             <td data-label="Status"><span class="badge ${m.status === 'invited' ? 'badge-invited' : 'badge-admin'}" style="${m.status === 'invited' ? '' : 'background:rgba(46,125,50,0.12);color:#2e7d32;'}">${m.status === 'invited' ? 'Invited' : 'Active'}</span></td>
             <td data-label="Permissions"><div class="perm-chips">${permChips}</div></td>
             <td>
@@ -431,8 +433,9 @@
     }
 
     function permFieldsHtml(idPrefix, role, permissions) {
+      const isSA = role === 'site_admin';
       return `
-        <div class="field" id="${idPrefix}-perm-wrap" style="${role === 'admin' ? 'display:none;' : ''}">
+        <div class="field" id="${idPrefix}-perm-wrap" style="${isSA ? 'display:none;' : ''}">
           <label>Permissions</label>
           <div class="perm-checklist">
             ${PERMISSIONS.map(p => `
@@ -442,7 +445,7 @@
               </label>`).join('')}
           </div>
         </div>
-        <div class="admin-perm-note" id="${idPrefix}-admin-note" style="${role === 'admin' ? '' : 'display:none;'}">Admins automatically have access to everything, including Team management.</div>`;
+        <div class="admin-perm-note" id="${idPrefix}-admin-note" style="${isSA ? '' : 'display:none;'}">Site Admins automatically have access to everything, including Accounts.</div>`;
     }
 
     function wireRoleToggle(idPrefix) {
@@ -451,9 +454,15 @@
         r.closest('label').classList.toggle('selected', r.checked);
         r.addEventListener('change', () => {
           radios.forEach(r2 => r2.closest('label').classList.toggle('selected', r2.checked));
-          const isAdmin = document.querySelector(`input[name="${idPrefix}-role"]:checked`).value === 'admin';
-          document.getElementById(`${idPrefix}-perm-wrap`).style.display = isAdmin ? 'none' : '';
-          document.getElementById(`${idPrefix}-admin-note`).style.display = isAdmin ? '' : 'none';
+          const newRole = document.querySelector(`input[name="${idPrefix}-role"]:checked`).value;
+          const isSA = newRole === 'site_admin';
+          document.getElementById(`${idPrefix}-perm-wrap`).style.display = isSA ? 'none' : '';
+          document.getElementById(`${idPrefix}-admin-note`).style.display = isSA ? '' : 'none';
+          // Switching to Admin defaults to full access (matching today's behavior) —
+          // still individually editable from there, same checklist Staff already uses.
+          if (newRole === 'admin') {
+            PERMISSIONS.forEach(p => { document.getElementById(`${idPrefix}-perm-${p.key}`).checked = true; });
+          }
         });
       });
     }
@@ -482,6 +491,7 @@
           <div class="role-radio-group">
             <label><input type="radio" name="invite-role-role" value="staff" checked> Staff</label>
             <label><input type="radio" name="invite-role-role" value="admin"> Admin</label>
+            <label><input type="radio" name="invite-role-role" value="site_admin"> Site Admin</label>
           </div>
         </div>
         ${permFieldsHtml('invite-role', 'staff', null)}`;
@@ -489,6 +499,76 @@
       setModalFooter([
         { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
         { label: 'Send Invite', className: 'btn btn-gold', onClick: submitInvite }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+// Matches the navy/gold shell used by the site's own transactional emails
+    // (see emailShell()/fieldRow() in netlify/functions/contact.js etc.) — kept as a
+    // literal copy here since this is browser code with no shared module system.
+    function buildInviteEmailHtml(name, email, tempPassword, inviterEmail) {
+      const fieldRow = (label, value) => `
+        <tr><td style="padding:0 0 14px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="background-color:#F5F4EF; border-left:4px solid #c3a355; border-radius:6px; padding:12px 16px;">
+              <div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#7F6D34;">${label}</div>
+              <div style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; margin-top:3px; line-height:1.5;">${value}</div>
+            </td></tr>
+          </table>
+        </td></tr>`;
+      return `<!DOCTYPE html>
+<html>
+<body style="margin:0; padding:0; background-color:#F5F4EF;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F5F4EF; padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; background-color:#FFFFFF; border-radius:12px; overflow:hidden;">
+        <tr><td style="background-color:#303b6a; padding:28px 32px 22px;">
+          <div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#A9B3D6;">Christ Church Bluffton</div>
+          <div style="font-family:Georgia,'Times New Roman',serif; font-size:24px; color:#FFFFFF; margin-top:8px;">You're Invited to the Admin Panel</div>
+        </td></tr>
+        <tr><td style="padding:28px 32px;">
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">Hi ${escapeHtml(name)},</p>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">You've been given access to the Christ Church Bluffton admin panel — the tool we use to manage prayer requests, newsletter signups, events, and photos for the website. Here's what you need to sign in for the first time:</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            ${fieldRow('Email', escapeHtml(email))}
+            ${fieldRow('Temporary Password', escapeHtml(tempPassword))}
+          </table>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:6px 0 24px;">Sign in with the email and temporary password above, and you'll be asked to create your own password right away — after that, the temporary one won't be needed.</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 8px;">
+            <tr><td style="background-color:#303b6a; border-radius:8px;">
+              <a href="https://christchurchbluffton.org/admin" style="display:inline-block; padding:14px 32px; font-family:Arial,Helvetica,sans-serif; font-size:15px; font-weight:bold; color:#FFFFFF; text-decoration:none;">Sign In to the Admin Panel</a>
+            </td></tr>
+          </table>
+          <p style="font-family:Arial,Helvetica,sans-serif; font-size:12px; color:#999999; text-align:center; margin:10px 0 0;">Or go to christchurchbluffton.org/admin directly</p>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:14px; color:#666666; line-height:1.6; margin:28px 0 0; padding-top:20px; border-top:1px solid #EEEEEE;">If you have any trouble, please contact me at <a href="mailto:${escapeHtml(inviterEmail)}" style="color:#303b6a;">${escapeHtml(inviterEmail)}</a>.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+    }
+
+    function openInviteResultModal(name, email, tempPassword) {
+      const emailHtml = buildInviteEmailHtml(name, email, tempPassword, session.email);
+      document.getElementById('modal-title').textContent = 'Invite Email Ready';
+      document.getElementById('modal-subtitle').textContent = `${name} — ${email}`;
+      document.getElementById('modal-body').innerHTML = `
+        <p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin:0 0 16px;">This account has been created. Nothing has been sent yet — preview the email below, then copy it into your email client and send it to ${escapeHtml(email)} yourself.</p>
+        <div class="field">
+          <label>Temporary Password</label>
+          <input type="text" id="invite-result-pw" value="${escapeHtml(tempPassword)}" readonly>
+        </div>`;
+      setModalFooter([
+        { label: 'Copy Email HTML', className: 'btn btn-outline', onClick: () => {
+          navigator.clipboard.writeText(emailHtml);
+          showToast('Email HTML copied to clipboard.');
+        } },
+        { label: 'Preview Email', className: 'btn btn-outline', onClick: () => {
+          const blob = new Blob([emailHtml], { type: 'text/html' });
+          window.open(URL.createObjectURL(blob), '_blank');
+        } },
+        { label: 'Done', className: 'btn btn-gold', onClick: closeModal }
       ]);
       document.getElementById('modal-backdrop').classList.add('open');
     }
@@ -511,30 +591,23 @@
         return;
       }
 
-      const permissions = role === 'admin' ? fullPermissions() : readPermFields('invite-role');
-      const res = await backendFetch('/api/team', {
+      const permissions = role === 'site_admin' ? fullPermissions() : readPermFields('invite-role');
+      const token = await getAccessToken();
+      const res = await fetch('/.netlify/functions/admin-invite', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: token ? `Bearer ${token}` : '' },
         body: JSON.stringify({ email, name, role, permissions })
       });
       const data = await res.json();
       if (!res.ok) {
-        errorBox.textContent = data.error || 'Could not create this account — the local backend server may not be running.';
+        errorBox.textContent = data.error || 'Could not create this account.';
         errorBox.classList.add('visible');
         return;
       }
-      await backendFetch(`/api/team/${data.id}/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: 'Temp123!!' })
-      });
 
       logActivity('team_invite', `${name} (${email}) — ${role}`);
-      closeModal();
       await renderTeam();
-      // No real email service wired up yet — Kevin hands out the temp password directly.
-      // They're forced to set their own password on first sign-in (see shared.js loadSidebar).
-      showToast(`${name} added with a temporary password (Temp123!!). No email was sent — share the login directly. They'll be asked to set their own password the first time they sign in.`);
+      openInviteResultModal(name, email, data.tempPassword);
     }
 
     function openEditModal(member) {
@@ -551,6 +624,7 @@
           <div class="role-radio-group">
             <label><input type="radio" name="edit-role-role" value="staff" ${member.role === 'staff' ? 'checked' : ''}> Staff</label>
             <label><input type="radio" name="edit-role-role" value="admin" ${member.role === 'admin' ? 'checked' : ''}> Admin</label>
+            <label><input type="radio" name="edit-role-role" value="site_admin" ${member.role === 'site_admin' ? 'checked' : ''}> Site Admin</label>
           </div>
         </div>
         ${permFieldsHtml('edit-role', member.role, member.permissions)}`;
@@ -573,13 +647,13 @@
         errorBox.classList.add('visible');
         return;
       }
-      if (member.role === 'admin' && role !== 'admin' && currentTeam.filter(m => m.role === 'admin').length <= 1) {
-        errorBox.textContent = 'This is the only Admin account — promote someone else to Admin before demoting this one.';
+      if (member.role === 'site_admin' && role !== 'site_admin' && currentTeam.filter(m => m.role === 'site_admin').length <= 1) {
+        errorBox.textContent = 'This is the only Site Admin account — promote someone else to Site Admin before demoting this one.';
         errorBox.classList.add('visible');
         return;
       }
 
-      const permissions = role === 'admin' ? fullPermissions() : readPermFields('edit-role');
+      const permissions = role === 'site_admin' ? fullPermissions() : readPermFields('edit-role');
       const { error } = await supabaseClient.from('profiles').update({ name, role, permissions }).eq('id', member.id);
       if (error) {
         errorBox.textContent = error.message;
@@ -645,8 +719,8 @@
     }
 
     function openRemoveModal(member) {
-      if (member.role === 'admin' && currentTeam.filter(m => m.role === 'admin').length <= 1) {
-        showToast('This is the only Admin account — promote someone else to Admin before removing this one.');
+      if (member.role === 'site_admin' && currentTeam.filter(m => m.role === 'site_admin').length <= 1) {
+        showToast('This is the only Site Admin account — promote someone else to Site Admin before removing this one.');
         return;
       }
       document.getElementById('modal-title').textContent = 'Remove Team Member';

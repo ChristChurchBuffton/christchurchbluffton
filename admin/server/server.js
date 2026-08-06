@@ -43,7 +43,7 @@ async function requireCaller(req, res, next) {
 }
 
 function requireAdmin(req, res, next) {
-  if (req.callerRole !== 'admin') return res.status(403).json({ error: 'Admins only.' });
+  if (req.callerRole !== 'admin' && req.callerRole !== 'site_admin') return res.status(403).json({ error: 'Admins only.' });
   next();
 }
 
