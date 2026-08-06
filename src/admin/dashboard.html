@@ -307,7 +307,7 @@
       if (hasPermission(session, 'prayers')) cardKeys.push('prayers');
       if (hasPermission(session, 'subscribers')) cardKeys.push('subscribers');
       if (hasPermission(session, 'congregants')) cardKeys.push('congregants');
-      if (isSiteAdmin(session)) cardKeys.push('pendingInvites');
+      if (isAdminTier(session)) cardKeys.push('pendingInvites');
 
       const grid = document.getElementById('stat-grid');
       if (cardKeys.length === 0) {
@@ -317,7 +317,7 @@
         grid.innerHTML = cards.map(statCardHtml).join('');
       }
 
-      if (isSiteAdmin(session)) {
+      if (isAdminTier(session)) {
         document.getElementById('activity-card').style.display = '';
         const log = await activityLogPromise;
         renderActivity(log);
