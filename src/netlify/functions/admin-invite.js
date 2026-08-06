@@ -73,7 +73,7 @@ exports.handler = async (event) => {
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
-  const SITE_URL = event.headers.origin || 'https://christchurchbluffton.org';
+  const SITE_URL = event.headers.origin || event.headers.Origin || 'https://christchurchbluffton.org';
 
   try {
     const authHeader = event.headers.authorization || event.headers.Authorization || '';
@@ -110,7 +110,7 @@ exports.handler = async (event) => {
     const linkRes = await fetch(`${SUPABASE_URL}/auth/v1/admin/generate_link`, {
       method: 'POST',
       headers: { apikey: SECRET_KEY, Authorization: `Bearer ${SECRET_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'invite', email, options: { redirect_to: `${SITE_URL}/admin/accept-invite.html` } }),
+      body: JSON.stringify({ type: 'invite', email, redirect_to: `${SITE_URL}/admin/accept-invite.html` }),
       signal: AbortSignal.timeout(10000)
     });
     const linkData = await linkRes.json();
