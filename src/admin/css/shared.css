@@ -555,6 +555,34 @@ body.reading-mode.tint-green .main { background: #E1F0E1; }
 
 .table-scroll { overflow-x: auto; }
 
+/* Blocking first-login password-reset modal — injected on any page by
+   showForcedPasswordResetModal() in shared.js. No close button, no
+   click-outside-to-dismiss — the only ways out are completing it or logging out. */
+.forced-reset-overlay {
+  position: fixed; inset: 0; background: rgba(30,37,71,0.75);
+  z-index: 5000; display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.forced-reset-box {
+  background: var(--white); border-radius: 14px; width: 100%; max-width: 420px;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.4); padding: 28px 30px;
+}
+.forced-reset-box h2 { font-family: Georgia, 'Times New Roman', serif; font-size: 20px; color: var(--navy-blue); margin: 0 0 8px; }
+.forced-reset-box p { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin: 0 0 20px; }
+.forced-reset-box .field { margin-bottom: 14px; }
+.forced-reset-box .field label { display: block; font-size: 13px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; }
+.forced-reset-box .field input {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
+  font-family: inherit; font-size: 14px; background: var(--lightest-gray); box-sizing: border-box;
+}
+.forced-reset-box .field input:focus { outline: none; border-color: var(--gold); background: var(--white); }
+.forced-reset-error {
+  background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger);
+  border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 14px; display: none;
+}
+.forced-reset-error.visible { display: block; }
+.forced-reset-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; gap: 12px; }
+.forced-reset-logout { font-size: 12px; color: var(--text-muted); text-decoration: underline; cursor: pointer; background: none; border: none; padding: 0; }
+
 .restricted-panel {
   text-align: center;
   padding: 80px 32px;

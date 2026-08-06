@@ -371,6 +371,74 @@ function setupReadingModeControls(session) {
   });
 }
 
+// ---- Forced first-login password reset ----
+// A blocking modal (not a page redirect) so there's no way to end up "on" the
+// panel without having actually set a real password — it's injected on top of
+// whatever page just loaded, with no close button and no click-outside-to-dismiss.
+// Status only flips to 'active' once the form is actually submitted successfully,
+// so closing the tab or logging out and back in just shows this same modal again.
+function showForcedPasswordResetModal(session) {
+  if (document.getElementById('forced-reset-overlay')) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'forced-reset-overlay';
+  overlay.id = 'forced-reset-overlay';
+  overlay.innerHTML = `
+    <div class="forced-reset-box">
+      <h2>Set Your Password</h2>
+      <p>This is your first sign-in — set your own password before continuing. You won't be able to use the admin panel until this is done.</p>
+      <div class="forced-reset-error" id="forced-reset-error"></div>
+      <div class="field">
+        <label for="forced-reset-pw">New Password</label>
+        <input type="password" id="forced-reset-pw" placeholder="At least 6 characters">
+      </div>
+      <div class="field">
+        <label for="forced-reset-pw-confirm">Confirm New Password</label>
+        <input type="password" id="forced-reset-pw-confirm" placeholder="Repeat password">
+      </div>
+      <div class="forced-reset-actions">
+        <button type="button" class="forced-reset-logout" id="forced-reset-logout">Log out instead</button>
+        <button type="button" class="btn btn-gold" id="forced-reset-submit">Set Password</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  document.getElementById('forced-reset-logout').addEventListener('click', async () => {
+    await signOutSession();
+    window.location.href = 'index.html';
+  });
+
+  document.getElementById('forced-reset-submit').addEventListener('click', async () => {
+    const pw = document.getElementById('forced-reset-pw').value;
+    const confirmPw = document.getElementById('forced-reset-pw-confirm').value;
+    const errorBox = document.getElementById('forced-reset-error');
+    errorBox.classList.remove('visible');
+
+    if (pw.length < 6) {
+      errorBox.textContent = 'Password must be at least 6 characters.';
+      errorBox.classList.add('visible');
+      return;
+    }
+    if (pw !== confirmPw) {
+      errorBox.textContent = 'Passwords do not match.';
+      errorBox.classList.add('visible');
+      return;
+    }
+    const { error: pwError } = await supabaseClient.auth.updateUser({ password: pw });
+    if (pwError) {
+      errorBox.textContent = pwError.message;
+      errorBox.classList.add('visible');
+      return;
+    }
+    const { error: statusError } = await supabaseClient.from('profiles').update({ status: 'active' }).eq('id', session.id);
+    if (statusError) {
+      errorBox.textContent = statusError.message;
+      errorBox.classList.add('visible');
+      return;
+    }
+    window.location.reload();
+  });
+}
+
 async function loadSidebar() {
   const cached = _readSessionCache();
   if (cached && cached.status !== 'invited') {
@@ -387,10 +455,8 @@ async function loadSidebar() {
   let session = requireSession();
   if (!session) return;
 
-  const currentPageEarly = document.body.dataset.page;
-  if (session.status === 'invited' && currentPageEarly !== 'account') {
-    window.location.href = 'account.html?forceReset=1';
-    return;
+  if (session.status === 'invited') {
+    showForcedPasswordResetModal(session);
   }
 
   // The sidebar markup is baked directly into every page (see #sidebar-mount in the HTML),
