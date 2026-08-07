@@ -44,7 +44,7 @@
       <div id="accept-loading" style="padding:20px 0; text-align:center; color:var(--text-muted); font-size:13px;">Checking your invite...</div>
 
       <form class="auth-form" id="accept-form" style="display:none;">
-        <p style="font-size:14px; color:var(--text-dark); line-height:1.6; margin:0 0 18px;">You're signed in — set a password to finish setting up your account.</p>
+        <p style="font-size:14px; color:var(--text-dark); line-height:1.6; margin:0 0 18px;">Set a password to accept your invite and sign in.</p>
         <div class="auth-error" id="accept-error"></div>
         <div class="field">
           <label for="accept-pw">New Password<span class="required-mark">*</span></label>
@@ -67,16 +67,23 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/shared.js"></script>
   <script>
-    // The invite link's #access_token=...&type=invite fragment is consumed
-    // automatically by the Supabase client on load (detectSessionInUrl, on by
-    // default) — by the time _sessionReady resolves, either a real session exists
-    // (link was valid) or it doesn't (expired/already used/tampered with).
-    (async function () {
-      await _sessionReady;
-      const { data: { session } } = await supabaseClient.auth.getSession();
+    // The invite email links here with ?token_hash=...&type=invite in the query
+    // string — a plain page load, nothing gets verified yet. Deliberately NOT
+    // using Supabase's own action_link (a bare GET straight to its /verify
+    // endpoint, which authenticates on load): mail apps and link-scanners
+    // routinely preview links automatically, and a GET to that endpoint burns
+    // the one-time token before the real person ever clicks it (confirmed
+    // 2026-08-06: two real team invites went unused this exact way). Instead,
+    // verifyOtp() only ever runs from inside the form's submit handler below —
+    // i.e. only once a real person has actually typed a password and clicked
+    // Submit — so an automated preview can't consume the token.
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const tokenHash = params.get('token_hash');
+      const otpType = params.get('type') || 'invite';
       document.getElementById('accept-loading').style.display = 'none';
 
-      if (!session) {
+      if (!tokenHash) {
         document.getElementById('accept-invalid').style.display = 'block';
         return;
       }
@@ -104,6 +111,14 @@
 
         const submitBtn = document.getElementById('accept-submit');
         submitBtn.disabled = true;
+
+        const { data: verifyData, error: verifyError } = await supabaseClient.auth.verifyOtp({ token_hash: tokenHash, type: otpType });
+        if (verifyError || !verifyData.session) {
+          document.getElementById('accept-form').style.display = 'none';
+          document.getElementById('accept-invalid').style.display = 'block';
+          return;
+        }
+        const session = verifyData.session;
 
         const { error: pwError } = await supabaseClient.auth.updateUser({ password: pw });
         if (pwError) {

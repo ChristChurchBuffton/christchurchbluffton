@@ -518,7 +518,7 @@
       document.getElementById('modal-backdrop').classList.add('open');
     }
 
-    function openInviteResultModal(name, email, actionLink, emailSent) {
+    function openInviteResultModal(name, email, acceptLink, emailSent) {
       document.getElementById('modal-title').textContent = emailSent ? 'Invite Sent' : 'Invite Not Sent';
       document.getElementById('modal-subtitle').textContent = `${name} — ${email}`;
       document.getElementById('modal-body').innerHTML = `
@@ -565,7 +565,7 @@
 
       logActivity('team_invite', `${name} (${email}) — ${role}`);
       await renderTeam();
-      openInviteResultModal(name, email, data.actionLink, data.emailSent);
+      openInviteResultModal(name, email, data.acceptLink, data.emailSent);
     }
 
     function openEditModal(member) {

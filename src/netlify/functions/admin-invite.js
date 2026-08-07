@@ -33,7 +33,7 @@ function fieldRow(label, valueHtml) {
 // transactional emails (contact.js etc.) — kept as a literal copy since this is a
 // separate serverless function with no shared module system. No temp password field
 // anymore — the button IS the login, a real single-use Supabase invite link.
-function buildInviteEmailHtml(name, email, actionLink, inviterEmail) {
+function buildInviteEmailHtml(name, email, acceptLink, inviterEmail) {
   return `<!DOCTYPE html>
 <html>
 <body style="margin:0; padding:0; background-color:#F5F4EF;">
@@ -50,7 +50,7 @@ function buildInviteEmailHtml(name, email, actionLink, inviterEmail) {
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${fieldRow('Email', email)}</table>
           <table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px auto 8px;">
             <tr><td style="background-color:#303b6a; border-radius:8px;">
-              <a href="${actionLink}" style="display:inline-block; padding:14px 32px; font-family:Arial,Helvetica,sans-serif; font-size:15px; font-weight:bold; color:#FFFFFF; text-decoration:none;">Accept Invite &amp; Set Password</a>
+              <a href="${acceptLink}" style="display:inline-block; padding:14px 32px; font-family:Arial,Helvetica,sans-serif; font-size:15px; font-weight:bold; color:#FFFFFF; text-decoration:none;">Accept Invite &amp; Set Password</a>
             </td></tr>
           </table>
           <p style="font-family:Arial,Helvetica,sans-serif; font-size:12px; color:#999999; text-align:center; margin:10px 0 0;">This link is single-use and expires after a while — if it's stopped working, ask for a new invite.</p>
@@ -104,9 +104,16 @@ exports.handler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: 'Name, email, and a role of site_admin, admin, or staff are required.' }) };
     }
 
-    // Creates the auth user AND returns a real, single-use sign-in link — no
-    // password to generate or type. Clicking it authenticates automatically and
-    // lands on accept-invite.html with a live session already established.
+    // Creates the auth user AND returns a real, single-use invite token — no
+    // password to generate or type. We deliberately do NOT email Supabase's own
+    // action_link (a bare GET to Supabase's /verify endpoint that authenticates
+    // on load) — mail apps and link-scanners routinely "preview" links
+    // automatically, which silently burns a one-time token before the real
+    // person ever clicks it (confirmed 2026-08-06: two team invites went
+    // unused this way). Instead we email a link to our own accept-invite.html
+    // carrying the raw token_hash, and that page only calls verifyOtp() from
+    // inside the password-submit handler — i.e. only on a real, deliberate
+    // form submission, never on page load.
     const linkRes = await fetch(`${SUPABASE_URL}/auth/v1/admin/generate_link`, {
       method: 'POST',
       headers: { apikey: SECRET_KEY, Authorization: `Bearer ${SECRET_KEY}`, 'Content-Type': 'application/json' },
@@ -118,7 +125,7 @@ exports.handler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: linkData.msg || linkData.error_description || 'Could not create that account.' }) };
     }
     const newUserId = (linkData.user && linkData.user.id) || linkData.id;
-    const actionLink = linkData.action_link;
+    const acceptLink = `${SITE_URL}/admin/accept-invite.html?token_hash=${encodeURIComponent(linkData.hashed_token)}&type=invite`;
 
     const profileInsertRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
       method: 'POST',
@@ -150,7 +157,7 @@ exports.handler = async (event) => {
             from: process.env.EMAIL_FROM || 'Christ Church Bluffton <notifications@christchurchbluffton.org>',
             to: [email],
             subject: "You're Invited to the Christ Church Bluffton Admin Panel",
-            html: buildInviteEmailHtml(name, email, actionLink, me.email)
+            html: buildInviteEmailHtml(name, email, acceptLink, me.email)
           }),
           signal: AbortSignal.timeout(10000)
         });
@@ -161,7 +168,7 @@ exports.handler = async (event) => {
       }
     }
 
-    return { statusCode: 200, body: JSON.stringify({ id: newUserId, actionLink, emailSent }) };
+    return { statusCode: 200, body: JSON.stringify({ id: newUserId, acceptLink, emailSent }) };
   } catch (err) {
     console.error('[AdminInvite] Error:', err.message);
     return { statusCode: 500, body: JSON.stringify({ error: 'Something went wrong.' }) };
