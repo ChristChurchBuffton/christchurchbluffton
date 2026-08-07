@@ -91,6 +91,14 @@
       addPasswordToggle(document.getElementById('accept-pw'));
       addPasswordToggle(document.getElementById('accept-pw-confirm'));
 
+      // Holds the session once the token_hash has been successfully verified once.
+      // Verifying spends the one-time token immediately, but setting the password
+      // is a separate step right after — if that second step fails (dropped
+      // connection, closed tab, etc.), the token is already gone. Keeping the
+      // session here means a retry (same page, click Submit again) can skip
+      // straight to saving the password instead of needing a brand-new invite.
+      let verifiedSession = null;
+
       document.getElementById('accept-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const pw = document.getElementById('accept-pw').value;
@@ -112,18 +120,21 @@
         const submitBtn = document.getElementById('accept-submit');
         submitBtn.disabled = true;
 
-        const { data: verifyData, error: verifyError } = await supabaseClient.auth.verifyOtp({ token_hash: tokenHash, type: otpType });
-        if (verifyError || !verifyData.session) {
-          document.getElementById('accept-form').style.display = 'none';
-          document.getElementById('accept-invalid').style.display = 'block';
-          return;
+        if (!verifiedSession) {
+          const { data: verifyData, error: verifyError } = await supabaseClient.auth.verifyOtp({ token_hash: tokenHash, type: otpType });
+          if (verifyError || !verifyData.session) {
+            document.getElementById('accept-form').style.display = 'none';
+            document.getElementById('accept-invalid').style.display = 'block';
+            return;
+          }
+          verifiedSession = verifyData.session;
         }
-        const session = verifyData.session;
+        const session = verifiedSession;
 
         const { error: pwError } = await supabaseClient.auth.updateUser({ password: pw });
         if (pwError) {
           submitBtn.disabled = false;
-          errorBox.textContent = pwError.message;
+          errorBox.textContent = `${pwError.message} Your invite link has already been used — it's safe to just click Submit again.`;
           errorBox.classList.add('visible');
           return;
         }
@@ -134,8 +145,8 @@
           errorBox.classList.add('visible');
           return;
         }
-        logActivity('team_reset_pw', `${session.user.email} — self, accepted invite`);
-        logActivity('login', 'accepted invite', session.user.email);
+        await logActivity('team_reset_pw', `${session.user.email} — self, accepted invite`);
+        await logActivity('login', 'accepted invite', session.user.email);
         window.location.href = 'dashboard.html';
       });
     })();

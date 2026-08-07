@@ -1,6 +1,33 @@
 # Christ Church Bluffton — TODO
 
-## STATUS (2026-08-05): LIVE, no open blockers on the public site. 11 commits pushed to both `origin` and `production` today.
+## STATUS (2026-08-06): LIVE on production, commit `f1e2bd4` pushed to both `origin` and `production`, verified working on the real domain. All 6 team accounts deleted + re-invited through the real magic-link flow (+ 1 test account for Kevin), all 3 team emails sent. GSC: About page re-indexing requested; legacy "Indexed, though blocked by robots.txt" explained as stale pre-launch data, no action needed — check back ~mid-August to confirm it cleared. Taking a break here; next session picks up whenever there's new data/replies to review.
+
+## 2026-08-06 — Site Admin tier follow-through, Staff permission lock, Bradley Chestnut bio, ghost link cleanup
+- [x] Real magic-link Invite flow built end-to-end (Supabase `generate_link`, top-level `redirect_to` — nesting it under `options` silently fell back to the project's Site URL), replacing the old broken `localhost:8100` invite call and then the temp-password version that followed it. New `accept-invite.html` landing page, new `admin-team.js` function for Reset Password/Remove (also dead before today).
+- [x] Blocking forced-password-reset modal (`showForcedPasswordResetModal` in `shared.js`) replaces the old redirect-to-account-page approach — renders over whatever page just loaded instead of losing the user's place.
+- [x] Password field UX: eye-icon show/hide toggle added to every password field sitewide in the admin (`addPasswordToggle()`), autocomplete attributes fixed, no more preloaded value in the New Password field on Account Settings. "Forgotten your password? Contact kevin@..." line added to sign-in page — verified live on production.
+- [x] Staff role locked out of permissions it will never use — Newsletter, Subscribers, Content Editor, Congregants, Events. Invite modal also now defaults to every checkbox unchecked instead of pre-checked.
+- [x] Added a "Meet Our Worship Pastor" section to about.html for Bradley Chestnut (flipped layout vs. Jonathan's section, divider between the two). Two real Content Editor bugs found and fixed along the way: a missing `site_content_sections` registry row silently dropped all of the section's fields/images, and empty `original_value` on the inserted field rows silently blocked inline text editing — neither had any visible error, found via direct browser console inspection.
+- [x] **Real bug found and fixed 2026-08-06**: Bradley's flipped section never collapsed to a single column at any screen width, all the way down to phone size (image squeezed to 40px wide) — a CSS specificity conflict where `.pastor-grid.reverse` (unconditional) outranked the mobile media query's plain `.pastor-grid` rule. Fixed by adding a matching override inside the media query; verified via iframe-injection testing at 1440/1200/1050/1024/1023/900/768/480/375/360px.
+- [x] Removed the hidden gallery listing page (`src/a34317d8/index.html`) — it went stale on every new admin upload without a redeploy. Kept the underlying Netlify→Supabase Storage proxy redirect and all 5 real static photo files, so individual "Copy Link" URLs from the admin Photos page are completely unaffected.
+- [x] Added explicit 404 redirects in `netlify.toml` for the bare `/a34317d8` and `/a34317d8/` paths (no filename) so they show the site's normal 404 page instead of a raw Supabase JSON error — verified live on both staging and production (404 status, real branded not-found page; real photo links unaffected).
+- [x] 12 real photos moved (not copied) from Downloads into `src/images/` — Bradley's headshot (now wired into about.html) plus 11 others (communion table setting x6, greeting guests entrance x4, one alternate Bradley headshot) still unplaced, not yet requested.
+- [x] Three email drafts saved to `comm/client/` (team explainer, Jonathan's Reading Mode feature, Judy's Photos walkthrough) — **all 3 sent by Kevin 2026-08-06**, after review passes that caught a stray "Judy," line mid-paragraph in the group email (fixed before sending) and flagged a duplicate "Account permissions" bullet (left as-is, Kevin's call).
+- [x] **Pushed to `origin` AND `production` 2026-08-06, commit `f1e2bd4`** — verified live on christchurchbluffton.org (About page breakpoints, ghost-link 404s, admin panel login/Accounts/Content Editor all checked directly).
+- [x] Bradley Chestnut promoted to Site Admin (Kevin's own action, confirmed live).
+- [x] Jonathan Riddle deleted + re-invited alongside the other 5 so his account goes through the same real magic-link flow (he'd been on the account from an earlier real-invite test, so was previously "Active" — now reset to "Invited" like everyone else).
+- [x] **All 6 non-Kevin team accounts deleted and re-invited** through the real magic-link flow, plus a 7th test invite (`contact@forgeddigitaldesign.com`, "Kevin McCartney Test", Site Admin) so Kevin can walk through the real flow himself. All 7 confirmed "Invite Sent" with a real one-click link emailed via Resend:
+  - Christ Church Admin → admin@christchurchbluffton.org → Site Admin
+  - Christ Church Info → info@christchurchbluffton.org → Admin (all permissions)
+  - Kim Perri → kimperri@aol.com → Admin (all permissions)
+  - Bradley Chestnut → bradley@christchurchbluffton.org → Site Admin
+  - Treasurer → treasurer@christchurchbluffton.org → Admin (all permissions)
+  - Jonathan Riddle → jonathan@christchurchbluffton.org → Site Admin
+  - Kevin McCartney Test → contact@forgeddigitaldesign.com → Site Admin
+- [x] GSC: requested re-indexing for `/about` (content changed). Reviewed legacy "Indexed, though blocked by robots.txt" warning (2 pages: root + www variant, last crawled 7/23, validation started 8/1) — confirmed stale pre-launch robots.txt data, not a current issue. **Check back ~mid-August** to confirm it cleared to "Passed."
+- [ ] Not yet requested: wire the 11 remaining unplaced real photos (`communion-table-setting-1` through `-6.webp`, `greeting-guests-entrance-1` through `-4.webp`) into actual pages.
+
+## STATUS (2026-08-05, historical): LIVE, no open blockers on the public site. 11 commits pushed to both `origin` and `production` that day.
 
 ## 2026-08-05 — Admin panel merged into this repo, LIVE at /admin, live-site forms now feed it
 - [x] Admin panel moved from a standalone repo into `src/admin/` in this repo, deployed as part of the normal site build, reachable at `christchurchbluffton.org/admin`
@@ -11,7 +38,7 @@
 - [x] Prayer popup: added optional Email/Phone fields; fixed a bug where it got stuck on the "Thank you" screen after submitting instead of resetting for a second use
 - [x] Netlify environment variables (`SUPABASE_URL`, `SUPABASE_SECRET_KEY`) added to both the testing and production Netlify sites (separate accounts) so the live forms can actually write to the database
 - [x] Added 2 new real admin-panel team members: Bradley Chestnut, and a generic Treasurer account. Every account's password reset to a real distribution temp password and status set to "invited" (except Kevin's own), so each person is forced to set their own password the first time they sign in
-- [ ] Dashboard's Recent Activity list (12 entries + "Load 10 more") is built and tested but not yet pushed — small, no rush
+- [x] Dashboard's Recent Activity list (12 entries + "Load 10 more") — confirmed live in production (commit `cf89a91`), this line was stale
 - [ ] Drafted a team-explainer email and an admin-panel-invite email template — see `comm/client/` — not sent yet
 
 ## STATUS (2026-08-03, historical): LIVE, no open blockers. Commits `245a8b3` + `2b83e0d` pushed to both `origin` and `production`.
@@ -177,7 +204,6 @@ The push itself:
 - [x] Pastor bio — received (2026-04-07), applied to about.html; reordered 2026-04-21 to lead with family, ministry, then interests
 - [x] Mission statement — received (2026-04-07), applied to about.html + index.html
 - [x] Ministry team mission statements — received (2026-04-10) from Ministry Teams Guidelines doc, applied to serve.html (Greeting renamed to "Greeting & Ushers" to match doc; added 8th card, Altar Guild)
-- [ ] Pastor quote — client confirmed 2026-07-24 they now have it; waiting on the actual text to apply to about.html
 - [x] Content review feedback on new site build — first round received 2026-07-20 (About beliefs paragraph + Join Us "What to Expect" copy), both applied. Still awaiting full remaining review from Rev. Riddle.
 - [x] ~~ACNA membership verification~~ — removed 2026-07-24 per client, not needed
 - [x] ~~Email verification / display name fix (David, admin)~~ — dropped 2026-07-24 per client, no context existed for this anywhere
@@ -193,7 +219,6 @@ The push itself:
 - [x] Join Us page — worship service photo (`altar-service-helpers.webp`)
 - [x] Join Us page — Book of Common Prayer image (liturgy section) — done 2026-07-21, AI-generated (Flux Dev via Leonardo.ai), `book-of-common-prayer.webp`
 - [x] Join Us page — worship music image (music section) — done 2026-07-21, AI-generated (Flux Dev via Leonardo.ai), `worship-piano-keys.webp`
-- [ ] Groups page — Table 246 photo (`table-246-group.webp`) — added April 2026, but **flagged 2026-07-27 by the team as the wrong photo** (it's actually from a discontinued coffee gathering, not a real Table 246 group). Left in place for now; waiting on Karen or Judy to supply a real Table 246 photo.
 - [x] Groups page — Prayer Group image — CORRECTION 2026-07-23: this was already done, `prayer-group-saved-book.webp` is live on the page. The archived `prayer-group-bible-study.webp` is an unused alternate, not a gap.
 - [x] Groups page — Youth Activities image — CORRECTION 2026-07-23: this was already done, `youth-group-hands-prayer.webp` is live on the page. The archived `youth-group-fellowship-circle.webp` is an unused alternate, not a gap.
 - [x] Serve page — all 8 ministry team photos (Greeting & Ushers, Altar Guild, Communion, Lay Readers, Nursery, Musical Worship, Technology & Social Media, Safety) — done 2026-07-22/23
@@ -221,9 +246,6 @@ The push itself:
 - [x] ~~DKIM records from Tithely/SendGrid~~ — closed 2026-07-24 per client, email deliverability is already working fine, no need to chase Tithe.ly support further
 - [x] ~~DMARC upgrade~~ — closed 2026-07-24 per client, same reason as above
 - [x] SPF — done
-
-## Pre-Launch (for Jonathan's production site — not live yet)
-- [ ] Cross-browser testing (Firefox, Safari, Edge, mobile)
 
 ## Post-Launch QA — reorganized 2026-07-24, categorized per client
 - [x] Verify Tithe.ly donation button/modal works on production — confirmed working 2026-07-24 per client, re-confirmed live 2026-08-01

@@ -246,7 +246,7 @@ const ACTIVITY_LABELS = {
 function logActivity(action, target, actorOverride) {
   const session = getSession();
   const actor = actorOverride || (session ? session.email : 'unknown');
-  supabaseClient.from('activity_log').insert({ actor, action, target: target || '' })
+  return supabaseClient.from('activity_log').insert({ actor, action, target: target || '' })
     .then(({ error }) => { if (error) console.error('logActivity failed:', error.message); });
 }
 

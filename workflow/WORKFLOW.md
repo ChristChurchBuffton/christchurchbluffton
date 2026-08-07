@@ -183,6 +183,22 @@
 
 ---
 
+## Phase 9: Site Admin Tier, Team Onboarding Follow-Through, Ghost Link Cleanup (2026-08-06) ✅ COMPLETE — pushed to production, all 7 invites sent
+> Follow-through on Phase 8's admin panel launch: the real Site Admin role tier (built and shipped earlier as commit `8de01e1`), a fully working Invite flow (discovered broken in production the whole time), and a permission model that actually matches what each role should be able to do.
+
+- [x] **Site Admin role tier** — third tier above Admin/Staff, real RLS enforcement (`admin/supabase/migrations/0008_site_admin_role.sql`), not just UI hiding. Only Site Admins can reach the Accounts page or edit other Admin/Site Admin rows.
+- [x] **Real Invite flow, rebuilt twice** — first replaced the dead `localhost:8100` call with a temp-password Netlify Function, then rebuilt again onto Supabase's real magic-link (`generate_link`) with actual email delivery via Resend. Root-caused a silent bug where `redirect_to` nested under `options` was ignored — must be a top-level field on the request body. New `accept-invite.html` landing page consumes the link and sets a real password before landing on the dashboard.
+- [x] **Reset Password / Remove rebuilt** — new `admin-team.js` Netlify Function, same dead-backend problem as the old Invite button, now fixed for both admin-initiated actions and self-service "Delete My Account."
+- [x] **Password UX pass** — show/hide eye toggle on every password field, autocomplete fixes, no more preloaded value in New Password on Account Settings, "forgot your password" contact line on sign-in, blocking full-screen forced-reset modal that renders in place instead of redirecting away.
+- [x] **Staff permission lock** — Staff can never be granted Newsletter, Subscribers, Content Editor, Congregants, or Events, since the role was never meant to reach them; Invite modal now defaults to no permissions checked instead of everything checked.
+- [x] **Bradley Chestnut "Worship Pastor" bio section** added to about.html, flipped layout vs. Jonathan's section. Two real Content Editor data bugs found and fixed in the process — see `todo.md` for detail — plus a genuine responsive bug (flipped section never collapsed to single column on mobile) found and fixed via the project's iframe breakpoint-testing protocol.
+- [x] **Ghost link (`/a34317d8`) cleanup** — removed the hidden gallery listing page (went stale without a redeploy on every new upload), kept the underlying Supabase Storage proxy so per-photo "Copy Link" URLs are unaffected, and added explicit redirects so the bare folder path shows the real 404 page instead of a raw Supabase error.
+- [x] Committed `f1e2bd4`, pushed to both `origin` and `production` — verified live on christchurchbluffton.org (About page breakpoints via computed-style checks at 1440 down to 375px, ghost-link 404s, admin login/Accounts/Content Editor).
+- [x] All 6 existing non-Kevin team accounts (incl. Jonathan, added back into scope so everyone goes through the identical real flow) deleted and re-invited through the real magic-link flow, plus a 7th test invite for Kevin (`contact@forgeddigitaldesign.com`) to verify the flow himself. All 3 drafted emails sent by Kevin.
+- [x] GSC follow-up: requested re-indexing for `/about`; reviewed the legacy "Indexed, though blocked by robots.txt" warning and confirmed it's stale pre-launch data already mid-validation (started 8/1) — no action needed, just a check-back in ~mid-August.
+
+---
+
 ## Quick Reference
 | Item | Value |
 |---|---|
