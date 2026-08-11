@@ -375,8 +375,25 @@
       return parts[parts.length - 1] || '';
     }
 
+    // Public forms (newsletter, contact) don't block someone from submitting more than
+    // once, so the same email can have multiple raw rows — collapse to one row per email
+    // for display. `subscribers` is already ordered newest-first, so the first occurrence
+    // kept here is the most recent submission.
+    function dedupeByEmail(list) {
+      const seen = new Set();
+      const result = [];
+      for (const s of list) {
+        const key = (s.email || '').toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        result.push(s);
+      }
+      return result;
+    }
+
     function renderSubscribers() {
-      let list = [...subscribers];
+      const unique = dedupeByEmail(subscribers);
+      let list = [...unique];
       if (sourceFilter) list = list.filter(s => s.source === sourceFilter);
       if (searchTerm) {
         const term = searchTerm.toLowerCase();
@@ -386,11 +403,11 @@
       }
       list.sort((a, b) => lastNameOf(`${a.firstName} ${a.lastName}`).localeCompare(lastNameOf(`${b.firstName} ${b.lastName}`)));
 
-      document.getElementById('subscribers-count').textContent = `${subscribers.length} ${subscribers.length === 1 ? 'person' : 'people'}`;
+      document.getElementById('subscribers-count').textContent = `${unique.length} ${unique.length === 1 ? 'person' : 'people'}`;
 
       const rows = document.getElementById('subscriber-rows');
       if (list.length === 0) {
-        rows.innerHTML = `<tr><td colspan="5" class="subscriber-empty">${subscribers.length === 0 ? 'No subscribers yet — add the first one.' : 'No matches for this filter/search.'}</td></tr>`;
+        rows.innerHTML = `<tr><td colspan="5" class="subscriber-empty">${unique.length === 0 ? 'No subscribers yet — add the first one.' : 'No matches for this filter/search.'}</td></tr>`;
         return;
       }
       rows.innerHTML = list.map(s => `

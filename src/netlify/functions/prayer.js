@@ -117,8 +117,6 @@ exports.handler = async (event) => {
       }
     }
 
-    // TEMP: staff notification disabled for staging test 2026-08-11 — RESTORE before final push to production
-    /*
     // Send email notification via Resend
     if (process.env.RESEND_API_KEY) {
       await fetch('https://api.resend.com/emails', {
@@ -139,7 +137,6 @@ exports.handler = async (event) => {
         signal: AbortSignal.timeout(10000)
       });
     }
-    */
 
     // Send a confirmation reply to the submitter, if they gave an email — this form allows
     // fully anonymous submissions (no email), so there's nothing to send to otherwise

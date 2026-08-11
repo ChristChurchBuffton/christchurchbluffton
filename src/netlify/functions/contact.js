@@ -174,8 +174,6 @@ exports.handler = async (event) => {
       }
     }
 
-    // TEMP: staff notification disabled for staging test 2026-08-11 — RESTORE before final push to production
-    /*
     // Send email notification via Resend
     if (process.env.RESEND_API_KEY) {
       const notifyTo = ['info@christchurchbluffton.org', 'admin@christchurchbluffton.org'];
@@ -210,7 +208,6 @@ exports.handler = async (event) => {
         signal: AbortSignal.timeout(10000)
       });
     }
-    */
 
     // Send a confirmation reply to the submitter — "Prayer Request" and "Receiving Updates"
     // get the same reply as their dedicated forms (prayer.js / stay-updated.js); every other
