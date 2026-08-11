@@ -1,5 +1,34 @@
 # Christ Church Bluffton — TODO
 
+## Queued for next push (2026-08-10) — not yet pushed to origin or production
+1. [ ] `src/netlify/functions/prayer.js` — added `bradley@christchurchbluffton.org` to prayer request notification recipients (was admin@ + jonathan@, now also bradley@)
+2. [ ] `src/netlify/functions/prayer.js` — auto-reply email to prayer request submitters, built and wired in (syntax-checked, not yet live-tested). Sends only if they gave an email (form allows anonymous/no-email submissions). Copy approved by Kevin via local preview at `comm/client/2026-08-10-prayer-autoreply-email-preview.html`. Sender shows as "Christ Church Bluffton", `reply_to` set to `admin@christchurchbluffton.org` so replies land in a real staffed inbox instead of the send-only `notifications@` address.
+
+## Auto-Reply Emails — current workflow (started 2026-08-10, building one form at a time)
+Copy for all three drafted and approved by Kevin via local preview server (`npx http-server`, port 5511) — preview files kept in `comm/client/` for reference: `2026-08-10-prayer-autoreply-email-preview.html`, `2026-08-10-contact-autoreply-email-preview.html`, `2026-08-10-newsletter-autoreply-email-preview.html`.
+- [x] Prayer request auto-reply — copy approved, code wired into `prayer.js` (see item 2 above). Still needs: a real live-submission test (not just syntax check), then push.
+- [x] Newsletter auto-reply — copy approved, reply-to decided as `info@christchurchbluffton.org` (matches the address already public on the Contact page). Wired into `stay-updated.js` 2026-08-10 (syntax-checked, not yet live-tested). Email is required on this form, so no "did they give an email" guard needed (unlike prayer).
+- [x] Contact form auto-reply — wired into `contact.js` 2026-08-10 (syntax-checked, not yet live-tested). Branches on the "I'm Interested In" dropdown: selecting **Prayer Request** sends the same pastoral reply as `prayer.js` (reply-to `admin@`), selecting **Receiving Updates** sends the same subscribed-confirmation as `stay-updated.js` (reply-to `info@`), and Visiting/Volunteering/Other get the standard "Message Received" contact reply (reply-to `admin@`) — per Kevin's explicit rule 2026-08-10.
+- [ ] All three forms now have auto-replies wired in (prayer, newsletter, contact) — next: live-test each end-to-end (real submission, confirm the auto-reply actually arrives and looks right in a real inbox, not just the local preview), then push to `origin`, confirm on staging, then push to `production`.
+
+## Future phase — "Submission Notifications" admin tab (not started, Kevin's idea 2026-08-11, begin at a later date)
+Right now, who gets notified about a form submission is hardcoded directly in the function files — e.g. prayer goes to admin@/jonathan@/bradley@, contact to info@/admin@, newsletter to info@ — and changing any of it (like adding bradley@ today) requires a code edit + deploy every time. This tab would let admin panel staff manage those recipient lists themselves, no deploy needed.
+- [ ] New Supabase migration (`0009_...`, next in sequence after `0008_site_admin_role.sql`) — a small table holding the recipient list per form (`prayer` / `contact` / `newsletter`), seeded with today's current hardcoded addresses so behavior doesn't change until someone actually edits it in the new UI.
+- [ ] New permission key (e.g. `notifications`) added to `PAGE_PERMISSION_MAP` in `shared.js`, plus the Invite modal's permission checklist (`staff.html`) — same pattern as every other tab (Newsletter, Subscribers, etc.), defaults unchecked.
+- [ ] New admin page (`src/admin/notifications.html`) — simple settings-style UI, one editable recipient list per form, not a full record-browsing table like Subscribers/Prayer Requests.
+- [ ] New sidebar nav entry (`includes/sidebar.html` + wherever `build-sidebar.js` duplicates it).
+- [ ] Update `prayer.js`, `contact.js`, and `stay-updated.js` to fetch recipients from Supabase instead of the hardcoded arrays — with the current hardcoded list kept as a fallback in code in case the fetch fails or the table's empty, so a database hiccup can't silently kill staff notifications entirely.
+- [ ] Log changes to `activity_log` when someone edits recipients, so it shows up in the Dashboard's Recent Activity feed (who changed it, when) — same as other admin actions already do.
+- [ ] Test: each form still notifies the right people after the switch from hardcoded to database-driven, and the new admin UI itself (add/remove an email, save, reload, confirm it stuck).
+
+## Future phase — Unsubscribe mechanism (not started, separate from the auto-reply work above)
+Decided 2026-08-10: unsubscribing marks a subscriber as unsubscribed rather than deleting them, so staff can see who unsubscribed and when.
+- [ ] Add a Supabase migration giving `subscribers` a real status (e.g. `unsubscribed_at` or a status column) — currently that table has no such field, staff just hard-delete someone to "unsubscribe" them today.
+- [ ] Build a real unsubscribe link using a per-person token (not a plain email address in the URL, which anyone could use to unsubscribe someone else) — new small Netlify function + a simple confirmation landing page.
+- [ ] On unsubscribe: notify `info@christchurchbluffton.org` and reflect the change in the admin Subscribers list.
+- [ ] Once this is live, swap the newsletter auto-reply's "reply or email us to unsubscribe" line for the real one-click unsubscribe link.
+- [ ] Update `privacy.html`'s unsubscribe language to match the new real mechanism (currently says "contact us" only).
+
 ## STATUS (2026-08-06): LIVE on production, commit `f1e2bd4` pushed to both `origin` and `production`, verified working on the real domain. All 6 team accounts deleted + re-invited through the real magic-link flow (+ 1 test account for Kevin), all 3 team emails sent. GSC: About page re-indexing requested; legacy "Indexed, though blocked by robots.txt" explained as stale pre-launch data, no action needed — check back ~mid-August to confirm it cleared. Taking a break here; next session picks up whenever there's new data/replies to review.
 
 ## 2026-08-06 — Site Admin tier follow-through, Staff permission lock, Bradley Chestnut bio, ghost link cleanup

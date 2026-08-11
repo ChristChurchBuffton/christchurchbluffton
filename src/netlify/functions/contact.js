@@ -43,6 +43,26 @@ function emailShell(heading, fieldsHtml) {
 </html>`;
 }
 
+function replyShell(heading, bodyHtml) {
+  return `<!DOCTYPE html>
+<html>
+<body style="margin:0; padding:0; background-color:#F5F4EF;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F5F4EF; padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; background-color:#FFFFFF; border-radius:12px; overflow:hidden;">
+        <tr><td style="background-color:#303b6a; padding:28px 32px 22px;">
+          <div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#A9B3D6;">Christ Church Bluffton</div>
+          <div style="font-family:Georgia,'Times New Roman',serif; font-size:24px; color:#FFFFFF; margin-top:8px;">${heading}</div>
+        </td></tr>
+        <tr><td style="padding:28px 32px;">${bodyHtml}
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
 async function breezeRequest(endpoint, params) {
   const url = new URL(endpoint, process.env.BREEZE_URL + '/');
   Object.entries(params).forEach(([k, v]) => {
@@ -154,6 +174,8 @@ exports.handler = async (event) => {
       }
     }
 
+    // TEMP: staff notification disabled for staging test 2026-08-11 — RESTORE before final push to production
+    /*
     // Send email notification via Resend
     if (process.env.RESEND_API_KEY) {
       const notifyTo = ['info@christchurchbluffton.org', 'admin@christchurchbluffton.org'];
@@ -184,6 +206,91 @@ exports.handler = async (event) => {
           subject: `New Contact Form — ${fullName}`,
           text: `New contact form submission:\n\nName: ${fullName}\nEmail: ${email}\nPhone: ${phone || '(none)'}\nInterest: ${interest}\nMessage: ${message || '(none)'}`,
           html: emailShell('Contact Form Submission', fieldsHtml)
+        }),
+        signal: AbortSignal.timeout(10000)
+      });
+    }
+    */
+
+    // Send a confirmation reply to the submitter — "Prayer Request" and "Receiving Updates"
+    // get the same reply as their dedicated forms (prayer.js / stay-updated.js); every other
+    // interest gets the standard contact-form reply below.
+    if (process.env.RESEND_API_KEY) {
+      let subject, replyTo, heading, bodyHtml, textBody;
+
+      if (interest === 'prayer') {
+        const prayerText = message || 'Submitted via the contact form — no details given, please follow up.';
+        subject = "We've Received Your Prayer Request";
+        replyTo = 'admin@christchurchbluffton.org';
+        heading = 'Prayer Received';
+        textBody = `Thank you for trusting us with this.\n\nYour prayer request has been received, and our pastoral team will be lifting you up.\n\nPrayer: ${prayerText}\n\nIf you'd like to talk with someone directly, you're always welcome to reach out at admin@christchurchbluffton.org.\n\nWith you in prayer,\nChrist Church Bluffton`;
+        bodyHtml = `
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">
+            Thank you for trusting us with this.
+          </p>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">
+            Your prayer request has been received, and our pastoral team will be lifting you up.
+          </p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${fieldRow('Prayer', prayerText.replace(/\n/g, '<br>'))}
+          </table>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:6px 0 20px;">
+            If you'd like to talk with someone directly, you're always welcome to reach out at <a href="mailto:admin@christchurchbluffton.org" style="color:#303b6a;">admin@christchurchbluffton.org</a>.
+          </p>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:28px 0 0; padding-top:20px; border-top:1px solid #EEEEEE;">
+            With you in prayer,<br>Christ Church Bluffton
+          </p>`;
+      } else if (interest === 'updates') {
+        subject = "You're Signed Up for Our Newsletter";
+        replyTo = 'info@christchurchbluffton.org';
+        heading = "You're Subscribed";
+        textBody = `Thanks for signing up!\n\nYou're now subscribed to receive newsletters and updates from Christ Church Bluffton.\n\nDidn't sign up for this, or want to stop receiving these emails? Just reply to this email or reach out to us at info@christchurchbluffton.org and we'll take care of it right away.\n\nBlessings,\nChrist Church Bluffton`;
+        bodyHtml = `
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">
+            Thanks for signing up!
+          </p>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">
+            You're now subscribed to receive newsletters and updates from Christ Church Bluffton.
+          </p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${fieldRow('Email', email)}
+          </table>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:6px 0 20px;">
+            Didn't sign up for this, or want to stop receiving these emails? Just reply to this email or reach out to us at <a href="mailto:info@christchurchbluffton.org" style="color:#303b6a;">info@christchurchbluffton.org</a> and we'll take care of it right away.
+          </p>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:28px 0 0; padding-top:20px; border-top:1px solid #EEEEEE;">
+            Blessings,<br>Christ Church Bluffton
+          </p>`;
+      } else {
+        subject = "We've Received Your Message";
+        replyTo = 'admin@christchurchbluffton.org';
+        heading = 'Message Received';
+        textBody = `Thank you for reaching out to Christ Church Bluffton.\n\nYour message has been received, and someone from our team will follow up with you soon.\n\nYour Message: ${message || '(none)'}\n\nIf you need anything before then, feel free to reach out directly at admin@christchurchbluffton.org.\n\nBlessings,\nChrist Church Bluffton`;
+        bodyHtml = `
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">
+            Thank you for reaching out to Christ Church Bluffton.
+          </p>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">
+            Your message has been received, and someone from our team will follow up with you soon.
+          </p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${fieldRow('Your Message', (message || '(none)').replace(/\n/g, '<br>'))}
+          </table>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:6px 0 20px;">
+            If you need anything before then, feel free to reach out directly at <a href="mailto:admin@christchurchbluffton.org" style="color:#303b6a;">admin@christchurchbluffton.org</a>.
+          </p>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:28px 0 0; padding-top:20px; border-top:1px solid #EEEEEE;">
+            Blessings,<br>Christ Church Bluffton
+          </p>`;
+      }
+
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: process.env.EMAIL_FROM || 'Christ Church Bluffton <notifications@christchurchbluffton.org>',
+          reply_to: replyTo,
+          to: [email],
+          subject,
+          text: textBody,
+          html: replyShell(heading, bodyHtml)
         }),
         signal: AbortSignal.timeout(10000)
       });

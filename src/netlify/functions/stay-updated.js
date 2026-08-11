@@ -43,6 +43,26 @@ function emailShell(heading, fieldsHtml) {
 </html>`;
 }
 
+function replyShell(heading, bodyHtml) {
+  return `<!DOCTYPE html>
+<html>
+<body style="margin:0; padding:0; background-color:#F5F4EF;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F5F4EF; padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; background-color:#FFFFFF; border-radius:12px; overflow:hidden;">
+        <tr><td style="background-color:#303b6a; padding:28px 32px 22px;">
+          <div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#A9B3D6;">Christ Church Bluffton</div>
+          <div style="font-family:Georgia,'Times New Roman',serif; font-size:24px; color:#FFFFFF; margin-top:8px;">${heading}</div>
+        </td></tr>
+        <tr><td style="padding:28px 32px;">${bodyHtml}
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
 async function breezeRequest(endpoint, params) {
   const url = new URL(endpoint, process.env.BREEZE_URL + '/');
   Object.entries(params).forEach(([k, v]) => {
@@ -120,6 +140,8 @@ exports.handler = async (event) => {
       }
     }
 
+    // TEMP: staff notification disabled for staging test 2026-08-11 — RESTORE before final push to production
+    /*
     // Send email notification via Resend
     if (process.env.RESEND_API_KEY) {
       await fetch('https://api.resend.com/emails', {
@@ -131,6 +153,38 @@ exports.handler = async (event) => {
           subject: `New Stay Updated Signup — ${email}`,
           text: `New stay updated signup:\n\nEmail: ${email}`,
           html: emailShell('Newsletter Submission', fieldRow('Email', `<a href="mailto:${email}" style="color:#303b6a;">${email}</a>`))
+        }),
+        signal: AbortSignal.timeout(10000)
+      });
+    }
+    */
+
+    // Send a confirmation reply to the submitter — email is required on this form, unlike prayer
+    if (process.env.RESEND_API_KEY) {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: process.env.EMAIL_FROM || 'Christ Church Bluffton <notifications@christchurchbluffton.org>',
+          reply_to: 'info@christchurchbluffton.org',
+          to: [email],
+          subject: "You're Signed Up for Our Newsletter",
+          text: `Thanks for signing up!\n\nYou're now subscribed to receive newsletters and updates from Christ Church Bluffton.\n\nDidn't sign up for this, or want to stop receiving these emails? Just reply to this email or reach out to us at info@christchurchbluffton.org and we'll take care of it right away.\n\nBlessings,\nChrist Church Bluffton`,
+          html: replyShell('You\'re Subscribed', `
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">
+            Thanks for signing up!
+          </p>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">
+            You're now subscribed to receive newsletters and updates from Christ Church Bluffton.
+          </p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${fieldRow('Email', email)}
+          </table>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:6px 0 20px;">
+            Didn't sign up for this, or want to stop receiving these emails? Just reply to this email or reach out to us at <a href="mailto:info@christchurchbluffton.org" style="color:#303b6a;">info@christchurchbluffton.org</a> and we'll take care of it right away.
+          </p>
+          <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:28px 0 0; padding-top:20px; border-top:1px solid #EEEEEE;">
+            Blessings,<br>Christ Church Bluffton
+          </p>`)
         }),
         signal: AbortSignal.timeout(10000)
       });
