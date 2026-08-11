@@ -239,7 +239,8 @@ const ACTIVITY_LABELS = {
   team_edit: 'Edited team member',
   team_remove: 'Removed team member',
   team_reset_pw: 'Reset a team member\'s password',
-  notification_settings_edit: 'Updated notification recipients'
+  notification_settings_edit: 'Updated notification recipients',
+  dev_update: 'Dev Update'
 };
 
 // Fire-and-forget, same as the old localStorage version — callers never awaited this
@@ -414,6 +415,101 @@ function addPasswordToggle(input) {
 // whatever page just loaded, with no close button and no click-outside-to-dismiss.
 // Status only flips to 'active' once the form is actually submitted successfully,
 // so closing the tab or logging out and back in just shows this same modal again.
+// Consumes a one-shot highlight left by a "Show Me" click (see showPanelAnnouncements
+// below) — sessionStorage survives the full page reload a Show Me navigation causes,
+// unlike any in-memory JS state. Cleared immediately after use so it never re-fires on
+// a later, unrelated visit to the same page.
+function consumePendingHighlight() {
+  const selector = sessionStorage.getItem('panelHighlightSelector');
+  if (!selector) return;
+  sessionStorage.removeItem('panelHighlightSelector');
+  const el = document.querySelector(selector);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.classList.add('panel-highlight-target');
+  el.addEventListener('animationend', () => el.classList.remove('panel-highlight-target'), { once: true });
+}
+
+function _escapeAnnouncementHtml(str) {
+  return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+// One-time "what's new" popups, targeted by role and dismissed per-person — one person
+// clicking Okay doesn't hide it from other targeted people who haven't seen it yet. No
+// authoring UI exists yet; rows are inserted directly (see migration 0011).
+async function getPendingAnnouncements(session) {
+  const [{ data: announcements, error: annError }, { data: dismissals, error: dismError }] = await Promise.all([
+    supabaseClient.from('panel_announcements').select('*').order('created_at', { ascending: true }),
+    supabaseClient.from('panel_announcement_dismissals').select('announcement_id').eq('user_id', session.id)
+  ]);
+  if (annError || dismError) {
+    console.error('getPendingAnnouncements failed:', (annError || dismError).message);
+    return [];
+  }
+  const dismissedIds = new Set(dismissals.map(d => d.announcement_id));
+  return announcements.filter(a => (a.target_roles || []).includes(session.role) && !dismissedIds.has(a.id));
+}
+
+// Steps through the given announcements one at a time. Each click — whether labeled
+// "Next" or "Okay" — records that specific announcement as dismissed for this person
+// before advancing, so navigating away mid-sequence doesn't lose progress already made.
+function showPanelAnnouncements(session, announcements) {
+  if (!announcements.length || document.getElementById('announcement-overlay')) return;
+  let index = 0;
+  // Which announcement (if any) Show Me was already used for — survives the full page
+  // reload a Show Me navigation causes, so the button doesn't reappear once you're
+  // already looking at the thing it pointed to.
+  const usedShowMeId = sessionStorage.getItem('panelShowMeAnnouncementId');
+  const overlay = document.createElement('div');
+  overlay.className = 'announcement-overlay';
+  overlay.id = 'announcement-overlay';
+  document.body.appendChild(overlay);
+
+  async function dismiss(a) {
+    const { error } = await supabaseClient.from('panel_announcement_dismissals')
+      .insert({ announcement_id: a.id, user_id: session.id });
+    if (error) console.error('dismiss announcement failed:', error.message);
+    if (a.id === usedShowMeId) sessionStorage.removeItem('panelShowMeAnnouncementId');
+  }
+
+  function render() {
+    const a = announcements[index];
+    const isLast = index === announcements.length - 1;
+    const hasShowMe = a.target_page && a.highlight_selector && a.id !== usedShowMeId;
+    overlay.innerHTML = `
+      <div class="announcement-box">
+        <div class="announcement-eyebrow">
+          <span>Panel Update Announcement</span>
+          ${announcements.length > 1 ? `<span>${index + 1} of ${announcements.length}</span>` : ''}
+        </div>
+        <h2>${_escapeAnnouncementHtml(a.title)}</h2>
+        <p>${_escapeAnnouncementHtml(a.body)}</p>
+        <div class="announcement-actions">
+          ${hasShowMe ? `<button type="button" class="announcement-show-me" id="announcement-show-me-btn">Show Me</button>` : '<span></span>'}
+          <button type="button" class="btn btn-gold" id="announcement-next-btn">${isLast ? 'Okay' : 'Next'}</button>
+        </div>
+      </div>`;
+    document.getElementById('announcement-next-btn').addEventListener('click', async () => {
+      await dismiss(a);
+      if (isLast) {
+        overlay.remove();
+        if (!location.pathname.endsWith('/dashboard.html')) window.location.href = 'dashboard.html';
+      } else { index++; render(); }
+    });
+    if (hasShowMe) {
+      document.getElementById('announcement-show-me-btn').addEventListener('click', () => {
+        // Deliberately does NOT dismiss — this announcement is still unread, so it pops
+        // back up on the destination page alongside the highlight. Only Next/Okay
+        // actually advances or closes things out.
+        sessionStorage.setItem('panelHighlightSelector', a.highlight_selector);
+        sessionStorage.setItem('panelShowMeAnnouncementId', a.id);
+        window.location.href = a.target_page;
+      });
+    }
+  }
+  render();
+}
+
 function showForcedPasswordResetModal(session) {
   if (document.getElementById('forced-reset-overlay')) return;
   const overlay = document.createElement('div');
@@ -480,6 +576,8 @@ function showForcedPasswordResetModal(session) {
 }
 
 async function loadSidebar() {
+  consumePendingHighlight();
+
   const cached = _readSessionCache();
   if (cached && cached.status !== 'invited') {
     _renderSidebarChrome(cached);
@@ -497,6 +595,8 @@ async function loadSidebar() {
 
   if (session.status === 'invited') {
     showForcedPasswordResetModal(session);
+  } else {
+    getPendingAnnouncements(session).then(pending => showPanelAnnouncements(session, pending));
   }
 
   // The sidebar markup is baked directly into every page (see #sidebar-mount in the HTML),

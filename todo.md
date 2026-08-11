@@ -1,5 +1,8 @@
 # Christ Church Bluffton — TODO
 
+## Testing note — Panel Announcements (localhost only!)
+Each time an announcement's code/copy is updated during local testing, `panel_announcement_dismissals` needs to be manually cleared (`delete from public.panel_announcement_dismissals;` via Supabase SQL Editor) or the popup won't show again — it correctly remembers it was already dismissed. **This is a localhost-testing-only step** — never clear real dismissals once this feature is live for actual staff, since that would make already-seen announcements pop back up for everyone.
+
 ## STATUS (2026-08-11): LIVE on production, commit `37c389d` pushed to both `origin` and `production`, verified live on christchurchbluffton.org (checked the Serve page Scripture-quote fix rendered correctly as proof the new deploy actually went out).
 
 ## 2026-08-10/11 — Submitter auto-reply emails (prayer, contact, newsletter) + Subscribers dedupe

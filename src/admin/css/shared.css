@@ -596,6 +596,34 @@ body.reading-mode.tint-green .main { background: #E1F0E1; }
 .forced-reset-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; gap: 12px; }
 .forced-reset-logout { font-size: 12px; color: var(--text-muted); text-decoration: underline; cursor: pointer; background: none; border: none; padding: 0; }
 
+/* Panel Update Announcement — one-time "what's new" popup, shown by
+   showPanelAnnouncements() in shared.js. Steps through any announcements
+   targeted at this person's role that they haven't dismissed yet. */
+.announcement-overlay {
+  position: fixed; inset: 0; background: rgba(30,37,71,0.75);
+  z-index: 5000; display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.announcement-box {
+  background: var(--white); border-radius: 14px; width: 100%; max-width: 440px;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.4); padding: 28px 30px;
+}
+.announcement-eyebrow {
+  font-family: Arial, Helvetica, sans-serif; font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--gold-text); font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+}
+.announcement-box h2 { font-family: Georgia, 'Times New Roman', serif; font-size: 20px; color: var(--navy-blue); margin: 0 0 12px; }
+.announcement-box p { font-size: 14px; color: var(--text-dark); line-height: 1.6; margin: 0; }
+.announcement-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 22px; gap: 12px; }
+.announcement-show-me { font-size: 12px; color: var(--gold-text); text-decoration: underline; cursor: pointer; background: none; border: none; padding: 0; }
+
+/* Temporary glow applied by consumePendingHighlight() in shared.js after a "Show Me"
+   navigation — removed automatically once the animation finishes. */
+@keyframes panel-highlight-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(195,163,85,0); }
+  15%, 85% { box-shadow: 0 0 0 5px rgba(195,163,85,0.55); }
+}
+.panel-highlight-target { animation: panel-highlight-pulse 1.4s ease-in-out 3; border-radius: 8px; }
+
 .restricted-panel {
   text-align: center;
   padding: 80px 32px;

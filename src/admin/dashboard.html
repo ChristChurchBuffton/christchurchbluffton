@@ -273,11 +273,14 @@
         more.style.display = 'none';
         return;
       }
-      list.innerHTML = recent.map(e => `
-        <li>
-          <span>${escapeHtml(ACTIVITY_LABELS[e.action] || e.action)}${e.target ? ' — ' + escapeHtml(e.target) : ''} <span style="color:var(--text-muted);">(${escapeHtml(e.actor)})</span></span>
+      list.innerHTML = recent.map(e => {
+        const isDevUpdate = e.action === 'dev_update';
+        return `
+        <li${isDevUpdate ? ' style="color:var(--danger); font-weight:bold;"' : ''}>
+          <span>${escapeHtml(ACTIVITY_LABELS[e.action] || e.action)}${e.target ? ' — ' + escapeHtml(e.target) : ''} <span style="color:var(--text-muted); font-weight:normal;">(${escapeHtml(e.actor)})</span></span>
           <span class="activity-when">${escapeHtml(new Date(e.t).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}</span>
-        </li>`).join('');
+        </li>`;
+      }).join('');
       more.style.display = activityShown < activityLog.length ? '' : 'none';
     }
 
@@ -324,6 +327,10 @@
       if (isAdminTier(session)) {
         document.getElementById('activity-card').style.display = '';
         const log = await activityLogPromise;
+        // PREVIEW ONLY — sample of what a real "pushed live" Dev Update entry would look
+        // like, built client-side, never written to the database. Remove once approved
+        // and the real thing is wired to actually log on a real push.
+        log.push({ t: Date.now(), actor: 'kevin@forgeddigitaldesign.com', action: 'dev_update', target: 'Notification Settings, Prayer Log Archive, and Panel Announcements pushed live' });
         renderActivity(log);
       }
     });

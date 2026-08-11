@@ -744,6 +744,9 @@
       if (!session) return;
       if (document.getElementById('team-rows')) await renderTeam();
       const log = await getActivityLog();
+      // PREVIEW ONLY — same sample Dev Update entry as the Dashboard, built client-side,
+      // never written to the database. Remove once approved and wired to log for real.
+      log.push({ t: Date.now(), actor: 'kevin@forgeddigitaldesign.com', action: 'dev_update', target: 'Notification Settings, Prayer Log Archive, and Panel Announcements pushed live' });
       const count = log.length;
       document.getElementById('log-entry-count').textContent = `${count} entr${count === 1 ? 'y' : 'ies'} logged`;
     });
