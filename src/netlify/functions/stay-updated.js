@@ -43,6 +43,27 @@ function emailShell(heading, fieldsHtml) {
 </html>`;
 }
 
+// Recipients are managed in the admin panel's Notification Settings page (Site Admin
+// only) so changing who gets notified doesn't require a code deploy. Falls back to the
+// hardcoded list below if the table's empty or the fetch fails, so a database hiccup
+// can't silently kill staff notifications entirely.
+async function getRecipients(formKey, fallback) {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SECRET_KEY) return fallback;
+  try {
+    const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/notification_settings?form_key=eq.${formKey}&select=recipients`, {
+      headers: { 'apikey': process.env.SUPABASE_SECRET_KEY, 'Authorization': `Bearer ${process.env.SUPABASE_SECRET_KEY}` },
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!res.ok) return fallback;
+    const rows = await res.json();
+    if (!rows.length || !rows[0].recipients || !rows[0].recipients.length) return fallback;
+    return rows[0].recipients;
+  } catch (err) {
+    console.error('[Stay Updated] getRecipients error:', err.message);
+    return fallback;
+  }
+}
+
 function replyShell(heading, bodyHtml) {
   return `<!DOCTYPE html>
 <html>
@@ -142,12 +163,13 @@ exports.handler = async (event) => {
 
     // Send email notification via Resend
     if (process.env.RESEND_API_KEY) {
+      const notifyTo = await getRecipients('newsletter', ['info@christchurchbluffton.org']);
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           from: process.env.EMAIL_FROM || 'Newsletter Submission <notifications@christchurchbluffton.org>',
-          to: ['info@christchurchbluffton.org'],
+          to: notifyTo,
           subject: `New Stay Updated Signup — ${email}`,
           text: `New stay updated signup:\n\nEmail: ${email}`,
           html: emailShell('Newsletter Submission', fieldRow('Email', `<a href="mailto:${email}" style="color:#303b6a;">${email}</a>`))

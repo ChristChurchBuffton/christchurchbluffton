@@ -18,7 +18,7 @@ const path = require('path');
 // Pages live in src/admin/ (Netlify's publish dir) — this script itself stays here in
 // admin/, outside the deploy folder, alongside the other dev-only tooling (server/, supabase/).
 const root = path.join(__dirname, '..', 'src', 'admin');
-const pages = ['content', 'congregants', 'dashboard', 'account', 'team', 'photos', 'newsletter', 'volunteers', 'events', 'staff', 'prayers', 'subscribers'];
+const pages = ['content', 'congregants', 'dashboard', 'account', 'team', 'photos', 'newsletter', 'volunteers', 'events', 'staff', 'prayers', 'subscribers', 'notifications'];
 
 const sidebarHtml = fs.readFileSync(path.join(root, 'includes', 'sidebar.html'), 'utf8').trim();
 const mountRegex = /<div id="sidebar-mount">[\s\S]*?<\/div>\s*(?=<div class="main">)/;

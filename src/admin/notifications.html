@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<title>Notification Settings — Christ Church Bluffton Admin</title>
+<link rel="stylesheet" href="css/shared.css">
+<style>
+  .page-width { max-width: 760px; margin: 0 auto; }
+  .info-banner {
+    background: rgba(48,59,106,0.06);
+    border: 1px solid rgba(48,59,106,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: var(--text-dark);
+    line-height: 1.5;
+  }
+
+  .notif-card { margin-bottom: 20px; }
+  .notif-card-head {
+    padding: 16px 22px;
+    background: linear-gradient(135deg, rgba(195,163,85,0.12) 0%, rgba(195,163,85,0.04) 100%);
+    border-bottom: 2px solid var(--gold);
+  }
+  .notif-card-title { font-family: Georgia, 'Times New Roman', serif; font-size: 16px; color: var(--navy-blue); }
+  .notif-card-subtitle { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; }
+  .notif-card-body { padding: 18px 22px; }
+
+  .recipient-list { list-style: none; margin: 0 0 14px; padding: 0; }
+  .recipient-list li {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 10px 14px; border: 1px solid var(--border-gray); border-radius: 8px;
+    margin-bottom: 8px; font-size: 13.5px; color: var(--text-dark); background: var(--lightest-gray);
+  }
+  .recipient-list li:last-child { margin-bottom: 0; }
+  .recipient-empty { font-size: 13px; color: var(--text-muted); font-style: italic; padding: 4px 0 14px; }
+  .remove-recipient-btn {
+    width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border-gray);
+    background: var(--white); color: var(--text-muted); cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; padding: 0; font-size: 14px; line-height: 1;
+  }
+  .remove-recipient-btn:hover { border-color: var(--danger); color: var(--danger); background: rgba(177,67,67,0.05); }
+
+  .add-recipient-row { display: flex; gap: 8px; }
+  .add-recipient-row input[type="email"] {
+    flex: 1; padding: 9px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
+    font-family: inherit; font-size: 13.5px; background: var(--white); color: var(--text-dark);
+  }
+  .add-recipient-row input[type="email"]:focus { outline: none; border-color: var(--gold); }
+  .add-recipient-row .btn { padding: 9px 16px; font-size: 13px; white-space: nowrap; }
+
+  .section-error {
+    background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger);
+    border-radius: 8px; padding: 8px 12px; font-size: 12.5px; margin-bottom: 10px; display: none;
+  }
+  .section-error.visible { display: block; }
+</style>
+</head>
+<body data-page="notifications" data-site-admin-only="true">
+  <div class="app-shell">
+    <div id="sidebar-mount">
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img class="brand-crest" src="assets/site-images/logo-dark-bg.png" alt="Christ Church Bluffton crest">
+    <div>
+      <div class="title">Christ Church Bluffton</div>
+      <div class="label">Admin Panel</div>
+    </div>
+    <button type="button" class="hamburger-btn" id="hamburger-btn" aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+    </button>
+  </div>
+  <div class="sidebar-collapsible" id="sidebar-collapsible">
+    <nav>
+      <a href="dashboard.html" data-page="dashboard">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Dashboard
+      </a>
+      <a href="staff.html" data-page="staff">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Staff
+      </a>
+      <a href="congregants.html" data-page="congregants" data-permission="congregants">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+        Congregants
+      </a>
+      <a href="prayers.html" data-page="prayers" data-permission="prayers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+        Prayer Requests
+      </a>
+      <a href="volunteers.html" data-page="volunteers" data-permission="signups">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Volunteers
+      </a>
+      <a href="subscribers.html" data-page="subscribers" data-permission="subscribers">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h4M15 12h4M6 16h12"/></svg>
+        Subscribers
+      </a>
+      <a href="newsletter.html" data-page="newsletter" data-permission="newsletter" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        Newsletter
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="notifications.html" data-page="notifications" data-site-admin-only="true">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Notification Settings
+      </a>
+      <a href="events.html" data-page="events" data-permission="events">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Events
+      </a>
+      <a href="content.html" data-page="content" data-permission="contentEditor" class="tablet-not-recommended">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Content Editor
+        <span class="nav-note">Disabled — use a PC</span>
+      </a>
+      <a href="photos.html" data-page="photos" data-permission="photos">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg>
+        Photos
+      </a>
+      <a href="team.html" data-page="team" data-site-admin-only="true">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M19 8h4M21 6v4"/></svg>
+        Accounts
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="reading-mode-row" id="reading-mode-row" style="display:none;">
+        <button type="button" class="reading-mode-btn" id="reading-mode-btn" title="Toggle easier-to-read text">
+          <span class="aa-icon">Aa</span> Reading Mode
+        </button>
+        <div class="reading-tint-swatches" id="reading-tint-swatches" style="display:none;">
+          <button type="button" class="tint-swatch tint-cream" data-tint="cream" title="Cream background"></button>
+          <button type="button" class="tint-swatch tint-blue" data-tint="blue" title="Light blue background"></button>
+          <button type="button" class="tint-swatch tint-green" data-tint="green" title="Light green background"></button>
+        </div>
+      </div>
+      <a href="account.html" class="user-chip" id="user-chip-link" title="Account Settings">
+        <div class="avatar" id="sidebar-avatar">?</div>
+        <div class="user-chip-info">
+          <div class="name" id="sidebar-name">—</div>
+          <div class="role" id="sidebar-role">—</div>
+        </div>
+        <svg class="chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+      <a href="#" class="logout-link" id="logout-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Log out
+      </a>
+    </div>
+  </div>
+</aside>
+  </div>
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <h1>Notification Settings</h1>
+          <div class="subtitle">Who gets emailed when someone submits a form on the website — Site Admin only</div>
+        </div>
+      </div>
+      <div class="content" id="page-body">
+        <div class="info-banner">
+          Each list below is who gets notified by email for that form. This doesn't change what the person submitting the form sees — they still get their own confirmation email either way.
+        </div>
+        <div class="page-width" id="notif-sections"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    const FORM_SECTIONS = [
+      { key: 'prayer', title: 'Prayer Request Notifications', subtitle: 'Sent whenever someone submits the prayer request form' },
+      { key: 'contact', title: 'Contact Form Notifications', subtitle: 'Sent whenever someone submits the contact form' },
+      { key: 'newsletter', title: 'Newsletter Notifications', subtitle: 'Sent whenever someone signs up for the newsletter' }
+    ];
+
+    let settingsByForm = {};
+
+    function escapeHtml(str) {
+      return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    async function loadNotificationSettings() {
+      const { data, error } = await supabaseClient.from('notification_settings').select('*');
+      if (error) { console.error('loadNotificationSettings failed:', error.message); return; }
+      settingsByForm = {};
+      data.forEach(row => { settingsByForm[row.form_key] = row.recipients || []; });
+    }
+
+    function renderSections() {
+      const container = document.getElementById('notif-sections');
+      container.innerHTML = FORM_SECTIONS.map(section => {
+        const recipients = settingsByForm[section.key] || [];
+        const listHtml = recipients.length
+          ? `<ul class="recipient-list">${recipients.map(email => `
+              <li>
+                <span>${escapeHtml(email)}</span>
+                <button type="button" class="remove-recipient-btn" data-form="${section.key}" data-email="${escapeHtml(email)}" title="Remove" aria-label="Remove ${escapeHtml(email)}">&times;</button>
+              </li>`).join('')}</ul>`
+          : `<div class="recipient-empty">No recipients yet — add one below.</div>`;
+
+        return `
+          <div class="card notif-card">
+            <div class="notif-card-head">
+              <div class="notif-card-title">${section.title}</div>
+              <div class="notif-card-subtitle">${section.subtitle}</div>
+            </div>
+            <div class="notif-card-body">
+              <div class="section-error" id="error-${section.key}"></div>
+              ${listHtml}
+              <div class="add-recipient-row">
+                <input type="email" id="add-input-${section.key}" placeholder="name@example.com">
+                <button type="button" class="btn btn-gold" data-add-form="${section.key}">+ Add</button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function showSectionError(formKey, message) {
+      const box = document.getElementById(`error-${formKey}`);
+      box.textContent = message;
+      box.classList.add('visible');
+    }
+    function clearSectionError(formKey) {
+      const box = document.getElementById(`error-${formKey}`);
+      box.classList.remove('visible');
+    }
+
+    async function addRecipient(formKey) {
+      clearSectionError(formKey);
+      const input = document.getElementById(`add-input-${formKey}`);
+      const email = input.value.trim().toLowerCase();
+
+      if (!email || !isValidEmail(email)) {
+        showSectionError(formKey, 'Enter a valid email address.');
+        return;
+      }
+      const current = settingsByForm[formKey] || [];
+      if (current.some(e => e.toLowerCase() === email)) {
+        showSectionError(formKey, 'That email is already on the list.');
+        return;
+      }
+
+      const updated = [...current, email];
+      const { error } = await supabaseClient.from('notification_settings')
+        .update({ recipients: updated, updated_at: new Date().toISOString() })
+        .eq('form_key', formKey);
+      if (error) { showSectionError(formKey, error.message); return; }
+
+      logActivity('notification_settings_edit', `Added ${email} to ${formKey}`);
+      settingsByForm[formKey] = updated;
+      renderSections();
+    }
+
+    async function removeRecipient(formKey, email) {
+      const current = settingsByForm[formKey] || [];
+      if (current.length <= 1) {
+        showSectionError(formKey, 'At least one recipient is required — add a replacement before removing the last one.');
+        return;
+      }
+      if (!confirm(`Remove ${email} from ${formKey} notifications?`)) return;
+
+      const updated = current.filter(e => e !== email);
+      const { error } = await supabaseClient.from('notification_settings')
+        .update({ recipients: updated, updated_at: new Date().toISOString() })
+        .eq('form_key', formKey);
+      if (error) { showSectionError(formKey, error.message); return; }
+
+      logActivity('notification_settings_edit', `Removed ${email} from ${formKey}`);
+      settingsByForm[formKey] = updated;
+      renderSections();
+    }
+
+    loadSidebar().then(async () => {
+      if (!document.getElementById('notif-sections')) return;
+
+      await loadNotificationSettings();
+      renderSections();
+
+      document.getElementById('notif-sections').addEventListener('click', (e) => {
+        const removeBtn = e.target.closest('.remove-recipient-btn');
+        if (removeBtn) {
+          removeRecipient(removeBtn.dataset.form, removeBtn.dataset.email);
+          return;
+        }
+        const addBtn = e.target.closest('[data-add-form]');
+        if (addBtn) {
+          addRecipient(addBtn.dataset.addForm);
+        }
+      });
+
+      document.getElementById('notif-sections').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && e.target.matches('input[type="email"]')) {
+          e.preventDefault();
+          const formKey = e.target.id.replace('add-input-', '');
+          addRecipient(formKey);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

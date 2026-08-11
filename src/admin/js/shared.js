@@ -238,7 +238,8 @@ const ACTIVITY_LABELS = {
   team_invite: 'Invited team member',
   team_edit: 'Edited team member',
   team_remove: 'Removed team member',
-  team_reset_pw: 'Reset a team member\'s password'
+  team_reset_pw: 'Reset a team member\'s password',
+  notification_settings_edit: 'Updated notification recipients'
 };
 
 // Fire-and-forget, same as the old localStorage version — callers never awaited this
