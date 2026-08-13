@@ -53,6 +53,24 @@
     .page-list { position: static; }
   }
 
+  /* Click-to-edit relies on precise clicks and hover affordances that don't translate to
+     touch, so below 1280px show a "Desktop only" message instead of the real editor. 1280px
+     (not the sidebar's 900px breakpoint) because widths in the 900-1279px range are commonly
+     real touchscreen tablets in landscape (an iPad Pro 12.9" landscape is 1366x1024, a
+     standard iPad landscape is 1024x768) — 1280px is the realistic floor for an actual
+     laptop, per budget Windows laptops and older 13" MacBook Airs. A real CSS media query
+     rather than a one-time JS width check at page load — reacts live if the window is
+     resized, instead of needing a full reload to notice the width changed. */
+  #mobile-restricted-panel { display: none; }
+  @media (max-width: 1279px) {
+    #mobile-restricted-panel { display: block; }
+    .live-url-banner, .editor-layout { display: none; }
+    /* Save Changes is already permanently disabled (not wired to the live site yet) — hiding
+       it (and View Change Log, which needs the editor's own data) alongside the "Desktop
+       only" message instead of leaving them active-looking in the topbar above it. */
+    #save-btn, #log-link, #revert-btn { display: none; }
+  }
+
   /* ---- Preview pane ---- */
   .preview-pane {
     background: var(--white);
@@ -156,6 +174,8 @@
     background: var(--white);
   }
   .log-link:hover { border-color: var(--navy-blue); color: var(--navy-blue); }
+  .log-link:disabled { opacity: 0.5; cursor: not-allowed; }
+  .log-link:disabled:hover { border-color: var(--border-gray); color: var(--text-muted); }
 
   /* Editing is disabled at the same narrow/portrait breakpoint as the sidebar nav warning —
      landscape tablet widths overlap real laptop widths too much to block reliably by screen
@@ -419,10 +439,16 @@
         </div>
         <div class="topbar-actions">
           <button type="button" class="log-link" id="log-link">View Change Log</button>
+          <button type="button" class="log-link" id="revert-btn" disabled title="No unsaved changes on this page to discard">Revert</button>
           <button class="btn btn-gold save-btn" id="save-btn" disabled title="Not connected to the live site yet — edits won't be enabled until this panel can push changes to christchurchbluffton.org">Save Changes</button>
         </div>
       </div>
       <div class="content" id="page-body">
+        <div class="restricted-panel" id="mobile-restricted-panel">
+          <div class="icon">🖥️</div>
+          <h2>Desktop only</h2>
+          <p>The Content Editor isn't available on tablet or mobile — please use a PC.</p>
+        </div>
         <div class="live-url-banner">
           <strong>Work In Progress — Not Live</strong>
         </div>
@@ -973,6 +999,10 @@
         const match = imgs.find(im => (im.getAttribute('src') || '').split('/').pop() === info.file);
         if (!match) return;
         match.classList.add('cms-image-editable');
+        // Once swapped, src becomes a data: URI and the original-filename match above no longer
+        // works — a stable id (same pattern as text fields) is what lets Revert find this exact
+        // image again later regardless of what its src has changed to.
+        match.setAttribute('data-bind-id', info.id);
 
         const rect = getVisibleImageRect(match, doc);
         const scrollTop = doc.defaultView.scrollY;
@@ -1013,6 +1043,11 @@
       fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
+        // Capture the true original src once, the first time this image is edited — if it's
+        // swapped a second time before ever saving/reverting, re-deriving from imgEl.src here
+        // would capture the already-swapped data: URI instead of the real original.
+        const existing = pendingChanges[info.id];
+        const oldSrc = existing ? existing.oldSrc : imgEl.src;
         const reader = new FileReader();
         reader.onload = (ev) => {
           document.getElementById('popover-thumb').src = ev.target.result;
@@ -1023,6 +1058,7 @@
             section: info.section,
             oldValue: info.file,
             newValue: file.name,
+            oldSrc,
             apply: () => {}
           };
           updateSaveButtonState();
@@ -1039,6 +1075,46 @@
       const count = Object.keys(pendingChanges).length;
       btn.classList.toggle('dirty', count > 0);
       btn.textContent = count > 0 ? `Save Changes (${count})` : 'Save Changes';
+      const revertBtn = document.getElementById('revert-btn');
+      revertBtn.disabled = count === 0;
+      revertBtn.title = count > 0
+        ? `Discard ${count} unsaved change${count === 1 ? '' : 's'} on this page`
+        : 'No unsaved changes on this page to discard';
+    }
+
+    // Resets every pending edit on the current page back to what was on the page before
+    // today's editing session — text fields back to their original wording, swapped photos
+    // back to their original file. Only touches the live preview + pendingChanges bookkeeping,
+    // same as everything else in this editor until Save Changes actually persists it.
+    function revertPendingChanges() {
+      const ids = Object.keys(pendingChanges);
+      if (ids.length === 0) return;
+      const count = ids.length;
+      document.getElementById('modal-title').textContent = 'Discard changes?';
+      document.getElementById('modal-subtitle').textContent = currentPage;
+      document.getElementById('modal-body').innerHTML =
+        `<p style="font-size:14px; color:var(--text-dark); line-height:1.6;">Discard ${count} unsaved change${count === 1 ? '' : 's'} on this page? This can't be undone.</p>`;
+      setModalFooter([
+        { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+        { label: 'Discard Changes', className: 'btn btn-gold', onClick: () => { applyRevert(ids); closeModal(); } }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    function applyRevert(ids) {
+      const previewDoc = document.getElementById('preview-iframe').contentDocument;
+      ids.forEach(id => {
+        const change = pendingChanges[id];
+        const el = previewDoc && previewDoc.querySelector(`[data-bind-id="${id}"]`);
+        if (!el) return;
+        if (change.type === 'text') {
+          el.textContent = change.oldValue;
+        } else if (change.type === 'image') {
+          el.src = change.oldSrc;
+        }
+      });
+      pendingChanges = {};
+      updateSaveButtonState();
     }
 
     function formatLogTimestamp(date) {
@@ -1140,6 +1216,7 @@
     }
 
     document.getElementById('log-link').addEventListener('click', openChangeLogModal);
+    document.getElementById('revert-btn').addEventListener('click', revertPendingChanges);
     document.getElementById('save-btn').addEventListener('click', () => commitPendingChanges());
 
     function fitPreviewScale() {
@@ -1216,17 +1293,8 @@
 
     loadSidebar().then(async () => {
       if (!document.getElementById('page-list')) return;
-      // Click-to-edit relies on precise clicks and hover affordances that don't translate to
-      // touch — block direct URL access here too, not just the (already-disabled) nav link.
-      if (window.innerWidth <= 900) {
-        document.getElementById('page-body').innerHTML = `
-          <div class="restricted-panel">
-            <div class="icon">🖥️</div>
-            <h2>Desktop only</h2>
-            <p>The Content Editor isn't available on tablet or mobile — please use a PC.</p>
-          </div>`;
-        return;
-      }
+      // The "Desktop only" gate itself is now a live CSS media query (see #mobile-restricted-panel
+      // above) instead of a one-time check here — the editor always initializes underneath it.
       pageContent = await contentPromise;
       if (currentPage === 'Site-Wide' || !pageContent[currentPage]) currentPage = 'Home';
       changeLog = await changeLogPromise;

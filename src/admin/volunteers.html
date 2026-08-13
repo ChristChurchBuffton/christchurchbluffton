@@ -58,10 +58,20 @@
     background: linear-gradient(135deg, rgba(195,163,85,0.12) 0%, rgba(195,163,85,0.04) 100%);
     border-bottom: 2px solid var(--gold);
   }
+  /* Below tablet width, always stack the count pill under the title rather than letting
+     it wrap only when it happens not to fit — a deliberate default, not a fallback. */
+  @media (max-width: 560px) {
+    .volunteers-card-head { flex-direction: column; align-items: flex-start; }
+  }
   .volunteers-card-title { font-family: Georgia, 'Times New Roman', serif; font-size: 21px; font-weight: bold; color: var(--navy-blue); }
+  /* white-space:nowrap + flex-shrink:0 stop a longer team name from squeezing this pill
+     until its own text wraps ("0" / "volunteers" on separate lines) — flex-wrap on the
+     parent above means if the two still don't fit side by side, the whole pill drops to
+     its own line under the title instead of being squeezed or pushed past the card edge. */
   .volunteers-card-count {
     font-size: 10.5px; font-weight: bold; color: var(--gold-text); text-transform: uppercase; letter-spacing: 0.5px;
     background: rgba(195,163,85,0.18); padding: 3px 10px; border-radius: 100px;
+    white-space: nowrap; flex-shrink: 0;
   }
 
   .volunteer-table { width: 100%; border-collapse: collapse; background: var(--white); table-layout: fixed; }
@@ -90,6 +100,13 @@
     display: inline-block; margin-left: 6px; font-size: 9px; font-weight: bold; text-transform: uppercase;
     letter-spacing: 0.4px; background: rgba(195,163,85,0.2); color: var(--gold-text); padding: 2px 7px; border-radius: 100px;
     vertical-align: middle;
+  }
+  /* Table/card mode (see the max-width:1700px switch below) always drops the Youth and Team
+     Lead badges to their own line under the name, rather than only when they don't fit —
+     a deliberate default for mobile/tablet, not a fallback. The real wide desktop table
+     keeps them inline beside the name. */
+  @media (max-width: 1700px) {
+    .youth-badge, .lead-badge { display: block; width: fit-content; margin-left: 0; margin-top: 4px; }
   }
   .parent-info { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
   .parent-info .parent-name { color: var(--text-dark); font-weight: bold; }
@@ -151,8 +168,11 @@
   }
   @media (max-width: 640px) {
     .volunteer-table tr {
-      grid-template-columns: 0.8fr 1.2fr;
-      grid-template-areas: "name name" "subteam subteam" "phone email" "parent parent" "actions actions";
+      grid-template-columns: 1fr;
+      /* Keep email on its own row here too — the 1150px breakpoint already fixed this
+         same email-wrap problem; sharing "phone email" on one row at an even narrower
+         width undid that fix and reintroduced it. */
+      grid-template-areas: "name" "subteam" "phone" "email" "parent" "actions";
     }
     .volunteer-table td:last-child {
       padding-top: 10px !important; margin-top: 6px; border-top: 1px solid var(--border-gray);
@@ -190,13 +210,29 @@
   .field input:focus, .field select:focus { outline: none; border-color: var(--gold); background: var(--white); }
   .name-row { display: flex; gap: 12px; }
   .name-row .field { flex: 1; }
+  @media (max-width: 560px) {
+    .name-row { flex-direction: column; gap: 0; }
+  }
 
   .team-checklist { display: flex; flex-direction: column; gap: 10px; max-height: 280px; overflow-y: auto; }
   .team-row label { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: normal; color: var(--text-dark); cursor: pointer; }
   .team-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--gold-text); flex-shrink: 0; }
   .sub-team-select { display: none; margin: 6px 0 0 26px; width: calc(100% - 26px); font-size: 13px; padding: 7px 10px; }
-  .lead-check-row { display: none; align-items: center; gap: 8px; margin: 6px 0 0 26px; font-size: 12px; color: var(--gold-text); cursor: pointer; }
+  /* Scoped to .team-row .lead-check-row (not just .lead-check-row) so this display:none
+     beats ".team-row label { display: flex }" above on specificity — without the extra
+     qualifier, that more general label rule was winning and the row showed for every
+     team regardless of checked state, even though the JS toggle below sets it correctly. */
+  .team-row .lead-check-row { display: none; align-items: center; gap: 8px; margin: 6px 0 0 26px; font-size: 12px; color: var(--gold-text); cursor: pointer; }
   .lead-check-row input { width: 14px; height: 14px; accent-color: var(--gold-text); flex-shrink: 0; }
+  /* Below 560px there isn't enough width left for a 26px indent to read as "nested under
+     its team" — it just eats space the wrapped label text needs. Also drop the checklist's
+     own scrollbox here: a scroll region nested inside the modal's own scroll is an awkward
+     "scroll within a scroll" on touch, so let it flow as part of the modal's single scroll. */
+  @media (max-width: 560px) {
+    .team-checklist { max-height: none; overflow-y: visible; }
+    .sub-team-select { margin-left: 12px; width: calc(100% - 12px); }
+    .lead-check-row { margin-left: 12px; }
+  }
 
   .youth-section { border-top: 1px solid var(--border-gray); margin-top: 16px; padding-top: 16px; }
   .youth-check-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-dark); cursor: pointer; }

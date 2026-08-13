@@ -1,5 +1,38 @@
 # Christ Church Bluffton — TODO
 
+## STATUS (2026-08-12): Full admin panel breakpoint sweep — IN PROGRESS, nothing pushed yet
+Working page-by-page through the admin panel testing 320px up to 1920px (using an injected same-origin iframe, per the Breakpoint Testing Protocol in CLAUDE.md — never resizing the real browser window). All fixes below are CSS-only unless noted, all still sitting uncommitted in the working tree alongside the pre-existing uncommitted work from 8/11.
+
+**Pages fully swept, all fixes verified at every breakpoint:**
+- **Congregants** — grid overflow fix, new City/State/Zip fields (migration `0013_family_address_fields.sql` already applied to the live DB — confirmed below), name-row + child-row stacking under 560px. ⚠️ **Open item, not yet fixed**: the Add/Edit Family modal's Head/Spouse Email placeholders are hardcoded to `kevin@example.com`/`stephanie@example.com` — Kevin's own real info used as example text. Per his instruction, swap for generic placeholders before this file is next touched; not yet swept for the same pattern on other admin pages.
+- **Dashboard** — Recent Activity list restructured so long entries don't truncate.
+- **Prayer Requests** — Email/Phone + Status/Date now stack under 560px; the whole "Prayer Log" panel (not just individual cards) caps to 560px and centers between 600-1300px viewport width — a deliberate design call: cap the WHOLE container, not just inner cards, confirmed as the preferred pattern and reused on Subscribers/Notification Settings too.
+- **Events** — date-above-details stacking (pre-existing), Start/End Date stack under 560px, fixed a hint-text-overlap bug that stacking caused (`.two-col-row + .repeat-hint` margin), **and a brand new feature: Event End Time** (see below).
+- **Volunteers** — name-row stacking; Add/Edit Volunteer's Teams checklist no longer has a nested scrollbox (was an awkward "scroll within a scroll" on mobile) and the "team lead" sub-checkbox indent shrinks from 26px to 12px under 560px; **real CSS specificity bug fixed** — `.team-row label { display:flex }` was overriding `.lead-check-row { display:none }`'s more specific intent, so the "make this volunteer the team lead" option showed for every team regardless of checked state, even though the JS toggle to show/hide it correctly was already there and working. Also fixed the team-card header pill (`Greeters · 3 volunteers`) wrapping onto 2 lines or overflowing the card on longer team names — now always drops to its own line under the title at mobile/tablet widths (deliberate default, not just a wrap-when-it-doesn't-fit fallback), goes back to side-by-side at tablet+ (560px+).
+- **Subscribers** — name-row stacking; Source/Added split into their own full-width rows under 720px (was awkwardly sharing one row); the "Mailing List" panel caps to 560px and centers, but **only between 600-720px** — tried capping it all the way up to 1300px like Prayer Requests first, but that broke the table's own wider column layouts (Source column got crushed at 1440px, a real regression Kevin caught) since those were sized assuming a full-width row. Reverted that part, kept panel-cap scoped to just the range where the row is genuinely single-column.
+- **Notification Settings** — recipient emails already wrapped correctly (pre-existing fix); the "+ Add" input/button row now stacks under 480px (button drops below, stays compact width, right-aligned) instead of squeezing the placeholder text; the whole page container narrows to 560px between 600-1300px (same "cap the whole panel" pattern), reverts to its normal 760px cap outside that range.
+- **Newsletter** — reviewed, no fixes needed. Deliberately shows a "Desktop only" placeholder under 900px (a one-time JS check at page-load, not a live media query — if testing this page, reload fresh at each width rather than just resizing, or the placeholder won't update). Composer itself looks clean 1024px through 1920px.
+- **Photos, Staff** — pre-existing fixes from before this session (grid overflow, mobile table rework), not re-touched today.
+
+**Not yet started:** Content Editor.
+
+**Not yet reviewed this session, need to circle back**: whatever's currently mid-test — see the live session for exact position.
+
+## NEW FEATURE (2026-08-12): Event End Time — built + verified working end-to-end, still uncommitted
+Events could only ever show a single start time ("at 5:30 PM"). Added an optional End Time so it displays as a range ("5:30 PM–7:00 PM").
+- [x] Migration `0014_event_end_time.sql` — adds nullable `end_time time` to `public.events`. **Already applied to the live database** (see below for how — this one didn't need the old browser workaround).
+- [x] Add/Edit Event modal: new End Time field next to Time, in the same responsive two-col-row as Start/End Date.
+- [x] Validation: End Time requires a Start Time to be set too; End Time can't be at-or-before Start Time.
+- [x] Display: `formatDateOrRange()` line now shows `5:30 PM–7:00 PM` when both are set, falls back to just `5:30 PM` when End Time is blank — unchanged for existing events.
+- [x] Verified end-to-end on localhost: edited the real "Saturday Evening Church Service" event, set End Time to 7:00 PM, saved, confirmed it now reads "...at 5:30 PM–7:00 PM" on the list.
+
+## INFRASTRUCTURE (2026-08-12): Supabase migrations no longer need a browser — SOLVED
+Previously every schema migration for this project required the Supabase SQL Editor by hand (no CLI, no DB password, no connection string existed anywhere). Fixed properly instead of working around it again:
+- [x] Supabase CLI installed (`C:\Users\kwmcc\.local\bin\supabase.exe`, on PATH).
+- [x] Scoped personal access token generated ("CLI - CCB Work", 90-day expiry → ~2026-11-10, project-only, exactly 3 permissions: Project Settings Read, Database Read-write, Migrations Read-write) — saved as `SUPABASE_ACCESS_TOKEN` in `admin/server/.env` (gitignored).
+- [x] Confirmed working: schema changes now run via a plain `curl` to the Management API's `/database/query` endpoint, straight from the terminal, no browser needed. Full method + the token-renewal steps documented in the `project_ccb_admin_panel` memory file.
+- [x] Migration `0013_family_address_fields.sql` (adds city/state/zip to `congregant_families`) — checked directly via the new method 2026-08-12: already applied to the live DB (columns exist), just hadn't been confirmed/checked off before now.
+
 ## Testing note — Panel Announcements (localhost only!)
 Each time an announcement's code/copy is updated during local testing, `panel_announcement_dismissals` needs to be manually cleared (`delete from public.panel_announcement_dismissals;` via Supabase SQL Editor) or the popup won't show again — it correctly remembers it was already dismissed. **This is a localhost-testing-only step** — never clear real dismissals once this feature is live for actual staff, since that would make already-seen announcements pop back up for everyone.
 

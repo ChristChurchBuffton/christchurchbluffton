@@ -11,7 +11,10 @@
 <style>
   .photo-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    /* min(220px, 100%) — safe today, but a bare pixel minimum can exceed the available
+       width once page padding is subtracted on very narrow screens (same fix applied to
+       the Congregants grid, which had the same pattern and did overflow). */
+    grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
     gap: 20px;
   }
   .photo-card {

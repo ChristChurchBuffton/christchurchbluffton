@@ -110,13 +110,23 @@
   }
   @media (max-width: 640px) {
     .team-table tr {
-      grid-template-columns: 1fr 1fr;
-      grid-template-areas: "member member" "role status" "perms perms" "actions actions";
+      grid-template-columns: 1fr;
+      /* Role and Status used to share one row split 50/50 — fine for short labels like
+         "Staff"/"Active", but "Site Admin" got squeezed into its half while its neighbor
+         sat in a mostly-empty one, an uneven, cramped-looking pair. Full-width rows for
+         both instead, so neither is ever fighting for space with the other. */
+      grid-template-areas: "member" "role" "status" "perms" "actions";
     }
     .team-table td:last-child {
       justify-self: start; padding-top: 10px !important; margin-top: 4px;
       border-top: 1px solid var(--border-gray);
     }
+  }
+  /* Only genuinely narrow phone widths have too little room for chips to wrap evenly — from
+     here up there's enough space for "Photos" next to "Prayer Requests" without it looking
+     ragged, so let them flow back into wrapped rows instead of stacking one per line. */
+  @media (max-width: 400px) {
+    .perm-chips { flex-direction: column; align-items: flex-start; gap: 6px; }
   }
 
   /* ---- Modal (shared shell pattern) ---- */
@@ -146,6 +156,15 @@
   }
   .field input:focus { outline: none; border-color: var(--gold); background: var(--white); }
 
+  /* The member-list card above uses full width productively (chips wrap into it), but this
+     card's actual content — two small date pickers and a button — doesn't scale with width
+     at all, so it was just leaving a growing empty gap on wider tablet/small-laptop screens.
+     Cap and center only THIS card (not .team-card generally, which the member list also
+     uses and shouldn't be capped) in that range; real desktop and genuinely narrow phones
+     are both left alone. */
+  @media (min-width: 600px) and (max-width: 1300px) {
+    .activity-log-card { max-width: 560px; margin-left: auto; margin-right: auto; }
+  }
   .log-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; padding: 18px 22px; }
   .log-controls .field { margin-bottom: 0; }
   .log-controls .field input[type="date"] {
@@ -172,6 +191,19 @@
   .perm-checklist label.perm-locked { color: var(--text-muted); cursor: not-allowed; }
   .perm-checklist label.perm-locked input { cursor: not-allowed; }
   .perm-locked-note { font-size: 11px; font-style: italic; }
+  /* "Site Admin" was the only option of the three long enough to wrap onto a second line,
+     making that one segment taller than its siblings — an uneven, awkward-looking selected
+     (navy) box whichever option got picked. Stack the three options into full-width rows
+     instead, so none of them are ever narrow enough to wrap. The locked-permission note was
+     also wrapping right up against the checkbox — give it its own line, indented to align
+     under the label text rather than the checkbox. */
+  @media (max-width: 560px) {
+    .role-radio-group { flex-direction: column; }
+    .role-radio-group label + label { border-left: none; border-top: 1px solid var(--border-gray); }
+    .role-radio-group label.selected { border-left-color: var(--border-gray); border-top-color: transparent; }
+    .perm-checklist label { flex-wrap: wrap; }
+    .perm-locked-note { flex-basis: 100%; margin-left: 26px; }
+  }
   .admin-perm-note { font-size: 12px; color: var(--text-muted); font-style: italic; }
   .form-error { background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; }
   .form-error.visible { display: block; }
@@ -311,7 +343,7 @@
           </div>
         </div>
 
-        <div class="card team-card" style="margin-top:22px;">
+        <div class="card team-card activity-log-card" style="margin-top:22px;">
           <div class="team-card-head">
             <div class="team-card-title">Activity Log</div>
             <div class="team-card-count" id="log-entry-count">— entries</div>
@@ -439,25 +471,32 @@
       toastTimer = setTimeout(() => toast.classList.remove('visible'), 5000);
     }
 
+    // Site Admin used to hide this whole checklist and swap in a text note instead — a jarring
+    // layout "bounce" every time the role was switched. Now it stays visible and just shows
+    // every permission checked-and-locked, matching how Staff's restricted permissions are
+    // already shown (disabled/grayed, never hidden) rather than introducing a second pattern.
+    // Accounts still isn't a real checkbox (it's role-based, not a togglable permission), so
+    // it still needs its own short note alongside the now-always-visible checklist.
     function permFieldsHtml(idPrefix, role, permissions) {
       const isSA = role === 'site_admin';
       const isStaff = role === 'staff';
       return `
-        <div class="field" id="${idPrefix}-perm-wrap" style="${isSA ? 'display:none;' : ''}">
+        <div class="field" id="${idPrefix}-perm-wrap">
           <label>Permissions</label>
           <div class="perm-checklist">
             ${PERMISSIONS.map(p => {
-              const locked = isStaff && !STAFF_ALLOWED_PERMISSIONS.includes(p.key);
-              const checked = permissions && permissions[p.key] && !locked;
+              const staffLocked = isStaff && !STAFF_ALLOWED_PERMISSIONS.includes(p.key);
+              const locked = isSA || staffLocked;
+              const checked = isSA || (permissions && permissions[p.key] && !locked);
               return `
               <label class="${locked ? 'perm-locked' : ''}">
                 <input type="checkbox" id="${idPrefix}-perm-${p.key}" ${checked ? 'checked' : ''} ${locked ? 'disabled' : ''}>
-                ${p.label}${locked ? ' <span class="perm-locked-note">(not available to Staff)</span>' : ''}
+                ${p.label}${staffLocked ? ' <span class="perm-locked-note">(not available to Staff)</span>' : ''}
               </label>`;
             }).join('')}
           </div>
         </div>
-        <div class="admin-perm-note" id="${idPrefix}-admin-note" style="${isSA ? '' : 'display:none;'}">Site Admins automatically have access to everything, including Accounts.</div>`;
+        <div class="admin-perm-note" id="${idPrefix}-admin-note" style="${isSA ? '' : 'display:none;'}">Site Admins also get full access to Accounts.</div>`;
     }
 
     function wireRoleToggle(idPrefix) {
@@ -468,18 +507,21 @@
           radios.forEach(r2 => r2.closest('label').classList.toggle('selected', r2.checked));
           const newRole = document.querySelector(`input[name="${idPrefix}-role"]:checked`).value;
           const isSA = newRole === 'site_admin';
-          document.getElementById(`${idPrefix}-perm-wrap`).style.display = isSA ? 'none' : '';
           document.getElementById(`${idPrefix}-admin-note`).style.display = isSA ? '' : 'none';
           // Switching to Admin defaults to full access (matching today's behavior) — still
           // individually editable from there. Switching to Staff locks (and force-unchecks)
           // the permissions Staff can never have, regardless of what was checked before.
+          // Switching to Site Admin checks and locks everything — same checklist stays
+          // visible the whole time, just its checked/disabled state changes with the role.
           PERMISSIONS.forEach(p => {
             const cb = document.getElementById(`${idPrefix}-perm-${p.key}`);
             const label = cb.closest('label');
-            const locked = newRole === 'staff' && !STAFF_ALLOWED_PERMISSIONS.includes(p.key);
+            const staffLocked = newRole === 'staff' && !STAFF_ALLOWED_PERMISSIONS.includes(p.key);
+            const locked = isSA || staffLocked;
             cb.disabled = locked;
             label.classList.toggle('perm-locked', locked);
-            if (locked) cb.checked = false;
+            if (isSA) cb.checked = true;
+            else if (staffLocked) cb.checked = false;
             else if (newRole === 'admin') cb.checked = true;
           });
         });

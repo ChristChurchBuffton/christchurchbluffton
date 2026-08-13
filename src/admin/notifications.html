@@ -10,6 +10,11 @@
 <link rel="stylesheet" href="css/shared.css">
 <style>
   .page-width { max-width: 760px; margin: 0 auto; }
+  /* Tablet/small-laptop widths still felt a bit wide for these short two-item rows —
+     narrow it further in this range, same pattern used on the other list pages. */
+  @media (min-width: 600px) and (max-width: 1300px) {
+    .page-width { max-width: 560px; }
+  }
   .info-banner {
     background: rgba(48,59,106,0.06);
     border: 1px solid rgba(48,59,106,0.2);
@@ -38,6 +43,9 @@
     padding: 10px 14px; border: 1px solid var(--border-gray); border-radius: 8px;
     margin-bottom: 8px; font-size: 13.5px; color: var(--text-dark); background: var(--lightest-gray);
   }
+  /* Without min-width:0, a flex item won't shrink below its text's natural width — a long
+     email would just push the remove button out past the card's edge on narrow screens. */
+  .recipient-email { min-width: 0; overflow-wrap: break-word; }
   .recipient-list li:last-child { margin-bottom: 0; }
   .recipient-empty { font-size: 13px; color: var(--text-muted); font-style: italic; padding: 4px 0 14px; }
   .remove-recipient-btn {
@@ -49,11 +57,18 @@
 
   .add-recipient-row { display: flex; gap: 8px; }
   .add-recipient-row input[type="email"] {
-    flex: 1; padding: 9px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
+    flex: 1; min-width: 0; padding: 9px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
     font-family: inherit; font-size: 13.5px; background: var(--white); color: var(--text-dark);
   }
   .add-recipient-row input[type="email"]:focus { outline: none; border-color: var(--gold); }
   .add-recipient-row .btn { padding: 9px 16px; font-size: 13px; white-space: nowrap; }
+  /* Below 560px the input and "+ Add" button sharing one row squeezed the placeholder
+     text — stack the input above the button instead. align-self:flex-start keeps the
+     button at its natural compact size rather than stretching it to the input's width. */
+  @media (max-width: 480px) {
+    .add-recipient-row { flex-direction: column; }
+    .add-recipient-row .btn { align-self: flex-end; }
+  }
 
   .section-error {
     background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger);
@@ -191,6 +206,13 @@
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
+    // On narrow screens a long email has to wrap somewhere — without this, the browser
+    // breaks mid-word at an arbitrary character. <wbr> only offers a break point right
+    // after @ and each ., so if it wraps at all, it wraps somewhere sensible.
+    function formatEmailForWrap(email) {
+      return escapeHtml(email).replace(/([@.])/g, '$1<wbr>');
+    }
+
     async function loadNotificationSettings() {
       const { data, error } = await supabaseClient.from('notification_settings').select('*');
       if (error) { console.error('loadNotificationSettings failed:', error.message); return; }
@@ -205,7 +227,7 @@
         const listHtml = recipients.length
           ? `<ul class="recipient-list">${recipients.map(email => `
               <li>
-                <span>${escapeHtml(email)}</span>
+                <span class="recipient-email">${formatEmailForWrap(email)}</span>
                 <button type="button" class="remove-recipient-btn" data-form="${section.key}" data-email="${escapeHtml(email)}" title="Remove" aria-label="Remove ${escapeHtml(email)}">&times;</button>
               </li>`).join('')}</ul>`
           : `<div class="recipient-empty">No recipients yet — add one below.</div>`;

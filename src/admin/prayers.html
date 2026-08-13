@@ -129,6 +129,14 @@
     .prayer-table td:nth-child(1)::before { display: none; }
     .prayer-table .row-actions { justify-content: flex-start; padding-top: 6px; border-top: 1px solid var(--border-gray); }
   }
+  /* Once there's enough room to spare, the whole Prayer Log panel stretching edge-to-edge
+     leaves a lot of dead cream space around short cards — cap and center the WHOLE panel
+     (header bar included), not just the individual cards, so it narrows as one unit
+     instead of leaving an oversized frame around skinny centered cards. Narrower than
+     this, the existing side margins already keep it readable, so leave those untouched. */
+  @media (min-width: 600px) and (max-width: 1300px) {
+    .prayers-card { max-width: 560px; margin-left: auto; margin-right: auto; }
+  }
 
   /* ---- Modal (shared shell pattern) ---- */
   .modal-backdrop {
@@ -159,6 +167,9 @@
   .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--gold); background: var(--white); }
   .name-row { display: flex; gap: 12px; }
   .name-row .field { flex: 1; }
+  @media (max-width: 560px) {
+    .name-row { flex-direction: column; gap: 0; }
+  }
   .anon-check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dark); cursor: pointer; margin-bottom: 16px; }
   .anon-check-row input { width: 15px; height: 15px; accent-color: var(--gold-text); }
 

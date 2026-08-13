@@ -45,7 +45,10 @@
 
   .congregants-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    /* min(320px, 100%) instead of a bare 320px — a hardcoded minimum can exceed the
+       actual available width once page padding is subtracted on very narrow screens,
+       forcing horizontal overflow. */
+    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
     gap: 16px;
   }
   .congregants-empty { padding: 40px 16px; text-align: center; font-size: 13px; color: var(--text-muted); font-style: italic; grid-column: 1 / -1; }
@@ -124,6 +127,18 @@
   .field input:focus { outline: none; border-color: var(--gold); background: var(--white); }
   .name-row { display: flex; gap: 12px; }
   .name-row .field { flex: 1; }
+  @media (max-width: 560px) {
+    .name-row { flex-direction: column; gap: 0; }
+  }
+
+  .city-state-zip { display: flex; gap: 12px; }
+  .city-state-zip .csz-city { flex: 2; }
+  .csz-state-zip { display: flex; gap: 12px; flex: 1; }
+  .csz-state-zip .csz-state { flex: 1; }
+  .csz-state-zip .csz-zip { flex: 1.3; }
+  @media (max-width: 560px) {
+    .city-state-zip { flex-direction: column; gap: 0; }
+  }
 
   .modal-section-title {
     font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.4px; color: var(--gold-text);
@@ -143,6 +158,28 @@
   }
   .kid-row .remove-kid-btn:hover { border-color: var(--danger); color: var(--danger); background: rgba(177,67,67,0.05); }
   .kid-row .remove-kid-btn svg { width: 14px; height: 14px; }
+  /* Below 560px the modal itself is narrower than its 560px max-width, leaving too
+     little room for 3 flex fields + the remove button in one row (the date input's
+     native minimum width alone forces the name fields down to an unusable ~30-80px).
+     Stack the fields and move the remove button into a corner badge instead. */
+  @media (max-width: 560px) {
+    .kid-row {
+      flex-direction: column;
+      align-items: stretch;
+      position: relative;
+      padding: 34px 14px 14px 14px;
+      border: 1px solid var(--border-gray);
+      border-radius: 10px;
+    }
+    .kid-row .remove-kid-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 26px;
+      height: 26px;
+    }
+    .kid-row .remove-kid-btn svg { width: 12px; height: 12px; }
+  }
   .add-kid-btn {
     padding: 8px 14px; border-radius: 100px; border: 1px dashed var(--border-gray); background: var(--white);
     font-size: 12px; font-weight: bold; color: var(--navy-blue); cursor: pointer;
@@ -314,6 +351,9 @@
         spousePhone: row.spouse_phone,
         children: row.children || [],
         address: row.address,
+        city: row.city,
+        state: row.state,
+        zip: row.zip,
         attendingSince: row.attending_since,
         addedAt: row.added_at ? new Date(row.added_at).getTime() : null
       };
@@ -332,6 +372,9 @@
         spouse_phone: data.spousePhone || null,
         children: data.children || [],
         address: data.address || null,
+        city: data.city || null,
+        state: data.state || null,
+        zip: data.zip || null,
         attending_since: data.attendingSince || null
       };
     }
@@ -367,12 +410,19 @@
 
     function familySurname(f) { return f.headLastName || ''; }
 
+    function formatAddress(f) {
+      const street = f.address ? escapeHtml(f.address) : '';
+      const cityStateZip = [f.city, [f.state, f.zip].filter(Boolean).join(' ')].filter(Boolean).map(escapeHtml).join(', ');
+      const parts = [street, cityStateZip].filter(Boolean);
+      return parts.length ? parts.join('<br>') : '—';
+    }
+
     function matchesSearch(f, term) {
       if (!term) return true;
       const haystack = [
         f.headFirstName, f.headLastName, f.headEmail,
         f.spouseFirstName, f.spouseLastName, f.spouseEmail,
-        f.address,
+        f.address, f.city, f.state, f.zip,
         ...(f.children || []).map(k => `${k.firstName} ${k.lastName}`)
       ].join(' ').toLowerCase();
       return haystack.includes(term.toLowerCase());
@@ -414,7 +464,7 @@
             </div>
             <div class="family-detail ${isOpen ? 'open' : ''}" id="detail-${f.id}">
               <span class="detail-label">Address</span>
-              ${escapeHtml(f.address || '—')}
+              ${formatAddress(f)}
               <span class="detail-label">Attending Since</span>
               ${formatDate(f.attendingSince)}
               <span class="detail-label">Head of Household</span>
@@ -496,7 +546,7 @@
         </div>
         <div class="name-row">
           <div class="field"><label>Email</label><input type="email" id="head-email" placeholder="kevin@example.com" value="${existing ? escapeHtml(existing.headEmail || '') : ''}"></div>
-          <div class="field"><label>Phone</label><input type="text" id="head-phone" placeholder="(843) 555-0100" value="${existing ? escapeHtml(existing.headPhone || '') : ''}"></div>
+          <div class="field"><label>Phone</label><input type="text" id="head-phone" placeholder="(xxx) xxx-xxxx" value="${existing ? escapeHtml(existing.headPhone || '') : ''}"></div>
         </div>
 
         <div class="modal-section-title">Spouse (optional)</div>
@@ -506,7 +556,7 @@
         </div>
         <div class="name-row">
           <div class="field"><label>Email</label><input type="email" id="spouse-email" placeholder="stephanie@example.com" value="${existing ? escapeHtml(existing.spouseEmail || '') : ''}"></div>
-          <div class="field"><label>Phone</label><input type="text" id="spouse-phone" placeholder="(843) 555-0100" value="${existing ? escapeHtml(existing.spousePhone || '') : ''}"></div>
+          <div class="field"><label>Phone</label><input type="text" id="spouse-phone" placeholder="(xxx) xxx-xxxx" value="${existing ? escapeHtml(existing.spousePhone || '') : ''}"></div>
         </div>
 
         <div class="modal-section-title">Children</div>
@@ -514,7 +564,14 @@
         <button type="button" class="add-kid-btn" id="add-kid-btn">+ Add Child</button>
 
         <div class="modal-section-title">Household</div>
-        <div class="field"><label>Address</label><input type="text" id="fam-address" placeholder="52 Wyndham Dr, Bluffton, SC 29910" value="${existing ? escapeHtml(existing.address || '') : ''}"></div>
+        <div class="field"><label>Street Address</label><input type="text" id="fam-address" placeholder="52 Wyndham Dr" value="${existing ? escapeHtml(existing.address || '') : ''}"></div>
+        <div class="city-state-zip">
+          <div class="field csz-city"><label>City</label><input type="text" id="fam-city" placeholder="Bluffton" value="${existing ? escapeHtml(existing.city || '') : ''}"></div>
+          <div class="csz-state-zip">
+            <div class="field csz-state"><label>State</label><input type="text" id="fam-state" placeholder="SC" maxlength="2" value="${existing ? escapeHtml(existing.state || '') : ''}"></div>
+            <div class="field csz-zip"><label>Zip</label><input type="text" id="fam-zip" placeholder="29910" maxlength="10" value="${existing ? escapeHtml(existing.zip || '') : ''}"></div>
+          </div>
+        </div>
         <div class="field"><label>Attending Since</label><input type="date" id="fam-attending-since" value="${existing ? (existing.attendingSince || '') : ''}"></div>`;
 
       renderKidRows(modalChildren);
@@ -528,6 +585,7 @@
         { label: existing ? 'Save Changes' : 'Add Family', className: 'btn btn-gold', onClick: () => submitFamilyForm(existing ? existing.id : null) }
       ]);
       document.getElementById('modal-backdrop').classList.add('open');
+      document.getElementById('modal-body').scrollTop = 0;
     }
 
     function readKidsFromForm() {
@@ -548,6 +606,9 @@
       const spouseEmail = document.getElementById('spouse-email').value.trim();
       const spousePhone = document.getElementById('spouse-phone').value.trim();
       const address = document.getElementById('fam-address').value.trim();
+      const city = document.getElementById('fam-city').value.trim();
+      const state = document.getElementById('fam-state').value.trim();
+      const zip = document.getElementById('fam-zip').value.trim();
       const attendingSince = document.getElementById('fam-attending-since').value;
       const errorBox = document.getElementById('fam-error');
       errorBox.classList.remove('visible');
@@ -562,7 +623,7 @@
         headFirstName, headLastName, headEmail, headPhone,
         spouseFirstName, spouseLastName, spouseEmail, spousePhone,
         children: readKidsFromForm(),
-        address, attendingSince
+        address, city, state, zip, attendingSince
       };
       const payload = familyDataToRow(data);
       const familyLabel = `${headLastName}, ${headFirstName}`;

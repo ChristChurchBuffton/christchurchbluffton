@@ -32,10 +32,12 @@
     border-bottom: 1px solid var(--border-gray);
     font-size: 13px;
     color: var(--text-dark);
-    display: flex; justify-content: space-between; gap: 12px;
+    display: flex; flex-direction: column; gap: 3px;
   }
   .activity-list li:last-child { border-bottom: none; }
-  .activity-list .activity-when { color: var(--text-muted); white-space: nowrap; }
+  .activity-desc { overflow-wrap: break-word; }
+  .activity-actor { color: var(--text-muted); overflow-wrap: break-word; }
+  .activity-list .activity-when { color: var(--text-muted); font-size: 12px; }
   .activity-empty { padding: 18px 22px; font-size: 13px; color: var(--text-muted); }
   .activity-more { padding: 14px 22px; text-align: center; border-top: 1px solid var(--border-gray); }
   .activity-more-btn {
@@ -277,8 +279,9 @@
         const isDevUpdate = e.action === 'dev_update';
         return `
         <li${isDevUpdate ? ' style="color:var(--danger); font-weight:bold;"' : ''}>
-          <span>${escapeHtml(ACTIVITY_LABELS[e.action] || e.action)}${e.target ? ' — ' + escapeHtml(e.target) : ''} <span style="color:var(--text-muted); font-weight:normal;">(${escapeHtml(e.actor)})</span></span>
+          <span class="activity-desc">${escapeHtml(ACTIVITY_LABELS[e.action] || e.action)}${e.target ? ' — ' + escapeHtml(e.target) : ''}</span>
           <span class="activity-when">${escapeHtml(new Date(e.t).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}</span>
+          <span class="activity-actor" style="${isDevUpdate ? 'font-weight:normal;' : ''}">(${escapeHtml(e.actor)})</span>
         </li>`;
       }).join('');
       more.style.display = activityShown < activityLog.length ? '' : 'none';
