@@ -38,6 +38,12 @@
   .activity-desc { overflow-wrap: break-word; }
   .activity-actor { color: var(--text-muted); overflow-wrap: break-word; }
   .activity-list .activity-when { color: var(--text-muted); font-size: 12px; }
+  .activity-meta { display: flex; flex-direction: column; gap: 3px; }
+  /* Date/time and actor are both short — pairing them on one line once there's room saves
+     a whole line per entry, instead of always stacking all three regardless of width. */
+  @media (min-width: 768px) {
+    .activity-meta { flex-direction: row; gap: 8px; }
+  }
   .activity-empty { padding: 18px 22px; font-size: 13px; color: var(--text-muted); }
   .activity-more { padding: 14px 22px; text-align: center; border-top: 1px solid var(--border-gray); }
   .activity-more-btn {
@@ -280,8 +286,10 @@
         return `
         <li${isDevUpdate ? ' style="color:var(--danger); font-weight:bold;"' : ''}>
           <span class="activity-desc">${escapeHtml(ACTIVITY_LABELS[e.action] || e.action)}${e.target ? ' — ' + escapeHtml(e.target) : ''}</span>
-          <span class="activity-when">${escapeHtml(new Date(e.t).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}</span>
-          <span class="activity-actor" style="${isDevUpdate ? 'font-weight:normal;' : ''}">(${escapeHtml(e.actor)})</span>
+          <span class="activity-meta">
+            <span class="activity-when">${escapeHtml(new Date(e.t).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}</span>
+            <span class="activity-actor" style="${isDevUpdate ? 'font-weight:normal;' : ''}">(${escapeHtml(e.actor)})</span>
+          </span>
         </li>`;
       }).join('');
       more.style.display = activityShown < activityLog.length ? '' : 'none';
