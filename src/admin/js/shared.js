@@ -142,7 +142,7 @@ async function backendFetch(path, options = {}) {
 function requireSession() {
   const session = getSession();
   if (!session) {
-    window.location.href = 'index.html';
+    window.location.href = 'index';
     return null;
   }
   return session;
@@ -493,7 +493,7 @@ function showPanelAnnouncements(session, announcements) {
       await dismiss(a);
       if (isLast) {
         overlay.remove();
-        if (!location.pathname.endsWith('/dashboard.html')) window.location.href = 'dashboard.html';
+        if (!location.pathname.endsWith('/dashboard')) window.location.href = 'dashboard';
       } else { index++; render(); }
     });
     if (hasShowMe) {
@@ -539,7 +539,7 @@ function showForcedPasswordResetModal(session) {
 
   document.getElementById('forced-reset-logout').addEventListener('click', async () => {
     await signOutSession();
-    window.location.href = 'index.html';
+    window.location.href = 'index';
   });
 
   document.getElementById('forced-reset-submit').addEventListener('click', async () => {
@@ -609,7 +609,7 @@ async function loadSidebar() {
     e.preventDefault();
     logActivity('logout', session.email);
     await signOutSession();
-    window.location.href = 'index.html';
+    window.location.href = 'index';
   });
 
   // Tablet/mobile only — nav collapses behind this toggle instead of stacking above content.

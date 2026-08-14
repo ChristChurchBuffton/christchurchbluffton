@@ -59,7 +59,7 @@
 
       <div id="accept-invalid" style="display:none;">
         <div class="auth-note">This invite link is invalid or has already been used. Ask a Site Admin to send you a fresh invite.</div>
-        <a href="index.html" class="btn-primary" style="display:block; text-align:center; text-decoration:none; box-sizing:border-box;">Go to Sign In</a>
+        <a href="index" class="btn-primary" style="display:block; text-align:center; text-decoration:none; box-sizing:border-box;">Go to Sign In</a>
       </div>
     </div>
   </div>
@@ -147,7 +147,7 @@
         }
         await logActivity('team_reset_pw', `${session.user.email} — self, accepted invite`);
         await logActivity('login', 'accepted invite', session.user.email);
-        window.location.href = 'dashboard.html';
+        window.location.href = 'dashboard';
       });
     })();
   </script>
