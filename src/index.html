@@ -114,7 +114,7 @@
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            transition: opacity 1.5s ease, visibility 1.5s ease;
+            transition: opacity 2.5s ease, visibility 2.5s ease;
         }
         .loader.fade-out { opacity: 0; visibility: hidden; }
         .loader-content { text-align: center; }
@@ -123,12 +123,15 @@
             height: auto;
             object-fit: contain;
             margin-bottom: 4px;
+            animation: loader-reveal 1.8s ease-out both;
         }
         @media (min-width: 768px) {
             .loader-logo { width: 240px; }
+            .loader-subtext { font-size: 1.25rem; }
         }
         @media (min-width: 1280px) {
             .loader-logo { width: 320px; }
+            .loader-subtext { font-size: 1.625rem; }
         }
         .loader-text {
             color: var(--white);
@@ -138,17 +141,26 @@
             animation: loader-fade 2s ease-in-out infinite;
         }
         .loader-subtext {
-            color: #c9ac66;
+            color: var(--white);
             font-family: var(--font-body);
-            font-size: 1.125rem;
+            font-size: 1.1rem;
             font-style: italic;
             letter-spacing: 2px;
-            margin-top: 2px;
-            opacity: 0.9;
+            margin-top: 8px;
+            opacity: 0;
+            animation: loader-reveal-inward 2s ease-out 0.35s both;
         }
         @keyframes loader-fade {
             0%, 100% { opacity: 0.5; }
             50% { opacity: 1; }
+        }
+        @keyframes loader-reveal {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes loader-reveal-inward {
+            from { opacity: 0; transform: scale(0.7); letter-spacing: 0px; }
+            to { opacity: 1; transform: scale(1); letter-spacing: 2px; }
         }
 
         /* ── Main Content ── */
@@ -201,7 +213,7 @@
         }
 
         /* ── Sections ── */
-        .section { padding: 120px 0; position: relative; }
+        .section { padding: 100px 0; position: relative; }
         .section-slim { padding: 80px 0; }
         .section-label {
             display: inline-block;
@@ -346,9 +358,39 @@
             gap: 26px;
         }
         .motto-divider {
+            visibility: hidden;
             width: 2px;
             height: 32px;
             background: var(--gold);
+        }
+        @media (min-width: 460px) {
+            .motto-divider-1 { visibility: visible; }
+        }
+        @media (min-width: 1024px) {
+            .motto-divider-2 { visibility: visible; }
+        }
+        /* Below 1024px, keep the lines stacked with a horizontal rule
+           between each — avoids the lopsided "2 on one row, 1 alone below"
+           state that a lower cutoff would produce. flex-basis 100% forces
+           the divider onto its own full-width row so it can't tuck in
+           beside a line; the actual visible bar is a centered ::after. */
+        @media (max-width: 1023px) {
+            .motto-divider {
+                visibility: visible;
+                flex: 1 1 100%;
+                width: auto;
+                height: auto;
+                background: none;
+                display: flex;
+                justify-content: center;
+            }
+            .motto-divider::after {
+                content: '';
+                display: block;
+                width: 55px;
+                height: 2px;
+                background: var(--gold);
+            }
         }
         .motto-line {
             font-family: var(--font-heading);
@@ -361,6 +403,11 @@
             transition: color 0.3s ease, transform 0.3s ease;
             cursor: default;
         }
+        /* 1024-1079px (tablet landscape): all 3 words fit on one row with a
+           small text trim. */
+        @media (min-width: 1024px) and (max-width: 1079px) {
+            .motto-line { font-size: 1.8rem; }
+        }
         .motto-line:hover {
             color: #7F6D34;
             transform: translateY(-3px);
@@ -369,7 +416,6 @@
             .motto-band { padding: 26px 20px; }
             .motto-lines { gap: 14px; }
             .motto-line { font-size: 1.25rem; letter-spacing: 1px; }
-            .motto-divider { display: none; }
         }
 
         /* ── About Section ── */
@@ -676,7 +722,7 @@
 
         /* ── Responsive — Tablet ── */
         @media (max-width: 1023px) {
-            .section { padding: 80px 0; }
+            .section, .stats-section { padding: 80px 0; }
             .about-grid {
                 grid-template-columns: 1fr;
                 gap: 40px;
@@ -705,10 +751,14 @@
             .vision-card-img { height: 220px; }
         }
 
+        /* ── Responsive — Mobile Breakpoint (matches other pages) ── */
+        @media (max-width: 768px) {
+            .section, .stats-section { padding: 60px 0; }
+            .container { padding: 0 20px; }
+        }
+
         /* ── Responsive — Mobile ── */
         @media (max-width: 600px) {
-            .section { padding: 60px 0; }
-            .container { padding: 0 20px; }
             .section-title { font-size: 2rem; }
             .hero {
                 padding: 60px 20px;
@@ -828,9 +878,9 @@
             <div class="container">
                 <div class="motto-lines animate">
                     <span class="motto-line">Knowing Jesus</span>
-                    <span class="motto-divider"></span>
+                    <span class="motto-divider motto-divider-1"></span>
                     <span class="motto-line">Sharing Life</span>
-                    <span class="motto-divider"></span>
+                    <span class="motto-divider motto-divider-2"></span>
                     <span class="motto-line">Bringing Hope</span>
                 </div>
             </div>
@@ -1001,10 +1051,10 @@
                 loader.style.display = 'none';
                 return;
             }
-            var minTime = 1500;
+            var minTime = 2200;
             function hideLoader() {
                 loader.classList.add('fade-out');
-                setTimeout(function() { loader.style.display = 'none'; }, 1500);
+                setTimeout(function() { loader.style.display = 'none'; }, 2500);
             }
             setTimeout(hideLoader, minTime);
         })();

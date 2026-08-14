@@ -179,6 +179,7 @@
             gap: 80px;
             align-items: center;
         }
+        .about-grid > * { min-width: 0; }
         .about-content p {
             font-family: var(--font-body);
             color: var(--text-gray);
@@ -369,6 +370,7 @@
             gap: 80px;
             align-items: center;
         }
+        .pastor-grid > * { min-width: 0; }
         .pastor-grid.reverse { grid-template-columns: 1.2fr 1fr; }
         .pastor-grid.reverse .pastor-image { order: 2; }
         .pastor-grid.reverse .pastor-content { order: 1; }
@@ -440,6 +442,11 @@
             font-family: var(--font-body);
             font-weight: 400;
             transition: all 0.3s ease;
+            max-width: 100%;
+        }
+        .link-text {
+            min-width: 0;
+            overflow-wrap: break-word;
         }
         .contact-link:hover { color: #7F6D34; }
         .link-icon { font-size: 1.25rem; }
@@ -576,8 +583,9 @@
         }
 
         @media (max-width: 360px) {
-            .container { padding: 0 12px; }
-            .page-header { padding: 50px 12px 40px; }
+            .container { padding: 0 16px; }
+            .link-text { max-width: 190px; }
+            .page-header { padding: 50px 16px 40px; }
             .belief-card { padding: 18px; }
             .scripture-banner { padding: 24px 16px; border-radius: 12px; }
         }
@@ -754,7 +762,7 @@
                         <div class="pastor-contact animate">
                             <a href="mailto:jonathan@christchurchbluffton.org" class="contact-link">
                                 <span class="link-icon">&#9993;</span>
-                                jonathan@christchurchbluffton.org
+                                <span class="link-text">jonathan@<wbr>christchurchbluffton.org</span>
                             </a>
                         </div>
                         <div class="pastor-quote animate">
@@ -795,7 +803,7 @@
                         <div class="pastor-contact animate">
                             <a href="mailto:bradley@christchurchbluffton.org" class="contact-link">
                                 <span class="link-icon">&#9993;</span>
-                                bradley@christchurchbluffton.org
+                                <span class="link-text">bradley@<wbr>christchurchbluffton.org</span>
                             </a>
                         </div>
                     </div>

@@ -101,6 +101,9 @@
 
     // Load footer + newsletter handler
     loadComponent('site-footer', 'includes/footer.html', function() {
+        var copyrightYear = document.getElementById('copyright-year');
+        if (copyrightYear) copyrightYear.textContent = new Date().getFullYear();
+
         var form = document.getElementById('newsletterForm');
         if (!form) return;
         if (window.renderTurnstile) renderTurnstile(form.querySelector('.cf-turnstile'));
@@ -192,15 +195,32 @@
         closeBtn.addEventListener('click', closePrayer);
         overlay.addEventListener('click', closePrayer);
 
-        // Fade the FAB out while the footer is in view so it never overlaps footer content
+        // Fade the FAB out while the footer, or a card block it would otherwise sit on
+        // top of (like the contact page's info cards), is in view.
         var footerEl = document.getElementById('site-footer');
+        var obstructionEl = document.querySelector('.contact-cards');
+        var fabNearFooter = false;
+        var fabNearObstruction = false;
+        function updateFabVisibility() {
+            fab.classList.toggle('fab-near-footer', fabNearFooter || fabNearObstruction);
+        }
         if (footerEl && 'IntersectionObserver' in window) {
             var footerObserver = new IntersectionObserver(function(entries) {
                 entries.forEach(function(entry) {
-                    fab.classList.toggle('fab-near-footer', entry.isIntersecting);
+                    fabNearFooter = entry.isIntersecting;
                 });
+                updateFabVisibility();
             }, { threshold: 0 });
             footerObserver.observe(footerEl);
+        }
+        if (obstructionEl && 'IntersectionObserver' in window) {
+            var obstructionObserver = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    fabNearObstruction = entry.isIntersecting;
+                });
+                updateFabVisibility();
+            }, { threshold: 0 });
+            obstructionObserver.observe(obstructionEl);
         }
 
 

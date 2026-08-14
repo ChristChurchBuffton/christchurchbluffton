@@ -131,7 +131,7 @@
 
         /* ── Two-Column Give Section (desktop) ── */
         .give-section {
-            padding: 60px 0 50px;
+            padding: 100px 0;
         }
 
         .give-grid {
@@ -140,6 +140,7 @@
             gap: 50px;
             align-items: start;
         }
+        .give-grid > * { min-width: 0; }
 
         /* Left column: mission + info */
         .give-content {
@@ -205,6 +206,8 @@
             font-size: 1rem;
             color: var(--gold-text);
             font-weight: 400;
+            overflow-wrap: break-word;
+            min-width: 0;
         }
 
         .connect-email:hover {
@@ -548,6 +551,10 @@
         }
 
         /* ── Tablet ── */
+        @media (max-width: 1023px) {
+            .give-section { padding: 80px 0; }
+        }
+
         @media (max-width: 900px) {
             .give-grid {
                 grid-template-columns: 1fr;
@@ -604,7 +611,7 @@
             }
 
             .give-section {
-                padding: 30px 0 20px;
+                padding: 60px 0;
             }
 
             .donation-header {
@@ -761,7 +768,7 @@
                         <div class="info-card">
                             <p class="info-label">Stay Connected</p>
                             <p class="connect-text">Questions or want to be included in future updates?<br>Email us at</p>
-                            <a href="mailto:info@christchurchbluffton.org" class="connect-email">info@christchurchbluffton.org</a>
+                            <a href="mailto:info@christchurchbluffton.org" class="connect-email">info@<wbr>christchurchbluffton.org</a>
                         </div>
 
                         <div class="qr-row">
@@ -801,7 +808,7 @@
                         <div class="info-card" style="margin-top: 20px;">
                             <p class="info-label">Other Ways to Give</p>
                             <p class="connect-text">Interested in donating in a different way?<br>Reach out to our treasurer at</p>
-                            <a href="mailto:treasurer@christchurchbluffton.org" class="connect-email">treasurer@christchurchbluffton.org</a>
+                            <a href="mailto:treasurer@christchurchbluffton.org" class="connect-email">treasurer@<wbr>christchurchbluffton.org</a>
                         </div>
                     </div>
 

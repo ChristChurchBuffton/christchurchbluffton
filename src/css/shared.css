@@ -411,9 +411,15 @@ textarea:focus-visible {
 }
 
 .footer-logo-full {
-    height: 70px;
+    height: 54px;
     width: auto;
     object-fit: contain;
+}
+@media (min-width: 480px) {
+    .footer-logo-full { height: 62px; }
+}
+@media (min-width: 768px) {
+    .footer-logo-full { height: 70px; }
 }
 
 .footer-church-name {
@@ -445,6 +451,15 @@ textarea:focus-visible {
 }
 .footer-tagline-location {
     display: block;
+}
+@media (min-width: 768px) {
+    .footer-tagline-location {
+        display: inline;
+    }
+}
+/* Desktop (≥1024px): keep the location on its own second line. */
+@media (min-width: 1024px) {
+    .footer-tagline-location { display: block; }
 }
 
 .footer-contact-info { display: flex; flex-direction: column; gap: 6px; }

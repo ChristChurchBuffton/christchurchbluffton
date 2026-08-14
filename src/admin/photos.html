@@ -249,7 +249,7 @@
           <div class="subtitle">Church photos available for newsletters, social media, flyers, and other church uses</div>
         </div>
         <button class="btn btn-gold" id="upload-btn">+ Upload Photo</button>
-        <input type="file" accept="image/jpeg" id="upload-input" style="display:none;">
+        <input type="file" accept="image/jpeg,image/png" id="upload-input" style="display:none;">
       </div>
       <div class="content" id="page-body">
         <div class="live-url-banner">
@@ -361,7 +361,7 @@
         <button type="button" class="upload-tile" id="upload-tile-btn">
           <div class="plus">+</div>
           Click to upload a photo
-          <div class="upload-tile-hint">JPG only</div>
+          <div class="upload-tile-hint">JPG or PNG</div>
         </button>` + sorted.map(p => `
           <div class="photo-card">
             <a href="${escapeHtml(photoLink(p))}" target="_blank" rel="noopener">
@@ -408,9 +408,10 @@
     }
 
     // Asks for a friendly display name before the actual upload — "Church Crew" becomes both
-    // the Storage filename and the DB filename column ("church-crew.jpg"), matching the plain
-    // readable naming the 5 seed photos already use.
+    // the Storage filename and the DB filename column ("church-crew.jpg" or "church-crew.png"),
+    // matching the plain readable naming the 5 seed photos already use.
     function openUploadModal(file) {
+      const ext = file.type === 'image/png' ? '.png' : '.jpg';
       document.getElementById('modal-title').textContent = 'Name This Photo';
       document.getElementById('modal-subtitle').textContent = 'Used for the file name and the link you copy';
       const baseName = file.name.replace(/\.[^.]+$/, '');
@@ -423,7 +424,7 @@
         </div>`;
       const nameInput = document.getElementById('upload-name');
       const preview = document.getElementById('upload-name-preview');
-      const updatePreview = () => { preview.textContent = (slugify(nameInput.value) || '—') + '.jpg'; };
+      const updatePreview = () => { preview.textContent = (slugify(nameInput.value) || '—') + ext; };
       nameInput.addEventListener('input', updatePreview);
       updatePreview();
 
@@ -437,7 +438,7 @@
               errorEl.classList.add('visible');
               return;
             }
-            const finalName = slug + '.jpg';
+            const finalName = slug + ext;
             if (photos.some(p => p.filename.toLowerCase() === finalName.toLowerCase())) {
               errorEl.textContent = `A photo named "${finalName}" already exists — pick a different name.`;
               errorEl.classList.add('visible');
@@ -465,8 +466,8 @@
         const file = e.target.files[0];
         fileInput.value = '';
         if (!file) return;
-        if (file.type !== 'image/jpeg') {
-          alert('Please choose a JPG photo — other file types aren\'t supported here yet (JPG keeps these consistent with email clients like Outlook).');
+        if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
+          alert('Please choose a JPG or PNG photo — other file types aren\'t supported here yet (JPG/PNG keep these consistent with email clients like Outlook).');
           return;
         }
         openUploadModal(file);
