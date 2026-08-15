@@ -114,7 +114,7 @@
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            transition: opacity 2.5s ease, visibility 2.5s ease;
+            transition: opacity 3s ease, visibility 3s ease;
         }
         .loader.fade-out { opacity: 0; visibility: hidden; }
         .loader-content { text-align: center; }
@@ -125,14 +125,6 @@
             margin-bottom: 4px;
             animation: loader-reveal 1.8s ease-out both;
         }
-        @media (min-width: 768px) {
-            .loader-logo { width: 240px; }
-            .loader-subtext { font-size: 1.25rem; }
-        }
-        @media (min-width: 1280px) {
-            .loader-logo { width: 320px; }
-            .loader-subtext { font-size: 1.625rem; }
-        }
         .loader-text {
             color: var(--white);
             font-family: var(--font-heading);
@@ -141,7 +133,7 @@
             animation: loader-fade 2s ease-in-out infinite;
         }
         .loader-subtext {
-            color: var(--white);
+            color: #F2E8D5;
             font-family: var(--font-body);
             font-size: 1.1rem;
             font-style: italic;
@@ -149,6 +141,14 @@
             margin-top: 8px;
             opacity: 0;
             animation: loader-reveal-inward 2s ease-out 0.35s both;
+        }
+        @media (min-width: 768px) {
+            .loader-logo { width: 240px; }
+            .loader-subtext { font-size: 1.25rem; }
+        }
+        @media (min-width: 1280px) {
+            .loader-logo { width: 320px; }
+            .loader-subtext { font-size: 1.625rem; }
         }
         @keyframes loader-fade {
             0%, 100% { opacity: 0.5; }
@@ -159,8 +159,8 @@
             to { opacity: 1; transform: translateY(0); }
         }
         @keyframes loader-reveal-inward {
-            from { opacity: 0; transform: scale(0.7); letter-spacing: 0px; }
-            to { opacity: 1; transform: scale(1); letter-spacing: 2px; }
+            from { opacity: 0; letter-spacing: 0px; }
+            to { opacity: 1; letter-spacing: 2px; }
         }
 
         /* ── Main Content ── */
@@ -1054,7 +1054,7 @@
             var minTime = 2200;
             function hideLoader() {
                 loader.classList.add('fade-out');
-                setTimeout(function() { loader.style.display = 'none'; }, 2500);
+                setTimeout(function() { loader.style.display = 'none'; }, 3000);
             }
             setTimeout(hideLoader, minTime);
         })();
