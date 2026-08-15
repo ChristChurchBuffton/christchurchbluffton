@@ -199,6 +199,18 @@
 
 ---
 
+## Phase 10: Admin Cleanup, Logo/Footer Rebuild & Loading-Screen Polish (2026-08-13 → 2026-08-15) — PUSHED TO `origin` ONLY, standing by on `production`
+> Admin URL/activity-log cleanup and Greeters onboarding, then a full public-site logo refresh and footer rebuild modeled on Traditions Field Club, then a redo of the homepage loading-screen animation. All three commits (`e9ed372`, `49cb84d`/`bf80e9e`, `0bca5fc`) pushed to `origin` (staging) only — holding on `production` for Kevin's go-ahead.
+
+- [x] **Admin clean-URL + Dev Update fix** (commit `e9ed372`) — stripped `.html` from internal admin links, removed a fake "Dev Update" activity-log entry, uploaded 22 Greeters volunteers. Cross-checked 4 Greeters with missing team assignments against source Word docs (see `todo.md` for findings) — one correction (Maury Moody) found but deliberately left unapplied per Kevin's call to revisit later.
+- [x] **Site-wide spacing/overflow fixes + PNG upload support** (commit `49cb84d`) — see `todo.md` for detail.
+- [x] **Public-site logo refresh + 4-column footer rebuild** (commit `bf80e9e`) — new footer logo (stacked crest-over-wordmark, matching the loading-screen logo) replacing the old side-by-side version; footer rebuilt from a single narrow bar into a 4-column layout (Branding / Quick Links / Contact / Stay Updated) modeled directly on Traditions Field Club's footer, including Instagram/Facebook "Coming Soon" rows, gold column headers, and a full 320–1440px+ breakpoint sweep (caught and fixed a real logo-size regression at 768px). Source logo files archived to `assets/logos/` with descriptive names. Full detail in `christ-church-bluffton-notes` memory.
+- [x] **Loading-screen animation redo** (commit `0bca5fc`) — "Welcome Home" subtext changed from a scale-pop to a letter-spacing reveal, recolored to warm cream, fade-out duration extended 2.5s → 3s. Found and fixed a real CSS cascade-order bug that had been silently locking the subtext at its smallest size on every screen width. Full detail in `christ-church-bluffton-notes` memory.
+- [x] Reviewed the live `origin` staging deploy (`christchurch-bluffton.netlify.app`) after each push to confirm it matched localhost.
+- [ ] **Production push still pending** — Kevin is standing by for the go-ahead; at that moment, insert a real `dev_update` activity-log row timestamped to the actual go-live, not before.
+
+---
+
 ## Quick Reference
 | Item | Value |
 |---|---|

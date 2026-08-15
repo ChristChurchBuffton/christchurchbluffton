@@ -1,6 +1,33 @@
 # Christ Church Bluffton — TODO
 
-## STATUS (2026-08-13/14): Admin clean-URL fix + new public-site logo (loader/header/footer) + Greeters mass-upload + Dev Update bug fix — PUSHED TO `origin` ONLY, commit `e9ed372`. **Holding on `production` until the church approves** — Kevin's explicit instruction was "we'll later push this to church once approved."
+## STATUS (2026-08-14/15): Site-wide spacing/overflow fixes + PNG upload support + footer rebuild + loading-screen fixes — PUSHED TO `origin` ONLY, commit `0bca5fc`. **Holding on `production` — standing by for Kevin's go-ahead.**
+
+### Site-wide spacing, overflow, and email-wrap fixes (commit `49cb84d`)
+- [x] Homepage motto band ("Knowing Jesus | Sharing Life | Bringing Hope") — dividers now show/hide independently per adjacent pair, stacked layout with horizontal gold rules on mobile now correctly extends to 1023px (a CSS cascade bug — an old `display:none` rule was silently overriding the new one — is what broke this originally), 1024-1079px shows one row with a small text trim to fit.
+- [x] Header/footer logo ratio-matching finished via pixel-measurement script (not just trusting the same CSS multiplier); footer logo bumped 64px→70px at ≥768px (later fully replaced by the footer rebuild below).
+- [x] Site-wide section/container padding standardized — homepage brought down from 120px to match About/Join Us/Groups/Serve's existing 100px; Contact/Give's much tighter padding (was 50-60px) brought up to match; homepage's mobile breakpoint moved from 600px to 768px to match the other pages.
+- [x] Prayer Request floating button now avoids the Contact page's info cards too, not just the footer (extended the existing IntersectionObserver fade mechanism in `components.js`, generic — attaches automatically if `.contact-cards` exists on the page).
+- [x] **Real overflow bugs found + fixed** on Contact/About/Give: CSS grid/flex items were rendering wider than their column because grid/flex items default to `min-width:auto` — fixed with `min-width:0` everywhere this pattern showed up. About page's version was missed on the first pass (Kevin caught it: "look under the pastor").
+- [x] Long emails (`jonathan@`, `bradley@`, `info@`, `treasurer@christchurchbluffton.org`) now break at a clean point after the `@` (via `<wbr>`) instead of an arbitrary mid-word split or a shrunk font — Kevin explicitly asked about shrinking the font first; decided against it (would need ~25% smaller than surrounding text to fit on one line, looks inconsistent).
+- [x] Footer copyright year made dynamic (`new Date().getFullYear()`) — was hardcoded "2026", would have gone stale every January.
+- [x] Sitemap `lastmod` dates refreshed for the 5 pages actually changed this session.
+- [x] Full SEO/metadata audit — titles, descriptions, canonicals, robots tags, JSON-LD, GA4 — all clean, no fixes needed.
+
+### PNG photo upload support in the admin Photos page (commit `49cb84d`)
+- [x] `src/admin/photos.html` only accepted JPG before — added PNG (`accept="image/jpeg,image/png"`, validation, upload-tile hint text). Filename extension now derives from the actual file type instead of being hardcoded to `.jpg` (a PNG upload would have silently gotten a `.jpg` filename despite being real PNG binary data underneath).
+- [x] Verified end-to-end with a real test upload (not just code review): Supabase Storage accepted it, content-type reported correctly as `image/png`, file size matched byte-for-byte (no recompression), dimensions decoded correctly. Test file (`png-upload-test-delete-me.png`) still sitting in the live Photos gallery — Kevin said he might delete it himself.
+
+### Footer rebuild — 4-column layout modeled on Traditions Field Club (commit `bf80e9e`)
+See the `christ-church-bluffton-notes` memory file for the full breakdown (column structure, logo source change, sizing tiers, spacing rebalance, gold headers, "Designed by" rename+right-align, Instagram/Facebook "Coming Soon" rows). Reviewed clean at every breakpoint 320px through 1280px, confirmed live on the real staging deploy (`christchurch-bluffton.netlify.app`) after pushing.
+
+### Loading-screen fixes (commit `0bca5fc`)
+- [x] **Real bug found + fixed**: "Welcome Home" subtext's base font-size CSS rule was declared *after* its responsive `@media` overrides in `index.html` — same cascade-order bug pattern as the motto-band one. The 1.25rem/1.625rem tablet/desktop sizes were silently never applying; the text was stuck at the tiny mobile size (17.6px) on every screen, including Kevin's own wide monitor. Fixed by reordering.
+- [x] Reveal animation simplified to fade + letter-spacing-expand (dropped the scale transform — was "busy" combining 3 effects).
+- [x] Text color changed from white to a warm cream (`#F2E8D5`) — Kevin's pick from 3 options presented.
+- [x] Fade-out duration increased from 2.5s to 3s (both the CSS transition and its matching JS `setTimeout` — they have to stay in sync or the loader either cuts off early or lingers invisible past when needed).
+- [x] Bradley emailed the staging link with a summary of the footer/social changes.
+
+## STATUS (2026-08-13/14): Admin clean-URL fix + new public-site logo (loader/header/footer) + Greeters mass-upload + Dev Update bug fix — PUSHED TO `origin` ONLY, commit `e9ed372`. Rolled into the `0bca5fc` push above.
 
 ### Admin panel — removed `.html` from all internal navigation
 - [x] Sidebar template + all 13 synced pages, login/logout redirects, accept-invite flow, dashboard stat-card links (`shared.js`, `includes/sidebar.html`, `index.html`, `accept-invite.html`, `account.html`, `team.html`, `dashboard.html`) — every internal `window.location.href`/`<a href>` now points to a clean path (`dashboard` not `dashboard.html`). Dashboard's 5 stat-card links were an extra spot found and fixed that wasn't in the original file list.
