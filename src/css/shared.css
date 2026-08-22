@@ -654,8 +654,12 @@ textarea:focus-visible {
 }
 
 .newsletter-form input[type="email"]:focus {
-    outline: none;
     border-color: var(--gold);
+}
+
+.newsletter-form input[type="email"]:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
 }
 
 .btn-subscribe {
@@ -834,8 +838,13 @@ textarea:focus-visible {
 
 .prayer-popup-body input:focus,
 .prayer-popup-body textarea:focus {
-    outline: none;
     border-color: var(--gold);
+}
+
+.prayer-popup-body input:focus-visible,
+.prayer-popup-body textarea:focus-visible {
+    outline: 2px solid var(--navy-blue);
+    outline-offset: 3px;
 }
 
 .prayer-popup-body textarea {
