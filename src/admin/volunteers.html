@@ -58,6 +58,19 @@
     background: linear-gradient(135deg, rgba(195,163,85,0.12) 0%, rgba(195,163,85,0.04) 100%);
     border-bottom: 2px solid var(--gold);
   }
+  /* Collapsible team headers (All Teams view) are real <button> elements so they're keyboard-
+     operable and get native Enter/Space handling — reset button chrome, keep the same look. */
+  button.volunteers-card-head {
+    width: 100%; border: none; font: inherit; text-align: left; cursor: pointer;
+  }
+  button.volunteers-card-head:hover { background: linear-gradient(135deg, rgba(195,163,85,0.18) 0%, rgba(195,163,85,0.07) 100%); }
+  button.volunteers-card-head:focus-visible { outline: 2px solid var(--navy-blue); outline-offset: -2px; }
+  .volunteers-card-head-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .team-toggle-arrow {
+    flex-shrink: 0; width: 16px; height: 16px; color: var(--gold-text);
+    transition: transform 0.18s ease;
+  }
+  .team-toggle-arrow.is-open { transform: rotate(90deg); }
   /* Below tablet width, always stack the count pill under the title rather than letting
      it wrap only when it happens not to fit — a deliberate default, not a fallback. */
   @media (max-width: 560px) {
@@ -418,6 +431,7 @@
     let subTeamRowIds = {}; // { teamName: sub_teams.id } — tracks each team's row in Supabase (undefined until a first sub-team is added for that team)
     let teamFilter = '';
     let subTeamFilterValue = '';
+    let expandedTeams = new Set(); // team names currently expanded in the "All Teams" view — starts empty (all collapsed)
 
     function escapeHtml(str) {
       return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -553,26 +567,29 @@
     }
 
     // A team can have sub-teams defined without every member being assigned one yet — flag those
-    // so it's obvious at a glance, instead of just showing a blank dash.
-    function subTeamCellHtml(v) {
-      const parts = v.teams.map(t => {
-        if (t.subTeam) return escapeHtml(t.subTeam);
-        const teamHasSubTeams = (subTeamsData[t.name] || []).length > 0;
-        return teamHasSubTeams ? `<span class="subteam-flag" title="No sub-team assigned for ${escapeHtml(t.name)}">Needs Sub-Team</span>` : null;
-      }).filter(Boolean);
-      return parts.length ? parts.join(', ') : '—';
+    // so it's obvious at a glance, instead of just showing a blank dash. Scoped to teamContext
+    // (the team this row is listed under) — a volunteer on multiple teams must only show the
+    // sub-team for THIS card, not any sub-team from their other team assignments.
+    function subTeamCellHtml(v, teamContext) {
+      const t = v.teams.find(t => t.name === teamContext);
+      if (!t) return '—';
+      if (t.subTeam) return escapeHtml(t.subTeam);
+      const teamHasSubTeams = (subTeamsData[teamContext] || []).length > 0;
+      return teamHasSubTeams ? `<span class="subteam-flag" title="No sub-team assigned for ${escapeHtml(teamContext)}">Needs Sub-Team</span>` : '—';
     }
 
     // `teamContext` is the team this row is being listed under (every render path is already
     // scoped to one team, so re-showing the team name/chip on each row would just repeat the
-    // card header) — used only to know whether to show the "Team Lead" badge under the name.
+    // card header) — used both for the "Team Lead" badge and to scope sub-team display to only
+    // this team, since a volunteer can belong to more than one team at once.
     function volunteerRowHtml(v, teamContext) {
-      const subTeamTitle = v.teams.filter(t => t.subTeam).map(t => t.subTeam).join(', ');
-      const isLeadHere = v.teams.some(t => t.name === teamContext && t.isLead);
+      const thisTeam = v.teams.find(t => t.name === teamContext);
+      const subTeamTitle = thisTeam && thisTeam.subTeam ? thisTeam.subTeam : '';
+      const isLeadHere = !!(thisTeam && thisTeam.isLead);
       return `
         <tr>
           <td class="volunteer-name" data-label="Name">${escapeHtml(v.firstName)} ${escapeHtml(v.lastName)}${v.isYouth ? '<span class="youth-badge">Youth</span>' : ''}${isLeadHere ? '<span class="lead-badge">&#9733; Team Lead</span>' : ''}</td>
-          <td class="truncate" data-label="Sub-Team" title="${escapeHtml(subTeamTitle)}">${subTeamCellHtml(v)}</td>
+          <td class="truncate" data-label="Sub-Team" title="${escapeHtml(subTeamTitle)}">${subTeamCellHtml(v, teamContext)}</td>
           <td class="truncate" data-label="Phone" title="${v.phone ? escapeHtml(formatPhone(v.phone)) : ''}">${v.phone ? escapeHtml(formatPhone(v.phone)) : '—'}</td>
           <td class="truncate" data-label="Email" title="${escapeHtml(v.email)}">${escapeHtml(v.email)}</td>
           <td${v.isYouth ? ' data-label="Parent / Guardian"' : ''}>${v.isYouth ? `<div class="parent-info"><span class="parent-name">${escapeHtml(v.parentName || '(no name)')}</span><br>${escapeHtml(formatPhone(v.parentPhone))}${v.parentPhone && v.parentEmail ? ' &middot; ' : ''}${escapeHtml(v.parentEmail || '')}</div>` : ''}</td>
@@ -620,6 +637,7 @@
         wrap.innerHTML = TEAMS.map(team => {
           const teamVolunteers = sortByLeadThenLastName(volunteers.filter(v => v.teams.some(t => t.name === team)), team);
           const teamSubTeams = subTeamsData[team] || [];
+          const isOpen = expandedTeams.has(team);
           let bodyHtml;
 
           if (teamVolunteers.length === 0) {
@@ -644,11 +662,14 @@
 
           return `
             <div class="card volunteers-card">
-              <div class="volunteers-card-head">
-                <div class="volunteers-card-title">${escapeHtml(team)}</div>
+              <button type="button" class="volunteers-card-head" data-action="toggle-team" data-team="${escapeHtml(team)}" aria-expanded="${isOpen}">
+                <div class="volunteers-card-head-left">
+                  <svg class="team-toggle-arrow ${isOpen ? 'is-open' : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"></polyline></svg>
+                  <div class="volunteers-card-title">${escapeHtml(team)}</div>
+                </div>
                 <div class="volunteers-card-count">${teamVolunteers.length} ${teamVolunteers.length === 1 ? 'volunteer' : 'volunteers'}</div>
-              </div>
-              ${bodyHtml}
+              </button>
+              ${isOpen ? bodyHtml : ''}
             </div>`;
         }).join('');
         return;
@@ -1000,6 +1021,7 @@
       document.getElementById('team-filter').addEventListener('change', (e) => {
         teamFilter = e.target.value;
         subTeamFilterValue = '';
+        if (teamFilter) expandedTeams.add(teamFilter);
         updateSubTeamFilterVisibility();
         renderVolunteers();
       });
@@ -1009,6 +1031,13 @@
       });
 
       document.getElementById('volunteers-wrap').addEventListener('click', (e) => {
+        const toggleBtn = e.target.closest('[data-action="toggle-team"]');
+        if (toggleBtn) {
+          const team = toggleBtn.dataset.team;
+          if (expandedTeams.has(team)) expandedTeams.delete(team); else expandedTeams.add(team);
+          renderVolunteers();
+          return;
+        }
         const editBtn = e.target.closest('[data-action="edit"]');
         if (editBtn) {
           const volunteer = volunteers.find(v => v.id === editBtn.dataset.id);
