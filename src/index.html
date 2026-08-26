@@ -116,7 +116,11 @@
             z-index: 1000;
             transition: opacity 3s ease, visibility 3s ease;
         }
-        .loader.fade-out { opacity: 0; visibility: hidden; }
+        /* pointer-events:none applies the instant fade-out starts (it isn't a transitioned
+           property here) — otherwise the fixed, full-screen loader keeps swallowing clicks on
+           the header/menu underneath for the whole 3s visibility transition, even once it's
+           faded low enough to see through. */
+        .loader.fade-out { opacity: 0; visibility: hidden; pointer-events: none; }
         .loader-content { text-align: center; }
         .loader-logo {
             width: 190px;
