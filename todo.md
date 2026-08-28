@@ -1,5 +1,26 @@
 # Christ Church Bluffton — TODO
 
+## STATUS (2026-08-26): Volunteers UI + sub-team fix, Table 246 photo, loader click-fix — PUSHED TO BOTH `origin` AND `production`, commit `8d81b63`
+
+### Volunteers admin page (`src/admin/volunteers.html`) — commit `f2baf33`
+- [x] "All Teams" view: team cards collapse by default with a toggle arrow (top-left of each header), click to expand/collapse; selecting a team in the filter dropdown auto-expands it and it stays expanded when switching back to "All Teams".
+- [x] **Real bug found + fixed**: sub-team column was showing a volunteer's sub-team from ANY of their teams, not just the one the row is under — invisible until a volunteer was ever on 2+ teams at once (Bruce/Lynn Chew, see below, triggered it for the first time). Fixed by scoping `subTeamCellHtml`/`volunteerRowHtml` to `teamContext`.
+- [x] Bulk-added 11 new Ushers (Borst, Dickinson, Lavarnway couples split into individual rows, Jensen, Musselman, Sheryl Carlson) + Nicole Landskowsky to Lay Readers, all via direct SQL (not one-by-one in the UI). Bruce & Lynn Chew (already Greeters) added to Ushers on their existing rows rather than duplicated; email updated to the one from the new signup list per Kevin's choice.
+
+### Table 246 photo — commit `a7bfda1`
+- [x] Old photo (discontinued coffee gathering, flagged since 2026-07-28) replaced with the real Table 246 group photo, downloaded from Kevin's own hidden gallery and resized to match the site's 1600x1200/800x600 webp convention. Updated in both `src/images/` and the Content Editor's `site-mirror` copy.
+
+### Loading screen — commit `8d81b63`
+- [x] **Real bug found + fixed**: `.loader.fade-out` transitioned `opacity`/`visibility` over 3s, but since `pointer-events` wasn't included, the full-screen loader kept blocking clicks on the header/menu for the whole 3s even once visually faded out. Added `pointer-events:none` to fade-out (not a transitioned property, applies instantly). Fixed in `src/index.html` + `site-mirror/index.html`.
+
+### Also this session
+- [x] Full site review (staging + production, desktop): every public + admin page checked for broken images and console errors — clean.
+- [x] SSL cert confirmed auto-renewed (was flagged expiring 9/17, actually renewed 8/18, now valid through 11/16) — see project notes, reminder removed.
+- [x] Confirmed `png-upload-test-delete-me.png` (2026-08-15 loose end) is gone from Photos.
+
+## 💡 FUTURE BUILD IDEA — bring up later, not started
+Possible new ministry team: **Home Visitation / Pastoral Care**, similar in spirit to the existing **Prayer Teams** ministry already on the site. Kevin flagged this 2026-08-15 as something to raise again later — no scope or details decided yet.
+
 ## STATUS (2026-08-14/15): Site-wide spacing/overflow fixes + PNG upload support + footer rebuild + loading-screen fixes — PUSHED TO `origin` ONLY, commit `0bca5fc`. **Holding on `production` — standing by for Kevin's go-ahead.**
 
 ### Site-wide spacing, overflow, and email-wrap fixes (commit `49cb84d`)

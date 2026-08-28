@@ -10,6 +10,15 @@
 <link rel="stylesheet" href="css/shared.css">
 <style>
   .topbar-actions { display: flex; align-items: center; gap: 10px; }
+  /* Save Draft is reachable from anywhere (pinned in the topbar), but the composer's own
+     "Draft saved" message lives further down the page — invisible if you're scrolled deep
+     into a long newsletter when you click it. This shows right next to the button itself,
+     so confirmation is always visible regardless of scroll position. */
+  .topbar-save-msg {
+    font-size: 12px; font-weight: bold; color: #2e7d32; opacity: 0; transition: opacity 0.3s;
+  }
+  .topbar-save-msg.error { color: var(--danger); }
+  .topbar-save-msg.visible { opacity: 1; }
 
   /* Composing is disabled entirely at this width, so there's nothing to save or send. */
   @media (max-width: 900px) {
@@ -17,18 +26,44 @@
     .topbar .subtitle { display: none; }
   }
 
-  .live-url-banner {
-    background: rgba(177,67,67,0.08);
-    border: 1px solid rgba(177,67,67,0.3);
-    border-radius: 10px;
-    padding: 12px 16px;
-    margin-bottom: 20px;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 13px;
-    color: var(--text-dark);
-    line-height: 1.6;
+  /* Always reachable without scrolling past a long newsletter — sticky right below the
+     topbar (83px tall), instead of buried at the bottom of the page. The old "Work In
+     Progress" banner's spot; that warning still exists, just folded into .send-hub-status
+     at lower volume, since Send Newsletter is genuinely still disabled and that shouldn't
+     quietly disappear.
+     Stuck flush at top:83px (zero gap) — an earlier version left an 8px external gap
+     between the topbar and this bar for breathing room, but neither element's background
+     covers that strip, so scrolling content showed through it. The breathing room is now
+     internal padding-top instead, so the bar's own opaque background covers it completely.
+     The negative top margin cancels .content's own 32px top padding so this bar's resting
+     position (before any scroll) is numerically identical to its stuck position — without
+     that, the two positions differ and the bar visibly jumps/snaps the moment it sticks. */
+  .send-hub-bar {
+    position: sticky; top: 83px; z-index: 40; background: var(--white);
+    border-bottom: 1px solid var(--border-gray); margin: -32px -32px 20px; padding: 22px 32px 14px;
+    display: flex; flex-wrap: wrap; align-items: flex-start; gap: 24px;
+    box-shadow: 0 4px 10px rgba(30,37,71,0.05);
   }
-  .live-url-banner strong { color: var(--danger); }
+  .send-hub-field { display: flex; flex-direction: column; gap: 4px; flex: 1 1 220px; min-width: 220px; }
+  .send-hub-field-wide { flex: 2 1 360px; min-width: 320px; }
+  .send-hub-field label { font-size: 12px; font-weight: bold; color: var(--text-muted); }
+  .send-hub-field select, .send-hub-field input {
+    padding: 8px 10px; border: 1px solid var(--border-gray); border-radius: 8px;
+    font-family: inherit; font-size: 13px; background: var(--lightest-gray); color: var(--text-dark);
+  }
+  .send-hub-field select:focus, .send-hub-field input:focus { outline: none; border-color: var(--gold); background: var(--white); }
+  .send-hub-hint { font-size: 11px; color: var(--text-muted); }
+  .send-hub-test-row { display: flex; gap: 8px; }
+  .send-hub-test-row input { flex: 1; }
+  .send-hub-status {
+    flex: 1 1 220px; align-self: center; font-size: 12px; color: var(--text-muted); line-height: 1.5;
+  }
+  .send-hub-status strong { color: var(--gold-text); }
+  .send-test-small-btn {
+    align-self: flex-start; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border-gray);
+    background: var(--white); font-size: 11.5px; font-weight: bold; color: var(--navy-blue); cursor: pointer;
+  }
+  .send-test-small-btn:hover { border-color: var(--gold); color: var(--gold-text); background: rgba(195,163,85,0.08); }
 
   .newsletter-layout {
     display: grid;
@@ -41,7 +76,10 @@
   }
 
   /* ---- Drafts column ---- */
-  .drafts-card { position: sticky; top: 32px; }
+  /* top:32px was stale — didn't account for the sticky topbar (83px) or the send-hub-bar
+     (91–191px) now sitting above it, so it tried to stick underneath both and showed through
+     the gap between them while scrolling. 200px clears both, matching .add-block-panel. */
+  .drafts-card { position: sticky; top: 200px; }
   .drafts-card .card-body { padding: 20px; }
   .drafts-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .btn-sm { padding: 6px 12px; font-size: 12px; }
@@ -66,12 +104,6 @@
   /* ---- Composer ---- */
   .composer-card { margin-bottom: 24px; }
   .composer-card .card-body { padding: 22px; }
-  .subject-field { margin-bottom: 4px; }
-  .subject-field input { font-size: 15px; padding: 11px 13px; }
-  .from-line {
-    font-size: 12px; color: var(--text-muted); margin-bottom: 20px;
-  }
-  .from-line strong { color: var(--text-dark); font-weight: bold; }
 
   .compose-mode-toggle {
     display: inline-flex; border: 1px solid var(--border-gray); border-radius: 8px;
@@ -84,16 +116,7 @@
   }
   .compose-mode-toggle button + button { border-left: 1px solid var(--border-gray); }
   .compose-mode-toggle button.active { background: var(--navy-blue); color: var(--white); }
-  .dev-badge {
-    display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 100px;
-    font-size: 9px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.3px;
-    background: rgba(195,163,85,0.18); color: var(--gold-text);
-  }
-  .compose-mode-toggle button.active .dev-badge { background: rgba(255,255,255,0.22); color: var(--white); }
-  .ai-prompt-notice {
-    background: rgba(195,163,85,0.1); border: 1px solid rgba(195,163,85,0.3); border-radius: 8px;
-    padding: 12px 16px; font-size: 13px; color: var(--text-dark); line-height: 1.5; margin-bottom: 16px;
-  }
+  .compose-mode-toggle button:disabled { color: var(--border-gray); cursor: default; background: var(--lightest-gray); }
   .mode-panel { display: none; }
   .mode-panel.active { display: block; }
   .html-textarea {
@@ -102,47 +125,161 @@
   }
   .html-textarea:focus { outline: none; border-color: var(--gold); background: var(--white); }
 
-  .add-block-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 14px; }
-  .add-block-label { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-right: 4px; }
+  /* Two columns: a square-ish "Add Block" panel to the left, the newsletter canvas to the
+     right. The panel is sticky (not fixed) so it stays reachable while scrolling a long
+     newsletter, but only within this row — it never overlaps unrelated page content. */
+  .visual-editor-layout { display: flex; align-items: flex-start; gap: 12px; }
+  .add-block-panel {
+    flex: 0 0 140px; width: 140px; position: sticky; top: 200px;
+    display: flex; flex-direction: column; gap: 8px; padding: 16px;
+    border: 2px solid var(--navy-blue); background: rgba(48,59,106,0.03);
+  }
+  .add-block-label { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); }
   .add-block-btn {
+    padding: 8px 10px; border-radius: 8px; border: 1px dashed var(--border-gray); background: var(--white);
+    font-size: 11.5px; font-weight: bold; color: var(--navy-blue); cursor: pointer; text-align: left;
+  }
+  .add-block-btn:hover { border-color: var(--gold); border-style: solid; color: var(--gold-text); background: rgba(195,163,85,0.08); }
+  .add-block-btn-primary { border-style: solid; border-color: var(--navy-blue); background: var(--navy-blue); color: var(--white); }
+  .add-block-btn-primary:hover { border-color: var(--navy-blue); background: var(--navy-blue); color: var(--white); opacity: 0.9; }
+
+  /* Its own little section within the same panel, set apart by a divider — a distinct action
+     (see the real, final rendered email) from the "add a block" actions above it. */
+  .add-block-panel-divider { height: 1px; background: var(--border-gray); margin: 4px 0; }
+  .preview-btn {
+    padding: 9px 10px; border-radius: 8px; border: none; background: #2563eb; color: var(--white);
+    font-size: 12px; font-weight: bold; cursor: pointer;
+  }
+  .preview-btn:hover { background: #1d4ed8; }
+
+  .preview-modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 100; background: rgba(20,24,46,0.55);
+    align-items: center; justify-content: center; padding: 30px;
+  }
+  .preview-modal-overlay.open { display: flex; }
+  .preview-modal {
+    background: var(--white); border-radius: 12px; width: 680px; max-width: 100%; max-height: 100%;
+    display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  }
+  .preview-modal-header {
+    display: flex; align-items: center; justify-content: space-between; padding: 14px 20px;
+    background: var(--navy-blue); color: var(--white); font-family: Georgia, 'Times New Roman', serif; font-size: 16px;
+  }
+  .preview-modal-close {
+    border: none; background: none; color: var(--white); font-size: 20px; line-height: 1; cursor: pointer; padding: 2px 6px;
+  }
+  .preview-modal-close:hover { opacity: 0.7; }
+  .preview-modal-body { padding: 20px; overflow-y: auto; background: var(--lightest-gray); }
+  .preview-modal-body iframe { width: 100%; height: 70vh; border: none; background: transparent; }
+
+  .send-test-modal { width: 420px; }
+  .send-test-modal-body { padding: 22px; }
+  .send-test-modal-hint { font-size: 12.5px; color: var(--text-muted); line-height: 1.5; margin: 0 0 16px; }
+  .send-test-confirm-btn { width: 100%; margin-top: 4px; }
+
+  .canvas-hint { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+
+  /* ---- Editable canvas — the live email preview IS the editor. Every field a viewer would
+     see in the sent email is a contenteditable region right where it renders; there's no
+     separate form. Block-level hover controls (move/remove) float over each block. ---- */
+  .email-canvas {
+    flex: 1 1 0; max-width: 600px; margin: 0 auto; background: #FBF9F4; border-radius: 12px; overflow: hidden;
+    border: 1px solid var(--border-gray); font-family: Arial, Helvetica, sans-serif;
+  }
+  .canvas-stripe { height: 5px; background-image: repeating-linear-gradient(90deg, #c9a961 0px, #c9a961 24px, #FBF9F4 24px, #FBF9F4 30px); }
+  .canvas-banner { background: #303b6a; padding: 14px 32px 30px; text-align: center; }
+  .canvas-date { text-align: right; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #c9a961; margin-bottom: 6px; }
+  .canvas-eyebrow { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #A9B3D6; margin-bottom: 10px; }
+  .canvas-headline {
+    font-family: Georgia, 'Times New Roman', serif; font-size: 28px; line-height: 1.3; color: #FFFFFF;
+    min-height: 1.3em; white-space: pre-wrap;
+  }
+  .canvas-headline:empty:before { content: attr(data-placeholder); color: rgba(255,255,255,0.5); font-style: italic; }
+  .canvas-rule { width: 56px; height: 2px; background: #B15A43; margin: 16px auto 0; }
+
+  .canvas-body-wrap { padding-bottom: 8px; }
+  .canvas-empty-hint { padding: 40px 32px; text-align: center; color: var(--text-muted); font-style: italic; font-size: 13px; }
+
+  .canvas-block { position: relative; padding: 20px 32px 0; }
+  .canvas-block:hover { background: rgba(195,163,85,0.05); }
+  .canvas-block-controls {
+    position: absolute; top: 6px; right: 10px; display: none; gap: 3px; background: var(--white);
+    border: 1px solid var(--border-gray); border-radius: 6px; padding: 2px; z-index: 2;
+  }
+  .canvas-block:hover .canvas-block-controls { display: flex; }
+  .canvas-block-controls button {
+    width: 22px; height: 22px; border: none; background: none; cursor: pointer; font-size: 11px;
+    color: var(--text-muted); border-radius: 4px;
+  }
+  .canvas-block-controls button:hover { background: var(--lightest-gray); color: var(--navy-blue); }
+  .canvas-block-controls button.danger:hover { color: var(--danger); }
+  .canvas-block-controls button:disabled { opacity: 0.3; cursor: default; }
+
+  [contenteditable="true"] { border-radius: 4px; cursor: text; }
+  [contenteditable="true"]:hover { background: rgba(195,163,85,0.1); }
+  [contenteditable="true"]:focus { background: rgba(195,163,85,0.16); box-shadow: 0 0 0 2px var(--gold); outline: none; }
+  [contenteditable="true"]:empty:before { content: attr(data-placeholder); color: var(--text-muted); font-style: italic; }
+
+  .canvas-eyebrow-sm { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #B15A43; margin-bottom: 4px; padding: 2px 4px; }
+  .canvas-section-title { font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: #303b6a; margin-bottom: 12px; padding: 2px 4px; }
+  .canvas-heading { font-family: Georgia, 'Times New Roman', serif; font-size: 20px; color: #303b6a; margin-bottom: 4px; padding: 2px 4px; }
+  .canvas-paragraph, .canvas-body { font-size: 15px; color: #2B2B2B; line-height: 1.7; white-space: pre-wrap; margin-bottom: 4px; padding: 2px 4px; }
+  .canvas-caption { font-size: 12px; color: #6B6B6B; text-align: center; margin: 6px 0; padding: 2px 4px; }
+
+  .canvas-image-wrap { text-align: center; margin: 8px 0 4px; }
+  .canvas-image-wrap img { max-width: 100%; border-radius: 8px; display: inline-block; }
+  .canvas-image-url { font-size: 11px; color: #8a8577; text-align: center; word-break: break-all; padding: 4px; margin-bottom: 8px; }
+  .canvas-image-empty {
+    border: 1px dashed var(--border-gray); border-radius: 8px; padding: 22px; text-align: center;
+    color: var(--text-muted); font-size: 13px; margin: 8px 0;
+  }
+
+  .canvas-section-items { display: flex; flex-direction: column; gap: 4px; }
+  .canvas-section-item { position: relative; }
+  .canvas-item-remove {
+    position: absolute; top: 4px; right: 4px; display: none; width: 20px; height: 20px; border-radius: 5px;
+    border: 1px solid var(--border-gray); background: var(--white); font-size: 11px; color: var(--text-muted); cursor: pointer;
+  }
+  .canvas-section-item:hover .canvas-item-remove { display: block; }
+  .canvas-item-remove:hover { border-color: var(--danger); color: var(--danger); }
+  .canvas-add-item-row { display: flex; justify-content: center; gap: 8px; margin: 8px 0 14px; }
+  .canvas-add-item-btn {
     padding: 6px 12px; border-radius: 100px; border: 1px dashed var(--border-gray); background: var(--white);
     font-size: 11.5px; font-weight: bold; color: var(--navy-blue); cursor: pointer;
   }
-  .add-block-btn:hover { border-color: var(--gold); border-style: solid; color: var(--gold-text); background: rgba(195,163,85,0.08); }
+  .canvas-add-item-btn:hover { border-color: var(--gold); border-style: solid; color: var(--gold-text); background: rgba(195,163,85,0.08); }
 
-  .blocks-list { display: flex; flex-direction: column; gap: 12px; }
-  .block-item { border: 1px solid var(--border-gray); border-radius: 10px; overflow: hidden; }
-  .block-item-head {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 8px 14px; background: var(--lightest-gray); border-bottom: 1px solid var(--border-gray);
+  .canvas-buttons-area { margin: 10px 0; }
+  .canvas-buttons-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 16px; }
+  .canvas-button-item { flex: 0 1 240px; max-width: 240px; }
+  .canvas-button-wrap { text-align: center; margin: 10px 0 4px; }
+  .canvas-button {
+    display: inline-block; font-weight: bold; font-size: 14px;
+    padding: 12px 28px;
   }
-  .block-type-tag { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.4px; color: var(--gold-text); }
-  .block-item-actions { display: flex; gap: 4px; }
-  .block-item-actions button {
-    width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border-gray);
-    background: var(--white); font-size: 12px; cursor: pointer; color: var(--text-muted);
+  .canvas-button-url { font-size: 11px; color: #8a8577; text-align: center; word-break: break-all; padding: 4px; }
+  .canvas-url-prefix { color: var(--text-muted); font-weight: bold; user-select: none; }
+  .canvas-url-value { border-radius: 3px; }
+  .canvas-button-tools {
+    display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 4px;
   }
-  .block-item-actions button:hover { border-color: var(--navy-blue); color: var(--navy-blue); }
-  .block-item-actions button.danger:hover { border-color: var(--danger); color: var(--danger); }
-  .block-item-actions button:disabled { opacity: 0.35; cursor: default; }
-  .block-item-actions button:disabled:hover { border-color: var(--border-gray); color: var(--text-muted); }
-  .block-item-body { padding: 14px; }
-  .block-input, .block-textarea {
-    width: 100%; padding: 10px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
-    font-family: inherit; font-size: 14px; background: var(--lightest-gray);
+  .canvas-swatches { display: flex; gap: 5px; }
+  .canvas-swatch {
+    width: 16px; height: 16px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0;
   }
-  .block-textarea { min-height: 80px; resize: vertical; }
-  .block-input:focus, .block-textarea:focus { outline: none; border-color: var(--gold); background: var(--white); }
-  .button-block-row { display: flex; gap: 10px; flex-wrap: wrap; }
-  .button-block-row .field { flex: 1; min-width: 180px; margin-bottom: 0; }
+  .canvas-swatch.active { border-color: var(--text-dark); }
+  .canvas-button-remove {
+    border: none; background: none; cursor: pointer; font-size: 11px; color: var(--text-muted); padding: 2px 4px;
+  }
+  .canvas-button-remove:hover { color: var(--danger); }
+  .canvas-add-button-btn {
+    display: block; margin: 6px auto 0; padding: 6px 14px; border-radius: 100px; border: 1px dashed var(--border-gray);
+    background: var(--white); font-size: 11.5px; font-weight: bold; color: var(--navy-blue); cursor: pointer;
+  }
+  .canvas-add-button-btn:hover { border-color: var(--gold); border-style: solid; color: var(--gold-text); background: rgba(195,163,85,0.08); }
 
-  .image-block-row { display: flex; gap: 14px; align-items: center; }
-  .image-block-preview {
-    width: 120px; height: 90px; flex-shrink: 0; border-radius: 8px; border: 1px solid var(--border-gray);
-    background: var(--white); display: flex; align-items: center; justify-content: center; overflow: hidden;
-  }
-  .image-block-preview img { width: 100%; height: 100%; object-fit: cover; }
-  .image-block-empty { font-size: 11px; color: var(--text-muted); text-align: center; padding: 0 8px; }
+  .canvas-divider { height: 1px; background: #E5E3DB; margin: 20px 0 0; }
+  .canvas-footer { padding: 18px 32px 28px; margin-top: 12px; border-top: 1px solid #E5E3DB; font-size: 11px; color: #6B6B6B; line-height: 1.6; }
 
   .field { margin-bottom: 16px; }
   .field:last-child { margin-bottom: 0; }
@@ -152,20 +289,6 @@
     font-family: inherit; font-size: 14px; background: var(--lightest-gray); color: var(--text-dark);
   }
   .field input:focus, .field select:focus { outline: none; border-color: var(--gold); background: var(--white); }
-
-  .send-to-row {
-    display: flex; align-items: flex-end; gap: 10px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--border-gray);
-    flex-wrap: wrap;
-  }
-  .send-to-row .field { flex: 1; min-width: 220px; margin-bottom: 0; }
-  .send-to-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
-
-  .test-send-row {
-    display: flex; align-items: flex-end; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-gray);
-    flex-wrap: wrap;
-  }
-  .test-send-row .field { flex: 1; min-width: 220px; margin-bottom: 0; }
-  .test-send-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
 
   .form-msg { border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; line-height: 1.6; }
   .form-msg.error { background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger); }
@@ -285,13 +408,30 @@
           <div class="subtitle">Compose an email newsletter — draft now, connect to Resend later</div>
         </div>
         <div class="topbar-actions">
+          <span class="topbar-save-msg" id="topbar-save-msg"></span>
           <button type="button" class="btn btn-outline" id="save-draft-btn">Save Draft</button>
           <button type="button" class="btn btn-gold" id="send-newsletter-btn" disabled title="Not connected yet — sending will be enabled once this panel is wired up to Resend">Send Newsletter</button>
         </div>
       </div>
       <div class="content" id="page-body">
-        <div class="live-url-banner">
-          <strong>Work In Progress — Not Live</strong>
+        <div class="send-hub-bar" id="send-hub-bar">
+          <div class="send-hub-field send-hub-field-wide">
+            <label for="subject-input">Subject Line<span class="required-mark">*</span></label>
+            <input type="text" id="subject-input" placeholder="e.g. Christ Church Bluffton Weekly Word">
+            <div class="send-hub-hint">From <strong>info@christchurchbluffton.org</strong></div>
+          </div>
+          <div class="send-hub-field">
+            <label for="send-to-select">Send to</label>
+            <select id="send-to-select">
+              <option value="all">All Subscribers</option>
+            </select>
+            <div class="send-hub-hint" id="send-to-hint">—</div>
+          </div>
+          <div class="send-hub-field">
+            <label>Test Send</label>
+            <button type="button" class="send-test-small-btn" id="open-send-test-btn">Send Test…</button>
+          </div>
+          <div class="send-hub-status">Work in progress — <strong>Send Newsletter</strong> and <strong>Send Test</strong> aren't connected yet (Resend), so no email actually goes out yet. Save Draft is fully real.</div>
         </div>
         <div class="newsletter-layout">
           <div class="drafts-col">
@@ -312,26 +452,25 @@
               <div class="card-body">
                 <div class="form-msg" id="newsletter-msg"></div>
 
-                <div class="field subject-field">
-                  <label for="subject-input">Subject Line<span class="required-mark">*</span></label>
-                  <input type="text" id="subject-input" placeholder="e.g. Christ Church Bluffton — August Update">
-                </div>
-                <div class="from-line">From <strong>info@christchurchbluffton.org</strong></div>
-
                 <div class="compose-mode-toggle">
                   <button type="button" class="mode-tab-btn active" data-mode="visual">Build Visually</button>
-                  <button type="button" class="mode-tab-btn" data-mode="html">Paste HTML</button>
-                  <button type="button" class="mode-tab-btn" data-mode="ai">AI Prompt<span class="dev-badge">In Development</span></button>
+                  <button type="button" class="mode-tab-btn" data-mode="html" disabled title="Locked for now">Paste HTML</button>
                 </div>
 
                 <div class="mode-panel active" id="visual-panel">
-                  <div class="blocks-list" id="blocks-list"></div>
-                  <div class="add-block-row">
-                    <span class="add-block-label">Add Block:</span>
-                    <button type="button" class="add-block-btn" data-type="heading">+ Heading</button>
-                    <button type="button" class="add-block-btn" data-type="paragraph">+ Paragraph</button>
-                    <button type="button" class="add-block-btn" data-type="image">+ Image</button>
-                    <button type="button" class="add-block-btn" data-type="button">+ Button/Link</button>
+                  <div class="canvas-hint">Click any text, image link, or button below to edit it right where it appears.</div>
+                  <div class="visual-editor-layout">
+                    <div class="card add-block-panel" id="add-block-panel">
+                      <span class="add-block-label">Add Block</span>
+                      <button type="button" class="add-block-btn add-block-btn-primary" data-type="section" title="The standard newsletter item — label, title, photo, text, optional button. Use it for most content.">+ Section</button>
+                      <button type="button" class="add-block-btn" data-type="heading">+ Heading</button>
+                      <button type="button" class="add-block-btn" data-type="paragraph">+ Paragraph</button>
+                      <button type="button" class="add-block-btn" data-type="image">+ Image</button>
+                      <button type="button" class="add-block-btn" data-type="button">+ Button/Link</button>
+                      <div class="add-block-panel-divider"></div>
+                      <button type="button" class="preview-btn" id="open-preview-btn">Preview</button>
+                    </div>
+                    <div class="email-canvas" id="email-canvas"></div>
                   </div>
                 </div>
 
@@ -342,44 +481,60 @@
                   </div>
                 </div>
 
-                <div class="mode-panel" id="ai-panel">
-                  <div class="ai-prompt-notice">In Development — this will be a prompt-style newsletter builder. Describe what you want the newsletter to say, and AI will draft it for you. Not connected yet.</div>
-                  <div class="field">
-                    <label for="ai-prompt-input">Prompt</label>
-                    <textarea class="html-textarea" id="ai-prompt-input" placeholder="e.g. Write a warm, upbeat newsletter recapping this month's events and inviting people to the fall picnic..." disabled></textarea>
-                  </div>
-                  <button type="button" class="btn btn-outline" disabled>Generate Draft (Coming Soon)</button>
-                </div>
-
-                <div class="send-to-row">
-                  <div class="field">
-                    <label for="send-to-select">Send to</label>
-                    <select id="send-to-select">
-                      <option value="all">All Subscribers</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="send-to-hint" id="send-to-hint">—</div>
-
-                <div class="test-send-row">
-                  <div class="field">
-                    <label for="test-email-input">Send a test copy to<span class="required-mark">*</span></label>
-                    <input type="email" id="test-email-input" placeholder="you@christchurchbluffton.org">
-                  </div>
-                  <button type="button" class="btn btn-outline" id="send-test-btn">Send Test</button>
-                </div>
-                <div class="test-send-hint">Test sends go only to the address above, not the full list.</div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="preview-frame-wrap">
+        <div class="preview-frame-wrap" id="preview-frame-wrap">
           <iframe id="preview-iframe" title="Newsletter preview" sandbox="" scrolling="auto"></iframe>
         </div>
       </div>
     </div>
   </div>
+
+  <div class="preview-modal-overlay" id="preview-modal-overlay">
+    <div class="preview-modal">
+      <div class="preview-modal-header">
+        <span>Newsletter Preview</span>
+        <button type="button" class="preview-modal-close" id="preview-modal-close" title="Close" aria-label="Close preview">&times;</button>
+      </div>
+      <div class="preview-modal-body">
+        <iframe id="preview-modal-iframe" title="Newsletter preview" sandbox=""></iframe>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-modal-overlay" id="send-test-modal-overlay">
+    <div class="preview-modal send-test-modal">
+      <div class="preview-modal-header">
+        <span>Send Test Copy</span>
+        <button type="button" class="preview-modal-close" id="send-test-modal-close" title="Close" aria-label="Close send test dialog">&times;</button>
+      </div>
+      <div class="send-test-modal-body">
+        <p class="send-test-modal-hint">Test sends go only to the addresses below, not the full subscriber list. Leave any of these blank to skip them.</p>
+        <div class="field">
+          <label for="test-email-1">Email 1</label>
+          <input type="email" id="test-email-1" placeholder="you@christchurchbluffton.org">
+        </div>
+        <div class="field">
+          <label for="test-email-2">Email 2</label>
+          <input type="email" id="test-email-2" placeholder="">
+        </div>
+        <div class="field">
+          <label for="test-email-3">Email 3</label>
+          <input type="email" id="test-email-3" placeholder="">
+        </div>
+        <div class="field">
+          <label for="test-email-4">Email 4</label>
+          <input type="email" id="test-email-4" placeholder="">
+        </div>
+        <div class="form-msg" id="send-test-modal-msg"></div>
+        <button type="button" class="btn btn-gold send-test-confirm-btn" id="send-test-confirm-btn">Send Test</button>
+      </div>
+    </div>
+  </div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/shared.js"></script>
@@ -388,12 +543,57 @@
     let drafts = [];
     let currentDraftId = null;
     let mode = 'visual';
-    let blocks = [];
     let blockIdCounter = 0;
     let previewTimer = null;
+    let newsletterHeadline = '';
+    let newsletterDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase();
+    let newsletterEyebrow = 'Christ Church Bluffton — Weekly Word';
+    let buttonIdCounter = 0;
+    let itemIdCounter = 0;
+    // A blank canvas is an intimidating start — a fresh draft (or "+ New") begins with a few
+    // ready-to-fill sections instead, each with an image spot to click into and a text area,
+    // matching the real recurring format (Women's Ministry, Youth, Hospitality, etc.).
+    let blocks = starterSectionBlocks(4);
 
     function escapeHtml(str) {
       return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    // Matches the real template: most buttons are terracotta, with navy as the contrast color
+    // when two buttons sit next to each other (Table 246's two sign-up links).
+    const BUTTON_COLORS = {
+      terracotta: { bg: '#B15A43', text: '#FFFFFF' },
+      navy: { bg: '#303b6a', text: '#FFFFFF' },
+      gold: { bg: '#c3a355', text: '#1e2547' }
+    };
+
+    // A button labeled "Contact Us" / "Email Us" almost always means the church's own info@
+    // address — auto-fill it. Only kicks in while the link is still blank, so it never
+    // overwrites a link someone already set on purpose.
+    const CONTACT_BUTTON_TRIGGERS = ['contact us', 'email us', 'contact', 'email'];
+    const CHURCH_CONTACT_MAILTO = 'mailto:info@christchurchbluffton.org';
+
+    // Once a button link has a scheme (mailto:/sms:/tel:/https:/http:), that scheme is
+    // permanently fixed in the editor — only the address after it (email, phone number, or
+    // web address) can be edited. The scheme is the part that actually breaks the link if
+    // it's mistyped or deleted; the address is the safe part to hand over. Paste a bare domain
+    // like "forgeddigitaldesign.com" and normalizeButtonUrl below adds the https:// for you.
+    const URL_FIXED_SCHEMES = ['mailto:', 'sms:', 'tel:', 'https://', 'http://'];
+    function splitButtonUrl(url) {
+      const scheme = URL_FIXED_SCHEMES.find(s => (url || '').toLowerCase().startsWith(s));
+      if (!scheme) return null;
+      return { scheme, rest: url.slice(scheme.length) };
+    }
+
+    // Whoever fills this in won't know to type "mailto:"/"sms:"/"https://" themselves — detect
+    // what they typed and add the right prefix automatically instead of expecting them to know.
+    function normalizeButtonUrl(raw) {
+      const text = (raw || '').trim();
+      if (!text) return text;
+      if (/^(mailto:|sms:|tel:|https?:\/\/)/i.test(text)) return text;
+      if (/^[^\s@]+@[^\s@]+\.[^\s@]+/.test(text)) return 'mailto:' + text;
+      if (/^[\d\s()+-]{7,}$/.test(text)) return 'sms:' + text.replace(/[\s()-]/g, '');
+      return 'https://' + text;
     }
 
     // Maps a newsletter_drafts row (snake_case) to the camelCase shape every render/editor
@@ -402,6 +602,9 @@
       return {
         id: row.id,
         subject: row.subject,
+        headline: row.headline || '',
+        date: row.date || '',
+        eyebrow: row.eyebrow || '',
         mode: row.mode,
         htmlCode: row.html_code,
         blocks: row.blocks || [],
@@ -429,20 +632,46 @@
       el.textContent = text;
       el.className = 'form-msg visible ' + type;
     }
+
+    let topbarSaveMsgTimer = null;
+    function showTopbarSaveMsg(text, isError) {
+      const el = document.getElementById('topbar-save-msg');
+      el.textContent = text;
+      el.className = 'topbar-save-msg visible' + (isError ? ' error' : '');
+      clearTimeout(topbarSaveMsgTimer);
+      topbarSaveMsgTimer = setTimeout(() => el.classList.remove('visible'), 4000);
+    }
     function clearMsg() {
       document.getElementById('newsletter-msg').className = 'form-msg';
     }
 
     function newBlockId() { return 'b' + (blockIdCounter++); }
+    // Deciding the link type up front (rather than guessing from typed text) means the right
+    // scheme is locked in from the moment the button exists — nothing to detect or get wrong.
+    function newButton(linkType) {
+      const prefix = { web: 'https://', email: 'mailto:', phone: 'sms:' }[linkType] || '';
+      return { id: 'btn' + (buttonIdCounter++), text: '', url: prefix, color: 'terracotta' };
+    }
+    function newSectionItem(type) {
+      return type === 'image' ? { id: 'it' + (itemIdCounter++), type: 'image', url: '' } : { id: 'it' + (itemIdCounter++), type: 'text', text: '' };
+    }
+
+    function newSectionBlock() {
+      return { id: newBlockId(), type: 'section', label: '', title: '', items: [newSectionItem('image'), newSectionItem('text')], buttons: [] };
+    }
+
+    function starterSectionBlocks(count) {
+      return Array.from({ length: count }, newSectionBlock);
+    }
 
     function addBlock(type) {
+      if (type === 'section') { blocks.push(newSectionBlock()); renderCanvas(); return; }
       const base = { id: newBlockId(), type };
       if (type === 'heading' || type === 'paragraph') base.text = '';
       if (type === 'image') { base.dataUrl = ''; base.caption = ''; }
-      if (type === 'button') { base.text = ''; base.url = ''; }
+      if (type === 'button') { base.buttons = []; }
       blocks.push(base);
-      renderBlocks();
-      updatePreview();
+      renderCanvas();
     }
 
     function moveBlock(id, dir) {
@@ -450,90 +679,170 @@
       const swap = idx + dir;
       if (idx < 0 || swap < 0 || swap >= blocks.length) return;
       const tmp = blocks[idx]; blocks[idx] = blocks[swap]; blocks[swap] = tmp;
-      renderBlocks();
-      updatePreview();
+      renderCanvas();
     }
 
     function removeBlock(id) {
       blocks = blocks.filter(b => b.id !== id);
-      renderBlocks();
-      updatePreview();
+      renderCanvas();
     }
 
-    function blockTypeLabel(type) {
-      return { heading: 'Heading', paragraph: 'Paragraph', image: 'Image', button: 'Button / Link' }[type] || type;
+    // ---- Editable canvas — renders the live email design directly, with contenteditable
+    // regions in place of separate form fields. Text edits land on `blur` (via `focusout`,
+    // which bubbles) so a full re-render never interrupts mid-keystroke; only the block
+    // controls (move/remove) and add-block re-render immediately.
+    // Wrapped in one container so a URL edit can patch just this piece (swapping between the
+    // "empty" and "has image" DOM shapes) without touching the rest of the block.
+    // Shared by the standalone Image block (field "dataUrl") and a section's image items
+    // (field "url") — same markup either way, just a different field name to sync back to.
+    function canvasImageFieldHtml(url, fieldName) {
+      const inner = url
+        ? `<div class="canvas-image-wrap"><img src="${escapeHtml(url)}" alt=""></div>
+           <div class="canvas-image-url" contenteditable="true" role="textbox" aria-label="Image URL" data-field="${fieldName}" data-placeholder="Image URL">${escapeHtml(url)}</div>`
+        : `<div class="canvas-image-empty" contenteditable="true" role="textbox" aria-label="Image URL — paste a link from the Photos page" data-field="${fieldName}" data-placeholder="Paste an image URL here (Copy Link from the Photos page)"></div>`;
+      return `<div class="canvas-image-block">${inner}</div>`;
     }
 
-    function blockBodyHtml(b) {
-      if (b.type === 'heading') {
-        return `<input type="text" class="block-input" data-field="text" value="${escapeHtml(b.text)}" placeholder="Heading text">`;
+    function canvasImageHtml(b) {
+      return canvasImageFieldHtml(b.dataUrl, 'dataUrl');
+    }
+
+    // A section (or a standalone Button block) can hold zero or more buttons, each with its
+    // own color — matches the real template, where most buttons are terracotta but a second
+    // button next to one (like Table 246's two sign-up links) switches to navy for contrast.
+    function canvasButtonUrlFieldHtml(btn) {
+      const split = splitButtonUrl(btn.url);
+      if (!split) {
+        return `<div class="canvas-button-url" contenteditable="true" role="textbox" aria-label="Button link" data-field="url" data-placeholder="Paste a web address, email, or phone number">${escapeHtml(btn.url)}</div>`;
       }
-      if (b.type === 'paragraph') {
-        return `<textarea class="block-textarea" data-field="text" placeholder="Paragraph text">${escapeHtml(b.text)}</textarea>`;
-      }
-      if (b.type === 'image') {
-        return `
-          <div class="image-block-row">
-            <div class="image-block-preview">${b.dataUrl ? `<img src="${b.dataUrl}" alt="">` : `<div class="image-block-empty">No image selected</div>`}</div>
-            <div>
-              <button type="button" class="btn btn-outline" data-action="choose-image">${b.dataUrl ? 'Replace Image' : 'Choose Image'}</button>
-              <input type="file" accept="image/*" class="image-file-input" style="display:none;">
-            </div>
+      const placeholder = split.scheme === 'mailto:' ? 'email address'
+        : (split.scheme === 'sms:' || split.scheme === 'tel:') ? 'phone number'
+        : 'e.g. forgeddigitaldesign.com';
+      return `<div class="canvas-button-url">
+        <span class="canvas-url-prefix">${escapeHtml(split.scheme)}</span><span class="canvas-url-value" contenteditable="true" role="textbox" aria-label="Button link — ${placeholder}" data-field="url-value" data-placeholder="${placeholder}">${escapeHtml(split.rest)}</span>
+      </div>`;
+    }
+
+    function canvasButtonItemHtml(btn) {
+      const palette = BUTTON_COLORS[btn.color] || BUTTON_COLORS.terracotta;
+      const swatches = Object.keys(BUTTON_COLORS).map(key => `<button type="button" class="canvas-swatch ${btn.color === key ? 'active' : ''}" data-action="set-color" data-color="${key}" style="background:${BUTTON_COLORS[key].bg};" title="${key}" aria-label="Set button color to ${key}" aria-pressed="${btn.color === key}"></button>`).join('');
+      return `
+        <div class="canvas-button-item" data-btn-id="${btn.id}">
+          <div class="canvas-button-wrap"><span class="canvas-button" contenteditable="true" role="textbox" aria-label="Button text" data-field="text" style="background:${palette.bg}; color:${palette.text};" data-placeholder="Button text">${escapeHtml(btn.text)}</span></div>
+          ${canvasButtonUrlFieldHtml(btn)}
+          <div class="canvas-button-tools">
+            <div class="canvas-swatches">${swatches}</div>
+            <button type="button" class="canvas-button-remove" data-action="remove-button">&times; Remove button</button>
           </div>
-          <div class="field" style="margin-top:12px;">
-            <label>Caption (optional)</label>
-            <input type="text" class="block-input" data-field="caption" value="${escapeHtml(b.caption)}" placeholder="Caption text">
-          </div>`;
-      }
-      if (b.type === 'button') {
-        return `
-          <div class="button-block-row">
-            <div class="field">
-              <label>Button Text</label>
-              <input type="text" class="block-input" data-field="text" value="${escapeHtml(b.text)}" placeholder="Learn More">
-            </div>
-            <div class="field">
-              <label>Link URL</label>
-              <input type="text" class="block-input" data-field="url" value="${escapeHtml(b.url)}" placeholder="https://christchurchbluffton.org">
-            </div>
-          </div>`;
-      }
-      return '';
+        </div>`;
     }
 
-    function renderBlocks() {
-      const list = document.getElementById('blocks-list');
-      if (blocks.length === 0) {
-        list.innerHTML = `<div class="drafts-empty">No content blocks yet — add one below.</div>`;
-        return;
-      }
-      list.innerHTML = blocks.map((b, i) => `
-        <div class="block-item" data-id="${b.id}">
-          <div class="block-item-head">
-            <span class="block-type-tag">${blockTypeLabel(b.type)}</span>
-            <div class="block-item-actions">
-              <button type="button" data-action="up" ${i === 0 ? 'disabled' : ''} title="Move up">&uarr;</button>
-              <button type="button" data-action="down" ${i === blocks.length - 1 ? 'disabled' : ''} title="Move down">&darr;</button>
-              <button type="button" class="danger" data-action="remove" title="Remove">&times;</button>
-            </div>
-          </div>
-          <div class="block-item-body">${blockBodyHtml(b)}</div>
-        </div>`).join('');
+    function canvasButtonsAreaHtml(b) {
+      const items = (b.buttons || []).map(canvasButtonItemHtml).join('');
+      return `<div class="canvas-buttons-area">
+        <div class="canvas-buttons-row">${items}</div>
+        <div class="canvas-add-button-row">
+          <span class="canvas-add-button-label">Add Button:</span>
+          <button type="button" class="canvas-add-button-btn" data-action="add-button" data-link-type="web">+ Web Link</button>
+          <button type="button" class="canvas-add-button-btn" data-action="add-button" data-link-type="email">+ Email</button>
+          <button type="button" class="canvas-add-button-btn" data-action="add-button" data-link-type="phone">+ Text</button>
+        </div>
+      </div>`;
     }
 
-    // ---- Branded HTML shell — same visual language as the live site's contact.js emailShell():
-    // navy header band, gold accents, Georgia headings / Arial body, table-based layout for email clients.
-    function buildEmailHtml(subject, rowsHtml) {
-      const heading = escapeHtml(subject) || 'Newsletter';
+    // A section's content is an ordered list of image / text pieces — same add/remove pattern
+    // as buttons, so a section isn't locked to exactly one photo and one paragraph.
+    function canvasItemImageBlock(item) {
+      return canvasImageFieldHtml(item.url, 'url');
+    }
+
+    function canvasSectionItemHtml(item) {
+      const controls = `<button type="button" class="canvas-item-remove" data-action="remove-item" title="Remove" aria-label="Remove this ${item.type === 'image' ? 'image' : 'paragraph'}">&times;</button>`;
+      const body = item.type === 'image'
+        ? canvasItemImageBlock(item)
+        : `<div class="canvas-body" contenteditable="true" role="textbox" aria-label="Section paragraph text" data-field="text" data-placeholder="What's happening...">${escapeHtml(item.text)}</div>`;
+      return `<div class="canvas-section-item" data-item-id="${item.id}">${body}${controls}</div>`;
+    }
+
+    function canvasSectionItemsAreaHtml(b) {
+      const items = (b.items || []).map(canvasSectionItemHtml).join('');
+      return `<div class="canvas-section-items">${items}</div>
+        <div class="canvas-add-item-row">
+          <button type="button" class="canvas-add-item-btn" data-action="add-image-item">+ Image</button>
+          <button type="button" class="canvas-add-item-btn" data-action="add-text-item">+ Paragraph</button>
+        </div>`;
+    }
+
+    function canvasBlockHtml(b, idx, total) {
+      const controls = `
+        <div class="canvas-block-controls">
+          <button type="button" data-action="up" ${idx === 0 ? 'disabled' : ''} title="Move up" aria-label="Move this block up">&uarr;</button>
+          <button type="button" data-action="down" ${idx === total - 1 ? 'disabled' : ''} title="Move down" aria-label="Move this block down">&darr;</button>
+          <button type="button" class="danger" data-action="remove" title="Remove" aria-label="Remove this block">&times;</button>
+        </div>`;
+      let inner = '';
+      if (b.type === 'section') {
+        inner = `
+          <div class="canvas-eyebrow-sm" contenteditable="true" role="textbox" aria-label="Section label" data-field="label" data-placeholder="LABEL (E.G. WOMEN'S MINISTRY)">${escapeHtml(b.label)}</div>
+          <div class="canvas-section-title" contenteditable="true" role="textbox" aria-label="Section title" data-field="title" data-placeholder="Section title">${escapeHtml(b.title)}</div>
+          ${canvasSectionItemsAreaHtml(b)}
+          ${canvasButtonsAreaHtml(b)}
+          <div class="canvas-divider"></div>`;
+      } else if (b.type === 'heading') {
+        inner = `<div class="canvas-heading" contenteditable="true" role="textbox" aria-label="Heading text" data-field="text" data-placeholder="Heading text">${escapeHtml(b.text)}</div>`;
+      } else if (b.type === 'paragraph') {
+        inner = `<div class="canvas-paragraph" contenteditable="true" role="textbox" aria-label="Paragraph text" data-field="text" data-placeholder="Paragraph text">${escapeHtml(b.text)}</div>`;
+      } else if (b.type === 'image') {
+        inner = canvasImageHtml(b) + `<div class="canvas-caption" contenteditable="true" role="textbox" aria-label="Image caption" data-field="caption" data-placeholder="Caption (optional)">${escapeHtml(b.caption)}</div>`;
+      } else if (b.type === 'button') {
+        inner = canvasButtonsAreaHtml(b);
+      }
+      return `<div class="canvas-block" data-id="${b.id}">${controls}${inner}</div>`;
+    }
+
+    function canvasHeaderHtml() {
+      return `
+        <div class="canvas-stripe"></div>
+        <div class="canvas-banner">
+          <div class="canvas-date" contenteditable="true" role="textbox" aria-label="Newsletter date" data-field="date" data-placeholder="DATE">${escapeHtml(newsletterDate)}</div>
+          <div class="canvas-eyebrow" contenteditable="true" role="textbox" aria-label="Newsletter category label" data-field="eyebrow" data-placeholder="Christ Church Bluffton — Weekly Word">${escapeHtml(newsletterEyebrow)}</div>
+          <div class="canvas-headline" contenteditable="true" role="textbox" aria-label="Newsletter headline" data-field="headline" data-placeholder="Newsletter headline...">${escapeHtml(newsletterHeadline)}</div>
+          <div class="canvas-rule"></div>
+        </div>`;
+    }
+
+    function renderCanvas() {
+      const canvas = document.getElementById('email-canvas');
+      const blocksHtml = blocks.length
+        ? blocks.map((b, i) => canvasBlockHtml(b, i, blocks.length)).join('')
+        : `<div class="canvas-empty-hint">No content blocks yet — use "Add Block" below.</div>`;
+      canvas.innerHTML = `${canvasHeaderHtml()}
+        <div class="canvas-body-wrap">${blocksHtml}</div>
+        <div class="canvas-footer">Christ Church Bluffton &middot; 7 Venture Drive, Suite 104, PMB 267 &middot; Bluffton, SC 29910<br>You're receiving this because you're connected with Christ Church Bluffton.</div>`;
+    }
+
+    // ---- Branded HTML shell — matches the real "Weekly Word" template (gold dash-stripe,
+    // navy banner with date + eyebrow + headline + accent bar) using the site's own color
+    // tokens (navy #303b6a, gold #c3a355, terracotta accent #B15A43), not the one-off values
+    // from any single already-sent issue. Georgia headings / Arial body, table-based layout
+    // for email clients — same language as the live site's contact.js emailShell().
+    function buildEmailHtml(headline, rowsHtml) {
+      const heading = escapeHtml(headline) || 'Newsletter';
+      const dateStr = escapeHtml(newsletterDate);
       return `<!DOCTYPE html>
 <html>
-<body style="margin:0; padding:0; background-color:#F5F4EF;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F5F4EF; padding:32px 16px;">
+<body style="margin:0; padding:0; background-color:#EDE7DA;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#EDE7DA; padding:32px 16px;">
     <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background-color:#FFFFFF; border-radius:12px; overflow:hidden;">
-        <tr><td style="background-color:#303b6a; padding:28px 32px 22px;">
-          <div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#A9B3D6;">Christ Church Bluffton</div>
-          <div style="font-family:Georgia,'Times New Roman',serif; font-size:24px; color:#FFFFFF; margin-top:8px;">${heading}</div>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background-color:#FBF9F4; border-radius:12px; overflow:hidden;">
+        <tr><td style="height:5px; background-image: repeating-linear-gradient(90deg, #c9a961 0px, #c9a961 24px, #FBF9F4 24px, #FBF9F4 30px);"></td></tr>
+        <tr><td style="background-color:#303b6a; padding:14px 32px 0; text-align:right;">
+          <span style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#c9a961;">${dateStr}</span>
+        </td></tr>
+        <tr><td style="background-color:#303b6a; padding:8px 32px 30px; text-align:center;">
+          <div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#A9B3D6; margin-bottom:10px;">${escapeHtml(newsletterEyebrow)}</div>
+          <div style="font-family:Georgia,'Times New Roman',serif; font-size:28px; line-height:1.3; color:#FFFFFF;">${heading}</div>
+          <div style="width:56px; height:2px; background-color:#B15A43; margin:16px auto 0;"></div>
         </td></tr>
         <tr><td style="padding:28px 32px;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rowsHtml}
@@ -549,7 +858,46 @@
 </html>`;
     }
 
+    // Multiple buttons render as one row, side by side (matches the real Table 246 example —
+    // two sign-up links next to each other, not stacked). A plain <table> of cells, not
+    // flexbox, since this HTML has to render correctly in email clients like Outlook.
+    function buttonsRowHtml(buttons) {
+      const visible = (buttons || []).filter(btn => btn.text);
+      if (!visible.length) return '';
+      const cells = visible.map((btn, i) => {
+        const palette = BUTTON_COLORS[btn.color] || BUTTON_COLORS.terracotta;
+        const spacer = i > 0 ? `<td style="width:12px;"></td>` : '';
+        return `${spacer}<td style="background-color:${palette.bg}; border-radius:8px;">
+          <a href="${escapeHtml(btn.url) || '#'}" style="display:inline-block; padding:12px 24px; font-family:Arial,Helvetica,sans-serif; font-size:14px; font-weight:bold; color:${palette.text}; text-decoration:none; white-space:nowrap;">${escapeHtml(btn.text)}</a>
+        </td>`;
+      }).join('');
+      return `<tr><td style="padding:4px 0 8px;" align="center">
+        <table role="presentation" cellpadding="0" cellspacing="0"><tr>${cells}</tr></table>
+      </td></tr>`;
+    }
+
+    function sectionItemRowHtml(item) {
+      if (item.type === 'image') {
+        if (!item.url) return '';
+        return `<tr><td style="padding:0 0 14px;" align="center"><img src="${escapeHtml(item.url)}" style="max-width:100%; border-radius:8px; display:block;" alt=""></td></tr>`;
+      }
+      const html = escapeHtml(item.text).replace(/\n/g, '<br>');
+      if (!html) return '';
+      return `<tr><td style="padding:0 0 16px;"><div style="font-family:Arial,Helvetica,sans-serif; font-size:15px; color:#2B2B2B; line-height:1.7;">${html}</div></td></tr>`;
+    }
+
     function blockRowHtml(b) {
+      if (b.type === 'section') {
+        const rows = [];
+        if (b.label) rows.push(`<tr><td style="padding:0 0 4px;"><div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#B15A43;">${escapeHtml(b.label)}</div></td></tr>`);
+        if (b.title) rows.push(`<tr><td style="padding:0 0 14px;"><div style="font-family:Georgia,'Times New Roman',serif; font-size:22px; color:#303b6a;">${escapeHtml(b.title)}</div></td></tr>`);
+        (b.items || []).forEach(item => { const r = sectionItemRowHtml(item); if (r) rows.push(r); });
+        const btnRow = buttonsRowHtml(b.buttons);
+        if (btnRow) rows.push(btnRow);
+        if (!rows.length) return `<tr><td style="padding:0 0 16px;"><div style="font-family:Arial,Helvetica,sans-serif; font-size:12px; color:#6B6B6B; font-style:italic;">(section block — nothing filled in yet)</div></td></tr>`;
+        rows.push(`<tr><td style="padding:8px 0 20px;"><div style="height:1px; background-color:#E5E3DB;"></div></td></tr>`);
+        return rows.join('');
+      }
       if (b.type === 'heading') {
         return `<tr><td style="padding:0 0 14px;"><div style="font-family:Georgia,'Times New Roman',serif; font-size:20px; color:#303b6a;">${escapeHtml(b.text) || '(empty heading)'}</div></td></tr>`;
       }
@@ -565,21 +913,16 @@
         </td></tr>`;
       }
       if (b.type === 'button') {
-        if (!b.text) return '';
-        return `<tr><td style="padding:8px 0 16px;" align="center">
-          <table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="background-color:#c3a355; border-radius:8px;">
-            <a href="${escapeHtml(b.url) || '#'}" style="display:inline-block; padding:12px 28px; font-family:Arial,Helvetica,sans-serif; font-size:14px; font-weight:bold; color:#1e2547; text-decoration:none;">${escapeHtml(b.text)}</a>
-          </td></tr></table>
-        </td></tr>`;
+        return buttonsRowHtml(b.buttons);
       }
       return '';
     }
 
-    function generateVisualHtml(subject) {
+    function generateVisualHtml(headline) {
       const rows = blocks.length
         ? blocks.map(blockRowHtml).join('')
         : `<tr><td style="padding:0;"><div style="font-family:Arial,Helvetica,sans-serif; font-size:13px; color:#6B6B6B; font-style:italic;">This newsletter doesn't have any content blocks yet. Add one below.</div></td></tr>`;
-      return buildEmailHtml(subject, rows);
+      return buildEmailHtml(headline, rows);
     }
 
     // Same final HTML regardless of which mode is active — Paste HTML uses the raw textarea
@@ -590,7 +933,7 @@
         const code = document.getElementById('html-code-input').value;
         return code.trim() ? code : buildEmailHtml(subject, `<tr><td style="padding:0;"><div style="font-family:Arial,Helvetica,sans-serif; font-size:13px; color:#6B6B6B; font-style:italic;">Paste your HTML on the left to see it here.</div></td></tr>`);
       }
-      return generateVisualHtml(subject);
+      return generateVisualHtml(newsletterHeadline || subject);
     }
 
     function updatePreview() {
@@ -601,25 +944,37 @@
       previewTimer = setTimeout(updatePreview, 300);
     }
 
+    // Visual mode edits directly in the canvas (no separate preview needed); Paste HTML mode
+    // still uses the sandboxed iframe, since that content could be anything pasted in.
     function setMode(newMode) {
       mode = newMode;
       document.querySelectorAll('.mode-tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === newMode));
       document.getElementById('visual-panel').classList.toggle('active', newMode === 'visual');
       document.getElementById('html-panel').classList.toggle('active', newMode === 'html');
-      document.getElementById('ai-panel').classList.toggle('active', newMode === 'ai');
-      updatePreview();
+      document.getElementById('preview-frame-wrap').style.display = newMode === 'visual' ? 'none' : 'flex';
+      if (newMode === 'visual') renderCanvas(); else updatePreview();
     }
 
     function resetComposer() {
       currentDraftId = null;
       document.getElementById('subject-input').value = '';
       document.getElementById('html-code-input').value = '';
-      blocks = [];
+      newsletterHeadline = '';
+      newsletterDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase();
+      newsletterEyebrow = 'Christ Church Bluffton — Weekly Word';
+      blocks = starterSectionBlocks(4);
       setMode('visual');
-      renderBlocks();
-      updatePreview();
       clearMsg();
       renderDraftsList();
+    }
+
+    // Recomputes the running id counters (block/button/section-item) after loading a saved
+    // draft, so newly added buttons/items can't collide with ids already used in it.
+    function maxIdSuffix(items, prefix) {
+      return items.reduce((max, it) => {
+        const n = typeof it.id === 'string' && it.id.startsWith(prefix) ? parseInt(it.id.slice(prefix.length)) || 0 : 0;
+        return Math.max(max, n);
+      }, -1) + 1;
     }
 
     function renderDraftsList() {
@@ -648,11 +1003,14 @@
       currentDraftId = d.id;
       document.getElementById('subject-input').value = d.subject || '';
       document.getElementById('html-code-input').value = d.htmlCode || '';
+      newsletterHeadline = d.headline || '';
+      newsletterDate = d.date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase();
+      newsletterEyebrow = d.eyebrow || 'Christ Church Bluffton — Weekly Word';
       blocks = (d.blocks || []).map(b => ({ ...b }));
       blockIdCounter = blocks.length ? Math.max(...blocks.map(b => parseInt((b.id || 'b0').slice(1)) || 0)) + 1 : 0;
+      buttonIdCounter = maxIdSuffix(blocks.flatMap(b => b.buttons || []), 'btn');
+      itemIdCounter = maxIdSuffix(blocks.flatMap(b => b.items || []), 'it');
       setMode(d.mode || 'visual');
-      renderBlocks();
-      updatePreview();
       clearMsg();
       renderDraftsList();
     }
@@ -692,20 +1050,20 @@
       if (currentDraftId) {
         const { data, error } = await supabaseClient
           .from('newsletter_drafts')
-          .update({ subject, mode, html_code: htmlCode, blocks, saved_at: nowIso })
+          .update({ subject, headline: newsletterHeadline, date: newsletterDate, eyebrow: newsletterEyebrow, mode, html_code: htmlCode, blocks, saved_at: nowIso })
           .eq('id', currentDraftId)
           .select()
           .single();
-        if (error) { showMsg('Could not save draft: ' + error.message, 'error'); return; }
+        if (error) { showMsg('Could not save draft: ' + error.message, 'error'); showTopbarSaveMsg('Save failed', true); return; }
         const updated = draftFromRow(data);
         drafts = drafts.map(d => d.id === currentDraftId ? updated : d);
       } else {
         const { data, error } = await supabaseClient
           .from('newsletter_drafts')
-          .insert({ subject, mode, html_code: htmlCode, blocks, saved_at: nowIso })
+          .insert({ subject, headline: newsletterHeadline, date: newsletterDate, eyebrow: newsletterEyebrow, mode, html_code: htmlCode, blocks, saved_at: nowIso })
           .select()
           .single();
-        if (error) { showMsg('Could not save draft: ' + error.message, 'error'); return; }
+        if (error) { showMsg('Could not save draft: ' + error.message, 'error'); showTopbarSaveMsg('Save failed', true); return; }
         const inserted = draftFromRow(data);
         currentDraftId = inserted.id;
         drafts.push(inserted);
@@ -713,20 +1071,29 @@
       logActivity('draft_save', subject || '(untitled)');
       renderDraftsList();
       showMsg('Draft saved.', 'success');
+      showTopbarSaveMsg('Draft saved ✓', false);
+    }
+
+    function sendTestModalMsg(text, type) {
+      const el = document.getElementById('send-test-modal-msg');
+      el.textContent = text;
+      el.className = 'form-msg visible ' + type;
     }
 
     function sendTest() {
       const subject = document.getElementById('subject-input').value.trim();
-      const testEmail = document.getElementById('test-email-input').value.trim();
-      if (!subject) { showMsg('Add a subject line before sending a test.', 'error'); return; }
-      if (!testEmail) { showMsg('Enter a test email address first.', 'error'); return; }
-      showMsg(`This would send a test copy of "${subject}" from info@christchurchbluffton.org to ${testEmail} once this panel is connected to Resend — not wired up yet. Nothing was actually sent.`, 'info');
+      const testEmails = ['test-email-1', 'test-email-2', 'test-email-3', 'test-email-4']
+        .map(id => document.getElementById(id).value.trim())
+        .filter(Boolean);
+      if (!subject) { sendTestModalMsg('Add a subject line before sending a test.', 'error'); return; }
+      if (!testEmails.length) { sendTestModalMsg('Enter at least one test email address first.', 'error'); return; }
+      sendTestModalMsg(`This would send a test copy of "${subject}" from info@christchurchbluffton.org to ${testEmails.join(', ')} once this panel is connected to Resend — not wired up yet. Nothing was actually sent.`, 'info');
     }
 
     const dataPromise = Promise.all([getDraftsFromDb(), getSubscriberCount()]);
 
     loadSidebar().then(async () => {
-      if (!document.getElementById('blocks-list')) return;
+      if (!document.getElementById('email-canvas')) return;
       // Composing a newsletter (block editing, HTML paste, live preview) isn't a comfortable
       // touch task — block it on tablet/mobile the same way Content Editor is blocked.
       if (window.innerWidth <= 900) {
@@ -741,7 +1108,7 @@
       session = getSession();
       const [draftsResult, subCount] = await dataPromise;
       drafts = draftsResult;
-      document.getElementById('test-email-input').value = 'info@christchurchbluffton.org';
+      document.getElementById('test-email-1').value = 'info@christchurchbluffton.org';
 
       document.getElementById('send-to-hint').textContent =
         `${subCount} ${subCount === 1 ? 'person' : 'people'} on the Subscribers list right now.`;
@@ -757,48 +1124,137 @@
         btn.addEventListener('click', () => addBlock(btn.dataset.type));
       });
 
-      document.getElementById('blocks-list').addEventListener('click', (e) => {
+      const canvasEl = document.getElementById('email-canvas');
+
+      canvasEl.addEventListener('click', (e) => {
         const actionBtn = e.target.closest('button[data-action]');
         if (!actionBtn) return;
-        const item = e.target.closest('.block-item');
-        const id = item.dataset.id;
+        const item = e.target.closest('.canvas-block');
+        if (!item) return;
         const action = actionBtn.dataset.action;
-        if (action === 'up') moveBlock(id, -1);
-        if (action === 'down') moveBlock(id, 1);
-        if (action === 'remove') removeBlock(id);
-        if (action === 'choose-image') item.querySelector('.image-file-input').click();
+
+        if (action === 'up') { moveBlock(item.dataset.id, -1); return; }
+        if (action === 'down') { moveBlock(item.dataset.id, 1); return; }
+        if (action === 'remove') { removeBlock(item.dataset.id); return; }
+
+        const block = blocks.find(b => b.id === item.dataset.id);
+        if (!block) return;
+
+        if (action === 'add-button') { (block.buttons || (block.buttons = [])).push(newButton(actionBtn.dataset.linkType)); renderCanvas(); return; }
+        if (action === 'add-image-item') { (block.items || (block.items = [])).push(newSectionItem('image')); renderCanvas(); return; }
+        if (action === 'add-text-item') { (block.items || (block.items = [])).push(newSectionItem('text')); renderCanvas(); return; }
+
+        const itemEl = e.target.closest('.canvas-section-item');
+        if (itemEl && action === 'remove-item') {
+          block.items = (block.items || []).filter(it => it.id !== itemEl.dataset.itemId);
+          renderCanvas();
+          return;
+        }
+
+        const btnItem = e.target.closest('.canvas-button-item');
+        if (!btnItem) return;
+        const btn = (block.buttons || []).find(b => b.id === btnItem.dataset.btnId);
+        if (!btn) return;
+        if (action === 'remove-button') { block.buttons = block.buttons.filter(b => b.id !== btn.id); renderCanvas(); }
+        if (action === 'set-color') { btn.color = actionBtn.dataset.color; renderCanvas(); }
       });
 
-      document.getElementById('blocks-list').addEventListener('change', (e) => {
-        if (!e.target.classList.contains('image-file-input')) return;
-        const file = e.target.files[0];
-        if (!file) return;
-        const item = e.target.closest('.block-item');
-        const id = item.dataset.id;
-        const block = blocks.find(b => b.id === id);
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          block.dataUrl = ev.target.result;
-          renderBlocks();
-          updatePreview();
-        };
-        reader.readAsDataURL(file);
-      });
-
-      document.getElementById('blocks-list').addEventListener('input', (e) => {
+      // Sync contenteditable edits back into `blocks` (or `newsletterHeadline` for the banner
+      // title) on focusout. Deliberately does NOT re-render the canvas for plain text — the
+      // browser is already showing what was typed, and a full re-render here would destroy
+      // and rebuild every block's DOM mid-click, which breaks focus when a user clicks
+      // straight from one field into another (the click's target node gets swapped out from
+      // under it). Only the image URL fields patch their own small container, since that one
+      // needs to swap between the "empty" and "has image" DOM shapes.
+      canvasEl.addEventListener('focusout', (e) => {
         const field = e.target.dataset.field;
         if (!field) return;
-        const item = e.target.closest('.block-item');
-        const id = item.dataset.id;
-        const block = blocks.find(b => b.id === id);
+        // .innerText reads the CSS-rendered text, not what was actually typed — for fields
+        // styled text-transform:uppercase (date, eyebrow) that would silently store the
+        // all-caps version instead of the real typed casing. .textContent is safe here since
+        // both are single-line fields with no line-break handling to preserve.
+        const rawEl = (field === 'date' || field === 'eyebrow') ? e.target.textContent : e.target.innerText;
+        const text = rawEl.trim();
+        if (!text) e.target.innerHTML = ''; // let the :empty placeholder show again
+        if (field === 'headline') { newsletterHeadline = text; return; }
+        if (field === 'date') { newsletterDate = text; return; }
+        if (field === 'eyebrow') { newsletterEyebrow = text; return; }
+
+        const item = e.target.closest('.canvas-block');
+        if (!item) return;
+        const block = blocks.find(b => b.id === item.dataset.id);
         if (!block) return;
-        block[field] = e.target.value;
-        schedulePreviewUpdate();
+
+        const btnItem = e.target.closest('.canvas-button-item');
+        if (btnItem) {
+          const btn = (block.buttons || []).find(b => b.id === btnItem.dataset.btnId);
+          if (btn) {
+            if (field === 'url') {
+              // First-time freeform entry — auto-detect + normalize, then patch this button's
+              // markup, since a recognized scheme now needs to switch to the fixed-prefix +
+              // editable-address display instead of one plain field.
+              btn.url = normalizeButtonUrl(text);
+              btnItem.outerHTML = canvasButtonItemHtml(btn);
+            } else if (field === 'url-value') {
+              // The scheme prefix is rendered as a separate, non-editable sibling element —
+              // only the address/number after it can ever be edited here.
+              const split = splitButtonUrl(btn.url) || { scheme: 'mailto:' };
+              btn.url = split.scheme + text;
+            } else {
+              btn[field] = text;
+              if (field === 'text' && !btn.url && CONTACT_BUTTON_TRIGGERS.includes(text.toLowerCase())) {
+                btn.url = CHURCH_CONTACT_MAILTO;
+                btnItem.outerHTML = canvasButtonItemHtml(btn); // patch just this button, not the whole canvas
+              }
+            }
+          }
+          return;
+        }
+
+        const sectionItemEl = e.target.closest('.canvas-section-item');
+        if (sectionItemEl) {
+          const sectionItem = (block.items || []).find(it => it.id === sectionItemEl.dataset.itemId);
+          if (!sectionItem) return;
+          sectionItem[field] = text; // 'text' or 'url'
+          if (field === 'url') {
+            const container = sectionItemEl.querySelector('.canvas-image-block');
+            if (container) container.outerHTML = canvasItemImageBlock(sectionItem);
+          }
+          return;
+        }
+
+        block[field] = text;
+        if (field === 'dataUrl') {
+          const container = item.querySelector('.canvas-image-block');
+          if (container) container.outerHTML = canvasImageHtml(block);
+        }
       });
 
       document.getElementById('new-draft-btn').addEventListener('click', resetComposer);
       document.getElementById('save-draft-btn').addEventListener('click', saveDraft);
-      document.getElementById('send-test-btn').addEventListener('click', sendTest);
+      document.getElementById('send-test-confirm-btn').addEventListener('click', sendTest);
+
+      const previewOverlay = document.getElementById('preview-modal-overlay');
+      document.getElementById('open-preview-btn').addEventListener('click', () => {
+        document.getElementById('preview-modal-iframe').srcdoc = getFinalHtml();
+        previewOverlay.classList.add('open');
+      });
+      document.getElementById('preview-modal-close').addEventListener('click', () => previewOverlay.classList.remove('open'));
+      previewOverlay.addEventListener('click', (e) => { if (e.target === previewOverlay) previewOverlay.classList.remove('open'); });
+
+      const sendTestOverlay = document.getElementById('send-test-modal-overlay');
+      document.getElementById('open-send-test-btn').addEventListener('click', () => {
+        document.getElementById('send-test-modal-msg').className = 'form-msg';
+        sendTestOverlay.classList.add('open');
+      });
+      document.getElementById('send-test-modal-close').addEventListener('click', () => sendTestOverlay.classList.remove('open'));
+      sendTestOverlay.addEventListener('click', (e) => { if (e.target === sendTestOverlay) sendTestOverlay.classList.remove('open'); });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        previewOverlay.classList.remove('open');
+        sendTestOverlay.classList.remove('open');
+      });
 
       document.getElementById('drafts-list').addEventListener('click', (e) => {
         const item = e.target.closest('.draft-item');
@@ -809,9 +1265,8 @@
         if (e.target.closest('[data-action="open"]')) { openDraft(id); }
       });
 
-      renderBlocks();
+      renderCanvas();
       renderDraftsList();
-      updatePreview();
     });
   </script>
 </body>

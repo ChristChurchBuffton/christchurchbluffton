@@ -279,6 +279,63 @@
   <script>
     const LIVE_BASE_URL = 'https://christchurchbluffton.org/a34317d8/';
 
+    // Whoever uploads a photo here (a phone photo, a flyer graphic) usually gets a file far
+    // bigger than it needs to be for web/email use — some recent uploads ran 2MB+ each, and
+    // since every embedded newsletter image reloads on every single email open, that adds up
+    // to real site bandwidth fast. This shrinks + compresses in the browser before it ever
+    // leaves the uploader's machine, so nothing changes about how the page is used.
+    // PNGs with real transparency (logos, graphics with a see-through background) stay PNG —
+    // only genuinely opaque images convert to JPEG, since that's where the big size win is
+    // (a photo saved as PNG is lossless and often 5-10x larger than the same photo as JPEG).
+    const MAX_UPLOAD_DIMENSION = 1600;
+    const JPEG_QUALITY = 0.82;
+
+    function canvasHasTransparency(ctx, width, height) {
+      const { data } = ctx.getImageData(0, 0, width, height);
+      for (let i = 3; i < data.length; i += 4) {
+        if (data[i] < 255) return true;
+      }
+      return false;
+    }
+
+    async function compressImage(file) {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const img = await new Promise((resolve, reject) => {
+        const im = new Image();
+        im.onload = () => resolve(im);
+        im.onerror = reject;
+        im.src = dataUrl;
+      });
+
+      let { width, height } = img;
+      if (width > MAX_UPLOAD_DIMENSION || height > MAX_UPLOAD_DIMENSION) {
+        if (width >= height) { height = Math.round(height * (MAX_UPLOAD_DIMENSION / width)); width = MAX_UPLOAD_DIMENSION; }
+        else { width = Math.round(width * (MAX_UPLOAD_DIMENSION / height)); height = MAX_UPLOAD_DIMENSION; }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const hasAlpha = file.type === 'image/png' && canvasHasTransparency(ctx, width, height);
+      const outType = hasAlpha ? 'image/png' : 'image/jpeg';
+      const ext = hasAlpha ? '.png' : '.jpg';
+
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, outType, outType === 'image/jpeg' ? JPEG_QUALITY : undefined));
+      // If compression somehow didn't help (rare — a tiny already-optimized image), just use the original.
+      if (!blob || blob.size >= file.size) {
+        return { file, ext: file.type === 'image/png' ? '.png' : '.jpg' };
+      }
+      return { file: new File([blob], file.name, { type: outType }), ext };
+    }
+
     // The 4 images genuinely live on christchurchbluffton.org/a34317d8 today — seeded into the
     // `photos` table (sentinel `external:` storage_path, no real Storage object behind them) the
     // first time the table is empty, so the admin view matches reality on first load. Not mock data.
@@ -410,8 +467,7 @@
     // Asks for a friendly display name before the actual upload — "Church Crew" becomes both
     // the Storage filename and the DB filename column ("church-crew.jpg" or "church-crew.png"),
     // matching the plain readable naming the 5 seed photos already use.
-    function openUploadModal(file) {
-      const ext = file.type === 'image/png' ? '.png' : '.jpg';
+    function openUploadModal(file, ext) {
       document.getElementById('modal-title').textContent = 'Name This Photo';
       document.getElementById('modal-subtitle').textContent = 'Used for the file name and the link you copy';
       const baseName = file.name.replace(/\.[^.]+$/, '');
@@ -462,7 +518,7 @@
 
       const fileInput = document.getElementById('upload-input');
       document.getElementById('upload-btn').addEventListener('click', () => fileInput.click());
-      fileInput.addEventListener('change', (e) => {
+      fileInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         fileInput.value = '';
         if (!file) return;
@@ -470,7 +526,15 @@
           alert('Please choose a JPG or PNG photo — other file types aren\'t supported here yet (JPG/PNG keep these consistent with email clients like Outlook).');
           return;
         }
-        openUploadModal(file);
+        const tileHint = document.querySelector('#upload-tile-btn .upload-tile-hint');
+        const originalHint = tileHint ? tileHint.textContent : null;
+        if (tileHint) tileHint.textContent = 'Shrinking photo…';
+        try {
+          const { file: prepared, ext } = await compressImage(file);
+          openUploadModal(prepared, ext);
+        } finally {
+          if (tileHint) tileHint.textContent = originalHint;
+        }
       });
       document.getElementById('modal-close').addEventListener('click', closeModal);
       document.getElementById('modal-backdrop').addEventListener('click', (e) => {
