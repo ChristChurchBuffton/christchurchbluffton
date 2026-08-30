@@ -15,7 +15,7 @@
      into a long newsletter when you click it. This shows right next to the button itself,
      so confirmation is always visible regardless of scroll position. */
   .topbar-save-msg {
-    font-size: 12px; font-weight: bold; color: #2e7d32; opacity: 0; transition: opacity 0.3s;
+    font-size: 14px; font-weight: bold; color: #2e7d32; opacity: 0; transition: opacity 0.3s;
   }
   .topbar-save-msg.error { color: var(--danger); }
   .topbar-save-msg.visible { opacity: 1; }
@@ -46,30 +46,37 @@
   }
   .send-hub-field { display: flex; flex-direction: column; gap: 4px; flex: 1 1 220px; min-width: 220px; }
   .send-hub-field-wide { flex: 2 1 360px; min-width: 320px; }
-  .send-hub-field label { font-size: 12px; font-weight: bold; color: var(--text-muted); }
+  .send-hub-field label { font-size: 14px; font-weight: bold; color: var(--text-muted); }
   .send-hub-field select, .send-hub-field input {
     padding: 8px 10px; border: 1px solid var(--border-gray); border-radius: 8px;
-    font-family: inherit; font-size: 13px; background: var(--lightest-gray); color: var(--text-dark);
+    font-family: inherit; font-size: 15px; background: var(--lightest-gray); color: var(--text-dark);
   }
   .send-hub-field select:focus, .send-hub-field input:focus { outline: none; border-color: var(--gold); background: var(--white); }
-  .send-hub-hint { font-size: 11px; color: var(--text-muted); }
+  .send-hub-hint { font-size: 13px; color: var(--text-muted); }
   .send-hub-test-row { display: flex; gap: 8px; }
   .send-hub-test-row input { flex: 1; }
   .send-hub-status {
-    flex: 1 1 220px; align-self: center; font-size: 12px; color: var(--text-muted); line-height: 1.5;
+    flex: 1 1 220px; align-self: center; font-size: 14px; color: var(--text-muted); line-height: 1.5;
   }
   .send-hub-status strong { color: var(--gold-text); }
   .send-test-small-btn {
     align-self: flex-start; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border-gray);
-    background: var(--white); font-size: 11.5px; font-weight: bold; color: var(--navy-blue); cursor: pointer;
+    background: var(--white); font-size: 14px; font-weight: bold; color: var(--navy-blue); cursor: pointer;
   }
   .send-test-small-btn:hover { border-color: var(--gold); color: var(--gold-text); background: rgba(195,163,85,0.08); }
+  .send-test-small-btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: auto; }
+  .send-test-small-btn:disabled:hover { border-color: var(--border-gray); color: var(--navy-blue); background: var(--white); }
 
   .newsletter-layout {
     display: grid;
-    grid-template-columns: 260px 1fr;
+    grid-template-columns: 430px 1fr;
     gap: 24px;
-    align-items: start;
+    /* Was align-items:start, which sizes each grid column to only its OWN content — the
+       drafts column (short) never grew as tall as the composer column (long), so its sticky
+       card had no room to actually stick and just scrolled off with the page instead.
+       stretch makes both columns match the tallest one, giving the sticky card real room to
+       move within as you scroll a long newsletter. */
+    align-items: stretch;
   }
   @media (max-width: 1100px) {
     .newsletter-layout { grid-template-columns: 1fr; }
@@ -78,28 +85,138 @@
   /* ---- Drafts column ---- */
   /* top:32px was stale — didn't account for the sticky topbar (83px) or the send-hub-bar
      (91–191px) now sitting above it, so it tried to stick underneath both and showed through
-     the gap between them while scrolling. 200px clears both, matching .add-block-panel. */
-  .drafts-card { position: sticky; top: 200px; }
+     the gap between them while scrolling. 200px clears both, matching .add-block-panel.
+     UPDATE: the send-hub-bar grew taller once its own text got bumped to industry-standard
+     sizes — its real bottom edge moved to 211px, so 200px was letting it paint over the top
+     ~11px of both sticky panels. 230px clears the new height with real margin instead of
+     the previous 9px, so a future small text/spacing change doesn't reopen this exact bug. */
+  /* Pure sticky positioning has no idea how tall the viewport actually is — once this panel's
+     own content (Saved Drafts + Sent both stacked here) is taller than the space below top:200px,
+     the overflow was getting silently clipped by the bottom of the window instead of staying
+     reachable. Capping the height and giving it its own scrollbar means it can always be
+     scrolled into full view without ever losing its stuck position on the page. */
+  .drafts-card { position: sticky; top: 230px; max-height: calc(100vh - 250px); overflow-y: auto; }
   .drafts-card .card-body { padding: 20px; }
   .drafts-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-  .btn-sm { padding: 6px 12px; font-size: 12px; }
-  .drafts-empty { font-size: 13px; color: var(--text-muted); font-style: italic; text-align: center; padding: 14px 4px; }
-  .drafts-divider { border: none; border-top: 1px solid var(--border-gray); margin: 18px 0; }
-  .drafts-subhead { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-bottom: 10px; }
+  .btn-sm { padding: 6px 12px; font-size: 14px; }
+  .drafts-empty { font-size: 15px; color: var(--text-muted); font-style: italic; text-align: center; padding: 14px 4px; }
+  /* Sent and Archive are each their own collapsible section, peers of each other rather than
+     one nested inside the other — same collapse pattern as Volunteers' team cards (real
+     <button>, arrow rotates 90° open). Collapsed by default so neither one grows the sidebar
+     just by existing, no matter how many pile up over time — no hard retention number needed. */
+  .drafts-section-toggle {
+    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    border: none; background: none; padding: 10px 2px; margin-top: 4px; cursor: pointer;
+    border-top: 1px solid var(--border-gray); font: inherit; text-align: left;
+  }
+  .drafts-section-toggle:hover { background: rgba(195,163,85,0.08); }
+  .drafts-section-toggle-left { display: flex; align-items: center; gap: 8px; }
+  .drafts-section-arrow {
+    flex-shrink: 0; width: 14px; height: 14px; color: var(--gold-text); transition: transform 0.18s ease;
+  }
+  .drafts-section-arrow.is-open { transform: rotate(90deg); }
+  .drafts-section-label { font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); }
+  .drafts-section-count {
+    font-size: 10.5px; font-weight: bold; color: var(--gold-text); text-transform: uppercase; letter-spacing: 0.5px;
+    background: rgba(195,163,85,0.18); padding: 2px 8px; border-radius: 100px;
+  }
+  /* Archive is deliberately quieter than Sent — everything in it is something you chose to
+     tuck away, so its toggle stays fully neutral gray (no gold) even though the interaction
+     is identical, instead of drawing the same eye as Sent's still-relevant issues. */
+  .drafts-section-toggle.muted .drafts-section-arrow { color: var(--text-muted); }
+  .drafts-section-toggle.muted .drafts-section-count { color: var(--text-muted); background: rgba(90,90,90,0.12); }
+  /* The whole card opens the draft on click, not just the name/meta text inside it (see the
+     click handler's fallthrough) — cursor:pointer here, not just on the inner pieces, so the
+     whole row actually looks as clickable as it now is. */
   .draft-item {
-    display: flex; align-items: center; gap: 8px;
+    display: flex; flex-direction: column; gap: 6px;
     padding: 10px; border-radius: 8px; margin-bottom: 6px;
-    border: 1px solid var(--border-gray);
+    border: 1px solid var(--border-gray); cursor: pointer;
   }
   .draft-item.active { border-color: var(--gold); background: rgba(195,163,85,0.08); }
-  .draft-item-main { flex: 1; min-width: 0; cursor: pointer; }
-  .draft-subject { font-size: 13px; font-weight: bold; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .draft-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .draft-item-main { cursor: pointer; }
+  .draft-name-wrap { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  /* Separate from the newsletter's own Subject Line — subject repeats almost every week
+     ("Christ Church Bluffton Weekly Word"), so it's useless for telling drafts apart in this
+     list. Plain text by default (NOT directly clickable-to-edit) — a bare click here just
+     opens the draft like the rest of the row. Only becomes contenteditable when "Edit name"
+     is chosen from the ⋮ menu (startEditingDraftName()), which is what fixed the real problem
+     this used to have: clicking the row to open it could land square on the name and
+     accidentally start editing it instead. Truncates rather than wraps so the row height
+     stays fixed. */
+  .draft-name { flex: 1; min-width: 0; font-size: 15px; font-weight: bold; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Briefly flashes after a rename is actually saved to the database — same "confirm it
+     really happened" idea as the topbar's own Draft saved ✓, just anchored to this row
+     since a rename can happen while a totally different draft is open in the composer. */
+  .draft-name-saved { flex-shrink: 0; color: #2e7d32; font-size: 13px; font-weight: bold; opacity: 0; transition: opacity 0.3s; }
+  .draft-name-saved.visible { opacity: 1; }
+  /* Meta (mode/date) and the Copy/Delete actions now share their own row below the name,
+     instead of everything squeezed onto one line — the name kept getting truncated early
+     to make room for two buttons that don't need to sit right next to it. */
+  .draft-item-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .draft-meta { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; cursor: pointer; }
+  /* Sent items sit in their own collapsible section below Saved Drafts (see .drafts-section-toggle
+     above). This small pill is the "went out for real" marker — a plain checkmark/date would
+     be too easy to mistake for just another draft. */
+  .draft-sent-badge {
+    display: inline-block; padding: 1px 7px; border-radius: 100px; background: rgba(46,125,50,0.12);
+    color: #2e7d32; font-size: 11px; font-weight: bold; letter-spacing: 0.3px; text-transform: uppercase;
+    vertical-align: middle; margin-right: 2px;
+  }
+  /* Archived reuses .draft-sent-badge's shape but in a neutral gray — still "went out for
+     real," just tucked away, so it shouldn't compete visually with the green Sent badge. */
+  .draft-archived-badge { background: rgba(90,90,90,0.12); color: var(--text-muted); }
+  .draft-item-actions { display: flex; flex-shrink: 0; gap: 6px; }
+  .draft-unarchive {
+    flex-shrink: 0; padding: 0 8px; height: 26px; border-radius: 6px; border: 1px solid var(--border-gray);
+    background: var(--white); color: var(--text-muted); font-size: 13px; font-weight: bold; cursor: pointer;
+  }
+  .draft-unarchive:hover { border-color: var(--gold); color: var(--gold-text); }
+  .draft-duplicate {
+    flex-shrink: 0; padding: 0 8px; height: 26px; border-radius: 6px; border: 1px solid var(--border-gray);
+    background: var(--white); color: var(--text-muted); font-size: 13px; font-weight: bold; cursor: pointer;
+  }
+  .draft-duplicate:hover { border-color: var(--gold); color: var(--gold-text); }
   .draft-delete {
-    flex-shrink: 0; width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border-gray);
-    background: var(--white); color: var(--text-muted); font-size: 12px; cursor: pointer;
+    flex-shrink: 0; width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--border-gray);
+    background: var(--white); color: var(--text-muted); font-size: 14px; cursor: pointer;
   }
   .draft-delete:hover { border-color: var(--danger); color: var(--danger); }
+  /* First click arms it — widens to a real word and turns danger-red, not just a subtle icon
+     swap, so a second click clearly reads as "yes, actually delete this" rather than something
+     that could pass as already-done. Auto-disarms back to the plain × after a few seconds. */
+  .draft-delete.armed {
+    width: auto; padding: 0 8px; background: var(--danger); border-color: var(--danger);
+    color: var(--white); font-size: 13px; font-weight: bold;
+  }
+
+  /* ---- Draft row overflow menu (unsent drafts only) ----
+     Sent/Archived rows only ever have two actions (Duplicate + Archive/Unarchive) and never
+     "Edit name" (that lock is intentional — a title can't change after it's gone out), so
+     they stay as plain inline buttons; a menu isn't earning its keep there. A draft has three
+     actions including Edit name, which is exactly where a menu starts being worth the extra
+     click, and — the real reason — keeps "open this draft" and "rename this draft" as two
+     unmistakably separate actions instead of both living on a bare click into the name. */
+  .draft-menu { position: relative; flex-shrink: 0; }
+  .draft-menu-btn {
+    width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--border-gray);
+    background: var(--white); color: var(--text-muted); font-size: 16px; line-height: 1; cursor: pointer;
+  }
+  .draft-menu-btn:hover { border-color: var(--gold); color: var(--gold-text); }
+  .draft-menu-dropdown {
+    display: none; flex-direction: column; gap: 2px; position: absolute; top: 100%; right: 0;
+    margin-top: 4px; z-index: 15; min-width: 130px;
+    background: var(--white); border: 1px solid var(--border-gray); border-radius: 8px;
+    padding: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  }
+  .draft-menu-dropdown.open { display: flex; }
+  .draft-menu-item {
+    padding: 7px 10px; border-radius: 6px; border: none; background: none; font-family: inherit;
+    font-size: 13px; font-weight: bold; color: var(--navy-blue); text-align: left; cursor: pointer;
+  }
+  .draft-menu-item:hover { background: rgba(195,163,85,0.12); color: var(--gold-text); }
+  .draft-menu-item-danger { color: var(--danger); }
+  .draft-menu-item-danger:hover { background: rgba(177,67,67,0.1); color: var(--danger); }
 
   /* ---- Composer ---- */
   .composer-card { margin-bottom: 24px; }
@@ -110,7 +227,7 @@
     overflow: hidden; margin-bottom: 18px;
   }
   .compose-mode-toggle button {
-    padding: 7px 16px; font-size: 12.5px; font-weight: bold; border: none;
+    padding: 7px 16px; font-size: 14px; font-weight: bold; border: none;
     background: var(--white); color: var(--text-muted); cursor: pointer;
     font-family: Arial, Helvetica, sans-serif;
   }
@@ -119,9 +236,14 @@
   .compose-mode-toggle button:disabled { color: var(--border-gray); cursor: default; background: var(--lightest-gray); }
   .mode-panel { display: none; }
   .mode-panel.active { display: block; }
+  /* Capped instead of the old full-width-of-the-composer-column textarea — that had nothing
+     to do with code readability, it was just filling space left over from the old always-on
+     inline preview underneath it (now a Preview button + modal instead, like Build Visually
+     already has). A capped width keeps pasted markup lines from stretching edge-to-edge on
+     a wide monitor; taller by default since there's no preview competing for vertical room. */
   .html-textarea {
-    width: 100%; min-height: 320px; padding: 14px; border: 1px solid var(--border-gray); border-radius: 8px;
-    font-family: 'Courier New', monospace; font-size: 12.5px; line-height: 1.6; background: var(--lightest-gray); resize: vertical;
+    width: 100%; max-width: 820px; min-height: 520px; padding: 14px; border: 1px solid var(--border-gray); border-radius: 8px;
+    font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.6; background: var(--lightest-gray); resize: vertical;
   }
   .html-textarea:focus { outline: none; border-color: var(--gold); background: var(--white); }
 
@@ -130,40 +252,91 @@
      newsletter, but only within this row — it never overlaps unrelated page content. */
   .visual-editor-layout { display: flex; align-items: flex-start; gap: 12px; }
   .add-block-panel {
-    flex: 0 0 140px; width: 140px; position: sticky; top: 200px;
+    /* Widened from 140px to fit "+ Button/Link" on one line at the larger button font-size
+       below — text was starting to wrap awkwardly at the old width once that size grew. */
+    flex: 0 0 170px; width: 170px; position: sticky; top: 230px;
+    /* Same fix as .drafts-card — this panel grew tall enough (7 block types + Add + the rich-text
+       toolbar + Preview) that its bottom was getting clipped by the viewport edge on shorter
+       screens instead of staying reachable. Caps + scrolls internally instead. Top matches
+       .drafts-card's 230px — both need the same clearance below the send-hub-bar. */
+    max-height: calc(100vh - 250px); overflow-y: auto;
     display: flex; flex-direction: column; gap: 8px; padding: 16px;
     border: 2px solid var(--navy-blue); background: rgba(48,59,106,0.03);
   }
-  .add-block-label { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); }
+  .add-block-label { font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); }
   .add-block-btn {
     padding: 8px 10px; border-radius: 8px; border: 1px dashed var(--border-gray); background: var(--white);
-    font-size: 11.5px; font-weight: bold; color: var(--navy-blue); cursor: pointer; text-align: left;
+    font-size: 14px; font-weight: bold; color: var(--navy-blue); cursor: pointer; text-align: left;
   }
   .add-block-btn:hover { border-color: var(--gold); border-style: solid; color: var(--gold-text); background: rgba(195,163,85,0.08); }
-  .add-block-btn-primary { border-style: solid; border-color: var(--navy-blue); background: var(--navy-blue); color: var(--white); }
-  .add-block-btn-primary:hover { border-color: var(--navy-blue); background: var(--navy-blue); color: var(--white); opacity: 0.9; }
+  /* Picking a type only stages it — it doesn't insert anything yet. The button just shows
+     which type is currently chosen, waiting on a separate, explicit "Add" click below. */
+  .add-block-btn.selected { border-style: solid; border-color: var(--navy-blue); background: var(--navy-blue); color: var(--white); }
+  .add-block-hint { font-size: 12.5px; color: var(--text-muted); line-height: 1.4; margin: -4px 0 2px; }
+  .confirm-add-btn {
+    padding: 9px 10px; border-radius: 8px; border: none; background: var(--navy-blue); color: var(--white);
+    font-size: 14px; font-weight: bold; cursor: pointer; font-family: inherit;
+  }
+  .confirm-add-btn:hover:not(:disabled) { background: #26305a; }
+  .confirm-add-btn:disabled { background: var(--lightest-gray); color: var(--text-muted); cursor: not-allowed; }
 
   /* Its own little section within the same panel, set apart by a divider — a distinct action
      (see the real, final rendered email) from the "add a block" actions above it. */
   .add-block-panel-divider { height: 1px; background: var(--border-gray); margin: 4px 0; }
   .preview-btn {
     padding: 9px 10px; border-radius: 8px; border: none; background: #2563eb; color: var(--white);
-    font-size: 12px; font-weight: bold; cursor: pointer;
+    font-size: 14px; font-weight: bold; cursor: pointer;
   }
   .preview-btn:hover { background: #1d4ed8; }
+
+  /* Rich-text toolbar — lives in the same sticky panel, only visible while a paragraph-type
+     field (standalone Paragraph block, or a section's body text) has focus. Buttons use
+     mousedown+preventDefault (not click) so pressing one never steals focus/selection away
+     from the field being formatted — execCommand always acts on whatever's currently
+     focused, so the toolbar itself never needs to know which field that is. */
+  .rte-toolbar { display: none; flex-wrap: wrap; gap: 4px; position: relative; }
+  .rte-toolbar.visible { display: flex; }
+  .rte-toolbar button {
+    width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-gray);
+    background: var(--white); font-size: 14px; font-weight: bold; color: var(--navy-blue); cursor: pointer;
+  }
+  .rte-toolbar button:hover { border-color: var(--gold); background: rgba(195,163,85,0.08); }
+  .rte-toolbar button.active { background: var(--navy-blue); color: var(--white); border-color: var(--navy-blue); }
+  .rte-link-popover {
+    display: none; position: absolute; top: 34px; left: 0; z-index: 20; width: 220px;
+    background: var(--white); border: 1px solid var(--border-gray); border-radius: 8px;
+    padding: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+  }
+  .rte-link-popover.open { display: block; }
+  .rte-link-popover input {
+    width: 100%; padding: 7px 9px; border: 1px solid var(--border-gray); border-radius: 6px;
+    font-size: 14px; margin-bottom: 8px; font-family: inherit;
+  }
+  .rte-link-popover input:focus { outline: none; border-color: var(--gold); }
+  .rte-link-actions { display: flex; gap: 6px; }
+  .rte-link-actions button { flex: 1; width: auto; padding: 6px; font-size: 13px; }
+
+  /* Inline formatting produced by the toolbar, rendered right in the canvas. */
+  .canvas-paragraph ul, .canvas-body ul { margin: 8px 0; padding-left: 22px; }
+  .canvas-paragraph a, .canvas-body a { color: var(--navy-blue); }
 
   .preview-modal-overlay {
     display: none; position: fixed; inset: 0; z-index: 100; background: rgba(20,24,46,0.55);
     align-items: center; justify-content: center; padding: 30px;
   }
   .preview-modal-overlay.open { display: flex; }
+  /* 680px was too tight once you account for the iframe's OWN scrollbar — the pasted email
+     content is a fixed 600px table + 32px of side padding = 632px it actually needs, but a
+     tall newsletter forces the iframe's native vertical scrollbar to eat ~15-17px of that
+     width from the inside, leaving less than 632px and triggering a second, horizontal
+     scrollbar. 760px leaves real headroom so that pinch never happens. */
   .preview-modal {
-    background: var(--white); border-radius: 12px; width: 680px; max-width: 100%; max-height: 100%;
+    background: var(--white); border-radius: 12px; width: 760px; max-width: 100%; max-height: 100%;
     display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.35);
   }
   .preview-modal-header {
     display: flex; align-items: center; justify-content: space-between; padding: 14px 20px;
-    background: var(--navy-blue); color: var(--white); font-family: Georgia, 'Times New Roman', serif; font-size: 16px;
+    background: var(--navy-blue); color: var(--white); font-family: Georgia, 'Times New Roman', serif; font-size: 18px;
   }
   .preview-modal-close {
     border: none; background: none; color: var(--white); font-size: 20px; line-height: 1; cursor: pointer; padding: 2px 6px;
@@ -174,10 +347,61 @@
 
   .send-test-modal { width: 420px; }
   .send-test-modal-body { padding: 22px; }
-  .send-test-modal-hint { font-size: 12.5px; color: var(--text-muted); line-height: 1.5; margin: 0 0 16px; }
+  .send-test-modal-hint { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin: 0 0 16px; }
+
+  /* Asked once, right when a draft is created — Manual Build (blocks) and HTML Build (raw
+     source) are two different representations of the same draft, not two views of the same
+     content, so switching between them mid-draft would just show something totally different,
+     not a translation of what you already built. Locking the choice up front (see
+     applyModeLock()) avoids that trap instead of letting someone discover it the hard way. */
+  .new-draft-modal { width: 380px; }
+  .new-draft-modal-body { padding: 24px 22px; text-align: center; }
+  .new-draft-name-label { font-size: 12.5px; font-weight: bold; color: var(--text-dark); text-align: left; margin: 0 0 6px; }
+  .new-draft-name-input {
+    width: 100%; padding: 9px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
+    font-family: inherit; font-size: 14px; color: var(--text-dark); background: var(--white);
+    margin: 0 0 18px; box-sizing: border-box;
+  }
+  .new-draft-name-input:focus { outline: none; border-color: var(--gold); }
+  .new-draft-modal-hint { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin: 0 0 20px; }
+  .new-draft-modal-choices { display: flex; flex-direction: column; gap: 10px; }
+
+  .delete-confirm-modal { width: 380px; }
+  .delete-confirm-modal-body { padding: 22px; }
+  .delete-confirm-modal-body p { font-size: 14px; color: var(--text-dark); line-height: 1.6; margin: 0 0 20px; }
+  .delete-confirm-actions { display: flex; justify-content: flex-end; gap: 10px; }
+  .btn-danger { background: var(--danger); color: var(--white); border-color: var(--danger); }
+  .btn-danger:hover { background: #93302f; border-color: #93302f; }
+  .new-draft-choice-btn {
+    padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border-gray); background: var(--white);
+    font-family: inherit; text-align: left; cursor: pointer;
+  }
+  .new-draft-choice-btn:hover { border-color: var(--gold); background: rgba(195,163,85,0.08); }
+  .new-draft-choice-title { font-size: 14px; font-weight: bold; color: var(--navy-blue); margin-bottom: 3px; }
+  .new-draft-choice-desc { font-size: 12.5px; color: var(--text-muted); }
+  /* A locked-out tab still shows which mode this draft is, just can't be switched to. */
+  .mode-tab-btn:disabled { color: var(--border-gray); cursor: not-allowed; background: var(--lightest-gray); }
+  .mode-tab-btn:disabled:hover { background: var(--lightest-gray); }
   .send-test-confirm-btn { width: 100%; margin-top: 4px; }
 
-  .canvas-hint { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+  .canvas-hint { font-size: 14px; color: var(--text-muted); margin-bottom: 12px; }
+  /* Swapped in place of the normal editing hint when viewing a Sent draft — same spot,
+     but reads as "this already went out" instead of "click to edit," since nothing below
+     it is actually clickable anymore. */
+  .canvas-hint.locked { color: #2e7d32; font-weight: bold; padding: 10px 14px; background: rgba(46,125,50,0.08); border-radius: 8px; }
+  /* A sent draft's canvas is shown, not edited — every contenteditable region gets
+     contenteditable="false" in JS (renderCanvas()'s lock pass), and this hides the
+     controls that would otherwise still float over each block on hover. */
+  .email-canvas.locked .canvas-block-controls,
+  .email-canvas.locked .canvas-insert-after,
+  .email-canvas.locked .canvas-add-item-row,
+  .email-canvas.locked .canvas-add-button-row,
+  .email-canvas.locked .canvas-button-tools,
+  .email-canvas.locked .canvas-item-remove { display: none !important; }
+  .email-canvas.locked [contenteditable] { cursor: default; }
+  .email-canvas.locked [contenteditable]:hover, .email-canvas.locked [contenteditable]:focus {
+    background: none; box-shadow: none;
+  }
 
   /* ---- Editable canvas — the live email preview IS the editor. Every field a viewer would
      see in the sent email is a contenteditable region right where it renders; there's no
@@ -198,10 +422,47 @@
   .canvas-rule { width: 56px; height: 2px; background: #B15A43; margin: 16px auto 0; }
 
   .canvas-body-wrap { padding-bottom: 8px; }
-  .canvas-empty-hint { padding: 40px 32px; text-align: center; color: var(--text-muted); font-style: italic; font-size: 13px; }
+  .canvas-empty-hint { padding: 40px 32px; text-align: center; color: var(--text-muted); font-style: italic; font-size: 15px; }
 
+  /* A Section block already ends in its own real divider (.canvas-divider, further down) —
+     this is that same real line used at the LEADING edge instead, for a Section that starts
+     right after freeform content (a Section/Divider before it already leaves one behind, so
+     this only applies when neither of those precedes it). Real in both senses: same markup
+     family as .canvas-divider, and matched line-for-line in generateVisualHtml()/blockRowHtml()
+     so the actual sent email shows the identical gap, not just the editor. */
+  .canvas-divider-leading { height: 1px; background: #E5E3DB; margin: 0 0 20px; }
   .canvas-block { position: relative; padding: 20px 32px 0; }
   .canvas-block:hover { background: rgba(195,163,85,0.05); }
+  /* The block the user last clicked/typed into — new blocks land right after it. A visible
+     marker so that's never an invisible, hard-to-guess state, especially for a new user. */
+  .canvas-block.active { box-shadow: inset 3px 0 0 var(--gold); background: rgba(195,163,85,0.04); }
+
+  /* "+ Add Block" between every pair of blocks — always visible (not hover-only) so a new
+     user can find it without knowing to look for it. Opens a small menu of the same 7
+     block types as the side panel, inserted right at that position in the newsletter. */
+  /* Hidden by default — shown only after the currently-active block (see .active above), so
+     there's always exactly one visible "+ Add Block", right where the user's last click said
+     new content should go. Showing one after every block at once was tried and looked
+     overwhelming on a long passage of paragraphs. */
+  .canvas-insert-after { display: none; position: relative; text-align: center; margin: 2px 0 10px; }
+  .canvas-insert-after.visible { display: block; }
+  .canvas-insert-btn {
+    padding: 4px 14px; border-radius: 100px; border: 1px dashed var(--border-gray); background: var(--white);
+    font-size: 13px; font-weight: bold; color: var(--text-muted); cursor: pointer; font-family: inherit;
+  }
+  .canvas-insert-btn:hover { border-color: var(--gold); border-style: solid; color: var(--gold-text); background: rgba(195,163,85,0.08); }
+  .canvas-insert-menu {
+    display: none; flex-direction: column; gap: 3px; position: absolute; top: 100%; left: 50%;
+    transform: translateX(-50%); margin-top: 4px; z-index: 15; min-width: 150px;
+    background: var(--white); border: 1px solid var(--border-gray); border-radius: 8px;
+    padding: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  }
+  .canvas-insert-menu.open { display: flex; }
+  .canvas-insert-menu-item {
+    padding: 7px 10px; border-radius: 6px; border: none; background: none; font-family: inherit;
+    font-size: 14px; font-weight: bold; color: var(--navy-blue); text-align: left; cursor: pointer;
+  }
+  .canvas-insert-menu-item:hover { background: rgba(195,163,85,0.12); color: var(--gold-text); }
   .canvas-block-controls {
     position: absolute; top: 6px; right: 10px; display: none; gap: 3px; background: var(--white);
     border: 1px solid var(--border-gray); border-radius: 6px; padding: 2px; z-index: 2;
@@ -228,10 +489,10 @@
 
   .canvas-image-wrap { text-align: center; margin: 8px 0 4px; }
   .canvas-image-wrap img { max-width: 100%; border-radius: 8px; display: inline-block; }
-  .canvas-image-url { font-size: 11px; color: #8a8577; text-align: center; word-break: break-all; padding: 4px; margin-bottom: 8px; }
+  .canvas-image-url { font-size: 13px; color: #8a8577; text-align: center; word-break: break-all; padding: 4px; margin-bottom: 8px; }
   .canvas-image-empty {
     border: 1px dashed var(--border-gray); border-radius: 8px; padding: 22px; text-align: center;
-    color: var(--text-muted); font-size: 13px; margin: 8px 0;
+    color: var(--text-muted); font-size: 15px; margin: 8px 0;
   }
 
   .canvas-section-items { display: flex; flex-direction: column; gap: 4px; }
@@ -245,7 +506,7 @@
   .canvas-add-item-row { display: flex; justify-content: center; gap: 8px; margin: 8px 0 14px; }
   .canvas-add-item-btn {
     padding: 6px 12px; border-radius: 100px; border: 1px dashed var(--border-gray); background: var(--white);
-    font-size: 11.5px; font-weight: bold; color: var(--navy-blue); cursor: pointer;
+    font-size: 13px; font-weight: bold; color: var(--navy-blue); cursor: pointer;
   }
   .canvas-add-item-btn:hover { border-color: var(--gold); border-style: solid; color: var(--gold-text); background: rgba(195,163,85,0.08); }
 
@@ -257,7 +518,7 @@
     display: inline-block; font-weight: bold; font-size: 14px;
     padding: 12px 28px;
   }
-  .canvas-button-url { font-size: 11px; color: #8a8577; text-align: center; word-break: break-all; padding: 4px; }
+  .canvas-button-url { font-size: 13px; color: #8a8577; text-align: center; word-break: break-all; padding: 4px; }
   .canvas-url-prefix { color: var(--text-muted); font-weight: bold; user-select: none; }
   .canvas-url-value { border-radius: 3px; }
   .canvas-button-tools {
@@ -269,42 +530,43 @@
   }
   .canvas-swatch.active { border-color: var(--text-dark); }
   .canvas-button-remove {
-    border: none; background: none; cursor: pointer; font-size: 11px; color: var(--text-muted); padding: 2px 4px;
+    border: none; background: none; cursor: pointer; font-size: 13px; color: var(--text-muted); padding: 2px 4px;
   }
   .canvas-button-remove:hover { color: var(--danger); }
   .canvas-add-button-btn {
     display: block; margin: 6px auto 0; padding: 6px 14px; border-radius: 100px; border: 1px dashed var(--border-gray);
-    background: var(--white); font-size: 11.5px; font-weight: bold; color: var(--navy-blue); cursor: pointer;
+    background: var(--white); font-size: 13px; font-weight: bold; color: var(--navy-blue); cursor: pointer;
   }
   .canvas-add-button-btn:hover { border-color: var(--gold); border-style: solid; color: var(--gold-text); background: rgba(195,163,85,0.08); }
 
   .canvas-divider { height: 1px; background: #E5E3DB; margin: 20px 0 0; }
-  .canvas-footer { padding: 18px 32px 28px; margin-top: 12px; border-top: 1px solid #E5E3DB; font-size: 11px; color: #6B6B6B; line-height: 1.6; }
+  /* No border-top here on purpose — whatever block comes before (almost always a Section)
+     already renders its own trailing divider line; adding a second one here is exactly the
+     doubled-line bug this comment is here to prevent from coming back. */
+  .canvas-footer-block { text-align: center; padding: 18px 0 4px; font-size: 15px; color: #5A5A5A; line-height: 1.8; }
+  /* Was 140px — the real sent email uses 220px (see blockRowHtml's footer row) and the
+     canvas is the same 600px width as the real email, so there's no reason for the two to
+     differ. The smaller size here was making the logo look wrong only in the editor. */
+  .canvas-footer-logo { display: block; width: 220px; margin: 0 auto 14px; }
+  .canvas-footer-email { color: var(--navy-blue); font-size: 16px; margin-top: 6px; }
+  .canvas-footer-unsub { font-size: 12px; letter-spacing: 0.3px; color: #8A8577; margin-top: 10px; }
 
   .field { margin-bottom: 16px; }
   .field:last-child { margin-bottom: 0; }
-  .field label { display: block; font-size: 13px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; }
+  .field label { display: block; font-size: 15px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; }
   .field input[type="text"], .field input[type="email"], .field select {
     width: 100%; padding: 10px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
-    font-family: inherit; font-size: 14px; background: var(--lightest-gray); color: var(--text-dark);
+    font-family: inherit; font-size: 15px; background: var(--lightest-gray); color: var(--text-dark);
   }
   .field input:focus, .field select:focus { outline: none; border-color: var(--gold); background: var(--white); }
 
-  .form-msg { border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; line-height: 1.6; }
+  .form-msg { border-radius: 8px; padding: 10px 14px; font-size: 15px; margin-bottom: 16px; display: none; line-height: 1.6; }
   .form-msg.error { background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger); }
   .form-msg.success { background: rgba(46,125,50,0.08); border: 1px solid rgba(46,125,50,0.3); color: #2e7d32; }
   .form-msg.info { background: rgba(195,163,85,0.1); border: 1px solid rgba(195,163,85,0.3); color: var(--gold-text); }
   .form-msg.visible { display: block; }
 
   /* ---- Preview ---- */
-  .preview-frame-wrap {
-    margin-top: 24px; padding: 8px 0 32px; display: flex; justify-content: center;
-    overflow-x: auto;
-  }
-  .preview-frame-wrap iframe {
-    width: 600px; max-width: 100%; height: 720px; border: none; background: transparent;
-    overflow: auto; flex-shrink: 0;
-  }
 </style>
 </head>
 <body data-page="newsletter">
@@ -416,20 +678,22 @@
       <div class="content" id="page-body">
         <div class="send-hub-bar" id="send-hub-bar">
           <div class="send-hub-field send-hub-field-wide">
-            <label for="subject-input">Subject Line<span class="required-mark">*</span></label>
+            <label for="subject-input">Email Subject Line<span class="required-mark">*</span></label>
             <input type="text" id="subject-input" placeholder="e.g. Christ Church Bluffton Weekly Word">
             <div class="send-hub-hint">From <strong>info@christchurchbluffton.org</strong></div>
           </div>
           <div class="send-hub-field">
             <label for="send-to-select">Send to</label>
             <select id="send-to-select">
-              <option value="all">All Subscribers</option>
+              <option value="test" selected>Test Newsletter (temporary)</option>
+              <option value="christ_church" disabled>Christ Church Subscribers</option>
+              <option value="youth_group" disabled>Youth Group Newsletter</option>
             </select>
             <div class="send-hub-hint" id="send-to-hint">—</div>
           </div>
           <div class="send-hub-field">
             <label>Test Send</label>
-            <button type="button" class="send-test-small-btn" id="open-send-test-btn">Send Test…</button>
+            <button type="button" class="send-test-small-btn" id="open-send-test-btn" disabled title="Not connected yet — sending will be enabled once this panel is wired up to Resend">Send Test…</button>
           </div>
           <div class="send-hub-status">Work in progress — <strong>Send Newsletter</strong> and <strong>Send Test</strong> aren't connected yet (Resend), so no email actually goes out yet. Save Draft is fully real.</div>
         </div>
@@ -453,20 +717,41 @@
                 <div class="form-msg" id="newsletter-msg"></div>
 
                 <div class="compose-mode-toggle">
-                  <button type="button" class="mode-tab-btn active" data-mode="visual">Build Visually</button>
-                  <button type="button" class="mode-tab-btn" data-mode="html" disabled title="Locked for now">Paste HTML</button>
+                  <button type="button" class="mode-tab-btn active" data-mode="visual">Manual Build</button>
+                  <button type="button" class="mode-tab-btn" data-mode="html">HTML Build</button>
                 </div>
 
                 <div class="mode-panel active" id="visual-panel">
-                  <div class="canvas-hint">Click any text, image link, or button below to edit it right where it appears.</div>
+                  <div class="canvas-hint" id="canvas-hint">Click any text, image link, or button below to edit it right where it appears.</div>
                   <div class="visual-editor-layout">
                     <div class="card add-block-panel" id="add-block-panel">
                       <span class="add-block-label">Add Block</span>
-                      <button type="button" class="add-block-btn add-block-btn-primary" data-type="section" title="The standard newsletter item — label, title, photo, text, optional button. Use it for most content.">+ Section</button>
-                      <button type="button" class="add-block-btn" data-type="heading">+ Heading</button>
-                      <button type="button" class="add-block-btn" data-type="paragraph">+ Paragraph</button>
-                      <button type="button" class="add-block-btn" data-type="image">+ Image</button>
-                      <button type="button" class="add-block-btn" data-type="button">+ Button/Link</button>
+                      <div class="add-block-hint" id="add-block-hint">Pick a type, then confirm below.</div>
+                      <button type="button" class="add-block-btn" data-type="section" title="The standard newsletter item — label, title, photo, text, optional button. Use it for most content." aria-pressed="false">+ Section</button>
+                      <button type="button" class="add-block-btn" data-type="heading" aria-pressed="false">+ Heading</button>
+                      <button type="button" class="add-block-btn" data-type="paragraph" aria-pressed="false">+ Paragraph</button>
+                      <button type="button" class="add-block-btn" data-type="image" aria-pressed="false">+ Image</button>
+                      <button type="button" class="add-block-btn" data-type="divider" title="A thin horizontal line — use it to separate content that isn't already inside a Section (which gets one automatically)." aria-pressed="false">+ Divider</button>
+                      <button type="button" class="add-block-btn" data-type="button" aria-pressed="false">+ Button/Link</button>
+                      <button type="button" class="add-block-btn" data-type="footer" title="The standard church footer — logo, tagline, location, contact email, and unsubscribe link. Not editable in place; add it where the newsletter should end." aria-pressed="false">+ Footer</button>
+                      <button type="button" class="confirm-add-btn" id="confirm-add-btn" disabled>Add</button>
+                      <div class="add-block-panel-divider"></div>
+                      <div class="rte-toolbar" id="rte-toolbar">
+                        <button type="button" data-cmd="bold" title="Bold"><b>B</b></button>
+                        <button type="button" data-cmd="italic" title="Italic"><i>I</i></button>
+                        <button type="button" data-cmd="underline" title="Underline"><u>U</u></button>
+                        <button type="button" data-cmd="insertUnorderedList" title="Bulleted list">&bull;&equiv;</button>
+                        <button type="button" data-link-type="url" title="Add a web link">&#128279;</button>
+                        <button type="button" data-link-type="email" title="Add an email link">@</button>
+                        <button type="button" data-link-type="phone" title="Add a phone link">&#9742;</button>
+                        <div class="rte-link-popover" id="rte-link-popover">
+                          <input type="text" id="rte-link-input">
+                          <div class="rte-link-actions">
+                            <button type="button" class="btn btn-outline" id="rte-link-cancel">Cancel</button>
+                            <button type="button" class="btn btn-gold" id="rte-link-confirm">Add Link</button>
+                          </div>
+                        </div>
+                      </div>
                       <div class="add-block-panel-divider"></div>
                       <button type="button" class="preview-btn" id="open-preview-btn">Preview</button>
                     </div>
@@ -479,15 +764,12 @@
                     <label for="html-code-input">HTML Source</label>
                     <textarea class="html-textarea" id="html-code-input" placeholder="Paste a full HTML email template here..."></textarea>
                   </div>
+                  <button type="button" class="preview-btn" id="open-html-preview-btn">Preview</button>
                 </div>
 
               </div>
             </div>
           </div>
-        </div>
-
-        <div class="preview-frame-wrap" id="preview-frame-wrap">
-          <iframe id="preview-iframe" title="Newsletter preview" sandbox="" scrolling="auto"></iframe>
         </div>
       </div>
     </div>
@@ -500,7 +782,63 @@
         <button type="button" class="preview-modal-close" id="preview-modal-close" title="Close" aria-label="Close preview">&times;</button>
       </div>
       <div class="preview-modal-body">
-        <iframe id="preview-modal-iframe" title="Newsletter preview" sandbox=""></iframe>
+        <iframe id="preview-modal-iframe" title="Newsletter preview"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Separate from the modal above on purpose: HTML Build content could be anything —
+       this iframe stays sandbox="" (no scripts, no same-origin access), unlike the
+       Manual Build preview above, which only ever renders our own trusted, self-generated
+       HTML and is deliberately not sandboxed. -->
+  <div class="preview-modal-overlay" id="html-preview-modal-overlay">
+    <div class="preview-modal">
+      <div class="preview-modal-header">
+        <span>Newsletter Preview</span>
+        <button type="button" class="preview-modal-close" id="html-preview-modal-close" title="Close" aria-label="Close preview">&times;</button>
+      </div>
+      <div class="preview-modal-body">
+        <iframe id="preview-iframe" title="Newsletter preview" sandbox="" scrolling="auto"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-modal-overlay" id="new-draft-modal-overlay">
+    <div class="preview-modal new-draft-modal">
+      <div class="preview-modal-header">
+        <span>New Draft</span>
+        <button type="button" class="preview-modal-close" id="new-draft-modal-close" title="Close" aria-label="Close">&times;</button>
+      </div>
+      <div class="preview-modal-body new-draft-modal-body">
+        <div class="new-draft-name-label">Draft name</div>
+        <input type="text" class="new-draft-name-input" id="new-draft-name-input" placeholder="e.g. August 30, 2026">
+        <div class="new-draft-modal-hint">How do you want to build this issue? This can't be switched later once you start.</div>
+        <div class="new-draft-modal-choices">
+          <button type="button" class="new-draft-choice-btn" id="new-draft-manual-btn" data-mode="visual">
+            <div class="new-draft-choice-title">Manual Build</div>
+            <div class="new-draft-choice-desc">Click-to-edit blocks — sections, images, buttons.</div>
+          </button>
+          <button type="button" class="new-draft-choice-btn" id="new-draft-html-btn" data-mode="html">
+            <div class="new-draft-choice-title">HTML Build</div>
+            <div class="new-draft-choice-desc">Paste a complete HTML email template.</div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-modal-overlay" id="delete-confirm-modal-overlay">
+    <div class="preview-modal delete-confirm-modal">
+      <div class="preview-modal-header">
+        <span>Delete Draft?</span>
+        <button type="button" class="preview-modal-close" id="delete-confirm-modal-close" title="Close" aria-label="Close">&times;</button>
+      </div>
+      <div class="preview-modal-body delete-confirm-modal-body">
+        <p id="delete-confirm-text">Delete this draft? This can't be undone.</p>
+        <div class="delete-confirm-actions">
+          <button type="button" class="btn btn-outline" id="delete-confirm-cancel">Cancel</button>
+          <button type="button" class="btn btn-danger" id="delete-confirm-confirm">Delete</button>
+        </div>
       </div>
     </div>
   </div>
@@ -544,7 +882,6 @@
     let currentDraftId = null;
     let mode = 'visual';
     let blockIdCounter = 0;
-    let previewTimer = null;
     let newsletterHeadline = '';
     let newsletterDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase();
     let newsletterEyebrow = 'Christ Church Bluffton — Weekly Word';
@@ -554,9 +891,27 @@
     // ready-to-fill sections instead, each with an image spot to click into and a text area,
     // matching the real recurring format (Women's Ministry, Youth, Hospitality, etc.).
     let blocks = starterSectionBlocks(4);
+    // Whichever block the user last clicked/typed into — new blocks (from either the side
+    // panel or a block's own "+ Add Block" control) land right after this one, not always at
+    // the bottom. Stays null until something's been clicked, or after the active block gets
+    // deleted (addBlock treats a missing id the same as "nothing selected" — falls back to
+    // appending at the end).
+    let activeBlockId = null;
+    // True while viewing a Sent draft — content still renders so you can see exactly what
+    // went out, but nothing in it is editable. Set in openDraft()/resetComposer(), enforced
+    // every time renderCanvas() runs (see applyComposerLock() at its end) so it can never
+    // drift out of sync with whatever's actually on screen.
+    let composerLocked = false;
 
     function escapeHtml(str) {
       return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    // newsletterDate defaults to an ALL-CAPS string (matches the banner's own display
+    // style) — fine for the banner, but shouty as a sidebar draft name. Normalizes case
+    // without touching the real newsletterDate value or the banner itself.
+    function titleCase(str) {
+      return (str || '').replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1).toLowerCase());
     }
 
     // Matches the real template: most buttons are terracotta, with navy as the contrast color
@@ -572,6 +927,28 @@
     // overwrites a link someone already set on purpose.
     const CONTACT_BUTTON_TRIGGERS = ['contact us', 'email us', 'contact', 'email'];
     const CHURCH_CONTACT_MAILTO = 'mailto:info@christchurchbluffton.org';
+
+    // The real divider row — a Section or standalone Divider block trails one automatically;
+    // generateVisualHtml() also opens a Section with this same row when nothing before it
+    // already left one behind (see its own comment). One shared string so all three spots
+    // render byte-for-byte the same gap.
+    const DIVIDER_ROW_HTML = `<tr><td style="padding:8px 0 20px;"><div style="height:1px; background-color:#E5E3DB;"></div></td></tr>`;
+
+    // The standard church footer — fixed content (logo, tagline, location, contact,
+    // unsubscribe), matching the real sent "Weekly Word" template exactly. Added via the
+    // "+ Footer" block like any other block (not automatic), so it can be placed, moved,
+    // or removed like the rest of the newsletter.
+    const FOOTER_LOGO_URL = 'https://christchurchbluffton.org/a34317d8/christ-church-banner.png';
+    const UNSUBSCRIBE_MAILTO = 'mailto:info@christchurchbluffton.org?subject=Unsubscribe%20Request&body=Please%20remove%20me%20from%20the%20Christ%20Church%20Bluffton%20newsletter%20list.%0D%0A%0D%0AThank%20you.';
+
+    // Kevin's temporary test audience while the Newsletter build is still being tested —
+    // "All Subscribers" is disabled in the Send To dropdown until real sending goes live,
+    // so nothing can accidentally go out to the real list during testing.
+    const TEST_NEWSLETTER_RECIPIENTS = [
+      'info@christchurchbluffton.org',
+      'kevin@forgeddigitaldesign.com',
+      'kevin.mccartney84@yahoo.com',
+    ];
 
     // Once a button link has a scheme (mailto:/sms:/tel:/https:/http:), that scheme is
     // permanently fixed in the editor — only the address after it (email, phone number, or
@@ -601,6 +978,7 @@
     function draftFromRow(row) {
       return {
         id: row.id,
+        name: row.name || '',
         subject: row.subject,
         headline: row.headline || '',
         date: row.date || '',
@@ -608,7 +986,9 @@
         mode: row.mode,
         htmlCode: row.html_code,
         blocks: row.blocks || [],
-        savedAt: row.saved_at ? new Date(row.saved_at).getTime() : Date.now()
+        savedAt: row.saved_at ? new Date(row.saved_at).getTime() : Date.now(),
+        sentAt: row.sent_at ? new Date(row.sent_at).getTime() : null,
+        archivedAt: row.archived_at ? new Date(row.archived_at).getTime() : null
       };
     }
 
@@ -621,10 +1001,21 @@
       return data.map(draftFromRow);
     }
 
-    async function getSubscriberCount() {
-      const { data, error } = await supabaseClient.from('subscribers').select('id');
-      if (error) { console.error('getSubscriberCount failed:', error.message); return 0; }
-      return data.length;
+    // Christ Church Subscribers and Youth Group Newsletter are two separate audiences
+    // (subscribers.list_type — see the Subscribers page's own tabs for the same split).
+    // Deduped by email within each list, matching how the Subscribers page displays counts —
+    // the same public form can be submitted more than once, so a raw row count would overstate
+    // how many people an issue actually reaches.
+    async function getSubscriberCounts() {
+      const { data, error } = await supabaseClient.from('subscribers').select('email, list_type');
+      if (error) { console.error('getSubscriberCounts failed:', error.message); return { christ_church: 0, youth_group: 0 }; }
+      const counts = { christ_church: 0, youth_group: 0 };
+      for (const list of Object.keys(counts)) {
+        counts[list] = new Set(
+          data.filter(r => r.list_type === list).map(r => (r.email || '').toLowerCase())
+        ).size;
+      }
+      return counts;
     }
 
     function showMsg(text, type) {
@@ -664,14 +1055,34 @@
       return Array.from({ length: count }, newSectionBlock);
     }
 
-    function addBlock(type) {
-      if (type === 'section') { blocks.push(newSectionBlock()); renderCanvas(); return; }
+    function makeBlock(type) {
+      if (type === 'section') return newSectionBlock();
       const base = { id: newBlockId(), type };
       if (type === 'heading' || type === 'paragraph') base.text = '';
       if (type === 'image') { base.dataUrl = ''; base.caption = ''; }
       if (type === 'button') { base.buttons = []; }
-      blocks.push(base);
+      // 'divider' and 'footer' need no extra fields — their content is fixed, not editable.
+      return base;
+    }
+
+    // New blocks land right after `afterId` (or activeBlockId if `afterId` isn't given —
+    // that's the case for the side-panel buttons, which don't know a specific position
+    // themselves). Falls back to appending at the end when there's no valid target yet
+    // (an empty draft, or the previously-active block was since deleted).
+    function addBlock(type, afterId) {
+      const newBlock = makeBlock(type);
+      const targetId = afterId !== undefined ? afterId : activeBlockId;
+      const idx = targetId ? blocks.findIndex(b => b.id === targetId) : -1;
+      if (idx === -1) blocks.push(newBlock);
+      else blocks.splice(idx + 1, 0, newBlock);
+      activeBlockId = newBlock.id;
       renderCanvas();
+      // The side panel is fixed/sticky, disconnected from any specific spot in a long
+      // newsletter — without this, clicking "+ Heading" there could add it somewhere
+      // completely off-screen with no visible sign anything happened. Scroll it into view
+      // so the result of clicking is never a silent, invisible change.
+      const newEl = document.querySelector(`.canvas-block-wrap[data-wrap-for="${newBlock.id}"]`);
+      if (newEl) newEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     function moveBlock(id, dir) {
@@ -760,7 +1171,7 @@
       const controls = `<button type="button" class="canvas-item-remove" data-action="remove-item" title="Remove" aria-label="Remove this ${item.type === 'image' ? 'image' : 'paragraph'}">&times;</button>`;
       const body = item.type === 'image'
         ? canvasItemImageBlock(item)
-        : `<div class="canvas-body" contenteditable="true" role="textbox" aria-label="Section paragraph text" data-field="text" data-placeholder="What's happening...">${escapeHtml(item.text)}</div>`;
+        : `<div class="canvas-body rte-field" contenteditable="true" role="textbox" aria-label="Section paragraph text" data-field="text" data-placeholder="What's happening...">${item.text || ''}</div>`;
       return `<div class="canvas-section-item" data-item-id="${item.id}">${body}${controls}</div>`;
     }
 
@@ -773,6 +1184,24 @@
         </div>`;
     }
 
+    // Same 7 choices as the side panel, reused for the inline "+ Add Block" menu that
+    // appears after every block — so adding a Heading right under a Section you're working
+    // in doesn't require scrolling up to the panel and doesn't dump it at the bottom.
+    const BLOCK_TYPE_LABELS = {
+      section: '+ Section', heading: '+ Heading', paragraph: '+ Paragraph', image: '+ Image',
+      divider: '+ Divider', button: '+ Button/Link', footer: '+ Footer'
+    };
+
+    function insertAfterControlHtml(blockId, visible) {
+      const items = Object.entries(BLOCK_TYPE_LABELS)
+        .map(([type, label]) => `<button type="button" class="canvas-insert-menu-item" data-type="${type}">${label}</button>`)
+        .join('');
+      return `<div class="canvas-insert-after ${visible ? 'visible' : ''}">
+        <button type="button" class="canvas-insert-btn" title="Add a new block right here">+ Add Block</button>
+        <div class="canvas-insert-menu">${items}</div>
+      </div>`;
+    }
+
     function canvasBlockHtml(b, idx, total) {
       const controls = `
         <div class="canvas-block-controls">
@@ -782,7 +1211,14 @@
         </div>`;
       let inner = '';
       if (b.type === 'section') {
+        // A Section already ends in its own trailing divider (below) — if the block right
+        // before this one isn't a Section or Divider (so it didn't already leave a line
+        // behind), this Section needs to open with one instead, or it runs straight into
+        // whatever came before it (e.g. freeform intro paragraphs with no divider of their own).
+        const prevType = idx > 0 ? blocks[idx - 1].type : null;
+        const needsLeadingDivider = prevType && prevType !== 'section' && prevType !== 'divider';
         inner = `
+          ${needsLeadingDivider ? '<div class="canvas-divider-leading"></div>' : ''}
           <div class="canvas-eyebrow-sm" contenteditable="true" role="textbox" aria-label="Section label" data-field="label" data-placeholder="LABEL (E.G. WOMEN'S MINISTRY)">${escapeHtml(b.label)}</div>
           <div class="canvas-section-title" contenteditable="true" role="textbox" aria-label="Section title" data-field="title" data-placeholder="Section title">${escapeHtml(b.title)}</div>
           ${canvasSectionItemsAreaHtml(b)}
@@ -791,13 +1227,34 @@
       } else if (b.type === 'heading') {
         inner = `<div class="canvas-heading" contenteditable="true" role="textbox" aria-label="Heading text" data-field="text" data-placeholder="Heading text">${escapeHtml(b.text)}</div>`;
       } else if (b.type === 'paragraph') {
-        inner = `<div class="canvas-paragraph" contenteditable="true" role="textbox" aria-label="Paragraph text" data-field="text" data-placeholder="Paragraph text">${escapeHtml(b.text)}</div>`;
+        inner = `<div class="canvas-paragraph rte-field" contenteditable="true" role="textbox" aria-label="Paragraph text" data-field="text" data-placeholder="Paragraph text">${b.text || ''}</div>`;
       } else if (b.type === 'image') {
         inner = canvasImageHtml(b) + `<div class="canvas-caption" contenteditable="true" role="textbox" aria-label="Image caption" data-field="caption" data-placeholder="Caption (optional)">${escapeHtml(b.caption)}</div>`;
       } else if (b.type === 'button') {
         inner = canvasButtonsAreaHtml(b);
+      } else if (b.type === 'divider') {
+        inner = `<div class="canvas-divider"></div>`;
+      } else if (b.type === 'footer') {
+        inner = `<div class="canvas-footer-block">
+          <img src="${escapeHtml(FOOTER_LOGO_URL)}" alt="Christ Church Bluffton" class="canvas-footer-logo">
+          <div>A Christ-centered community</div>
+          <div>Bluffton, South Carolina.</div>
+          <div class="canvas-footer-email">info@christchurchbluffton.org</div>
+          <div class="canvas-footer-unsub">Unsubscribe from this newsletter</div>
+        </div>`;
       }
-      return `<div class="canvas-block" data-id="${b.id}">${controls}${inner}</div>`;
+      // With nothing clicked yet, default the visible "+ Add Block" to after the last block —
+      // matches the old always-appends-to-the-end behavior until the user picks a spot.
+      const isActive = activeBlockId ? b.id === activeBlockId : idx === total - 1;
+      // The Footer is static (nothing inside it is actually clickable/editable), so it never
+      // needs the gold "active" highlight — it was showing up by default on every fresh draft
+      // since Footer is normally the last block and nothing's been clicked yet. isActive itself
+      // stays unchanged so "+ Add Block" still defaults to after it.
+      const isHighlighted = isActive && b.type !== 'footer';
+      return `<div class="canvas-block-wrap" data-wrap-for="${b.id}">
+        <div class="canvas-block ${isHighlighted ? 'active' : ''}" data-id="${b.id}">${controls}${inner}</div>
+        ${insertAfterControlHtml(b.id, isActive)}
+      </div>`;
     }
 
     function canvasHeaderHtml() {
@@ -817,8 +1274,28 @@
         ? blocks.map((b, i) => canvasBlockHtml(b, i, blocks.length)).join('')
         : `<div class="canvas-empty-hint">No content blocks yet — use "Add Block" below.</div>`;
       canvas.innerHTML = `${canvasHeaderHtml()}
-        <div class="canvas-body-wrap">${blocksHtml}</div>
-        <div class="canvas-footer">Christ Church Bluffton &middot; 7 Venture Drive, Suite 104, PMB 267 &middot; Bluffton, SC 29910<br>You're receiving this because you're connected with Christ Church Bluffton.</div>`;
+        <div class="canvas-body-wrap">${blocksHtml}</div>`;
+      applyComposerLock();
+    }
+
+    // Re-run after every renderCanvas() so a Sent draft can never end up with a stray
+    // editable field after some other action re-renders the canvas — the lock state always
+    // matches composerLocked, not whatever happened to be true the last time this ran.
+    function applyComposerLock() {
+      const canvas = document.getElementById('email-canvas');
+      canvas.classList.toggle('locked', composerLocked);
+      document.getElementById('add-block-panel').style.display = composerLocked ? 'none' : '';
+      document.getElementById('subject-input').disabled = composerLocked;
+      document.getElementById('save-draft-btn').disabled = composerLocked;
+      const hint = document.getElementById('canvas-hint');
+      hint.classList.toggle('locked', composerLocked);
+      const sentDraft = composerLocked ? drafts.find(d => d.id === currentDraftId) : null;
+      hint.textContent = sentDraft
+        ? `This newsletter was sent on ${new Date(sentDraft.sentAt).toLocaleDateString()} — view only.`
+        : 'Click any text, image link, or button below to edit it right where it appears.';
+      if (composerLocked) {
+        canvas.querySelectorAll('[contenteditable]').forEach(el => el.setAttribute('contenteditable', 'false'));
+      }
     }
 
     // ---- Branded HTML shell — matches the real "Weekly Word" template (gold dash-stripe,
@@ -831,25 +1308,22 @@
       const dateStr = escapeHtml(newsletterDate);
       return `<!DOCTYPE html>
 <html>
-<body style="margin:0; padding:0; background-color:#EDE7DA;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#EDE7DA; padding:32px 16px;">
+<body style="margin:0; padding:0; background-color:#EDE7DA; font-family:Georgia,'Times New Roman',serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#EDE7DA; padding:32px 16px; font-family:Georgia,'Times New Roman',serif;">
     <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background-color:#FBF9F4; border-radius:12px; overflow:hidden;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background-color:#FBF9F4;">
         <tr><td style="height:5px; background-image: repeating-linear-gradient(90deg, #c9a961 0px, #c9a961 24px, #FBF9F4 24px, #FBF9F4 30px);"></td></tr>
-        <tr><td style="background-color:#303b6a; padding:14px 32px 0; text-align:right;">
-          <span style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#c9a961;">${dateStr}</span>
+        <tr><td style="background-color:#303b6a; padding:14px 40px; text-align:right;">
+          <span style="font-family:'Trebuchet MS',Helvetica,Arial,sans-serif; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#c9a961;">${dateStr}</span>
         </td></tr>
-        <tr><td style="background-color:#303b6a; padding:8px 32px 30px; text-align:center;">
-          <div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#A9B3D6; margin-bottom:10px;">${escapeHtml(newsletterEyebrow)}</div>
-          <div style="font-family:Georgia,'Times New Roman',serif; font-size:28px; line-height:1.3; color:#FFFFFF;">${heading}</div>
-          <div style="width:56px; height:2px; background-color:#B15A43; margin:16px auto 0;"></div>
+        <tr><td style="background-color:#303b6a; padding:8px 40px 34px; text-align:center;">
+          <div style="font-family:'Trebuchet MS',Helvetica,Arial,sans-serif; font-size:11px; letter-spacing:4px; text-transform:uppercase; color:#A9B3D6; margin-bottom:10px;">${escapeHtml(newsletterEyebrow)}</div>
+          <div style="font-family:Georgia,'Times New Roman',serif; font-size:32px; line-height:1.25; color:#FBF9F4;">${heading}</div>
+          <div style="width:60px; height:2px; background-color:#B15A43; margin:18px auto 0;"></div>
         </td></tr>
-        <tr><td style="padding:28px 32px;">
+        <tr><td style="padding:28px 40px;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rowsHtml}
           </table>
-        </td></tr>
-        <tr><td style="padding:18px 32px 28px; border-top:1px solid #E5E3DB;">
-          <div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; color:#6B6B6B; line-height:1.6;">Christ Church Bluffton &middot; 7 Venture Drive, Suite 104, PMB 267 &middot; Bluffton, SC 29910<br>You're receiving this because you're connected with Christ Church Bluffton.</div>
         </td></tr>
       </table>
     </td></tr>
@@ -864,11 +1338,15 @@
     function buttonsRowHtml(buttons) {
       const visible = (buttons || []).filter(btn => btn.text);
       if (!visible.length) return '';
+      // Real template: a single button gets more breathing room (15px/28px padding); two
+      // side by side (Table 246's leader/group signup) shrink slightly (14px/20px) to fit.
+      const fontSize = visible.length > 1 ? '14px' : '15px';
+      const padding = visible.length > 1 ? '12px 20px' : '12px 28px';
       const cells = visible.map((btn, i) => {
         const palette = BUTTON_COLORS[btn.color] || BUTTON_COLORS.terracotta;
         const spacer = i > 0 ? `<td style="width:12px;"></td>` : '';
-        return `${spacer}<td style="background-color:${palette.bg}; border-radius:8px;">
-          <a href="${escapeHtml(btn.url) || '#'}" style="display:inline-block; padding:12px 24px; font-family:Arial,Helvetica,sans-serif; font-size:14px; font-weight:bold; color:${palette.text}; text-decoration:none; white-space:nowrap;">${escapeHtml(btn.text)}</a>
+        return `${spacer}<td style="background-color:${palette.bg}; border-radius:6px;">
+          <a href="${escapeHtml(btn.url) || '#'}" style="display:inline-block; padding:${padding}; font-family:'Trebuchet MS',Helvetica,Arial,sans-serif; font-size:${fontSize}; font-weight:bold; color:${palette.text}; text-decoration:none; white-space:nowrap;">${escapeHtml(btn.text)}</a>
         </td>`;
       }).join('');
       return `<tr><td style="padding:4px 0 8px;" align="center">
@@ -879,34 +1357,37 @@
     function sectionItemRowHtml(item) {
       if (item.type === 'image') {
         if (!item.url) return '';
-        return `<tr><td style="padding:0 0 14px;" align="center"><img src="${escapeHtml(item.url)}" style="max-width:100%; border-radius:8px; display:block;" alt=""></td></tr>`;
+        return `<tr><td style="padding:0 0 14px;" align="center"><img src="${escapeHtml(item.url)}" style="max-width:100%; display:block;" alt=""></td></tr>`;
       }
-      const html = escapeHtml(item.text).replace(/\n/g, '<br>');
-      if (!html) return '';
-      return `<tr><td style="padding:0 0 16px;"><div style="font-family:Arial,Helvetica,sans-serif; font-size:15px; color:#2B2B2B; line-height:1.7;">${html}</div></td></tr>`;
+      // item.text is trusted HTML (from the rich-text toolbar) — rendered as-is, except a
+      // stray literal newline (old plain-text drafts, or a Shift+Enter) still becomes a <br>.
+      if (!item.text) return '';
+      return `<tr><td style="padding:0 0 16px;"><div style="font-size:20px; color:#2B2B2B; line-height:1.7;">${item.text.replace(/\n/g, '<br>')}</div></td></tr>`;
     }
 
     function blockRowHtml(b) {
       if (b.type === 'section') {
         const rows = [];
-        if (b.label) rows.push(`<tr><td style="padding:0 0 4px;"><div style="font-family:Arial,Helvetica,sans-serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#B15A43;">${escapeHtml(b.label)}</div></td></tr>`);
-        if (b.title) rows.push(`<tr><td style="padding:0 0 14px;"><div style="font-family:Georgia,'Times New Roman',serif; font-size:22px; color:#303b6a;">${escapeHtml(b.title)}</div></td></tr>`);
+        if (b.label) rows.push(`<tr><td style="padding:0 0 6px;"><div style="font-family:'Trebuchet MS',Helvetica,Arial,sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#B15A43;">${escapeHtml(b.label)}</div></td></tr>`);
+        if (b.title) rows.push(`<tr><td style="padding:0 0 14px;"><div style="font-family:Georgia,'Times New Roman',serif; font-size:24px; color:#303b6a;">${escapeHtml(b.title)}</div></td></tr>`);
         (b.items || []).forEach(item => { const r = sectionItemRowHtml(item); if (r) rows.push(r); });
         const btnRow = buttonsRowHtml(b.buttons);
         if (btnRow) rows.push(btnRow);
-        if (!rows.length) return `<tr><td style="padding:0 0 16px;"><div style="font-family:Arial,Helvetica,sans-serif; font-size:12px; color:#6B6B6B; font-style:italic;">(section block — nothing filled in yet)</div></td></tr>`;
-        rows.push(`<tr><td style="padding:8px 0 20px;"><div style="height:1px; background-color:#E5E3DB;"></div></td></tr>`);
+        if (!rows.length) return `<tr><td style="padding:0 0 16px;"><div style="font-family:'Trebuchet MS',Helvetica,Arial,sans-serif; font-size:12px; color:#6B6B6B; font-style:italic;">(section block — nothing filled in yet)</div></td></tr>`;
+        rows.push(DIVIDER_ROW_HTML);
         return rows.join('');
       }
       if (b.type === 'heading') {
-        return `<tr><td style="padding:0 0 14px;"><div style="font-family:Georgia,'Times New Roman',serif; font-size:20px; color:#303b6a;">${escapeHtml(b.text) || '(empty heading)'}</div></td></tr>`;
+        return `<tr><td style="padding:0 0 14px;"><div style="font-family:Georgia,'Times New Roman',serif; font-size:24px; color:#303b6a;">${escapeHtml(b.text) || '(empty heading)'}</div></td></tr>`;
       }
       if (b.type === 'paragraph') {
-        const html = escapeHtml(b.text).replace(/\n/g, '<br>');
-        return `<tr><td style="padding:0 0 16px;"><div style="font-family:Arial,Helvetica,sans-serif; font-size:15px; color:#2B2B2B; line-height:1.7;">${html || '(empty paragraph)'}</div></td></tr>`;
+        // b.text is trusted HTML (from the rich-text toolbar) — rendered as-is, except a
+        // stray literal newline (old plain-text drafts, or a Shift+Enter) still becomes a <br>.
+        const html = (b.text || '').replace(/\n/g, '<br>');
+        return `<tr><td style="padding:0 0 16px;"><div style="font-size:20px; color:#2B2B2B; line-height:1.7;">${html || '(empty paragraph)'}</div></td></tr>`;
       }
       if (b.type === 'image') {
-        if (!b.dataUrl) return `<tr><td style="padding:0 0 16px;"><div style="font-family:Arial,Helvetica,sans-serif; font-size:12px; color:#6B6B6B; font-style:italic;">(image block — no image selected yet)</div></td></tr>`;
+        if (!b.dataUrl) return `<tr><td style="padding:0 0 16px;"><div style="font-family:'Trebuchet MS',Helvetica,Arial,sans-serif; font-size:12px; color:#6B6B6B; font-style:italic;">(image block — no image selected yet)</div></td></tr>`;
         return `<tr><td style="padding:0 0 16px;" align="center">
           <img src="${b.dataUrl}" style="max-width:100%; border-radius:8px; display:block;" alt="${escapeHtml(b.caption)}">
           ${b.caption ? `<div style="font-family:Arial,Helvetica,sans-serif; font-size:12px; color:#6B6B6B; margin-top:6px;">${escapeHtml(b.caption)}</div>` : ''}
@@ -915,18 +1396,41 @@
       if (b.type === 'button') {
         return buttonsRowHtml(b.buttons);
       }
+      if (b.type === 'divider') {
+        return DIVIDER_ROW_HTML;
+      }
+      if (b.type === 'footer') {
+        // No leading divider here — whatever block comes before (almost always a Section)
+        // already ends with its own trailing divider, matching the real template exactly.
+        return `<tr><td style="padding:20px 0 4px; text-align:center;">
+            <img src="${escapeHtml(FOOTER_LOGO_URL)}" width="220" alt="Christ Church Bluffton" style="display:block; width:220px; max-width:220px; height:auto; margin:0 auto 18px;">
+            <p style="margin:0 0 4px; font-size:15px; color:#5A5A5A;">A Christ-centered community</p>
+            <p style="margin:0 0 20px; font-size:15px; color:#5A5A5A;">Bluffton, South Carolina.</p>
+            <p style="margin:0 0 16px; font-size:16px;"><a href="${CHURCH_CONTACT_MAILTO}" style="color:#303b6a;">info@christchurchbluffton.org</a></p>
+            <a href="${escapeHtml(UNSUBSCRIBE_MAILTO)}" style="display:inline-block; font-family:Arial,Helvetica,sans-serif; font-size:13px; letter-spacing:0.3px; color:#8A8577;">Unsubscribe from this newsletter</a>
+          </td></tr>`;
+      }
       return '';
     }
 
     function generateVisualHtml(headline) {
       const rows = blocks.length
-        ? blocks.map(blockRowHtml).join('')
+        ? blocks.map((b, i) => {
+            // A Section trails its own real divider — but if it opens right after freeform
+            // content (not itself a Section or Divider, which already leave one behind), it
+            // needs to open with one too, or it runs straight into whatever came before it.
+            // Matches canvasBlockHtml()'s .canvas-divider-leading exactly, so what an editor
+            // sees while building is what actually goes out in the real email.
+            const prevType = i > 0 ? blocks[i - 1].type : null;
+            const needsLeadingDivider = b.type === 'section' && prevType && prevType !== 'section' && prevType !== 'divider';
+            return (needsLeadingDivider ? DIVIDER_ROW_HTML : '') + blockRowHtml(b);
+          }).join('')
         : `<tr><td style="padding:0;"><div style="font-family:Arial,Helvetica,sans-serif; font-size:13px; color:#6B6B6B; font-style:italic;">This newsletter doesn't have any content blocks yet. Add one below.</div></td></tr>`;
       return buildEmailHtml(headline, rows);
     }
 
-    // Same final HTML regardless of which mode is active — Paste HTML uses the raw textarea
-    // content as-is, Build Visually assembles it from blocks using the same branded shell.
+    // Same final HTML regardless of which mode is active — HTML Build uses the raw textarea
+    // content as-is, Manual Build assembles it from blocks using the same branded shell.
     function getFinalHtml() {
       const subject = document.getElementById('subject-input').value.trim();
       if (mode === 'html') {
@@ -939,33 +1443,73 @@
     function updatePreview() {
       document.getElementById('preview-iframe').srcdoc = getFinalHtml();
     }
-    function schedulePreviewUpdate() {
-      clearTimeout(previewTimer);
-      previewTimer = setTimeout(updatePreview, 300);
+
+    // Manual Build (blocks) and HTML Build (raw source) are two different representations of
+    // the same draft, not two views of the same content — switching mid-draft wouldn't
+    // translate one into the other, it'd just show something else entirely. Locking the choice
+    // (made once, in the New Draft picker) avoids that trap. Pass null to unlock both, which
+    // only happens for a genuinely blank, never-saved composer.
+    function applyModeLock(lockedMode) {
+      document.querySelectorAll('.mode-tab-btn').forEach(btn => {
+        const isOther = lockedMode && btn.dataset.mode !== lockedMode;
+        btn.disabled = isOther;
+        btn.title = isOther ? `This draft was started as ${lockedMode === 'visual' ? 'Manual Build' : 'HTML Build'} — start a new draft to use the other.` : '';
+      });
     }
 
-    // Visual mode edits directly in the canvas (no separate preview needed); Paste HTML mode
-    // still uses the sandboxed iframe, since that content could be anything pasted in.
+    // Both modes preview on-demand now (a Preview button opening a modal) rather than an
+    // always-on inline frame — Manual Build always worked this way; HTML Build used to be
+    // the odd one out with a permanently-visible iframe fighting the code textarea for space.
     function setMode(newMode) {
       mode = newMode;
       document.querySelectorAll('.mode-tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === newMode));
       document.getElementById('visual-panel').classList.toggle('active', newMode === 'visual');
       document.getElementById('html-panel').classList.toggle('active', newMode === 'html');
-      document.getElementById('preview-frame-wrap').style.display = newMode === 'visual' ? 'none' : 'flex';
-      if (newMode === 'visual') renderCanvas(); else updatePreview();
+      if (newMode === 'visual') renderCanvas();
     }
 
-    function resetComposer() {
+    // chosenMode comes from the New Draft picker ('visual' or 'html') and locks that draft to
+    // it. Called with no argument only as the fallback after deleting whatever draft was open
+    // (see deleteDraft()) — that's not "starting a new draft," just clearing back to a blank,
+    // genuinely unsaved composer, so both tabs stay open there instead of locking to a choice
+    // nobody actually made.
+    function resetComposer(chosenMode) {
       currentDraftId = null;
+      composerLocked = false;
       document.getElementById('subject-input').value = '';
       document.getElementById('html-code-input').value = '';
       newsletterHeadline = '';
       newsletterDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase();
       newsletterEyebrow = 'Christ Church Bluffton — Weekly Word';
       blocks = starterSectionBlocks(4);
-      setMode('visual');
+      setMode(chosenMode || 'visual');
+      applyModeLock(chosenMode || null);
       clearMsg();
       renderDraftsList();
+    }
+
+    // The New Draft picker's actual action — saves a real row immediately (same idea as
+    // Duplicate: pick it, and it's already sitting in the sidebar, not just cleared local
+    // state waiting on a manual Save Draft click that's easy to assume already happened).
+    async function createNewDraft(chosenMode, draftName) {
+      const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      const name = (draftName || '').trim() || today;
+      const nowIso = new Date().toISOString();
+      const { data, error } = await supabaseClient
+        .from('newsletter_drafts')
+        .insert({
+          name, subject: '', headline: '', date: today.toUpperCase(),
+          eyebrow: 'Christ Church Bluffton — Weekly Word', mode: chosenMode, html_code: '',
+          blocks: chosenMode === 'html' ? [] : starterSectionBlocks(4), saved_at: nowIso
+        })
+        .select()
+        .single();
+      if (error) { showMsg('Could not create draft: ' + error.message, 'error'); return; }
+      const inserted = draftFromRow(data);
+      drafts.push(inserted);
+      logActivity('draft_save', name);
+      openDraft(inserted.id);
+      showMsg('Draft created.', 'success');
     }
 
     // Recomputes the running id counters (block/button/section-item) after loading a saved
@@ -977,30 +1521,102 @@
       }, -1) + 1;
     }
 
+    // Whether the Sent / Archive sections are expanded — both start collapsed, and are peers
+    // of each other (Archive isn't nested inside Sent), each its own toggle button.
+    let showSent = false;
+    let showArchive = false;
+
+    function sectionToggleHtml(key, label, count, isOpen, muted) {
+      return `
+        <button type="button" class="drafts-section-toggle ${muted ? 'muted' : ''}" data-action="toggle-section" data-section="${key}" aria-expanded="${isOpen}">
+          <div class="drafts-section-toggle-left">
+            <svg class="drafts-section-arrow ${isOpen ? 'is-open' : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"></polyline></svg>
+            <span class="drafts-section-label">${label}</span>
+          </div>
+          <span class="drafts-section-count">${count}</span>
+        </button>`;
+    }
+
+    // Shared by Saved Drafts, Sent, and Archived — the meta line and the right-hand action
+    // both depend on which section a draft is in:
+    //  - draft:    mode + last-saved date · Copy · Delete (real delete, arm/confirm)
+    //  - sent:     "Sent" badge + date it went out · Copy · Archive (arm/confirm, never deletes)
+    //  - archived: "Archived" badge + date archived · Copy · Unarchive (immediate, reversible)
+    // Rename works identically in all three — it's just this row's own label, never part of
+    // what was actually sent.
+    // Date alone didn't say enough once more than one save could land on the same day —
+    // small addition, same muted meta-line styling, just date + time instead of date only.
+    function formatDateTime(ms) {
+      const d = new Date(ms);
+      return `${d.toLocaleDateString()}, ${d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+    }
+
+    function draftItemHtml(d, variant) {
+      let metaHtml, actionsHtml;
+      if (variant === 'archived') {
+        metaHtml = `<span class="draft-sent-badge draft-archived-badge">Archived</span> ${formatDateTime(d.archivedAt)}`;
+        actionsHtml = `
+              <button type="button" class="draft-duplicate" data-action="duplicate" title="Duplicate draft" aria-label="Duplicate draft">Duplicate</button>
+              <button type="button" class="draft-unarchive" data-action="unarchive" title="Move back to Sent" aria-label="Unarchive draft">Unarchive</button>`;
+      } else if (variant === 'sent') {
+        metaHtml = `<span class="draft-sent-badge">Sent</span> ${formatDateTime(d.sentAt)}`;
+        actionsHtml = `
+              <button type="button" class="draft-duplicate" data-action="duplicate" title="Duplicate draft" aria-label="Duplicate draft">Duplicate</button>
+              <button type="button" class="draft-delete" data-action="archive" title="Archive draft">&times;</button>`;
+      } else {
+        metaHtml = `${d.mode === 'html' ? 'HTML' : 'Manual'} &middot; Last Save: ${formatDateTime(d.savedAt)}`;
+        // Only a draft gets the ⋮ menu — Edit name only makes sense here (see the CSS comment
+        // above .draft-menu for why Sent/Archived stay as plain inline buttons instead).
+        actionsHtml = `
+              <div class="draft-menu">
+                <button type="button" class="draft-menu-btn" data-action="menu-toggle" title="More actions" aria-label="More actions for this draft" aria-haspopup="true" aria-expanded="false">&#8942;</button>
+                <div class="draft-menu-dropdown">
+                  <button type="button" class="draft-menu-item" data-action="edit-name">Edit name</button>
+                  <button type="button" class="draft-menu-item" data-action="duplicate">Duplicate</button>
+                  <button type="button" class="draft-menu-item draft-menu-item-danger" data-action="delete">Delete</button>
+                </div>
+              </div>`;
+      }
+      return `
+        <div class="draft-item ${d.id === currentDraftId ? 'active' : ''}" data-id="${d.id}">
+          <div class="draft-item-main" data-action="open">
+            <div class="draft-name-wrap">
+              <div class="draft-name" role="textbox" aria-label="Draft name" data-placeholder="(untitled)">${escapeHtml(d.name) || '(untitled)'}</div>
+              <span class="draft-name-saved" aria-hidden="true">&#10003;</span>
+            </div>
+          </div>
+          <div class="draft-item-footer">
+            <div class="draft-meta" data-action="open">${metaHtml}</div>
+            <div class="draft-item-actions">${actionsHtml}
+            </div>
+          </div>
+        </div>`;
+    }
+
     function renderDraftsList() {
       const listEl = document.getElementById('drafts-list');
       const emptyEl = document.getElementById('drafts-empty');
-      if (drafts.length === 0) {
-        emptyEl.style.display = 'block';
-        listEl.innerHTML = '';
-        return;
+      const activeDrafts = drafts.filter(d => !d.sentAt).sort((a, b) => b.savedAt - a.savedAt);
+      const sentDrafts = drafts.filter(d => d.sentAt && !d.archivedAt).sort((a, b) => b.sentAt - a.sentAt);
+      const archivedDrafts = drafts.filter(d => d.archivedAt).sort((a, b) => b.archivedAt - a.archivedAt);
+      emptyEl.style.display = activeDrafts.length === 0 ? 'block' : 'none';
+      let html = activeDrafts.map(d => draftItemHtml(d, 'draft')).join('');
+      if (sentDrafts.length) {
+        html += sectionToggleHtml('sent', 'Sent', sentDrafts.length, showSent, false);
+        if (showSent) html += sentDrafts.map(d => draftItemHtml(d, 'sent')).join('');
       }
-      emptyEl.style.display = 'none';
-      const sorted = [...drafts].sort((a, b) => b.savedAt - a.savedAt);
-      listEl.innerHTML = sorted.map(d => `
-        <div class="draft-item ${d.id === currentDraftId ? 'active' : ''}" data-id="${d.id}">
-          <div class="draft-item-main" data-action="open">
-            <div class="draft-subject">${escapeHtml(d.subject) || '(untitled)'}</div>
-            <div class="draft-meta">${d.mode === 'html' ? 'HTML' : 'Visual'} &middot; ${new Date(d.savedAt).toLocaleDateString()}</div>
-          </div>
-          <button type="button" class="draft-delete" data-action="delete" title="Delete draft">&times;</button>
-        </div>`).join('');
+      if (archivedDrafts.length) {
+        html += sectionToggleHtml('archive', 'Archive', archivedDrafts.length, showArchive, true);
+        if (showArchive) html += archivedDrafts.map(d => draftItemHtml(d, 'archived')).join('');
+      }
+      listEl.innerHTML = html;
     }
 
     function openDraft(id) {
       const d = drafts.find(x => x.id === id);
       if (!d) return;
       currentDraftId = d.id;
+      composerLocked = !!d.sentAt;
       document.getElementById('subject-input').value = d.subject || '';
       document.getElementById('html-code-input').value = d.htmlCode || '';
       newsletterHeadline = d.headline || '';
@@ -1011,36 +1627,99 @@
       buttonIdCounter = maxIdSuffix(blocks.flatMap(b => b.buttons || []), 'btn');
       itemIdCounter = maxIdSuffix(blocks.flatMap(b => b.items || []), 'it');
       setMode(d.mode || 'visual');
+      applyModeLock(d.mode || 'visual');
       clearMsg();
       renderDraftsList();
     }
 
-    // Native confirm() blocks the whole page (and even browser-automation input) until dismissed —
-    // a click-to-arm delete button is a lighter-weight, non-blocking way to guard against a
-    // mis-click on a low-stakes single-item delete.
-    async function deleteDraft(id, btnEl) {
+    // Real "are you sure?" popup instead of a click-twice arm pattern — clicking Delete in the
+    // dropdown opens this, Yes/No decides it, nothing happens on a single click.
+    let pendingDeleteId = null;
+    function promptDeleteDraft(id) {
       const d = drafts.find(x => x.id === id);
       if (!d) return;
-      if (!btnEl || btnEl.dataset.armed !== 'true') {
-        if (btnEl) {
-          btnEl.dataset.armed = 'true';
-          btnEl.textContent = '✓';
-          btnEl.title = 'Click again to confirm delete';
-          clearTimeout(btnEl._armTimer);
-          btnEl._armTimer = setTimeout(() => {
-            btnEl.dataset.armed = 'false';
-            btnEl.textContent = '×';
-            btnEl.title = 'Delete draft';
-          }, 3000);
-        }
-        return;
-      }
+      pendingDeleteId = id;
+      document.getElementById('delete-confirm-text').textContent =
+        `Delete "${d.name || d.subject || '(untitled)'}"? This can't be undone.`;
+      document.getElementById('delete-confirm-modal-overlay').classList.add('open');
+    }
+    async function confirmDeleteDraft() {
+      const id = pendingDeleteId;
+      const d = drafts.find(x => x.id === id);
+      document.getElementById('delete-confirm-modal-overlay').classList.remove('open');
+      pendingDeleteId = null;
+      if (!d) return;
       const { error } = await supabaseClient.from('newsletter_drafts').delete().eq('id', id);
       if (error) { showMsg('Could not delete draft: ' + error.message, 'error'); return; }
       drafts = drafts.filter(x => x.id !== id);
       logActivity('draft_delete', d.subject || '(untitled)');
       if (currentDraftId === id) resetComposer();
       else renderDraftsList();
+    }
+
+    // Same arm/confirm pattern as deleteDraft — this is a Sent draft's own "x" button, so it
+    // needs the same guard against a mis-click, even though the actual effect (archive, not
+    // delete) is reversible via Unarchive.
+    async function archiveDraft(id, btnEl) {
+      const d = drafts.find(x => x.id === id);
+      if (!d) return;
+      if (!btnEl || btnEl.dataset.armed !== 'true') {
+        if (btnEl) {
+          btnEl.dataset.armed = 'true';
+          btnEl.classList.add('armed');
+          btnEl.textContent = 'Archive?';
+          btnEl.title = 'Click again to move this to Archive';
+          clearTimeout(btnEl._armTimer);
+          btnEl._armTimer = setTimeout(() => {
+            btnEl.dataset.armed = 'false';
+            btnEl.classList.remove('armed');
+            btnEl.textContent = '×';
+            btnEl.title = 'Archive draft';
+          }, 3000);
+        }
+        return;
+      }
+      const nowIso = new Date().toISOString();
+      const { error } = await supabaseClient.from('newsletter_drafts').update({ archived_at: nowIso }).eq('id', id);
+      if (error) { showMsg('Could not archive draft: ' + error.message, 'error'); return; }
+      d.archivedAt = new Date(nowIso).getTime();
+      logActivity('draft_archive', d.name || d.subject || '(untitled)');
+      renderDraftsList();
+    }
+
+    // No arm/confirm needed — moving something back into Sent is low-stakes and fully
+    // reversible (just archive it again), unlike delete/archive which both remove it from
+    // the section you're currently looking at.
+    async function unarchiveDraft(id) {
+      const d = drafts.find(x => x.id === id);
+      if (!d) return;
+      const { error } = await supabaseClient.from('newsletter_drafts').update({ archived_at: null }).eq('id', id);
+      if (error) { showMsg('Could not unarchive draft: ' + error.message, 'error'); return; }
+      d.archivedAt = null;
+      logActivity('draft_unarchive', d.name || d.subject || '(untitled)');
+      renderDraftsList();
+    }
+
+    // Copies a draft as a brand-new saved row (own id, own "Copy" subject) — never touches
+    // the original. Useful for starting next week's issue from a past one instead of rebuilding
+    // from the blank starter sections every time.
+    async function duplicateDraft(id) {
+      const d = drafts.find(x => x.id === id);
+      if (!d) return;
+      const subject = d.subject ? `${d.subject} (Copy)` : '(Copy)';
+      const name = d.name ? `${d.name} (Copy)` : '(Copy)';
+      const nowIso = new Date().toISOString();
+      const { data, error } = await supabaseClient
+        .from('newsletter_drafts')
+        .insert({ name, subject, headline: d.headline, date: d.date, eyebrow: d.eyebrow, mode: d.mode, html_code: d.htmlCode, blocks: d.blocks, saved_at: nowIso })
+        .select()
+        .single();
+      if (error) { showMsg('Could not duplicate draft: ' + error.message, 'error'); return; }
+      const inserted = draftFromRow(data);
+      drafts.push(inserted);
+      logActivity('draft_duplicate', subject);
+      openDraft(inserted.id);
+      showMsg('Draft duplicated.', 'success');
     }
 
     async function saveDraft() {
@@ -1058,9 +1737,14 @@
         const updated = draftFromRow(data);
         drafts = drafts.map(d => d.id === currentDraftId ? updated : d);
       } else {
+        // First save of a brand-new draft — give it a real name right away instead of
+        // leaving it "(untitled)". The newsletter's own displayed date is the most useful
+        // default (each week's subject line is usually near-identical, so subject can't
+        // tell drafts apart, but the date can) — freely editable afterward in the sidebar.
+        const name = titleCase(newsletterDate) || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         const { data, error } = await supabaseClient
           .from('newsletter_drafts')
-          .insert({ subject, headline: newsletterHeadline, date: newsletterDate, eyebrow: newsletterEyebrow, mode, html_code: htmlCode, blocks, saved_at: nowIso })
+          .insert({ name, subject, headline: newsletterHeadline, date: newsletterDate, eyebrow: newsletterEyebrow, mode, html_code: htmlCode, blocks, saved_at: nowIso })
           .select()
           .single();
         if (error) { showMsg('Could not save draft: ' + error.message, 'error'); showTopbarSaveMsg('Save failed', true); return; }
@@ -1090,7 +1774,7 @@
       sendTestModalMsg(`This would send a test copy of "${subject}" from info@christchurchbluffton.org to ${testEmails.join(', ')} once this panel is connected to Resend — not wired up yet. Nothing was actually sent.`, 'info');
     }
 
-    const dataPromise = Promise.all([getDraftsFromDb(), getSubscriberCount()]);
+    const dataPromise = Promise.all([getDraftsFromDb(), getSubscriberCounts()]);
 
     loadSidebar().then(async () => {
       if (!document.getElementById('email-canvas')) return;
@@ -1106,22 +1790,56 @@
         return;
       }
       session = getSession();
-      const [draftsResult, subCount] = await dataPromise;
+      const [draftsResult, subCounts] = await dataPromise;
       drafts = draftsResult;
       document.getElementById('test-email-1').value = 'info@christchurchbluffton.org';
 
-      document.getElementById('send-to-hint').textContent =
-        `${subCount} ${subCount === 1 ? 'person' : 'people'} on the Subscribers list right now.`;
-
-      document.getElementById('subject-input').addEventListener('input', schedulePreviewUpdate);
-      document.getElementById('html-code-input').addEventListener('input', schedulePreviewUpdate);
+      const SEND_TO_LABELS = { christ_church: 'Christ Church Subscribers', youth_group: 'Youth Group Newsletter' };
+      function updateSendToHint() {
+        const hint = document.getElementById('send-to-hint');
+        const value = document.getElementById('send-to-select').value;
+        if (value === 'test') {
+          hint.textContent = `Sends only to: ${TEST_NEWSLETTER_RECIPIENTS.join(', ')}`;
+        } else {
+          const count = subCounts[value] || 0;
+          hint.textContent = `${count} ${count === 1 ? 'person' : 'people'} on the ${SEND_TO_LABELS[value]} list right now.`;
+        }
+      }
+      updateSendToHint();
+      document.getElementById('send-to-select').addEventListener('change', updateSendToHint);
 
       document.querySelectorAll('.mode-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => setMode(btn.dataset.mode));
       });
 
+      // Picking a type just stages it (highlights the button, enables "Add") — it doesn't
+      // insert anything until "Add" is clicked. Clicking the already-selected type again
+      // clears the selection instead of adding. This is the side panel only; the inline
+      // "+ Add Block" menu between blocks stays a single click = add, since that click is
+      // already an explicit "add right here" action, not a type pick.
+      let selectedAddType = null;
+      const confirmAddBtn = document.getElementById('confirm-add-btn');
       document.querySelectorAll('.add-block-btn').forEach(btn => {
-        btn.addEventListener('click', () => addBlock(btn.dataset.type));
+        btn.addEventListener('click', () => {
+          const nowSelected = selectedAddType !== btn.dataset.type;
+          selectedAddType = nowSelected ? btn.dataset.type : null;
+          document.querySelectorAll('.add-block-btn').forEach(b => {
+            const isSelected = b === btn && nowSelected;
+            b.classList.toggle('selected', isSelected);
+            b.setAttribute('aria-pressed', String(isSelected));
+          });
+          confirmAddBtn.disabled = !selectedAddType;
+        });
+      });
+      confirmAddBtn.addEventListener('click', () => {
+        if (!selectedAddType) return;
+        addBlock(selectedAddType);
+        selectedAddType = null;
+        document.querySelectorAll('.add-block-btn').forEach(b => {
+          b.classList.remove('selected');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        confirmAddBtn.disabled = true;
       });
 
       const canvasEl = document.getElementById('email-canvas');
@@ -1159,6 +1877,47 @@
         if (action === 'set-color') { btn.color = actionBtn.dataset.color; renderCanvas(); }
       });
 
+      // Marks whichever block was last clicked/typed into as "active" (a visible gold-edge
+      // highlight, not an invisible state) — that's where the next "+ Add Block" lands.
+      // Patches the highlight directly rather than a full renderCanvas(), same reasoning as
+      // the focusout text-sync below: re-rendering on every click would break in-progress
+      // typing and steal focus mid-click.
+      canvasEl.addEventListener('focusin', (e) => {
+        const wrap = e.target.closest('.canvas-block-wrap');
+        if (!wrap || wrap.dataset.wrapFor === activeBlockId) return;
+        const prevWrap = canvasEl.querySelector('.canvas-block-wrap .canvas-block.active')?.closest('.canvas-block-wrap');
+        if (prevWrap) {
+          prevWrap.querySelector('.canvas-block').classList.remove('active');
+          prevWrap.querySelector('.canvas-insert-after').classList.remove('visible');
+        }
+        wrap.querySelector('.canvas-block').classList.add('active');
+        wrap.querySelector('.canvas-insert-after').classList.add('visible');
+        activeBlockId = wrap.dataset.wrapFor;
+      });
+
+      // "+ Add Block" between blocks — opens a small menu of the same 7 types as the side
+      // panel, inserting right after that specific block regardless of what's active
+      // elsewhere (clicking this is itself an explicit, unambiguous choice of position).
+      canvasEl.addEventListener('click', (e) => {
+        const insertBtn = e.target.closest('.canvas-insert-btn');
+        if (insertBtn) {
+          const menu = insertBtn.nextElementSibling;
+          const wasOpen = menu.classList.contains('open');
+          canvasEl.querySelectorAll('.canvas-insert-menu.open').forEach(m => m.classList.remove('open'));
+          if (!wasOpen) menu.classList.add('open');
+          return;
+        }
+        const menuItem = e.target.closest('.canvas-insert-menu-item');
+        if (menuItem) {
+          const wrap = menuItem.closest('.canvas-block-wrap');
+          addBlock(menuItem.dataset.type, wrap.dataset.wrapFor);
+        }
+      });
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('.canvas-insert-after')) return;
+        document.querySelectorAll('.canvas-insert-menu.open').forEach(m => m.classList.remove('open'));
+      });
+
       // Sync contenteditable edits back into `blocks` (or `newsletterHeadline` for the banner
       // title) on focusout. Deliberately does NOT re-render the canvas for plain text — the
       // browser is already showing what was typed, and a full re-render here would destroy
@@ -1173,9 +1932,13 @@
         // styled text-transform:uppercase (date, eyebrow) that would silently store the
         // all-caps version instead of the real typed casing. .textContent is safe here since
         // both are single-line fields with no line-break handling to preserve.
+        // Rich-text fields (Paragraph blocks, section body text) keep their real formatting —
+        // bold/italic/underline/links/bulleted lists are actual markup, so the field's HTML
+        // itself is the stored value, not just its plain text.
+        const isRichField = e.target.classList.contains('rte-field');
         const rawEl = (field === 'date' || field === 'eyebrow') ? e.target.textContent : e.target.innerText;
-        const text = rawEl.trim();
-        if (!text) e.target.innerHTML = ''; // let the :empty placeholder show again
+        const text = isRichField ? e.target.innerHTML : rawEl.trim();
+        if (!e.target.textContent.trim()) e.target.innerHTML = ''; // let the :empty placeholder show again
         if (field === 'headline') { newsletterHeadline = text; return; }
         if (field === 'date') { newsletterDate = text; return; }
         if (field === 'eyebrow') { newsletterEyebrow = text; return; }
@@ -1230,7 +1993,118 @@
         }
       });
 
-      document.getElementById('new-draft-btn').addEventListener('click', resetComposer);
+      // ---- Rich-text toolbar for paragraph fields (standalone Paragraph blocks + a
+      // section's body text) — bold/italic/underline/bulleted list/links. Buttons use
+      // mousedown+preventDefault so pressing one never blurs the field being edited;
+      // execCommand always acts on the current focus/selection, so the toolbar doesn't
+      // need to track which field is active, only whether one currently is.
+      const rteToolbar = document.getElementById('rte-toolbar');
+      const rteLinkPopover = document.getElementById('rte-link-popover');
+      const rteLinkInput = document.getElementById('rte-link-input');
+      let rteSavedRange = null; // selection at the moment a link button was pressed
+      let rteSavedField = null; // the contenteditable that selection belongs to
+
+      function updateToolbarActiveStates() {
+        rteToolbar.querySelectorAll('[data-cmd]').forEach(btn => {
+          let isActive = false;
+          try { isActive = document.queryCommandState(btn.dataset.cmd); } catch (err) { /* ignore */ }
+          btn.classList.toggle('active', isActive);
+        });
+      }
+
+      canvasEl.addEventListener('focusin', (e) => {
+        if (!e.target.classList.contains('rte-field')) return;
+        rteToolbar.classList.add('visible');
+        updateToolbarActiveStates();
+      });
+      canvasEl.addEventListener('focusout', (e) => {
+        if (!e.target.classList.contains('rte-field')) return;
+        // Focus is about to move to the link popover's own input — that's still "editing
+        // this field" from the user's point of view, so don't hide the toolbar/popover.
+        if (rteLinkPopover.contains(e.relatedTarget)) return;
+        rteToolbar.classList.remove('visible');
+        rteLinkPopover.classList.remove('open');
+      });
+      document.addEventListener('selectionchange', () => {
+        if (rteToolbar.classList.contains('visible')) updateToolbarActiveStates();
+      });
+
+      rteToolbar.querySelectorAll('[data-cmd]').forEach(btn => {
+        btn.addEventListener('mousedown', (e) => {
+          e.preventDefault(); // keep focus/selection in the field, not on the button
+          document.execCommand(btn.dataset.cmd);
+          updateToolbarActiveStates();
+        });
+      });
+
+      rteToolbar.querySelectorAll('[data-link-type]').forEach(btn => {
+        btn.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          const sel = document.getSelection();
+          if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return; // need real selected text to link
+          rteSavedRange = sel.getRangeAt(0).cloneRange();
+          rteSavedField = document.activeElement;
+          const type = btn.dataset.linkType;
+          rteLinkInput.placeholder = type === 'email' ? 'name@example.com' : type === 'phone' ? '(843) 555-0123' : 'forgeddigitaldesign.com';
+          rteLinkInput.value = '';
+          rteLinkPopover.dataset.linkType = type;
+          rteLinkPopover.classList.add('open');
+          rteLinkInput.focus();
+        });
+      });
+
+      function confirmRteLink() {
+        const type = rteLinkPopover.dataset.linkType;
+        const raw = rteLinkInput.value.trim();
+        if (!raw || !rteSavedRange || !rteSavedField) { rteLinkPopover.classList.remove('open'); return; }
+        const href = type === 'email' ? `mailto:${raw}`
+          : type === 'phone' ? `tel:${raw.replace(/[^\d+]/g, '')}`
+          : /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+        // Focus has to genuinely return to the original field before restoring the selection —
+        // execCommand acts on document.activeElement, not just a detached Range object.
+        rteSavedField.focus();
+        const sel = document.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(rteSavedRange);
+        document.execCommand('createLink', false, href);
+        rteLinkPopover.classList.remove('open');
+        rteSavedRange = null;
+        rteSavedField = null;
+      }
+      document.getElementById('rte-link-confirm').addEventListener('mousedown', (e) => { e.preventDefault(); confirmRteLink(); });
+      document.getElementById('rte-link-cancel').addEventListener('mousedown', (e) => { e.preventDefault(); rteLinkPopover.classList.remove('open'); });
+      rteLinkInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); confirmRteLink(); }
+        if (e.key === 'Escape') { e.preventDefault(); rteLinkPopover.classList.remove('open'); }
+      });
+
+      const newDraftOverlay = document.getElementById('new-draft-modal-overlay');
+      const newDraftNameInput = document.getElementById('new-draft-name-input');
+      document.getElementById('new-draft-btn').addEventListener('click', () => {
+        // Pre-fill with today's date so ignoring the field entirely keeps the old default
+        // behavior — but it's a real input now, so typing over it names the draft on the spot.
+        newDraftNameInput.value = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        newDraftOverlay.classList.add('open');
+        newDraftNameInput.focus();
+        newDraftNameInput.select();
+      });
+      document.getElementById('new-draft-modal-close').addEventListener('click', () => newDraftOverlay.classList.remove('open'));
+      newDraftOverlay.addEventListener('click', (e) => { if (e.target === newDraftOverlay) newDraftOverlay.classList.remove('open'); });
+      document.querySelectorAll('.new-draft-choice-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const typedName = newDraftNameInput.value.trim();
+          const fallbackName = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+          newDraftOverlay.classList.remove('open');
+          createNewDraft(btn.dataset.mode, typedName || fallbackName);
+        });
+      });
+
+      const deleteConfirmOverlay = document.getElementById('delete-confirm-modal-overlay');
+      document.getElementById('delete-confirm-modal-close').addEventListener('click', () => { deleteConfirmOverlay.classList.remove('open'); pendingDeleteId = null; });
+      document.getElementById('delete-confirm-cancel').addEventListener('click', () => { deleteConfirmOverlay.classList.remove('open'); pendingDeleteId = null; });
+      deleteConfirmOverlay.addEventListener('click', (e) => { if (e.target === deleteConfirmOverlay) { deleteConfirmOverlay.classList.remove('open'); pendingDeleteId = null; } });
+      document.getElementById('delete-confirm-confirm').addEventListener('click', confirmDeleteDraft);
+
       document.getElementById('save-draft-btn').addEventListener('click', saveDraft);
       document.getElementById('send-test-confirm-btn').addEventListener('click', sendTest);
 
@@ -1241,6 +2115,16 @@
       });
       document.getElementById('preview-modal-close').addEventListener('click', () => previewOverlay.classList.remove('open'));
       previewOverlay.addEventListener('click', (e) => { if (e.target === previewOverlay) previewOverlay.classList.remove('open'); });
+
+      // HTML Build's own Preview button/modal — separate from the one above because its
+      // iframe stays sandboxed (see the HTML comment by #html-preview-modal-overlay).
+      const htmlPreviewOverlay = document.getElementById('html-preview-modal-overlay');
+      document.getElementById('open-html-preview-btn').addEventListener('click', () => {
+        updatePreview();
+        htmlPreviewOverlay.classList.add('open');
+      });
+      document.getElementById('html-preview-modal-close').addEventListener('click', () => htmlPreviewOverlay.classList.remove('open'));
+      htmlPreviewOverlay.addEventListener('click', (e) => { if (e.target === htmlPreviewOverlay) htmlPreviewOverlay.classList.remove('open'); });
 
       const sendTestOverlay = document.getElementById('send-test-modal-overlay');
       document.getElementById('open-send-test-btn').addEventListener('click', () => {
@@ -1253,16 +2137,117 @@
       document.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
         previewOverlay.classList.remove('open');
+        htmlPreviewOverlay.classList.remove('open');
         sendTestOverlay.classList.remove('open');
+        newDraftOverlay.classList.remove('open');
       });
 
       document.getElementById('drafts-list').addEventListener('click', (e) => {
+        // Not inside any .draft-item — Sent/Archive's own peer toggle buttons.
+        const sectionToggle = e.target.closest('[data-action="toggle-section"]');
+        if (sectionToggle) {
+          if (sectionToggle.dataset.section === 'sent') showSent = !showSent;
+          else if (sectionToggle.dataset.section === 'archive') showArchive = !showArchive;
+          renderDraftsList();
+          return;
+        }
+
+        // ⋮ menu toggle — same open/close pattern as the canvas's own "+ Add Block" menu.
+        const menuBtn = e.target.closest('[data-action="menu-toggle"]');
+        if (menuBtn) {
+          const dropdown = menuBtn.nextElementSibling;
+          const wasOpen = dropdown.classList.contains('open');
+          document.querySelectorAll('.draft-menu-dropdown.open').forEach(m => m.classList.remove('open'));
+          if (!wasOpen) dropdown.classList.add('open');
+          menuBtn.setAttribute('aria-expanded', String(!wasOpen));
+          return;
+        }
+
         const item = e.target.closest('.draft-item');
         if (!item) return;
         const id = item.dataset.id;
-        const deleteBtn = e.target.closest('[data-action="delete"]');
-        if (deleteBtn) { deleteDraft(id, deleteBtn); return; }
-        if (e.target.closest('[data-action="open"]')) { openDraft(id); }
+        // Only block "open" while the name is actively being edited (mid-rename) — otherwise
+        // a normal click on it (plain text the rest of the time) opens the draft like anywhere
+        // else in the row, same as clicking the meta line below it.
+        const nameEl = e.target.closest('.draft-name');
+        if (nameEl && nameEl.getAttribute('contenteditable') === 'true') return;
+
+        if (e.target.closest('[data-action="edit-name"]')) {
+          document.querySelectorAll('.draft-menu-dropdown.open').forEach(m => m.classList.remove('open'));
+          startEditingDraftName(id);
+          return;
+        }
+        if (e.target.closest('[data-action="delete"]')) {
+          document.querySelectorAll('.draft-menu-dropdown.open').forEach(m => m.classList.remove('open'));
+          promptDeleteDraft(id);
+          return;
+        }
+        const archiveBtn = e.target.closest('[data-action="archive"]');
+        if (archiveBtn) { archiveDraft(id, archiveBtn); return; }
+        if (e.target.closest('[data-action="unarchive"]')) { unarchiveDraft(id); return; }
+        if (e.target.closest('[data-action="duplicate"]')) {
+          document.querySelectorAll('.draft-menu-dropdown.open').forEach(m => m.classList.remove('open'));
+          duplicateDraft(id);
+          return;
+        }
+        // Anywhere else in the card — the padding, the meta line, the gap below the name —
+        // opens the draft. Used to require landing exactly on the name or meta text; this is
+        // the whole point of it being one big clickable row instead of two small targets.
+        openDraft(id);
+      });
+      // Closes any open ⋮ menu on an outside click — clicks inside a menu (or its own trigger,
+      // already handled above) are excluded so opening one doesn't immediately close itself.
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('.draft-menu')) return;
+        document.querySelectorAll('.draft-menu-dropdown.open').forEach(m => m.classList.remove('open'));
+      });
+
+      // Makes a draft's name editable in place, right where "Edit name" was clicked — same
+      // click-to-edit language as everything else in this tool, just entered deliberately
+      // through the menu instead of a bare click landing on it by accident.
+      function startEditingDraftName(id) {
+        const item = document.querySelector(`.draft-item[data-id="${id}"]`);
+        const nameEl = item?.querySelector('.draft-name');
+        if (!nameEl) return;
+        nameEl.setAttribute('contenteditable', 'true');
+        nameEl.focus();
+        const range = document.createRange();
+        range.selectNodeContents(nameEl);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+
+      // Renaming a draft is its own lightweight update — doesn't require opening the draft
+      // into the composer first, and doesn't touch anything else about it.
+      document.getElementById('drafts-list').addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' || !e.target.closest('.draft-name')) return;
+        e.preventDefault();
+        e.target.blur();
+      });
+      document.getElementById('drafts-list').addEventListener('focusout', async (e) => {
+        const nameEl = e.target.closest('.draft-name');
+        // Only real edits (contenteditable="true", set by startEditingDraftName()) reach here —
+        // a plain-text .draft-name losing focus (e.g. clicking away after just opening the
+        // draft) has nothing to save.
+        if (!nameEl || nameEl.getAttribute('contenteditable') !== 'true') return;
+        nameEl.setAttribute('contenteditable', 'false');
+        const item = nameEl.closest('.draft-item');
+        const id = item.dataset.id;
+        const d = drafts.find(x => x.id === id);
+        if (!d) return;
+        const newName = nameEl.textContent.trim();
+        nameEl.textContent = newName || '(untitled)';
+        if (newName === d.name) return;
+        const { error } = await supabaseClient.from('newsletter_drafts').update({ name: newName }).eq('id', id);
+        if (error) { showMsg('Could not rename draft: ' + error.message, 'error'); return; }
+        d.name = newName;
+        const savedMark = item.querySelector('.draft-name-saved');
+        if (savedMark) {
+          savedMark.classList.add('visible');
+          clearTimeout(savedMark._fadeTimer);
+          savedMark._fadeTimer = setTimeout(() => savedMark.classList.remove('visible'), 1800);
+        }
       });
 
       renderCanvas();

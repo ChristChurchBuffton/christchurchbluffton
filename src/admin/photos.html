@@ -117,6 +117,16 @@
   }
   .alpha-banner strong { color: #2e7d32; }
 
+  .category-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+  .category-pill {
+    padding: 8px 18px; border-radius: 999px; border: 1px solid var(--border-gray);
+    background: var(--white); color: var(--text-muted); font-size: 13px; font-weight: bold;
+    cursor: pointer; font-family: inherit;
+  }
+  .category-pill:hover { border-color: var(--gold); color: var(--gold-text); }
+  .category-pill.active { background: var(--navy-blue); border-color: var(--navy-blue); color: var(--white); }
+  .show-more-wrap { text-align: center; margin-top: 24px; }
+
   .modal-backdrop {
     display: none; position: fixed; inset: 0; background: rgba(30,37,71,0.55);
     z-index: 1000; align-items: center; justify-content: center; padding: 24px;
@@ -137,11 +147,11 @@
   .field { margin-bottom: 16px; }
   .field:last-child { margin-bottom: 0; }
   .field label { display: block; font-size: 13px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; }
-  .field input[type="text"] {
+  .field input[type="text"], .field select {
     width: 100%; padding: 10px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
     font-family: inherit; font-size: 14px; background: var(--lightest-gray); color: var(--text-dark);
   }
-  .field input:focus { outline: none; border-color: var(--gold); background: var(--white); }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--gold); background: var(--white); }
   .upload-name-preview { margin-top: 8px; font-size: 12px; font-family: monospace; color: var(--text-muted); }
 
   .form-error { background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; }
@@ -255,7 +265,9 @@
         <div class="live-url-banner">
           "Copy Link" copies the full, ready-to-paste URL for that photo. Click any photo to open its link directly.
         </div>
+        <div class="category-pills" id="category-pills"></div>
         <div class="photo-grid" id="photo-grid"></div>
+        <div class="show-more-wrap" id="show-more-wrap"></div>
       </div>
     </div>
   </div>
@@ -349,6 +361,34 @@
 
     let photos = [];
 
+    // Kevin's 3 real categories, plus "All" and "Archived". New uploads default to
+    // CCB Newsletter (the catch-all) — matches the `photos.category` column's own DB default.
+    const CATEGORIES = ['All', 'CCB Newsletter', 'CCB Brand', 'Youth Newsletter', 'Archived'];
+    const DEFAULT_UPLOAD_CATEGORY = 'CCB Newsletter';
+    let activeCategory = 'All';
+
+    // Archiving is fully computed, not a stored flag — no DB column, no scheduled job,
+    // always correct the instant the page loads. CCB Brand never archives (logos/branding
+    // don't go stale); everything else quietly drops out of the main views after 6 months
+    // and only shows up under the "Archived" pill. Per Kevin's decision, archived photos
+    // are never auto-deleted — archiving alone solves "the gallery gets hard to manage."
+    const ARCHIVE_AFTER_MS = 1000 * 60 * 60 * 24 * 30 * 6; // ~6 months
+    function isArchived(p) {
+      return p.category !== 'CCB Brand' && (Date.now() - p.addedAt) > ARCHIVE_AFTER_MS;
+    }
+
+    // Row-based "Show More" — starts at 5 rows, reveals 2 more per click. Column count comes
+    // from the grid's own resolved CSS (repeat(auto-fill, ...)), which is set by container
+    // width alone and stays accurate however many items are actually in the grid.
+    const INITIAL_ROWS = 5;
+    const ROWS_PER_CLICK = 2;
+    let visibleRows = INITIAL_ROWS;
+    function getColumnCount() {
+      const grid = document.getElementById('photo-grid');
+      const cols = getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length;
+      return cols || 1;
+    }
+
     function escapeHtml(str) {
       return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     }
@@ -393,7 +433,8 @@
           src,
           addedAt: new Date(row.added_at).getTime(),
           storagePath: row.storage_path,
-          external
+          external,
+          category: row.category || DEFAULT_UPLOAD_CATEGORY
         };
       });
     }
@@ -407,19 +448,42 @@
       return LIVE_BASE_URL + p.filename;
     }
 
+    function renderCategoryPills() {
+      const wrap = document.getElementById('category-pills');
+      wrap.innerHTML = CATEGORIES.map(c => `
+        <button type="button" class="category-pill ${c === activeCategory ? 'active' : ''}" data-category="${escapeHtml(c)}">${escapeHtml(c)}</button>
+      `).join('');
+    }
+
+    function filteredPhotos() {
+      if (activeCategory === 'Archived') return photos.filter(isArchived);
+      if (activeCategory === 'All') return photos.filter(p => !isArchived(p));
+      return photos.filter(p => p.category === activeCategory && !isArchived(p));
+    }
+
     // Pure render from whatever's already in `photos` — callers load fresh data first
     // (await loadPhotos(); renderPhotos();). Kept separate so the very first page load
     // can fire loadPhotos() early, in parallel with loadSidebar()'s session check,
     // instead of both waiting for one another.
     function renderPhotos() {
       const grid = document.getElementById('photo-grid');
-      const sorted = [...photos].sort((a, b) => b.addedAt - a.addedAt);
-      grid.innerHTML = `
+      const sorted = [...filteredPhotos()].sort((a, b) => b.addedAt - a.addedAt);
+
+      // No uploading from the Archived view — nothing gets uploaded straight into an
+      // archived state, so the upload tile (and its slot in the row math) doesn't apply there.
+      const showUploadTile = activeCategory !== 'Archived';
+      const columns = getColumnCount();
+      const visibleSlots = visibleRows * columns;
+      const reservedSlots = showUploadTile ? 1 : 0;
+      const photosToShow = sorted.slice(0, Math.max(0, visibleSlots - reservedSlots));
+      const hasMore = (sorted.length + reservedSlots) > visibleSlots;
+
+      grid.innerHTML = (showUploadTile ? `
         <button type="button" class="upload-tile" id="upload-tile-btn">
           <div class="plus">+</div>
           Click to upload a photo
           <div class="upload-tile-hint">JPG or PNG</div>
-        </button>` + sorted.map(p => `
+        </button>` : '') + photosToShow.map(p => `
           <div class="photo-card">
             <a href="${escapeHtml(photoLink(p))}" target="_blank" rel="noopener">
               <img class="thumb" src="${escapeHtml(p.src)}" alt="${escapeHtml(p.filename)}">
@@ -432,15 +496,18 @@
               </div>
             </div>
           </div>`).join('');
+
+      document.getElementById('show-more-wrap').innerHTML = hasMore
+        ? `<button type="button" class="btn btn-outline" id="show-more-btn">Show More</button>` : '';
     }
 
-    async function handleFile(file, finalName) {
+    async function handleFile(file, finalName, category) {
       const { error: uploadError } = await supabaseClient.storage.from('photos').upload(finalName, file);
       if (uploadError) {
         alert('Could not upload photo: ' + uploadError.message);
         return;
       }
-      const { error: insertError } = await supabaseClient.from('photos').insert({ filename: finalName, storage_path: finalName });
+      const { error: insertError } = await supabaseClient.from('photos').insert({ filename: finalName, storage_path: finalName, category });
       if (insertError) {
         alert('Could not save photo record: ' + insertError.message);
         return;
@@ -471,12 +538,19 @@
       document.getElementById('modal-title').textContent = 'Name This Photo';
       document.getElementById('modal-subtitle').textContent = 'Used for the file name and the link you copy';
       const baseName = file.name.replace(/\.[^.]+$/, '');
+      const categoryOptions = CATEGORIES.filter(c => c !== 'All');
       document.getElementById('modal-body').innerHTML = `
         <div class="form-error" id="upload-error"></div>
         <div class="field">
           <label for="upload-name">Photo Name<span class="required-mark">*</span></label>
           <input type="text" id="upload-name" placeholder="Church Crew" value="${escapeHtml(baseName)}">
           <div class="upload-name-preview" id="upload-name-preview"></div>
+        </div>
+        <div class="field">
+          <label for="upload-category">Category</label>
+          <select id="upload-category">
+            ${categoryOptions.map(c => `<option value="${escapeHtml(c)}" ${c === DEFAULT_UPLOAD_CATEGORY ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
+          </select>
         </div>`;
       const nameInput = document.getElementById('upload-name');
       const preview = document.getElementById('upload-name-preview');
@@ -500,8 +574,9 @@
               errorEl.classList.add('visible');
               return;
             }
+            const category = document.getElementById('upload-category').value;
             closeModal();
-            await handleFile(file, finalName);
+            await handleFile(file, finalName, category);
           } }
       ]);
       document.getElementById('modal-backdrop').classList.add('open');
@@ -514,7 +589,23 @@
     loadSidebar().then(async () => {
       if (!document.getElementById('photo-grid')) return;
       await dataPromise;
+      renderCategoryPills();
       renderPhotos();
+
+      document.getElementById('category-pills').addEventListener('click', (e) => {
+        const pill = e.target.closest('.category-pill');
+        if (!pill) return;
+        activeCategory = pill.dataset.category;
+        visibleRows = INITIAL_ROWS;
+        renderCategoryPills();
+        renderPhotos();
+      });
+
+      document.getElementById('show-more-wrap').addEventListener('click', (e) => {
+        if (!e.target.closest('#show-more-btn')) return;
+        visibleRows += ROWS_PER_CLICK;
+        renderPhotos();
+      });
 
       const fileInput = document.getElementById('upload-input');
       document.getElementById('upload-btn').addEventListener('click', () => fileInput.click());

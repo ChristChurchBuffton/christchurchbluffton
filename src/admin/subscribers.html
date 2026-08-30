@@ -37,6 +37,17 @@
     display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
     margin-bottom: 16px; flex-wrap: wrap;
   }
+  /* Same tab pattern as Prayer Requests' Log/Archive tabs (page-tab/page-tabs) — two
+     separate mailing lists, Christ Church Newsletter and Youth Group Newsletter, since
+     Youth Group has no public signup form yet and is manual-add only. */
+  .page-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .page-tab {
+    padding: 9px 18px; border-radius: 8px; border: 1px solid var(--border-gray);
+    background: var(--white); color: var(--text-muted); font-family: inherit; font-size: 13px;
+    font-weight: bold; cursor: pointer;
+  }
+  .page-tab:hover { border-color: var(--gold); color: var(--text-dark); }
+  .page-tab.active { background: var(--navy-blue); border-color: var(--navy-blue); color: var(--white); }
   .toolbar-filters { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
   .toolbar .filter-field { display: flex; flex-direction: column; gap: 6px; }
   .toolbar .filter-field label { font-size: 12px; font-weight: bold; color: var(--text-muted); }
@@ -295,6 +306,11 @@
       </div>
       <div class="content" id="page-body">
 
+        <div class="page-tabs page-width">
+          <button type="button" class="page-tab active" id="tab-christ-church" data-list="christ_church">Christ Church Newsletter</button>
+          <button type="button" class="page-tab" id="tab-youth-group" data-list="youth_group">Youth Group Newsletter</button>
+        </div>
+
         <div class="toolbar page-width">
           <div class="toolbar-filters">
             <div class="filter-field">
@@ -357,10 +373,12 @@
   <script src="js/shared.js"></script>
   <script>
     const SOURCE_LABELS = { newsletter: 'Newsletter Signup', contact: 'Contact Form', manual: 'Manually Added' };
+    const LIST_LABELS = { christ_church: 'Christ Church Newsletter', youth_group: 'Youth Group Newsletter' };
 
     let subscribers = [];
     let sourceFilter = '';
     let searchTerm = '';
+    let currentList = 'christ_church';
 
     function escapeHtml(str) {
       return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -382,7 +400,8 @@
         lastName: row.last_name,
         email: row.email,
         source: row.source,
-        addedAt: row.added_at
+        addedAt: row.added_at,
+        listType: row.list_type
       }));
     }
 
@@ -408,7 +427,11 @@
     }
 
     function renderSubscribers() {
-      const unique = dedupeByEmail(subscribers);
+      // Dedupe within the active list, not across both — the same email could legitimately
+      // be on both the Christ Church and Youth Group lists (e.g. a parent on both), and
+      // deduping across all subscribers first would silently drop them from whichever list
+      // isn't their most recent row.
+      const unique = dedupeByEmail(subscribers.filter(s => s.listType === currentList));
       let list = [...unique];
       if (sourceFilter) list = list.filter(s => s.source === sourceFilter);
       if (searchTerm) {
@@ -485,6 +508,13 @@
             <option value="newsletter" ${existing && existing.source === 'newsletter' ? 'selected' : ''}>Newsletter Signup</option>
             <option value="contact" ${existing && existing.source === 'contact' ? 'selected' : ''}>Contact Form</option>
           </select>
+        </div>
+        <div class="field">
+          <label for="sub-list">List</label>
+          <select id="sub-list">
+            <option value="christ_church" ${(existing ? existing.listType : currentList) === 'christ_church' ? 'selected' : ''}>Christ Church Newsletter</option>
+            <option value="youth_group" ${(existing ? existing.listType : currentList) === 'youth_group' ? 'selected' : ''}>Youth Group Newsletter</option>
+          </select>
         </div>`;
 
       setModalFooter([
@@ -499,6 +529,7 @@
       const lastName = document.getElementById('sub-last-name').value.trim();
       const email = document.getElementById('sub-email').value.trim();
       const source = document.getElementById('sub-source').value;
+      const listType = document.getElementById('sub-list').value;
       const errorBox = document.getElementById('sub-error');
       errorBox.classList.remove('visible');
 
@@ -512,9 +543,12 @@
         errorBox.classList.add('visible');
         return;
       }
-      const duplicate = subscribers.find(s => s.email.toLowerCase() === email.toLowerCase() && s.id !== existingId);
+      // Scoped to the list being added to, not every subscriber everywhere — the same
+      // person can legitimately be on both the Christ Church and Youth Group lists.
+      const duplicate = subscribers.find(s =>
+        s.email.toLowerCase() === email.toLowerCase() && s.listType === listType && s.id !== existingId);
       if (duplicate) {
-        errorBox.textContent = 'Someone with that email is already on the list.';
+        errorBox.textContent = `Someone with that email is already on the ${LIST_LABELS[listType]} list.`;
         errorBox.classList.add('visible');
         return;
       }
@@ -523,7 +557,7 @@
       if (existingId) {
         const { error } = await supabaseClient
           .from('subscribers')
-          .update({ first_name: firstName, last_name: lastName, email, source })
+          .update({ first_name: firstName, last_name: lastName, email, source, list_type: listType })
           .eq('id', existingId);
         if (error) {
           errorBox.textContent = error.message;
@@ -534,7 +568,7 @@
       } else {
         const { error } = await supabaseClient
           .from('subscribers')
-          .insert({ first_name: firstName, last_name: lastName, email, source });
+          .insert({ first_name: firstName, last_name: lastName, email, source, list_type: listType });
         if (error) {
           errorBox.textContent = error.message;
           errorBox.classList.add('visible');
@@ -579,6 +613,14 @@
       });
 
       document.getElementById('add-subscriber-btn').addEventListener('click', () => openSubscriberModal(null));
+
+      document.querySelectorAll('.page-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentList = btn.dataset.list;
+          document.querySelectorAll('.page-tab').forEach(b => b.classList.toggle('active', b === btn));
+          renderSubscribers();
+        });
+      });
 
       document.getElementById('source-filter').addEventListener('change', (e) => { sourceFilter = e.target.value; renderSubscribers(); });
       document.getElementById('search-input').addEventListener('input', (e) => { searchTerm = e.target.value; renderSubscribers(); });
