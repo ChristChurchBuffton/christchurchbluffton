@@ -184,7 +184,10 @@
             document.body.style.left = '';
             document.body.style.right = '';
             document.body.style.width = '';
-            window.scrollTo(0, lockedScrollY);
+            // Explicit behavior:'instant' is required here — this site sets
+            // html{scroll-behavior:smooth} globally, which would otherwise turn
+            // this restore into a visible animated scroll instead of a snap-back.
+            window.scrollTo({ top: lockedScrollY, left: 0, behavior: 'instant' });
         }
 
         function openPrayer() {

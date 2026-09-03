@@ -226,6 +226,12 @@
   .anon-check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dark); cursor: pointer; margin-bottom: 16px; }
   .anon-check-row input { width: 15px; height: 15px; accent-color: var(--gold-text); }
 
+  .care-type-checklist { display: flex; flex-direction: column; gap: 8px; }
+  .care-type-row { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: normal; color: var(--text-dark); cursor: pointer; }
+  .care-type-row input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--gold-text); flex-shrink: 0; }
+  .other-need-field { display: none; margin-top: 10px; }
+  .other-need-field.visible { display: block; }
+
   .form-error { background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; }
   .form-error.visible { display: block; }
 </style>
@@ -421,6 +427,9 @@
   <script>
     const STATUS_LABELS = { active: 'Active', answered: 'Answered', archived: 'Archived' };
     const STATUS_ORDER = { active: 0, answered: 1, archived: 2 };
+    // Keep in sync with the checkbox options on the public site's prayer forms
+    // (src/includes/prayer-fab.html and src/contact.html).
+    const CARE_TYPES = ['Prayer Request', 'Hospital/Home Visit', 'Communion', 'Bereavement/Grief Support', 'Spiritual Guidance', 'Other/Need'];
 
     let prayers = [];
     let statusFilter = '';
@@ -462,6 +471,8 @@
         email: data.isAnonymous ? null : (data.email || null),
         phone: data.isAnonymous ? null : (data.phone || null),
         request_text: data.requestText,
+        care_types: data.careTypes && data.careTypes.length ? data.careTypes : null,
+        other_need_text: data.otherNeedText || null,
         status: data.status,
         submitted_at: data.submittedAt
       };
@@ -618,6 +629,20 @@
           <label for="prayer-text">Request<span class="required-mark">*</span></label>
           <textarea id="prayer-text" placeholder="What should we be praying for?">${existing ? escapeHtml(existing.requestText) : ''}</textarea>
         </div>
+        <div class="field">
+          <label>What do they need assistance with?</label>
+          <div class="care-type-checklist">
+            ${CARE_TYPES.map((t, i) => `
+              <label class="care-type-row">
+                <input type="checkbox" class="care-type-check" value="${escapeHtml(t)}" id="prayer-care-${i}" ${existing && existing.careTypes.includes(t) ? 'checked' : ''}>
+                ${escapeHtml(t)}
+              </label>`).join('')}
+          </div>
+          <div class="field other-need-field${existing && existing.careTypes.includes('Other/Need') ? ' visible' : ''}" id="other-need-field">
+            <label for="prayer-other-need">Other/Need details</label>
+            <textarea id="prayer-other-need" placeholder="Briefly describe the need">${existing ? escapeHtml(existing.otherNeedText) : ''}</textarea>
+          </div>
+        </div>
         <div class="name-row">
           <div class="field">
             <label for="prayer-status">Status</label>
@@ -635,6 +660,11 @@
 
       document.getElementById('prayer-anonymous').addEventListener('change', (e) => toggleAnonFields(e.target.checked));
 
+      const otherNeedCheck = document.querySelector('.care-type-check[value="Other/Need"]');
+      otherNeedCheck.addEventListener('change', (e) => {
+        document.getElementById('other-need-field').classList.toggle('visible', e.target.checked);
+      });
+
       setModalFooter([
         { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
         { label: existing ? 'Save Changes' : 'Add Prayer or Pastoral Request', className: 'btn btn-gold', onClick: () => submitPrayerForm(existing ? existing.id : null) }
@@ -648,6 +678,8 @@
       const email = isAnonymous ? '' : document.getElementById('requester-email').value.trim();
       const phone = isAnonymous ? '' : formatPhone(document.getElementById('requester-phone').value.trim());
       const requestText = document.getElementById('prayer-text').value.trim();
+      const careTypes = Array.from(document.querySelectorAll('.care-type-check:checked')).map(cb => cb.value);
+      const otherNeedText = careTypes.includes('Other/Need') ? document.getElementById('prayer-other-need').value.trim() : '';
       const status = document.getElementById('prayer-status').value;
       const submittedAt = document.getElementById('prayer-date').value;
       const errorBox = document.getElementById('prayer-error');
@@ -664,7 +696,7 @@
         return;
       }
 
-      const data = { isAnonymous, requesterName, email, phone, requestText, status, submittedAt };
+      const data = { isAnonymous, requesterName, email, phone, requestText, careTypes, otherNeedText, status, submittedAt };
       const label = isAnonymous ? 'Anonymous request' : requesterName;
       const row = prayerToRow(data);
 
