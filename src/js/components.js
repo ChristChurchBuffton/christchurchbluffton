@@ -165,10 +165,33 @@
             trapFocus(e, popup);
         }
 
+        // Locks background scroll while the popup is open. overflow:hidden on body alone
+        // doesn't reliably stop touch-scrolling behind a fixed-position overlay on iOS
+        // Safari — pinning the body to position:fixed (offset by the current scroll
+        // position) is the standard cross-browser fix. Scroll position is restored on close.
+        var lockedScrollY = 0;
+        function lockBodyScroll() {
+            lockedScrollY = window.scrollY;
+            document.body.style.position = 'fixed';
+            document.body.style.top = (-lockedScrollY) + 'px';
+            document.body.style.left = '0';
+            document.body.style.right = '0';
+            document.body.style.width = '100%';
+        }
+        function unlockBodyScroll() {
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            document.body.style.width = '';
+            window.scrollTo(0, lockedScrollY);
+        }
+
         function openPrayer() {
             popup.classList.add('active');
             overlay.classList.add('active');
             fab.setAttribute('aria-expanded', 'true');
+            lockBodyScroll();
             document.addEventListener('keydown', prayerKeydown);
             var firstField = document.getElementById('prayerName');
             if (firstField) firstField.focus();
@@ -177,6 +200,7 @@
             popup.classList.remove('active');
             overlay.classList.remove('active');
             fab.setAttribute('aria-expanded', 'false');
+            unlockBodyScroll();
             document.removeEventListener('keydown', prayerKeydown);
             fab.focus();
 
