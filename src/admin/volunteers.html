@@ -424,11 +424,13 @@
     // Seeded from the real ministry teams on the live site's Serve page (content.html pageContent['Serve']),
     // with Greeters/Ushers split into two separate teams per Kevin's request (they aren't the same team).
     const TEAMS = [
-      'Greeters', 'Ushers', 'Altar Guild', 'Communion', 'Lay Readers', 'Nursery',
-      'Musical Worship', 'Technology & Social Media', 'Safety', 'Refreshments & Hospitality'
+      'Altar Guild', 'Communion', 'Greeters', 'Lay Readers', 'Musical Worship', 'Nursery',
+      'Prayer & Pastoral', 'Refreshments & Hospitality', 'Safety', 'Technology & Social Media',
+      'Ushers', 'Youth'
     ];
     // Safety requires adult volunteers, so the Youth option doesn't apply there.
     const YOUTH_EXCLUDED_TEAM = 'Safety';
+    const YOUTH_TEAM = 'Youth';
 
     let volunteers = [];
     let subTeamsData = {}; // { teamName: [sub-team names] } — editable per team via "Manage Sub-Teams"
@@ -476,6 +478,8 @@
         parentName: row.parent_name,
         parentPhone: row.parent_phone,
         parentEmail: row.parent_email,
+        backgroundCheckApprovedAt: row.background_check_approved_at || '',
+        backgroundCheckExpiresAt: row.background_check_expires_at || '',
         addedAt: row.added_at ? new Date(row.added_at).getTime() : null
       };
     }
@@ -586,17 +590,26 @@
     // scoped to one team, so re-showing the team name/chip on each row would just repeat the
     // card header) — used both for the "Team Lead" badge and to scope sub-team display to only
     // this team, since a volunteer can belong to more than one team at once.
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
     function volunteerRowHtml(v, teamContext) {
       const thisTeam = v.teams.find(t => t.name === teamContext);
       const subTeamTitle = thisTeam && thisTeam.subTeam ? thisTeam.subTeam : '';
       const isLeadHere = !!(thisTeam && thisTeam.isLead);
+      const isYouthTeam = teamContext === 'Youth';
+      const lastCellHtml = isYouthTeam
+        ? `<div class="parent-info">Approved: ${escapeHtml(formatDate(v.backgroundCheckApprovedAt))}<br>Expires: ${escapeHtml(formatDate(v.backgroundCheckExpiresAt))}</div>`
+        : '';
       return `
         <tr>
           <td class="volunteer-name" data-label="Name">${escapeHtml(v.firstName)} ${escapeHtml(v.lastName)}${v.isYouth ? '<span class="youth-badge">Youth</span>' : ''}${isLeadHere ? '<span class="lead-badge">&#9733; Team Lead</span>' : ''}</td>
           <td class="truncate" data-label="Sub-Team" title="${escapeHtml(subTeamTitle)}">${subTeamCellHtml(v, teamContext)}</td>
           <td class="truncate" data-label="Phone" title="${v.phone ? escapeHtml(formatPhone(v.phone)) : ''}">${v.phone ? escapeHtml(formatPhone(v.phone)) : '—'}</td>
           <td class="truncate" data-label="Email" title="${escapeHtml(v.email)}">${escapeHtml(v.email)}</td>
-          <td${v.isYouth ? ' data-label="Parent / Guardian"' : ''}>${v.isYouth ? `<div class="parent-info"><span class="parent-name">${escapeHtml(v.parentName || '(no name)')}</span><br>${escapeHtml(formatPhone(v.parentPhone))}${v.parentPhone && v.parentEmail ? ' &middot; ' : ''}${escapeHtml(v.parentEmail || '')}</div>` : ''}</td>
+          <td${isYouthTeam ? ' data-label="Background Check"' : ''}>${lastCellHtml}</td>
           <td>
             <div class="row-actions">
               <button type="button" class="icon-btn" data-action="edit" data-id="${v.id}" title="Edit" aria-label="Edit">
@@ -620,11 +633,12 @@
 
     function volunteerTableHtml(list, teamContext) {
       if (list.length === 0) return `<div class="volunteer-empty">No volunteers here yet.</div>`;
+      const lastHeader = teamContext === 'Youth' ? 'Background Check' : '';
       return `
         <div class="table-scroll">
         <table class="volunteer-table">
           ${VOLUNTEER_COLGROUP}
-          <thead><tr><th>Name</th><th>Sub-Team</th><th>Phone</th><th>Email</th><th>Parent / Guardian</th><th></th></tr></thead>
+          <thead><tr><th>Name</th><th>Sub-Team</th><th>Phone</th><th>Email</th><th>${lastHeader}</th><th></th></tr></thead>
           <tbody>${list.map(v => volunteerRowHtml(v, teamContext)).join('')}</tbody>
         </table>
         </div>`;
@@ -850,6 +864,16 @@
               <input type="email" id="vol-parent-email" placeholder="john@example.com" value="${existing ? escapeHtml(existing.parentEmail || '') : ''}">
             </div>
           </div>
+        </div>
+        <div class="parent-fields" id="bg-check-fields">
+          <div class="field">
+            <label for="vol-bg-approved">Background Check Approved</label>
+            <input type="date" id="vol-bg-approved" value="${existing ? escapeHtml(existing.backgroundCheckApprovedAt || '') : ''}">
+          </div>
+          <div class="field">
+            <label for="vol-bg-expires">Background Check Expires</label>
+            <input type="date" id="vol-bg-expires" value="${existing ? escapeHtml(existing.backgroundCheckExpiresAt || '') : ''}">
+          </div>
         </div>`;
 
       wireLivePhoneFormat(document.getElementById('vol-phone'));
@@ -864,8 +888,10 @@
           leadRow.style.display = cb.checked ? 'flex' : 'none';
           if (!cb.checked) document.getElementById(`vol-lead-${i}`).checked = false;
           if (cb.dataset.team === YOUTH_EXCLUDED_TEAM) updateYouthAvailability();
+          if (cb.dataset.team === YOUTH_TEAM) updateBgCheckVisibility();
         });
       });
+      updateBgCheckVisibility();
 
       const youthCheck = document.getElementById('vol-is-youth');
       document.getElementById('parent-fields').classList.toggle('visible', youthCheck.checked);
@@ -879,6 +905,15 @@
         { label: existing ? 'Save Changes' : 'Add Volunteer', className: 'btn btn-gold', onClick: () => submitVolunteerForm(existing ? existing.id : null) }
       ]);
       document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    // Background-check dates only matter for someone actually serving on the Youth team —
+    // shown/hidden based on that team checkbox specifically, not the "is a youth" age checkbox
+    // (an adult leading the Youth ministry needs a background check; a 16-year-old on the
+    // Nursery team doesn't).
+    function updateBgCheckVisibility() {
+      const youthTeamCheck = Array.from(document.querySelectorAll('.team-check')).find(cb => cb.dataset.team === YOUTH_TEAM);
+      document.getElementById('bg-check-fields').classList.toggle('visible', !!(youthTeamCheck && youthTeamCheck.checked));
     }
 
     // Safety team members must be adults — disable and clear the Youth option while Safety is checked.
@@ -927,6 +962,9 @@
       const parentName = document.getElementById('vol-parent-name').value.trim();
       const parentPhone = document.getElementById('vol-parent-phone').value.trim();
       const parentEmail = document.getElementById('vol-parent-email').value.trim();
+      const onYouthTeam = teams.some(t => t.name === YOUTH_TEAM);
+      const bgCheckApproved = document.getElementById('vol-bg-approved').value;
+      const bgCheckExpires = document.getElementById('vol-bg-expires').value;
       const errorBox = document.getElementById('vol-error');
       errorBox.classList.remove('visible');
 
@@ -959,7 +997,9 @@
         is_youth: isYouth,
         parent_name: isYouth ? (parentName || null) : null,
         parent_phone: isYouth ? (parentPhone || null) : null,
-        parent_email: isYouth ? (parentEmail || null) : null
+        parent_email: isYouth ? (parentEmail || null) : null,
+        background_check_approved_at: onYouthTeam ? (bgCheckApproved || null) : null,
+        background_check_expires_at: onYouthTeam ? (bgCheckExpires || null) : null
       };
 
       const fullName = `${firstName} ${lastName}`;
