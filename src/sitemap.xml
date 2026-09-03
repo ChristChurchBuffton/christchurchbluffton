@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://christchurchbluffton.org/</loc>
-    <lastmod>2026-08-14</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
@@ -22,7 +22,7 @@
   </url>
   <url>
     <loc>https://christchurchbluffton.org/serve</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-07</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
@@ -32,17 +32,17 @@
   </url>
   <url>
     <loc>https://christchurchbluffton.org/contact</loc>
-    <lastmod>2026-08-14</lastmod>
+    <lastmod>2026-09-03</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://christchurchbluffton.org/privacy</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://christchurchbluffton.org/terms</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <priority>0.3</priority>
   </url>
 </urlset>
