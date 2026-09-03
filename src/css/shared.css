@@ -1000,6 +1000,16 @@ textarea:focus-visible {
     .footer-links-give { text-align: center; }
     .newsletter-form { margin: 0 auto; }
 
+    /* iOS Safari auto-zooms into any focused input/textarea under 16px — these are
+       0.875rem (14px) at the base/desktop size, which is fine with a mouse but
+       triggers the zoom on a real phone. 16px here overrides that for touch widths
+       only, leaving the smaller desktop size untouched. */
+    .newsletter-form input[type="email"],
+    .prayer-popup-body input,
+    .prayer-popup-body textarea {
+        font-size: 16px;
+    }
+
     .prayer-fab {
         width: 128px;
         min-height: 58px;

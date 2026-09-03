@@ -421,6 +421,15 @@
             .cta-heading { font-size: 1rem; }
             .cta-text { font-size: 0.875rem; }
             .cta-btn { padding: 10px 28px; font-size: 0.875rem; }
+
+            /* iOS Safari auto-zooms into any focused input/textarea/select under 16px —
+               0.875rem (14px) is fine on desktop but triggers the zoom on a real phone.
+               16px here overrides that for touch widths only, desktop is untouched. */
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                font-size: 16px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -444,7 +453,7 @@
             .form-group input,
             .form-group select,
             .form-group textarea {
-                font-size: 0.75rem;
+                font-size: 16px;
                 padding: 8px 10px;
             }
 
