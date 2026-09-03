@@ -691,12 +691,12 @@ textarea:focus-visible {
     bottom: 20px;
     right: 30px;
     background: var(--navy-blue);
-    border-radius: 50%;
+    border-radius: 29px;
     align-items: center;
     justify-content: center;
-    width: 70px;
-    height: 70px;
-    padding: 10px;
+    width: 128px;
+    min-height: 58px;
+    padding: 10px 8px;
     box-shadow: 0 4px 20px rgba(48, 59, 106, 0.35);
     z-index: 89;
     cursor: pointer;
@@ -761,11 +761,14 @@ textarea:focus-visible {
     right: 30px;
     width: 340px;
     max-width: calc(100vw - 48px);
+    max-height: calc(100vh - 200px);
     background: var(--white);
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(48, 59, 106, 0.3);
     z-index: 90;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
     transform: translateY(20px);
     opacity: 0;
     transition: transform 0.3s ease, opacity 0.3s ease;
@@ -871,6 +874,41 @@ textarea:focus-visible {
     transform: translateY(-2px);
 }
 
+.care-type-fieldset {
+    border: 1px solid var(--light-gray);
+    border-radius: 8px;
+    padding: 12px 14px 14px;
+    margin: 0 0 14px;
+}
+
+.care-type-fieldset legend {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--dark-gray);
+    padding: 0 4px;
+}
+
+.care-type-option {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem !important;
+    margin-bottom: 8px !important;
+    cursor: pointer;
+}
+
+.care-type-option:last-of-type {
+    margin-bottom: 0 !important;
+}
+
+.care-type-fieldset input[type="checkbox"] {
+    width: auto !important;
+    padding: 0 !important;
+    margin: 0;
+    accent-color: var(--gold);
+}
+
 .prayer-success {
     display: none;
     text-align: center;
@@ -963,10 +1001,11 @@ textarea:focus-visible {
     .newsletter-form { margin: 0 auto; }
 
     .prayer-fab {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        padding: 8px;
+        width: 128px;
+        min-height: 58px;
+        height: auto;
+        border-radius: 29px;
+        padding: 10px 8px;
         font-size: 0.75rem;
         line-height: 1.2;
         text-align: center;
@@ -979,7 +1018,7 @@ textarea:focus-visible {
         bottom: 80px;
         right: 16px;
         width: 300px;
-        max-height: calc(100vh - 140px);
+        max-height: calc(100vh - 160px);
         overflow-y: auto;
     }
 

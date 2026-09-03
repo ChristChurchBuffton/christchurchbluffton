@@ -1,0 +1,28 @@
+To: Bradley Chestnut (bradley@christchurchbluffton.org)
+Subject: Admin Panel Invite + Prayer Email Access
+
+Hey Bradley,
+
+Moving forward, if you prefer me to split multiple topics into separate emails, please let me know. I know everyone has their own preferences.
+
+1. Admin Panel Invite
+As I mentioned yesterday, the link someone receives when invited to join the admin panel expires 24 hours after it is sent. I checked the church's database server and it seems the maximum expiration time is 24 hours. The security behind this is that the link acts like a temporary key into the account, so the shorter it stays active, the less time there is for it to land in the wrong hands.
+
+I could build a system with a longer expiration, like 72 hours, but that would require building a separate invite system from scratch. I think 24 hours is fine, as long as the sender also follows up directly with the new person. Let me know your thoughts.
+
+2. Prayer Request Email
+I created a prayers@ email about 6 months ago, which hasn't been active. I reset the password for it and I presume you'd like to have access. All prayer and pastoral requests will arrive to Jonathan, you, and prayers@, and I'll add Bob today. And as a reminder, the prayers also go into the admin panel.
+
+Email: prayers@christchurchbluffton.org
+Temp password: 2Pa>rNbAPY6E6gD>
+
+Additionally, this link is part of the email the submitter receives: "If you'd like to talk with someone directly, you're always welcome to reach out at admin@christchurchbluffton.org."
+
+Do you have suggestions for someone other than admin@ to place there?
+
+3. Prayer & Pastoral Care
+Prior to the youth page updates and the content management system, I'm going to make the changes we discussed regarding Prayer & Pastoral Care. Specifically, I will update the wording, add the new section, and update the Prayer & Pastoral Care/Contact Form selection boxes to reflect the type of care they would like to receive. This is the quickest task.
+
+I'll send the temporary link once it is complete, prior to pushing it live.
+
+Kevin

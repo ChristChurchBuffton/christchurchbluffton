@@ -90,7 +90,8 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { name, email, phone, prayer, website_url_confirm, turnstileToken } = JSON.parse(event.body);
+    const { name, email, phone, prayer, careTypes, otherNeedText, website_url_confirm, turnstileToken } = JSON.parse(event.body);
+    const cleanCareTypes = Array.isArray(careTypes) ? careTypes.filter(Boolean) : [];
 
     // Honeypot — bots fill this hidden field, real users don't
     if (website_url_confirm) {
@@ -127,6 +128,8 @@ exports.handler = async (event) => {
             email: email || null,
             phone: phone || null,
             request_text: prayer,
+            care_types: cleanCareTypes.length ? cleanCareTypes : null,
+            other_need_text: otherNeedText || null,
             status: 'active',
             submitted_at: new Date().toISOString().slice(0, 10)
           }),
@@ -145,14 +148,16 @@ exports.handler = async (event) => {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from: process.env.EMAIL_FROM || 'Prayer Request <notifications@christchurchbluffton.org>',
+          from: process.env.EMAIL_FROM || 'Prayer & Pastoral Care <notifications@christchurchbluffton.org>',
           to: notifyTo,
-          subject: `New Prayer Request — ${name || 'Anonymous'}`,
-          text: `New prayer request:\n\nName: ${name || 'Anonymous'}${email ? `\nEmail: ${email}` : ''}${phone ? `\nPhone: ${phone}` : ''}\nPrayer: ${prayer}`,
-          html: emailShell('Prayer Request', [
+          subject: `New Prayer & Pastoral Care Request — ${name || 'Anonymous'}`,
+          text: `New prayer & pastoral care request:\n\nName: ${name || 'Anonymous'}${email ? `\nEmail: ${email}` : ''}${phone ? `\nPhone: ${phone}` : ''}${cleanCareTypes.length ? `\nCare Type(s): ${cleanCareTypes.join(', ')}` : ''}${otherNeedText ? `\nOther/Need: ${otherNeedText}` : ''}\nPrayer: ${prayer}`,
+          html: emailShell('Prayer & Pastoral Care Request', [
             fieldRow('Name', name || 'Anonymous'),
             email ? fieldRow('Email', `<a href="mailto:${email}" style="color:#303b6a;">${email}</a>`) : '',
             phone ? fieldRow('Phone', phone) : '',
+            cleanCareTypes.length ? fieldRow('Care Type(s)', cleanCareTypes.join(', ')) : '',
+            otherNeedText ? fieldRow('Other/Need', otherNeedText) : '',
             fieldRow('Prayer', prayer.replace(/\n/g, '<br>'))
           ].join(''))
         }),
@@ -170,9 +175,9 @@ exports.handler = async (event) => {
           from: process.env.EMAIL_FROM || 'Christ Church Bluffton <notifications@christchurchbluffton.org>',
           reply_to: 'admin@christchurchbluffton.org',
           to: [email],
-          subject: "We've Received Your Prayer Request",
+          subject: "We've Received Your Prayer & Pastoral Care Request",
           text: `Thank you for trusting us with this.\n\nYour prayer request has been received, and our pastoral team will be lifting you up.\n\nPrayer: ${prayer}\n\nIf you'd like to talk with someone directly, you're always welcome to reach out at admin@christchurchbluffton.org.\n\nWith you in prayer,\nChrist Church Bluffton`,
-          html: replyShell('Prayer Received', `
+          html: replyShell('Request Received', `
           <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">
             Thank you for trusting us with this.
           </p>

@@ -186,14 +186,23 @@
             document.getElementById('prayerSuccess').classList.remove('active');
             document.getElementById('prayerFormBody').style.display = '';
             form.reset();
+            document.getElementById('prayerOtherNeedText').style.display = 'none';
             var btn = form.querySelector('.prayer-submit-btn');
-            btn.textContent = 'Submit Prayer';
+            btn.textContent = 'Submit Request';
             btn.disabled = false;
         }
 
         fab.addEventListener('click', openPrayer);
         closeBtn.addEventListener('click', closePrayer);
         overlay.addEventListener('click', closePrayer);
+
+        // "Other/Need" reveals a free-text field to briefly describe it — hidden otherwise
+        var otherNeedCheck = document.getElementById('prayerOtherNeedCheck');
+        var otherNeedText = document.getElementById('prayerOtherNeedText');
+        otherNeedCheck.addEventListener('change', function() {
+            otherNeedText.style.display = this.checked ? '' : 'none';
+            if (!this.checked) otherNeedText.value = '';
+        });
 
         // Fade the FAB out while the footer, or a card block it would otherwise sit on
         // top of (like the contact page's info cards), is in view.
@@ -236,6 +245,8 @@
             var token = '';
             try { token = turnstile.getResponse(form.querySelector('.cf-turnstile')); } catch (err) {}
 
+            var careTypes = Array.prototype.slice.call(form.querySelectorAll('[name="careType"]:checked')).map(function(el) { return el.value; });
+
             fetch('/api/prayer', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -244,6 +255,8 @@
                     email: form.querySelector('[name="email"]').value,
                     phone: form.querySelector('[name="phone"]').value,
                     prayer: form.querySelector('[name="prayer"]').value,
+                    careTypes: careTypes,
+                    otherNeedText: form.querySelector('[name="otherNeedText"]').value || '',
                     website_url_confirm: hp ? hp.value : '',
                     turnstileToken: token
                 })
@@ -255,14 +268,14 @@
                     try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
                     try { gtag('event', 'generate_lead', { form_name: 'prayer_request' }); } catch (err) {}
                 } else {
-                    btn.textContent = 'Submit Prayer';
+                    btn.textContent = 'Submit Request';
                     btn.disabled = false;
                     try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
                     alert('Something went wrong. Please try again or email us directly.');
                 }
             })
             .catch(function() {
-                btn.textContent = 'Submit Prayer';
+                btn.textContent = 'Submit Request';
                 btn.disabled = false;
                 try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
                 alert('Something went wrong. Please try again or email us directly.');

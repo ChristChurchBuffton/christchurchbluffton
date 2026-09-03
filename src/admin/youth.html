@@ -1,3 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<title>Youth — Christ Church Bluffton Admin</title>
+<link rel="stylesheet" href="css/shared.css">
+<style>
+  .coming-soon-panel {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 80px 24px; color: var(--text-muted);
+  }
+  .coming-soon-panel .icon { font-size: 40px; margin-bottom: 16px; }
+  .coming-soon-panel h2 { font-family: Georgia, 'Times New Roman', serif; color: var(--navy-blue); margin: 0 0 8px; }
+</style>
+</head>
+<body data-page="youth">
+  <div class="app-shell">
+    <div id="sidebar-mount">
 <aside class="sidebar">
   <div class="sidebar-brand">
     <img class="brand-crest" src="assets/site-images/logo-dark-bg.png" alt="Christ Church Bluffton crest">
@@ -92,3 +114,27 @@
     </div>
   </div>
 </aside>
+  </div>
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <h1>Youth</h1>
+          <div class="subtitle">A dedicated space for youth ministry — parent and student info, more to come</div>
+        </div>
+      </div>
+      <div class="content" id="page-body">
+        <div class="coming-soon-panel">
+          <div class="icon">🚧</div>
+          <h2>Coming Soon</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    loadSidebar();
+  </script>
+</body>
+</html>

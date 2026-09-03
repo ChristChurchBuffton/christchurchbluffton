@@ -543,15 +543,27 @@
                                     <option value="updates">Receiving Updates</option>
                                     <option value="visiting">Planning to Visit</option>
                                     <option value="volunteering">Volunteering</option>
-                                    <option value="prayer">Prayer Request</option>
+                                    <option value="prayer">Prayer & Pastoral Care</option>
                                     <option value="other">Other</option>
                                 </select>
                             </div>
-                            <div class="form-group" id="prayerContactGroup" style="display:none;">
-                                <label style="display:flex; align-items:center; gap:8px; font-weight:400; cursor:pointer;">
-                                    <input type="checkbox" id="prayerContact" name="prayerContact" style="width:auto;">
-                                    Would you like someone to follow up with you about this?
-                                </label>
+                            <div id="prayerContactGroup" style="display:none;">
+                                <fieldset class="form-group care-type-fieldset">
+                                    <legend>What type of care are you looking for? <span class="optional">(optional, select any that apply)</span></legend>
+                                    <label class="care-type-option"><input type="checkbox" name="careType" value="Prayer Request"> Prayer Request</label>
+                                    <label class="care-type-option"><input type="checkbox" name="careType" value="Hospital/Home Visit"> Hospital/Home Visit</label>
+                                    <label class="care-type-option"><input type="checkbox" name="careType" value="Communion"> Communion</label>
+                                    <label class="care-type-option"><input type="checkbox" name="careType" value="Bereavement/Grief Support"> Bereavement/Grief Support</label>
+                                    <label class="care-type-option"><input type="checkbox" name="careType" value="Spiritual Guidance"> Spiritual Guidance</label>
+                                    <label class="care-type-option"><input type="checkbox" name="careType" id="contactOtherNeedCheck" value="Other/Need"> Other/Need</label>
+                                    <input type="text" id="contactOtherNeedText" name="otherNeedText" placeholder="Briefly describe your need" style="display:none;margin-top:8px;">
+                                </fieldset>
+                                <div class="form-group">
+                                    <label style="display:flex; align-items:flex-start; gap:8px; font-weight:400; cursor:pointer;">
+                                        <input type="checkbox" id="prayerContact" name="prayerContact" style="width:auto;margin-top:3px;">
+                                        Would you like someone to follow up with you about this?
+                                    </label>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="message">Message <span class="optional">(optional)</span></label>
@@ -588,8 +600,9 @@
 
     </main>
 
-    <!-- Prayer FAB (loaded from includes/prayer-fab.html) -->
-    <div id="site-prayer"></div>
+    <!-- No Prayer & Pastoral Care FAB on this page — the Contact form's own
+         "I'm Interested In" dropdown already covers that, so the floating
+         button would just be redundant here. -->
 
     <!-- Footer (loaded from includes/footer.html) -->
     <div id="site-footer"></div>
@@ -613,12 +626,24 @@
         // Contact form handler
         if (window.renderTurnstile) renderTurnstile(document.querySelector('.cf-turnstile'));
 
-        // Only relevant when "Prayer Request" is selected — hidden (and unchecked) otherwise
+        // Only relevant when "Prayer & Pastoral Care" is selected — hidden (and cleared) otherwise
         document.getElementById('interest').addEventListener('change', function() {
             var show = this.value === 'prayer';
             var group = document.getElementById('prayerContactGroup');
             group.style.display = show ? '' : 'none';
-            if (!show) document.getElementById('prayerContact').checked = false;
+            if (!show) {
+                document.getElementById('prayerContact').checked = false;
+                group.querySelectorAll('[name="careType"]').forEach(function(cb) { cb.checked = false; });
+                document.getElementById('contactOtherNeedText').style.display = 'none';
+                document.getElementById('contactOtherNeedText').value = '';
+            }
+        });
+
+        // "Other/Need" reveals a free-text field to briefly describe it — hidden otherwise
+        document.getElementById('contactOtherNeedCheck').addEventListener('change', function() {
+            var otherNeedText = document.getElementById('contactOtherNeedText');
+            otherNeedText.style.display = this.checked ? '' : 'none';
+            if (!this.checked) otherNeedText.value = '';
         });
 
         document.getElementById('contactForm').addEventListener('submit', function(e) {
@@ -636,13 +661,18 @@
             var token = '';
             try { token = turnstile.getResponse(form.querySelector('.cf-turnstile')); } catch(e) {}
 
+            var isPrayer = form.interest.value === 'prayer';
+            var careTypes = isPrayer ? Array.prototype.slice.call(form.querySelectorAll('[name="careType"]:checked')).map(function(el) { return el.value; }) : [];
+
             var data = {
                 fullName: form.fullName.value,
                 email: form.email.value,
                 phone: form.phone.value || '',
                 interest: form.interest.value,
                 message: form.message.value || '',
-                prayerContact: form.interest.value === 'prayer' && form.prayerContact.checked,
+                prayerContact: isPrayer && form.prayerContact.checked,
+                careTypes: careTypes,
+                otherNeedText: isPrayer ? (form.otherNeedText.value || '') : '',
                 website_url_confirm: hp ? hp.value : '',
                 turnstileToken: token
             };

@@ -242,6 +242,16 @@ a { color: var(--navy-blue); }
   flex-shrink: 0;
 }
 
+/* "Prayer & Pastoral Care Requests" is long enough to wrap onto 2 lines in the sidebar's
+   width — align its icon to the top instead of the default vertical-center so it doesn't
+   float awkwardly between the two lines (same fix as the Contact page's follow-up checkbox). */
+.sidebar nav a[data-page="prayers"] {
+  align-items: flex-start;
+}
+.sidebar nav a[data-page="prayers"] .icon {
+  margin-top: 2px;
+}
+
 .sidebar nav a:hover {
   background: rgba(255,255,255,0.06);
   color: var(--white);

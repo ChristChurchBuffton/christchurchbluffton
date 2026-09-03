@@ -106,7 +106,8 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { fullName, email, phone, interest, message, prayerContact, website_url_confirm, turnstileToken } = JSON.parse(event.body);
+    const { fullName, email, phone, interest, message, prayerContact, careTypes, otherNeedText, website_url_confirm, turnstileToken } = JSON.parse(event.body);
+    const cleanCareTypes = Array.isArray(careTypes) ? careTypes.filter(Boolean) : [];
 
     // Honeypot — bots fill this hidden field, real users don't
     if (website_url_confirm) {
@@ -183,6 +184,8 @@ exports.handler = async (event) => {
               email,
               phone: phone || null,
               request_text: message || 'Submitted via the contact form — no details given, please follow up.',
+              care_types: cleanCareTypes.length ? cleanCareTypes : null,
+              other_need_text: otherNeedText || null,
               status: 'active',
               submitted_at: new Date().toISOString().slice(0, 10)
             }),
@@ -197,13 +200,18 @@ exports.handler = async (event) => {
 
     // Send email notification via Resend
     if (process.env.RESEND_API_KEY) {
-      const notifyTo = await getRecipients('contact', ['info@christchurchbluffton.org', 'admin@christchurchbluffton.org']);
+      // A Prayer & Pastoral Care submission notifies the SAME people as the dedicated
+      // Prayer Request form, not the general contact-form recipients — otherwise a prayer
+      // request submitted here would silently skip Bradley, Bob, and prayers@.
+      const notifyTo = interest === 'prayer'
+        ? await getRecipients('prayer', ['admin@christchurchbluffton.org', 'jonathan@christchurchbluffton.org', 'bradley@christchurchbluffton.org'])
+        : await getRecipients('contact', ['info@christchurchbluffton.org', 'admin@christchurchbluffton.org']);
 
       const interestLabels = {
         updates: 'Receiving Updates',
         visiting: 'Planning to Visit',
         volunteering: 'Volunteering',
-        prayer: 'Prayer Request',
+        prayer: 'Prayer & Pastoral Care',
         other: 'Other'
       };
 
@@ -213,6 +221,8 @@ exports.handler = async (event) => {
         fieldRow('Phone', phone || '(none)'),
         fieldRow('Interested In', interestLabels[interest] || interest),
         interest === 'prayer' ? fieldRow('Wants Follow-Up', prayerContact ? 'Yes — please reach out' : 'No') : '',
+        interest === 'prayer' && cleanCareTypes.length ? fieldRow('Care Type(s)', cleanCareTypes.join(', ')) : '',
+        interest === 'prayer' && otherNeedText ? fieldRow('Other/Need', otherNeedText) : '',
         fieldRow('Message', (message || '(none)').replace(/\n/g, '<br>'))
       ].join('');
 
@@ -238,9 +248,9 @@ exports.handler = async (event) => {
 
       if (interest === 'prayer') {
         const prayerText = message || 'Submitted via the contact form — no details given, please follow up.';
-        subject = "We've Received Your Prayer Request";
+        subject = "We've Received Your Prayer & Pastoral Care Request";
         replyTo = 'admin@christchurchbluffton.org';
-        heading = 'Prayer Received';
+        heading = 'Request Received';
         textBody = `Thank you for trusting us with this.\n\nYour prayer request has been received, and our pastoral team will be lifting you up.\n\nPrayer: ${prayerText}\n\nIf you'd like to talk with someone directly, you're always welcome to reach out at admin@christchurchbluffton.org.\n\nWith you in prayer,\nChrist Church Bluffton`;
         bodyHtml = `
           <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:0 0 20px;">

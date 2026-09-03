@@ -66,15 +66,27 @@
     box-shadow: 0 2px 10px rgba(48,59,106,0.07);
   }
   .prayers-card-head {
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    display: flex; align-items: flex-start; gap: 12px;
     padding: 16px 22px;
     background: linear-gradient(135deg, rgba(195,163,85,0.12) 0%, rgba(195,163,85,0.04) 100%);
     border-bottom: 2px solid var(--gold);
   }
-  .prayers-card-title { font-family: Georgia, 'Times New Roman', serif; font-size: 16px; color: var(--navy-blue); }
+  /* "Prayer & Pastoral" (l1) and "Request Log" (l2) are two separately-controlled
+     pieces (not one wrapping string) so the break between them — and where the count
+     badge sits relative to l2 — can be set precisely per breakpoint below, instead of
+     leaving it to unpredictable text-wrap. Desktop: everything inline, badge pinned to
+     the far right via margin-left:auto. Narrow: l1 stacks above l2row (see media query). */
+  .prayers-card-title-flow {
+    flex: 1 1 auto; min-width: 0;
+    display: flex; align-items: baseline; flex-wrap: wrap;
+    font-family: Georgia, 'Times New Roman', serif; font-size: 16px; color: var(--navy-blue);
+  }
+  .prayers-card-title-l1 { white-space: nowrap; margin-right: 0.35em; }
+  .prayers-card-title-l2row { display: flex; align-items: baseline; flex: 1 1 auto; min-width: 0; gap: 12px; }
+  .prayers-card-title-l2 { white-space: nowrap; }
   .prayers-card-count {
     font-size: 10.5px; font-weight: bold; color: var(--gold-text); text-transform: uppercase; letter-spacing: 0.5px;
-    background: rgba(195,163,85,0.18); padding: 3px 10px; border-radius: 100px;
+    background: rgba(195,163,85,0.18); padding: 3px 10px; border-radius: 100px; flex-shrink: 0; margin-left: auto;
   }
 
   .prayer-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
@@ -84,11 +96,17 @@
   }
   .prayer-table tr { transition: background 0.12s ease; }
   .prayer-table tbody tr:hover { background: rgba(195,163,85,0.05); }
-  .prayer-table td { padding: 13px 22px; border-bottom: 1px solid var(--border-gray); font-size: 13px; vertical-align: top; }
+  .prayer-table td { padding: 16px 22px; border-bottom: 1px solid var(--border-gray); font-size: 13px; vertical-align: top; }
   .prayer-table tr:last-child td { border-bottom: none; }
-  .prayer-requester { font-weight: bold; color: var(--text-dark); }
-  .prayer-requester .contact-line { font-weight: normal; font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+  .prayer-requester { font-weight: bold; color: var(--text-dark); font-size: 14px; }
+  .prayer-requester .contact-line { font-weight: normal; font-size: 12.5px; color: var(--text-muted); margin-top: 5px; line-height: 1.5; }
   .prayer-request-text { color: var(--text-dark); line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+  .care-type-tags { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .care-type-tag {
+    display: inline-block; font-size: 10.5px; font-weight: bold; color: var(--gold-text);
+    background: rgba(195,163,85,0.14); padding: 3px 9px; border-radius: 100px;
+  }
+  .care-type-other { margin-top: 6px; font-size: 12px; color: var(--text-muted); font-style: italic; }
   .status-chip {
     display: inline-block; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.3px;
     padding: 3px 9px; border-radius: 100px;
@@ -97,6 +115,32 @@
   .status-chip.answered { background: rgba(46,125,50,0.12); color: #2e7d32; }
   .status-chip.archived { background: rgba(0,0,0,0.06); color: var(--text-muted); }
   .prayer-empty { padding: 40px 16px; text-align: center; font-size: 13px; color: var(--text-muted); font-style: italic; }
+  /* Below this width there isn't room for "Prayer & Pastoral Request Log" plus the
+     count badge on one line — l1 moves to its own row, l2 + the badge share the row
+     below it, badge right-aligned. */
+  @media (max-width: 440px) {
+    .prayers-card-head { padding: 14px 16px; }
+    .prayers-card-title-flow { flex-direction: column; align-items: stretch; font-size: 14px; }
+    .prayers-card-title-l1 { margin-right: 0; margin-bottom: 4px; }
+    .prayers-card-title-l2row { width: 100%; }
+  }
+  /* 414px has enough room to bring the title back up toward its full desktop size. */
+  @media (min-width: 400px) and (max-width: 440px) {
+    .prayers-card-title-flow { font-size: 16px; }
+  }
+  /* At the narrowest width, "Prayer & Pastoral Request Log" fits back onto one line
+     (now that the badge isn't competing for room next to it) — l1 and l2 flow inline
+     together again, and the badge is pulled out to its own centered line below via
+     absolute positioning (padding-bottom on the head reserves room for it). */
+  @media (max-width: 340px) {
+    .prayers-card-head { position: relative; padding-bottom: 46px; }
+    .prayers-card-title-flow { display: block; }
+    .prayers-card-title-l1 { margin-right: 0.3em; }
+    .prayers-card-title-l2row { display: inline; }
+    .prayers-card-count {
+      position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); margin-left: 0;
+    }
+  }
   .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
   .icon-btn {
     width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-gray);
@@ -113,7 +157,7 @@
     .prayer-table, .prayer-table tbody, .prayer-table td { display: block; }
     .prayer-table thead { display: none; }
     .prayer-table tr {
-      display: block;
+      display: flex; flex-wrap: wrap; align-items: flex-start;
       border: 1px solid var(--border-gray); border-radius: 10px; margin: 12px 16px; padding: 14px 16px;
     }
     .prayer-table tbody tr:hover { background: none; }
@@ -127,6 +171,15 @@
       text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-bottom: 3px;
     }
     .prayer-table td:nth-child(1)::before { display: none; }
+    /* Status moves up onto the requester's row, right-aligned, instead of taking its
+       own stacked block below — trims card height. The STATUS label is redundant once
+       it's sitting right next to the name as a colored chip, so it's hidden here only. */
+    .prayer-table td:nth-child(1) { order: 1; flex: 1 1 auto; padding-bottom: 10px; }
+    .prayer-table td:nth-child(3) { order: 2; flex: 0 0 auto; margin-left: auto; padding-bottom: 10px; }
+    .prayer-table td:nth-child(3)::before { display: none; }
+    .prayer-table td:nth-child(2) { order: 3; flex: 1 0 100%; }
+    .prayer-table td:nth-child(4) { order: 4; flex: 1 0 100%; }
+    .prayer-table td:nth-child(5) { order: 5; flex: 1 0 100%; }
     .prayer-table .row-actions { justify-content: flex-start; padding-top: 6px; border-top: 1px solid var(--border-gray); }
   }
   /* Once there's enough room to spare, the whole Prayer Log panel stretching edge-to-edge
@@ -205,9 +258,13 @@
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
         Congregants
       </a>
+      <a href="youth" data-page="youth" data-permission="youth">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M5.5 21c0-4 3-7 6.5-7s6.5 3 6.5 7"/><path d="M12 14v3"/></svg>
+        Youth
+      </a>
       <a href="prayers" data-page="prayers" data-permission="prayers">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
-        Prayer Requests
+        Prayer & Pastoral Care Requests
       </a>
       <a href="volunteers" data-page="volunteers" data-permission="signups">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -274,15 +331,15 @@
     <div class="main">
       <div class="topbar">
         <div>
-          <h1>Prayer Requests</h1>
+          <h1>Prayer & Pastoral Care Requests</h1>
           <div class="subtitle">A record of prayer requests, so they don't just disappear into an inbox</div>
         </div>
-        <button type="button" class="btn btn-gold" id="add-prayer-btn">+ Add Prayer Request</button>
+        <button type="button" class="btn btn-gold" id="add-prayer-btn">+ Add Prayer or Pastoral Request</button>
       </div>
       <div class="content" id="page-body">
 
         <div class="page-tabs page-width">
-          <button type="button" class="page-tab active" id="tab-log" data-tab="log">Prayer Log</button>
+          <button type="button" class="page-tab active" id="tab-log" data-tab="log">Prayer & Pastoral Request Log</button>
           <button type="button" class="page-tab" id="tab-archive" data-tab="archive">Archive</button>
         </div>
 
@@ -310,17 +367,22 @@
         <div class="page-width">
           <div class="card prayers-card">
             <div class="prayers-card-head">
-              <div class="prayers-card-title" id="prayers-card-title">Prayer Log</div>
-              <div class="prayers-card-count" id="prayers-count">— requests</div>
+              <div class="prayers-card-title-flow">
+                <span class="prayers-card-title-l1" id="prayers-card-title-l1">Prayer &amp; Pastoral</span>
+                <span class="prayers-card-title-l2row">
+                  <span class="prayers-card-title-l2" id="prayers-card-title-l2">Request Log</span>
+                  <span class="prayers-card-count" id="prayers-count">— requests</span>
+                </span>
+              </div>
             </div>
             <div class="table-scroll">
               <table class="prayer-table">
                 <colgroup>
-                  <col style="width:18%">
+                  <col style="width:20%">
                   <col style="width:40%">
                   <col style="width:12%">
-                  <col style="width:12%">
-                  <col style="width:18%">
+                  <col style="width:13%">
+                  <col style="width:15%">
                 </colgroup>
                 <thead>
                   <tr>
@@ -344,7 +406,7 @@
     <div class="modal-box">
       <div class="modal-header">
         <div>
-          <div class="modal-title" id="modal-title">Add Prayer Request</div>
+          <div class="modal-title" id="modal-title">Add Prayer or Pastoral Request</div>
           <div class="modal-subtitle" id="modal-subtitle"></div>
         </div>
         <button type="button" class="modal-close" id="modal-close">&times;</button>
@@ -383,6 +445,8 @@
         email: row.email || '',
         phone: row.phone || '',
         requestText: row.request_text,
+        careTypes: row.care_types || [],
+        otherNeedText: row.other_need_text || '',
         status: row.status,
         submittedAt: row.submitted_at,
         statusChangedAt: row.status_changed_at
@@ -468,7 +532,8 @@
         return (b.submittedAt || '').localeCompare(a.submittedAt || '');
       });
 
-      document.getElementById('prayers-card-title').textContent = currentTab === 'archive' ? 'Archive' : 'Prayer Log';
+      document.getElementById('prayers-card-title-l1').textContent = currentTab === 'archive' ? 'Archive' : 'Prayer & Pastoral';
+      document.getElementById('prayers-card-title-l2').textContent = currentTab === 'archive' ? '' : 'Request Log';
       document.getElementById('archive-notice').style.display = currentTab === 'archive' ? '' : 'none';
       document.getElementById('status-filter-field').style.display = currentTab === 'archive' ? 'none' : '';
       document.getElementById('prayers-count').textContent = `${tabList.length} ${tabList.length === 1 ? 'request' : 'requests'}`;
@@ -481,14 +546,20 @@
       }
 
       rows.innerHTML = list.map(p => {
-        const contactBits = [p.email, p.phone].filter(Boolean).join(' · ');
+        const contactLines = [
+          p.email ? `<div class="contact-line">${escapeHtml(p.email)}</div>` : '',
+          p.phone ? `<div class="contact-line">${escapeHtml(formatPhone(p.phone))}</div>` : ''
+        ].join('');
+        const requestCellHtml = escapeHtml(p.requestText)
+          + (p.careTypes.length ? `<div class="care-type-tags">${p.careTypes.map(t => `<span class="care-type-tag">${escapeHtml(t)}</span>`).join('')}</div>` : '')
+          + (p.otherNeedText ? `<div class="care-type-other">Other/Need: ${escapeHtml(p.otherNeedText)}</div>` : '');
         return `
         <tr>
           <td class="prayer-requester" data-label="Requester">
             ${p.isAnonymous ? 'Anonymous' : escapeHtml(p.requesterName || '—')}
-            ${contactBits ? `<div class="contact-line">${escapeHtml(contactBits)}</div>` : ''}
+            ${contactLines}
           </td>
-          <td class="prayer-request-text" data-label="Request">${escapeHtml(p.requestText)}</td>
+          <td class="prayer-request-text" data-label="Request">${requestCellHtml}</td>
           <td data-label="Status"><span class="status-chip ${p.status}">${STATUS_LABELS[p.status] || p.status}</span></td>
           <td data-label="Date">${formatDate(p.submittedAt)}</td>
           <td>
@@ -524,7 +595,7 @@
     }
 
     function openPrayerModal(existing) {
-      document.getElementById('modal-title').textContent = existing ? 'Edit Prayer Request' : 'Add Prayer Request';
+      document.getElementById('modal-title').textContent = existing ? 'Edit Prayer Request' : 'Add Prayer or Pastoral Request';
       document.getElementById('modal-subtitle').textContent = '';
       const today = new Date().toISOString().slice(0, 10);
       document.getElementById('modal-body').innerHTML = `
@@ -566,7 +637,7 @@
 
       setModalFooter([
         { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
-        { label: existing ? 'Save Changes' : 'Add Prayer Request', className: 'btn btn-gold', onClick: () => submitPrayerForm(existing ? existing.id : null) }
+        { label: existing ? 'Save Changes' : 'Add Prayer or Pastoral Request', className: 'btn btn-gold', onClick: () => submitPrayerForm(existing ? existing.id : null) }
       ]);
       document.getElementById('modal-backdrop').classList.add('open');
     }
@@ -575,7 +646,7 @@
       const isAnonymous = document.getElementById('prayer-anonymous').checked;
       const requesterName = isAnonymous ? '' : document.getElementById('requester-name').value.trim();
       const email = isAnonymous ? '' : document.getElementById('requester-email').value.trim();
-      const phone = isAnonymous ? '' : document.getElementById('requester-phone').value.trim();
+      const phone = isAnonymous ? '' : formatPhone(document.getElementById('requester-phone').value.trim());
       const requestText = document.getElementById('prayer-text').value.trim();
       const status = document.getElementById('prayer-status').value;
       const submittedAt = document.getElementById('prayer-date').value;

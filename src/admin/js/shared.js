@@ -12,6 +12,19 @@ const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_d1822TZ_kOwccKkUvgIJfg_tQtekOI5
 const BACKEND_URL = 'http://localhost:8100';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
+// Normalizes any phone number a staff member types (dashes, dots, spaces, parens, none
+// of the above) to (XXX) XXX-XXXX before it's saved. Staff can type it however they
+// want — this only runs at save time. Anything that isn't a standard 10-digit US number
+// (11 digits with a leading 1, international, an extension, etc.) is left as typed
+// rather than mangled.
+function formatPhone(raw) {
+  if (!raw) return raw;
+  let digits = raw.replace(/\D/g, '');
+  if (digits.length === 11 && digits[0] === '1') digits = digits.slice(1);
+  if (digits.length !== 10) return raw.trim();
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
 // Permissions a Staff account can be individually granted. Admin accounts implicitly have all of
 // these plus Team management, which is admin-only and not togglable.
 const PERMISSIONS = [
@@ -20,9 +33,10 @@ const PERMISSIONS = [
   { key: 'newsletter', label: 'Newsletter' },
   { key: 'subscribers', label: 'Subscribers' },
   { key: 'congregants', label: 'Congregants' },
-  { key: 'prayers', label: 'Prayer Requests' },
+  { key: 'prayers', label: 'Prayer & Pastoral Requests' },
   { key: 'events', label: 'Events' },
-  { key: 'signups', label: 'Volunteers' }
+  { key: 'signups', label: 'Volunteers' },
+  { key: 'youth', label: 'Youth' }
 ];
 
 // Permissions Staff can never be granted, even if their permissions object somehow has
@@ -31,7 +45,7 @@ const PERMISSIONS = [
 // either sensitive/pastoral data or site-wide publishing, neither of which Staff should
 // have regardless of what's toggled on their account. This is the real enforcement, on
 // top of team.html's Edit form only letting Site Admins check these boxes for Staff at all.
-const STAFF_ALLOWED_PERMISSIONS = ['photos', 'prayers', 'signups'];
+const STAFF_ALLOWED_PERMISSIONS = ['photos', 'prayers', 'signups', 'youth'];
 
 // ---- Session ----
 // getSession() stays SYNCHRONOUS on purpose — nearly every page's existing code calls
@@ -291,7 +305,8 @@ const PAGE_PERMISSION_MAP = {
   congregants: 'congregants',
   prayers: 'prayers',
   events: 'events',
-  volunteers: 'signups'
+  volunteers: 'signups',
+  youth: 'youth'
 };
 
 // Paints the sidebar's account-specific bits (name/avatar/role, which nav links show,
