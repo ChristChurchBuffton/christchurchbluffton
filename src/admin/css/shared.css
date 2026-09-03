@@ -485,11 +485,16 @@ body.reading-mode.tint-green .main { background: #E1F0E1; }
 
 .stat-card .stat-label {
   font-size: 12px;
+  line-height: 1.35;
   font-weight: bold;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 8px;
+  /* Reserves room for 2 lines even when a label only needs 1 (e.g. "New Subscribers"
+     vs. "Open Prayer & Pastoral Requests"), so the value number below always starts
+     at the same height across every card in the row instead of shifting per-label. */
+  min-height: calc(12px * 1.35 * 2);
 }
 
 .stat-card .stat-value {
