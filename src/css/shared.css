@@ -769,8 +769,7 @@ textarea:focus-visible {
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(48, 59, 106, 0.3);
     z-index: 151;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden; /* the form body scrolls, not the whole card, so the blue title bar stays put and no scrollbar is drawn over it */
     overscroll-behavior: contain;
     transform: translateY(20px);
     opacity: 0;
@@ -778,10 +777,15 @@ textarea:focus-visible {
 }
 
 .prayer-popup.active {
-    display: block;
+    display: flex;
+    flex-direction: column;
     transform: translateY(0);
     opacity: 1;
 }
+
+/* On touch devices the popup itself takes focus when it opens (so no keyboard pops up);
+   it is a container, not a control, so it doesn't need a focus ring */
+.prayer-popup:focus { outline: none; }
 
 .prayer-popup-header {
     background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
@@ -789,6 +793,16 @@ textarea:focus-visible {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex: 0 0 auto;
+}
+
+/* The only part of the popup that scrolls */
+#prayerFormBody {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .prayer-popup-header h4 {
@@ -1037,7 +1051,6 @@ textarea:focus-visible {
         max-width: 420px;
         max-height: calc(100vh - 32px);
         max-height: calc(100dvh - 32px);
-        overflow-y: auto;
     }
 
     .prayer-popup-header {

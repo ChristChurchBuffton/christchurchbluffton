@@ -45,7 +45,7 @@
         if (!focusable.length) return;
         var first = focusable[0];
         var last = focusable[focusable.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
+        if (e.shiftKey && (document.activeElement === first || document.activeElement === container)) {
             e.preventDefault();
             last.focus();
         } else if (!e.shiftKey && document.activeElement === last) {
@@ -197,8 +197,17 @@
             fab.classList.add('fab-popup-open');
             lockBodyScroll();
             document.addEventListener('keydown', prayerKeydown);
-            var firstField = document.getElementById('prayerName');
-            if (firstField) firstField.focus();
+            // On touch devices don't focus a field: that pops the on-screen keyboard up over
+            // the form before the visitor has chosen anything. Focus the dialog itself instead
+            // so keyboard and screen-reader users still land inside it; the keyboard then only
+            // appears when the visitor taps a field. Desktop keeps focusing the first field.
+            if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
+                popup.setAttribute('tabindex', '-1');
+                popup.focus({ preventScroll: true });
+            } else {
+                var firstField = document.getElementById('prayerName');
+                if (firstField) firstField.focus();
+            }
         }
         function closePrayer() {
             popup.classList.remove('active');
