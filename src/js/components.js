@@ -194,6 +194,7 @@
             popup.classList.add('active');
             overlay.classList.add('active');
             fab.setAttribute('aria-expanded', 'true');
+            fab.classList.add('fab-popup-open');
             lockBodyScroll();
             document.addEventListener('keydown', prayerKeydown);
             var firstField = document.getElementById('prayerName');
@@ -203,6 +204,7 @@
             popup.classList.remove('active');
             overlay.classList.remove('active');
             fab.setAttribute('aria-expanded', 'false');
+            fab.classList.remove('fab-popup-open');
             unlockBodyScroll();
             document.removeEventListener('keydown', prayerKeydown);
             fab.focus();

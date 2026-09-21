@@ -731,8 +731,10 @@ textarea:focus-visible {
     box-shadow: 0 6px 30px rgba(48, 59, 106, 0.45);
 }
 
-/* Hide the FAB while the footer is in view so it never overlaps footer content */
-.prayer-fab.fab-near-footer {
+/* Hide the FAB while the footer is in view so it never overlaps footer content, and while
+   the prayer popup is open so the form gets the room and nothing sits over the dark backdrop */
+.prayer-fab.fab-near-footer,
+.prayer-fab.fab-popup-open {
     opacity: 0;
     pointer-events: none;
     transform: scale(0.85);
@@ -744,7 +746,7 @@ textarea:focus-visible {
     top: 0; left: 0;
     width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.4);
-    z-index: 89;
+    z-index: 150; /* above the sticky header (100) so the backdrop covers the whole page; below the mobile menu (199/200) */
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -757,15 +759,16 @@ textarea:focus-visible {
 .prayer-popup {
     display: none;
     position: fixed;
-    bottom: 100px;
+    bottom: 24px;
     right: 30px;
     width: 340px;
     max-width: calc(100vw - 48px);
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 48px);
+    max-height: calc(100dvh - 48px);
     background: var(--white);
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(48, 59, 106, 0.3);
-    z-index: 90;
+    z-index: 151;
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
@@ -1024,11 +1027,16 @@ textarea:focus-visible {
         right: 16px;
     }
 
+    /* Phones: the FAB hides while the form is open, so the form takes the room: nearly the
+       full width and height of the VISIBLE screen. dvh (dynamic viewport height) excludes
+       Safari's toolbars; the plain vh line above it is the fallback for older browsers. */
     .prayer-popup {
-        bottom: 80px;
+        bottom: 16px;
         right: 16px;
-        width: 300px;
-        max-height: calc(100vh - 160px);
+        width: calc(100vw - 32px);
+        max-width: 420px;
+        max-height: calc(100vh - 32px);
+        max-height: calc(100dvh - 32px);
         overflow-y: auto;
     }
 
