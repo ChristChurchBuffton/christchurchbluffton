@@ -5,19 +5,12 @@
             <!-- Branding -->
             <div class="footer-branding">
                 <div class="footer-logo-row">
-                    <img src="images/logo-dark-bg.png" alt="Christ Church Bluffton" class="footer-logo" width="55" height="55">
-                    <span class="footer-church-name">Christ Church<span class="footer-church-location">Bluffton</span></span>
+                    <img src="images/footer-logo.png" alt="Christ Church Bluffton" class="footer-logo-full">
                 </div>
                 <p class="footer-tagline">A Christ-centered community <span class="footer-tagline-location">Bluffton, South Carolina.</span></p>
-                <div class="footer-contact-info">
-                    <a href="mailto:info@christchurchbluffton.org">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                        info@christchurchbluffton.org
-                    </a>
-                </div>
             </div>
 
-            <!-- Quick Links (two columns) -->
+            <!-- Quick Links -->
             <div class="footer-column footer-quicklinks">
                 <h2>Quick Links</h2>
                 <div class="footer-links-grid">
@@ -37,13 +30,40 @@
                 </div>
             </div>
 
+            <!-- Contact -->
+            <div class="footer-column footer-contact">
+                <h2>Contact</h2>
+                <div class="footer-contact-info">
+                    <a href="mailto:info@christchurchbluffton.org">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        info@christchurchbluffton.org
+                    </a>
+                    <span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span>7 Venture Drive,<br>Bluffton, SC 29910</span>
+                    </span>
+                    <span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+                        Saturdays at 5:30 PM
+                    </span>
+                    <span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                        Instagram &mdash; Coming Soon
+                    </span>
+                    <span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                        Facebook &mdash; Coming Soon
+                    </span>
+                </div>
+            </div>
+
             <!-- Stay Updated -->
             <div class="footer-column footer-newsletter">
                 <h2>Stay Updated</h2>
                 <p>Sign up to receive updates on our journey</p>
                 <form class="newsletter-form" id="newsletterForm">
                     <label for="newsletterEmail" class="sr-only">Email address</label>
-                    <input type="email" name="email" id="newsletterEmail" placeholder="Your email" required>
+                    <input type="email" name="email" id="newsletterEmail" autocomplete="email" placeholder="Your email" required>
                     <input type="text" name="website_url_confirm" style="position:absolute;left:-9999px;" tabindex="-1" autocomplete="new-password" aria-hidden="true">
                     <div class="cf-turnstile" data-sitekey="0x4AAAAAAD8314cvz8A6O5m4" data-size="flexible"></div>
                     <button type="submit" class="btn-subscribe">Subscribe</button>
@@ -53,13 +73,13 @@
 
         <!-- Bottom Bar -->
         <div class="footer-bottom">
-            <p class="copyright">&copy; 2026 Christ Church Bluffton. All rights reserved.</p>
+            <p class="copyright">&copy; <span id="copyright-year">2026</span> Christ Church Bluffton. All rights reserved.</p>
             <div class="footer-legal">
                 <a href="/privacy">Privacy Policy</a>
                 <span class="divider">|</span>
                 <a href="/terms">Terms of Use</a>
             </div>
-            <p class="footer-powered"><a href="https://forgeddigitaldesign.com" target="_blank" rel="noopener">Powered by Forged Digital Design</a></p>
+            <p class="footer-powered"><a href="https://forgeddigitaldesign.com" target="_blank" rel="noopener">Designed by Forged Digital Design</a></p>
         </div>
     </div>
 </footer>

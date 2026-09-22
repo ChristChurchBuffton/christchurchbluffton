@@ -45,7 +45,7 @@
         if (!focusable.length) return;
         var first = focusable[0];
         var last = focusable[focusable.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
+        if (e.shiftKey && (document.activeElement === first || document.activeElement === container)) {
             e.preventDefault();
             last.focus();
         } else if (!e.shiftKey && document.activeElement === last) {
@@ -101,6 +101,9 @@
 
     // Load footer + newsletter handler
     loadComponent('site-footer', 'includes/footer.html', function() {
+        var copyrightYear = document.getElementById('copyright-year');
+        if (copyrightYear) copyrightYear.textContent = new Date().getFullYear();
+
         var form = document.getElementById('newsletterForm');
         if (!form) return;
         if (window.renderTurnstile) renderTurnstile(form.querySelector('.cf-turnstile'));
@@ -162,35 +165,119 @@
             trapFocus(e, popup);
         }
 
+        // Locks background scroll while the popup is open. overflow:hidden on body alone
+        // doesn't reliably stop touch-scrolling behind a fixed-position overlay on iOS
+        // Safari — pinning the body to position:fixed (offset by the current scroll
+        // position) is the standard cross-browser fix. Scroll position is restored on close.
+        var lockedScrollY = 0;
+        function lockBodyScroll() {
+            lockedScrollY = window.scrollY;
+            // Locking the page removes the desktop scrollbar, which would make the page ~15px
+            // wider and slide everything sideways. Measure it first and hold its space with
+            // padding so nothing moves. (Phones and Macs use overlay scrollbars: 0px, no-op.)
+            var scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+            document.body.style.position = 'fixed';
+            document.body.style.top = (-lockedScrollY) + 'px';
+            document.body.style.left = '0';
+            document.body.style.right = '0';
+            document.body.style.width = '100%';
+            if (scrollbarWidth > 0) {
+                document.body.style.boxSizing = 'border-box';
+                document.body.style.paddingRight = scrollbarWidth + 'px';
+            }
+        }
+        function unlockBodyScroll() {
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            document.body.style.width = '';
+            document.body.style.boxSizing = '';
+            document.body.style.paddingRight = '';
+            // Explicit behavior:'instant' is required here — this site sets
+            // html{scroll-behavior:smooth} globally, which would otherwise turn
+            // this restore into a visible animated scroll instead of a snap-back.
+            window.scrollTo({ top: lockedScrollY, left: 0, behavior: 'instant' });
+        }
+
         function openPrayer() {
             popup.classList.add('active');
             overlay.classList.add('active');
             fab.setAttribute('aria-expanded', 'true');
+            fab.classList.add('fab-popup-open');
+            lockBodyScroll();
             document.addEventListener('keydown', prayerKeydown);
-            var firstField = document.getElementById('prayerName');
-            if (firstField) firstField.focus();
+            // On touch devices don't focus a field: that pops the on-screen keyboard up over
+            // the form before the visitor has chosen anything. Focus the dialog itself instead
+            // so keyboard and screen-reader users still land inside it; the keyboard then only
+            // appears when the visitor taps a field. Desktop keeps focusing the first field.
+            if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
+                popup.setAttribute('tabindex', '-1');
+                popup.focus({ preventScroll: true });
+            } else {
+                var firstField = document.getElementById('prayerName');
+                if (firstField) firstField.focus();
+            }
         }
         function closePrayer() {
             popup.classList.remove('active');
             overlay.classList.remove('active');
             fab.setAttribute('aria-expanded', 'false');
+            fab.classList.remove('fab-popup-open');
+            unlockBodyScroll();
             document.removeEventListener('keydown', prayerKeydown);
             fab.focus();
+
+            // Reset back to a fresh fillable form for next time — without this, the success
+            // confirmation stayed showing indefinitely (even across close/reopen) until a full
+            // page reload, so a visitor couldn't submit a second prayer in the same visit.
+            document.getElementById('prayerSuccess').classList.remove('active');
+            document.getElementById('prayerFormBody').style.display = '';
+            form.reset();
+            document.getElementById('prayerOtherNeedText').style.display = 'none';
+            var btn = form.querySelector('.prayer-submit-btn');
+            btn.textContent = 'Submit Request';
+            btn.disabled = false;
         }
 
         fab.addEventListener('click', openPrayer);
         closeBtn.addEventListener('click', closePrayer);
         overlay.addEventListener('click', closePrayer);
 
-        // Fade the FAB out while the footer is in view so it never overlaps footer content
+        // "Other/Need" reveals a free-text field to briefly describe it — hidden otherwise
+        var otherNeedCheck = document.getElementById('prayerOtherNeedCheck');
+        var otherNeedText = document.getElementById('prayerOtherNeedText');
+        otherNeedCheck.addEventListener('change', function() {
+            otherNeedText.style.display = this.checked ? '' : 'none';
+            if (!this.checked) otherNeedText.value = '';
+        });
+
+        // Fade the FAB out while the footer, or a card block it would otherwise sit on
+        // top of (like the contact page's info cards), is in view.
         var footerEl = document.getElementById('site-footer');
+        var obstructionEl = document.querySelector('.contact-cards');
+        var fabNearFooter = false;
+        var fabNearObstruction = false;
+        function updateFabVisibility() {
+            fab.classList.toggle('fab-near-footer', fabNearFooter || fabNearObstruction);
+        }
         if (footerEl && 'IntersectionObserver' in window) {
             var footerObserver = new IntersectionObserver(function(entries) {
                 entries.forEach(function(entry) {
-                    fab.classList.toggle('fab-near-footer', entry.isIntersecting);
+                    fabNearFooter = entry.isIntersecting;
                 });
+                updateFabVisibility();
             }, { threshold: 0 });
             footerObserver.observe(footerEl);
+        }
+        if (obstructionEl && 'IntersectionObserver' in window) {
+            var obstructionObserver = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    fabNearObstruction = entry.isIntersecting;
+                });
+                updateFabVisibility();
+            }, { threshold: 0 });
+            obstructionObserver.observe(obstructionEl);
         }
 
 
@@ -206,12 +293,18 @@
             var token = '';
             try { token = turnstile.getResponse(form.querySelector('.cf-turnstile')); } catch (err) {}
 
+            var careTypes = Array.prototype.slice.call(form.querySelectorAll('[name="careType"]:checked')).map(function(el) { return el.value; });
+
             fetch('/api/prayer', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: form.querySelector('[name="name"]').value || 'Anonymous',
+                    email: form.querySelector('[name="email"]').value,
+                    phone: form.querySelector('[name="phone"]').value,
                     prayer: form.querySelector('[name="prayer"]').value,
+                    careTypes: careTypes,
+                    otherNeedText: form.querySelector('[name="otherNeedText"]').value || '',
                     website_url_confirm: hp ? hp.value : '',
                     turnstileToken: token
                 })
@@ -223,14 +316,14 @@
                     try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
                     try { gtag('event', 'generate_lead', { form_name: 'prayer_request' }); } catch (err) {}
                 } else {
-                    btn.textContent = 'Submit Prayer';
+                    btn.textContent = 'Submit Request';
                     btn.disabled = false;
                     try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
                     alert('Something went wrong. Please try again or email us directly.');
                 }
             })
             .catch(function() {
-                btn.textContent = 'Submit Prayer';
+                btn.textContent = 'Submit Request';
                 btn.disabled = false;
                 try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
                 alert('Something went wrong. Please try again or email us directly.');

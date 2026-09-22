@@ -113,7 +113,7 @@
 
         /* ── Contact Section ── */
         .contact-section {
-            padding: 50px 0;
+            padding: 100px 0;
         }
 
         .contact-grid {
@@ -122,6 +122,7 @@
             gap: 50px;
             align-items: start;
         }
+        .contact-grid > * { min-width: 0; }
 
         /* Left: Info */
         .contact-info h2 {
@@ -173,6 +174,10 @@
             height: 20px;
         }
 
+        .contact-card-content {
+            min-width: 0;
+        }
+
         .contact-card-content h3 {
             font-family: var(--font-heading);
             font-size: 1.25rem;
@@ -188,6 +193,7 @@
             color: var(--text-gray);
             text-decoration: none;
             line-height: 1.6;
+            overflow-wrap: break-word;
         }
 
         .contact-card-content a:hover {
@@ -382,6 +388,10 @@
         }
 
         /* ── Tablet ── */
+        @media (max-width: 1023px) {
+            .contact-section { padding: 80px 0; }
+        }
+
         @media (max-width: 900px) {
             .contact-grid {
                 grid-template-columns: 1fr;
@@ -404,7 +414,7 @@
             .container { padding: 0 20px; }
             .page-header { padding: 80px 20px 60px; }
             .page-title { font-size: 2rem; }
-            .contact-section { padding: 35px 0; }
+            .contact-section { padding: 60px 0; }
             .form-card { padding: 24px; }
             .cta-section { padding: 10px 20px 40px; }
             .cta-inner { padding: 30px 30px; border-radius: 30px; gap: 20px; }
@@ -412,13 +422,21 @@
             .cta-heading { font-size: 1rem; }
             .cta-text { font-size: 0.875rem; }
             .cta-btn { padding: 10px 28px; font-size: 0.875rem; }
+
+            /* iOS Safari auto-zooms into any focused input/textarea/select under 16px —
+               0.875rem (14px) is fine on desktop but triggers the zoom on a real phone.
+               16px here overrides that for touch widths only, desktop is untouched. */
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                font-size: 16px;
+            }
         }
 
         @media (max-width: 480px) {
             .container { padding: 0 16px; }
             .page-header { padding: 60px 16px 50px; }
             .page-title { font-size: 2rem; }
-            .contact-section { padding: 25px 0; }
             .form-card { padding: 18px; }
             .contact-card { padding: 16px; }
             .cta-section { padding: 10px 16px 30px; }
@@ -436,7 +454,7 @@
             .form-group input,
             .form-group select,
             .form-group textarea {
-                font-size: 0.75rem;
+                font-size: 16px;
                 padding: 8px 10px;
             }
 
@@ -506,7 +524,7 @@
                                 </div>
                                 <div class="contact-card-content">
                                     <h3>Email</h3>
-                                    <a href="mailto:info@christchurchbluffton.org">info@christchurchbluffton.org</a>
+                                    <a href="mailto:info@christchurchbluffton.org">info@<wbr>christchurchbluffton.org</a>
                                 </div>
                             </div>
 
@@ -529,15 +547,15 @@
                         <form class="contact-form" id="contactForm">
                             <div class="form-group">
                                 <label for="fullName">Full Name <span class="required">*</span></label>
-                                <input type="text" id="fullName" name="fullName" placeholder="Your full name" required>
+                                <input type="text" id="fullName" name="fullName" autocomplete="name" placeholder="Your full name" required>
                             </div>
                             <div class="form-group">
                                 <label for="email">Email Address <span class="required">*</span></label>
-                                <input type="email" id="email" name="email" placeholder="Your email address" required>
+                                <input type="email" id="email" name="email" autocomplete="email" placeholder="Your email address" required>
                             </div>
                             <div class="form-group">
                                 <label for="phone">Phone <span class="optional">(optional)</span></label>
-                                <input type="tel" id="phone" name="phone" placeholder="Your phone number">
+                                <input type="tel" id="phone" name="phone" autocomplete="tel" placeholder="Your phone number">
                             </div>
                             <div class="form-group">
                                 <label for="interest">I'm Interested In <span class="required">*</span></label>
@@ -546,15 +564,27 @@
                                     <option value="updates">Receiving Updates</option>
                                     <option value="visiting">Planning to Visit</option>
                                     <option value="volunteering">Volunteering</option>
-                                    <option value="prayer">Prayer Request</option>
+                                    <option value="prayer">Prayer & Pastoral Care</option>
                                     <option value="other">Other</option>
                                 </select>
                             </div>
-                            <div class="form-group" id="prayerContactGroup" style="display:none;">
-                                <label style="display:flex; align-items:center; gap:8px; font-weight:400; cursor:pointer;">
-                                    <input type="checkbox" id="prayerContact" name="prayerContact" style="width:auto;">
-                                    Would you like someone to follow up with you about this?
-                                </label>
+                            <div id="prayerContactGroup" style="display:none;">
+                                <fieldset class="form-group care-type-fieldset">
+                                    <legend>What type of care are you looking for? <span class="optional">(optional, select any that apply)</span></legend>
+                                    <label class="care-type-option"><input type="checkbox" name="careType" value="Prayer Request"> Prayer Request</label>
+                                    <label class="care-type-option"><input type="checkbox" name="careType" value="Hospital/Home Visit"> Hospital/Home Visit</label>
+                                    <label class="care-type-option"><input type="checkbox" name="careType" value="Communion"> Communion</label>
+                                    <label class="care-type-option"><input type="checkbox" name="careType" value="Bereavement/Grief Support"> Bereavement/Grief Support</label>
+                                    <label class="care-type-option"><input type="checkbox" name="careType" value="Spiritual Guidance"> Spiritual Guidance</label>
+                                    <label class="care-type-option"><input type="checkbox" name="careType" id="contactOtherNeedCheck" value="Other/Need"> Other/Need</label>
+                                    <input type="text" id="contactOtherNeedText" name="otherNeedText" aria-label="Briefly describe your need" placeholder="Briefly describe your need" style="display:none;margin-top:8px;">
+                                </fieldset>
+                                <div class="form-group">
+                                    <label style="display:flex; align-items:flex-start; gap:8px; font-weight:400; cursor:pointer;">
+                                        <input type="checkbox" id="prayerContact" name="prayerContact" style="width:auto;margin-top:3px;">
+                                        Would you like someone to follow up with you about this?
+                                    </label>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="message">Message <span class="optional">(optional)</span></label>
@@ -591,8 +621,9 @@
 
     </main>
 
-    <!-- Prayer FAB (loaded from includes/prayer-fab.html) -->
-    <div id="site-prayer"></div>
+    <!-- No Prayer & Pastoral Care FAB on this page — the Contact form's own
+         "I'm Interested In" dropdown already covers that, so the floating
+         button would just be redundant here. -->
 
     <!-- Footer (loaded from includes/footer.html) -->
     <div id="site-footer"></div>
@@ -615,6 +646,27 @@
     <script>
         // Contact form handler
         if (window.renderTurnstile) renderTurnstile(document.querySelector('.cf-turnstile'));
+
+        // Only relevant when "Prayer & Pastoral Care" is selected — hidden (and cleared) otherwise
+        document.getElementById('interest').addEventListener('change', function() {
+            var show = this.value === 'prayer';
+            var group = document.getElementById('prayerContactGroup');
+            group.style.display = show ? '' : 'none';
+            if (!show) {
+                document.getElementById('prayerContact').checked = false;
+                group.querySelectorAll('[name="careType"]').forEach(function(cb) { cb.checked = false; });
+                document.getElementById('contactOtherNeedText').style.display = 'none';
+                document.getElementById('contactOtherNeedText').value = '';
+            }
+        });
+
+        // "Other/Need" reveals a free-text field to briefly describe it — hidden otherwise
+        document.getElementById('contactOtherNeedCheck').addEventListener('change', function() {
+            var otherNeedText = document.getElementById('contactOtherNeedText');
+            otherNeedText.style.display = this.checked ? '' : 'none';
+            if (!this.checked) otherNeedText.value = '';
+        });
+
         document.getElementById('contactForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -630,12 +682,18 @@
             var token = '';
             try { token = turnstile.getResponse(form.querySelector('.cf-turnstile')); } catch(e) {}
 
+            var isPrayer = form.interest.value === 'prayer';
+            var careTypes = isPrayer ? Array.prototype.slice.call(form.querySelectorAll('[name="careType"]:checked')).map(function(el) { return el.value; }) : [];
+
             var data = {
                 fullName: form.fullName.value,
                 email: form.email.value,
                 phone: form.phone.value || '',
                 interest: form.interest.value,
                 message: form.message.value || '',
+                prayerContact: isPrayer && form.prayerContact.checked,
+                careTypes: careTypes,
+                otherNeedText: isPrayer ? (form.otherNeedText.value || '') : '',
                 website_url_confirm: hp ? hp.value : '',
                 turnstileToken: token
             };

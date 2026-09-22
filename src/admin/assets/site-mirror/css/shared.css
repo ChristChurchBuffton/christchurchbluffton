@@ -128,6 +128,20 @@ textarea:focus-visible {
     object-fit: contain;
 }
 
+.header-logo {
+    height: 72px;
+    width: auto;
+    object-fit: contain;
+}
+
+.header-logo-mobile {
+    height: auto;
+    width: auto;
+    max-height: 72px;
+    max-width: 100%;
+    object-fit: contain;
+}
+
 .logo-example {
     font-family: var(--font-body);
     font-size: 0.875rem;
@@ -376,7 +390,7 @@ textarea:focus-visible {
 
 .footer-main {
     display: grid;
-    grid-template-columns: 1.5fr 1fr 1.3fr;
+    grid-template-columns: 1.3fr 1fr 1fr 1fr;
     gap: 40px;
     padding-bottom: 24px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.15);
@@ -394,6 +408,21 @@ textarea:focus-visible {
 .footer-logo {
     object-fit: contain;
     border-radius: 50%;
+}
+
+.footer-logo-full {
+    height: 90px;
+    width: auto;
+    object-fit: contain;
+}
+@media (min-width: 480px) {
+    .footer-logo-full { height: 95px; }
+}
+@media (min-width: 768px) {
+    .footer-logo-full { height: 95px; }
+}
+@media (min-width: 1024px) {
+    .footer-logo-full { height: 90px; }
 }
 
 .footer-church-name {
@@ -426,16 +455,26 @@ textarea:focus-visible {
 .footer-tagline-location {
     display: block;
 }
+@media (min-width: 768px) {
+    .footer-tagline-location {
+        display: inline;
+    }
+}
+/* Desktop (≥1024px): keep the location on its own second line. */
+@media (min-width: 1024px) {
+    .footer-tagline-location { display: block; }
+}
 
 .footer-contact-info { display: flex; flex-direction: column; gap: 6px; }
 
-.footer-contact-info a {
+.footer-contact-info a,
+.footer-contact-info > span {
     color: rgba(255, 255, 255, 0.8);
     font-family: var(--font-body);
     font-size: 0.875rem;
     text-decoration: none;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
     transition: color 0.3s ease;
 }
@@ -449,6 +488,14 @@ textarea:focus-visible {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0 20px;
+}
+
+/* Desktop: 4-column layout (branding / links / contact / newsletter), all
+   left-aligned — matches the Traditions Field Club footer pattern. */
+@media (min-width: 1024px) {
+    .footer-column { text-align: left; }
+    .footer-links-grid { display: grid; grid-template-columns: 1fr; gap: 0; }
+    .footer-contact-info { align-items: flex-start; }
 }
 
 .footer-give-mobile {
@@ -492,7 +539,7 @@ textarea:focus-visible {
 
 .footer-column h2 {
     font-family: var(--font-heading);
-    color: var(--white);
+    color: var(--gold);
     font-size: 0.875rem;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -501,7 +548,7 @@ textarea:focus-visible {
 }
 
 .footer-links-list { list-style: none; }
-.footer-links-list li { margin-bottom: 10px; }
+.footer-links-list li { margin-bottom: 8px; }
 
 .footer-links-list a {
     font-family: var(--font-body);
@@ -523,7 +570,7 @@ textarea:focus-visible {
 }
 .footer-bottom .copyright { text-align: left; }
 .footer-bottom .footer-legal { justify-content: center; margin-top: 0; }
-.footer-bottom .footer-powered { text-align: center; }
+.footer-bottom .footer-powered { text-align: right; }
 
 .copyright {
     font-family: var(--font-body);
@@ -607,8 +654,12 @@ textarea:focus-visible {
 }
 
 .newsletter-form input[type="email"]:focus {
-    outline: none;
     border-color: var(--gold);
+}
+
+.newsletter-form input[type="email"]:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
 }
 
 .btn-subscribe {
@@ -640,12 +691,12 @@ textarea:focus-visible {
     bottom: 20px;
     right: 30px;
     background: var(--navy-blue);
-    border-radius: 50%;
+    border-radius: 29px;
     align-items: center;
     justify-content: center;
-    width: 70px;
-    height: 70px;
-    padding: 10px;
+    width: 128px;
+    min-height: 58px;
+    padding: 10px 8px;
     box-shadow: 0 4px 20px rgba(48, 59, 106, 0.35);
     z-index: 89;
     cursor: pointer;
@@ -680,8 +731,10 @@ textarea:focus-visible {
     box-shadow: 0 6px 30px rgba(48, 59, 106, 0.45);
 }
 
-/* Hide the FAB while the footer is in view so it never overlaps footer content */
-.prayer-fab.fab-near-footer {
+/* Hide the FAB while the footer is in view so it never overlaps footer content, and while
+   the prayer popup is open so the form gets the room and nothing sits over the dark backdrop */
+.prayer-fab.fab-near-footer,
+.prayer-fab.fab-popup-open {
     opacity: 0;
     pointer-events: none;
     transform: scale(0.85);
@@ -693,7 +746,7 @@ textarea:focus-visible {
     top: 0; left: 0;
     width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.4);
-    z-index: 89;
+    z-index: 150; /* above the sticky header (100) so the backdrop covers the whole page; below the mobile menu (199/200) */
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -706,25 +759,33 @@ textarea:focus-visible {
 .prayer-popup {
     display: none;
     position: fixed;
-    bottom: 100px;
+    bottom: 24px;
     right: 30px;
     width: 340px;
     max-width: calc(100vw - 48px);
+    max-height: calc(100vh - 48px);
+    max-height: calc(100dvh - 48px);
     background: var(--white);
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(48, 59, 106, 0.3);
-    z-index: 90;
-    overflow: hidden;
+    z-index: 151;
+    overflow: hidden; /* the form body scrolls, not the whole card, so the blue title bar stays put and no scrollbar is drawn over it */
+    overscroll-behavior: contain;
     transform: translateY(20px);
     opacity: 0;
     transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 .prayer-popup.active {
-    display: block;
+    display: flex;
+    flex-direction: column;
     transform: translateY(0);
     opacity: 1;
 }
+
+/* On touch devices the popup itself takes focus when it opens (so no keyboard pops up);
+   it is a container, not a control, so it doesn't need a focus ring */
+.prayer-popup:focus { outline: none; }
 
 .prayer-popup-header {
     background: linear-gradient(135deg, var(--navy-blue) 0%, #1e2547 100%);
@@ -732,6 +793,16 @@ textarea:focus-visible {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex: 0 0 auto;
+}
+
+/* The only part of the popup that scrolls */
+#prayerFormBody {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .prayer-popup-header h4 {
@@ -787,8 +858,13 @@ textarea:focus-visible {
 
 .prayer-popup-body input:focus,
 .prayer-popup-body textarea:focus {
-    outline: none;
     border-color: var(--gold);
+}
+
+.prayer-popup-body input:focus-visible,
+.prayer-popup-body textarea:focus-visible {
+    outline: 2px solid var(--navy-blue);
+    outline-offset: 3px;
 }
 
 .prayer-popup-body textarea {
@@ -813,6 +889,41 @@ textarea:focus-visible {
 
 .prayer-submit-btn:hover {
     transform: translateY(-2px);
+}
+
+.care-type-fieldset {
+    border: 1px solid var(--light-gray);
+    border-radius: 8px;
+    padding: 12px 14px 14px;
+    margin: 0 0 14px;
+}
+
+.care-type-fieldset legend {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--dark-gray);
+    padding: 0 4px;
+}
+
+.care-type-option {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem !important;
+    margin-bottom: 8px !important;
+    cursor: pointer;
+}
+
+.care-type-option:last-of-type {
+    margin-bottom: 0 !important;
+}
+
+.care-type-fieldset input[type="checkbox"] {
+    width: auto !important;
+    padding: 0 !important;
+    margin: 0;
+    accent-color: var(--gold);
 }
 
 .prayer-success {
@@ -867,6 +978,10 @@ textarea:focus-visible {
         height: 50px;
     }
 
+    .header-logo {
+        height: 64px;
+    }
+
     .footer-main {
         grid-template-columns: 1fr 1fr;
         gap: 30px;
@@ -896,16 +1011,28 @@ textarea:focus-visible {
     .footer-main {
         grid-template-columns: 1fr;
         text-align: center;
+        gap: 32px;
     }
-    .footer-branding { grid-column: auto; }
+    .footer-branding { grid-column: auto; margin-bottom: -16px; }
     .footer-links-give { text-align: center; }
     .newsletter-form { margin: 0 auto; }
 
+    /* iOS Safari auto-zooms into any focused input/textarea under 16px — these are
+       0.875rem (14px) at the base/desktop size, which is fine with a mouse but
+       triggers the zoom on a real phone. 16px here overrides that for touch widths
+       only, leaving the smaller desktop size untouched. */
+    .newsletter-form input[type="email"],
+    .prayer-popup-body input,
+    .prayer-popup-body textarea {
+        font-size: 16px;
+    }
+
     .prayer-fab {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        padding: 8px;
+        width: 128px;
+        min-height: 58px;
+        height: auto;
+        border-radius: 29px;
+        padding: 10px 8px;
         font-size: 0.75rem;
         line-height: 1.2;
         text-align: center;
@@ -914,12 +1041,16 @@ textarea:focus-visible {
         right: 16px;
     }
 
+    /* Phones: the FAB hides while the form is open, so the form takes the room: nearly the
+       full width and height of the VISIBLE screen. dvh (dynamic viewport height) excludes
+       Safari's toolbars; the plain vh line above it is the fallback for older browsers. */
     .prayer-popup {
-        bottom: 80px;
+        bottom: 16px;
         right: 16px;
-        width: 300px;
-        max-height: calc(100vh - 140px);
-        overflow-y: auto;
+        width: calc(100vw - 32px);
+        max-width: 420px;
+        max-height: calc(100vh - 32px);
+        max-height: calc(100dvh - 32px);
     }
 
     .prayer-popup-header {
@@ -937,7 +1068,7 @@ textarea:focus-visible {
 
 @media (max-width: 480px) {
     .header-container {
-        height: 60px;
+        height: 68px;
         padding: 6px 12px;
     }
 
@@ -953,6 +1084,10 @@ textarea:focus-visible {
 
     .church-name {
         font-size: 1rem;
+    }
+
+    .header-logo {
+        height: 52px;
     }
 }
 
@@ -978,6 +1113,10 @@ textarea:focus-visible {
 
     .church-name {
         font-size: 0.875rem;
+    }
+
+    .header-logo {
+        height: 44px;
     }
 
     .church-location {
