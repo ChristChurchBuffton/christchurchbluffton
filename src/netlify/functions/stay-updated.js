@@ -1,3 +1,5 @@
+const tm = require('./lib/form-test-mode');
+
 async function verifyTurnstile(token) {
   const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'POST',
@@ -100,7 +102,7 @@ async function breezeRequest(endpoint, params) {
   try { return JSON.parse(text); } catch { return { raw: text }; }
 }
 
-exports.handler = async (event) => {
+const handleRequest = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
@@ -131,10 +133,13 @@ exports.handler = async (event) => {
       const fields = [
         { field_id: process.env.BREEZE_EMAIL_FIELD_ID, field_type: 'email', response: true, details: { address: email } }
       ];
-      const person = await breezeRequest('people/add', { first, last, fields_json: JSON.stringify(fields) });
+      // Breeze writes are GET requests, so both calls sit inside one tm.write() — skipped in test mode
+      await tm.write('add person to Breeze and assign Stay Updated tag', async () => {
+        const person = await breezeRequest('people/add', { first, last, fields_json: JSON.stringify(fields) });
 
-      // Assign "Stay Updated" tag
-      await breezeRequest('tags/assign', { person_id: person.id, tag_id: process.env.BREEZE_TAG_STAYUPDATED });
+        // Assign "Stay Updated" tag
+        await breezeRequest('tags/assign', { person_id: person.id, tag_id: process.env.BREEZE_TAG_STAYUPDATED });
+      });
     } catch (breezeErr) {
       console.error('[Stay Updated] Breeze error:', breezeErr.message);
     }
@@ -144,7 +149,7 @@ exports.handler = async (event) => {
     // placeholder staff can edit later, rather than a blank name column.
     if (process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
       try {
-        const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/subscribers`, {
+        const res = await tm.write('insert row into subscribers', () => fetch(`${process.env.SUPABASE_URL}/rest/v1/subscribers`, {
           method: 'POST',
           headers: {
             'apikey': process.env.SUPABASE_SECRET_KEY,
@@ -154,7 +159,7 @@ exports.handler = async (event) => {
           },
           body: JSON.stringify({ first_name: 'Unknown', last_name: '', email, source: 'newsletter' }),
           signal: AbortSignal.timeout(10000)
-        });
+        }));
         if (!res.ok) console.error('[Stay Updated] Supabase insert failed:', res.status, await res.text());
       } catch (supabaseErr) {
         console.error('[Stay Updated] Supabase error:', supabaseErr.message);
@@ -167,13 +172,13 @@ exports.handler = async (event) => {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: JSON.stringify(tm.prepareEmail({
           from: process.env.EMAIL_FROM || 'Newsletter Submission <notifications@christchurchbluffton.org>',
           to: notifyTo,
           subject: `New Stay Updated Signup — ${email}`,
           text: `New stay updated signup:\n\nEmail: ${email}`,
           html: emailShell('Newsletter Submission', fieldRow('Email', `<a href="mailto:${email}" style="color:#303b6a;">${email}</a>`))
-        }),
+        })),
         signal: AbortSignal.timeout(10000)
       });
     }
@@ -183,7 +188,7 @@ exports.handler = async (event) => {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: JSON.stringify(tm.prepareEmail({
           from: process.env.EMAIL_FROM || 'Christ Church Bluffton <notifications@christchurchbluffton.org>',
           reply_to: 'info@christchurchbluffton.org',
           to: [email],
@@ -204,7 +209,7 @@ exports.handler = async (event) => {
           <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:28px 0 0; padding-top:20px; border-top:1px solid #EEEEEE;">
             Blessings,<br>Christ Church Bluffton
           </p>`)
-        }),
+        })),
         signal: AbortSignal.timeout(10000)
       });
     }
@@ -214,4 +219,13 @@ exports.handler = async (event) => {
     console.error('[Stay Updated] Error:', err.message);
     return { statusCode: 500, body: JSON.stringify({ error: 'Something went wrong. Please try again.' }) };
   }
+};
+
+// Form Test Mode wrapper — see workflow/form-test-mode/ and the Web Design playbook. With
+// FORM_TEST_MODE_TO unset this passes every response through untouched.
+exports.handler = async (event) => {
+  const early = tm.guard();
+  if (early) return early;
+  const res = await handleRequest(event);
+  return tm.isTestMode() ? Object.assign({}, res, { headers: tm.headers(res.headers) }) : res;
 };

@@ -172,11 +172,19 @@
         var lockedScrollY = 0;
         function lockBodyScroll() {
             lockedScrollY = window.scrollY;
+            // Locking the page removes the desktop scrollbar, which would make the page ~15px
+            // wider and slide everything sideways. Measure it first and hold its space with
+            // padding so nothing moves. (Phones and Macs use overlay scrollbars: 0px, no-op.)
+            var scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
             document.body.style.position = 'fixed';
             document.body.style.top = (-lockedScrollY) + 'px';
             document.body.style.left = '0';
             document.body.style.right = '0';
             document.body.style.width = '100%';
+            if (scrollbarWidth > 0) {
+                document.body.style.boxSizing = 'border-box';
+                document.body.style.paddingRight = scrollbarWidth + 'px';
+            }
         }
         function unlockBodyScroll() {
             document.body.style.position = '';
@@ -184,6 +192,8 @@
             document.body.style.left = '';
             document.body.style.right = '';
             document.body.style.width = '';
+            document.body.style.boxSizing = '';
+            document.body.style.paddingRight = '';
             // Explicit behavior:'instant' is required here — this site sets
             // html{scroll-behavior:smooth} globally, which would otherwise turn
             // this restore into a visible animated scroll instead of a snap-back.

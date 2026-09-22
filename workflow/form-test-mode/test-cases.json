@@ -1,0 +1,74 @@
+{
+  "_readme": "CCB Form Test Mode dry-run. Run:  node test-form-test-mode.js test-cases.json   (add --calls to see every stubbed call). Nothing is sent or written - the network is fully stubbed and every address below is fake. Recipient lists are different per form on purpose, so a mis-routed email shows up. writePaths = Breeze does its writes as GET requests, so these URL fragments are classified as writes.",
+  "testAddress": "tester@example.test",
+  "hosts": {
+    "email": ["api.resend.com"],
+    "spamCheck": ["challenges.cloudflare.com"],
+    "records": ["*.supabase.co", "*.breezechms.com"]
+  },
+  "writePaths": ["/people/add", "/tags/assign"],
+  "env": {
+    "RESEND_API_KEY": "re_dummy_key",
+    "TURNSTILE_SECRET_KEY": "dummy_secret",
+    "TURNSTILE_SECRET_KEY_INVISIBLE": "dummy_secret_invisible",
+    "SUPABASE_URL": "https://abcdefgh.supabase.co",
+    "SUPABASE_SECRET_KEY": "dummy_service_key",
+    "BREEZE_URL": "https://ccb-test.breezechms.com/api",
+    "BREEZE_API_KEY": "dummy_breeze_key",
+    "BREEZE_EMAIL_FIELD_ID": "111",
+    "BREEZE_PHONE_FIELD_ID": "222",
+    "BREEZE_TAG_CONTACT": "333",
+    "BREEZE_TAG_STAYUPDATED": "444"
+  },
+  "stubs": [
+    { "urlContains": "form_key=eq.contact",    "method": "GET", "respond": [{ "recipients": ["contact-desk@ccb.example", "office@ccb.example"] }] },
+    { "urlContains": "form_key=eq.prayer",     "method": "GET", "respond": [{ "recipients": ["prayer-team@ccb.example", "pastor@ccb.example"] }] },
+    { "urlContains": "form_key=eq.newsletter", "method": "GET", "respond": [{ "recipients": ["newsletter-desk@ccb.example"] }] },
+    { "urlContains": "/people/add",  "respond": { "id": "12345" } },
+    { "urlContains": "/tags/assign", "respond": {} }
+  ],
+  "cases": [
+    {
+      "name": "Contact form - Planning to Visit (general contact list)",
+      "function": "../../src/netlify/functions/contact.js",
+      "payload": { "fullName": "Test Visitor", "email": "visitor@stranger.test", "phone": "843-555-0100", "interest": "visiting", "message": "We would like to visit this Saturday.", "turnstileToken": "token" },
+      "realRecipients": ["contact-desk@ccb.example", "office@ccb.example"],
+      "writesExpected": 3
+    },
+    {
+      "name": "Contact form - Receiving Updates (newsletter-style reply)",
+      "function": "../../src/netlify/functions/contact.js",
+      "payload": { "fullName": "Test Visitor", "email": "visitor@stranger.test", "interest": "updates", "message": "", "turnstileToken": "token" },
+      "realRecipients": ["contact-desk@ccb.example", "office@ccb.example"],
+      "writesExpected": 3
+    },
+    {
+      "name": "Contact form - Prayer & Pastoral Care with follow-up (prayer team list + extra prayer_requests row)",
+      "function": "../../src/netlify/functions/contact.js",
+      "payload": { "fullName": "Test Visitor", "email": "visitor@stranger.test", "phone": "843-555-0100", "interest": "prayer", "message": "Please pray for my family.", "prayerContact": true, "careTypes": ["Hospital visit", "Grief"], "otherNeedText": "", "turnstileToken": "token" },
+      "realRecipients": ["prayer-team@ccb.example", "pastor@ccb.example"],
+      "writesExpected": 4
+    },
+    {
+      "name": "Prayer popup - with name and email (staff email + auto-reply)",
+      "function": "../../src/netlify/functions/prayer.js",
+      "payload": { "name": "Test Person", "email": "visitor@stranger.test", "phone": "843-555-0100", "prayer": "Please pray for healing.", "careTypes": ["Hospital visit"], "turnstileToken": "token" },
+      "realRecipients": ["prayer-team@ccb.example", "pastor@ccb.example"],
+      "writesExpected": 1
+    },
+    {
+      "name": "Prayer popup - anonymous (staff email only, no auto-reply)",
+      "function": "../../src/netlify/functions/prayer.js",
+      "payload": { "prayer": "Please pray.", "turnstileToken": "token" },
+      "realRecipients": ["prayer-team@ccb.example", "pastor@ccb.example"],
+      "writesExpected": 1
+    },
+    {
+      "name": "Newsletter signup (footer)",
+      "function": "../../src/netlify/functions/stay-updated.js",
+      "payload": { "email": "visitor@stranger.test", "turnstileToken": "token" },
+      "realRecipients": ["newsletter-desk@ccb.example"],
+      "writesExpected": 3
+    }
+  ]
+}

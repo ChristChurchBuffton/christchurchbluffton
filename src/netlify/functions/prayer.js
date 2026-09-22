@@ -1,3 +1,5 @@
+const tm = require('./lib/form-test-mode');
+
 async function verifyTurnstile(token) {
   const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'POST',
@@ -84,7 +86,7 @@ function replyShell(heading, bodyHtml) {
 </html>`;
 }
 
-exports.handler = async (event) => {
+const handleRequest = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
@@ -114,7 +116,7 @@ exports.handler = async (event) => {
     // pastoral "always succeed" response. Name, email, and phone are all optional on this form.
     if (process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
       try {
-        const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/prayer_requests`, {
+        const res = await tm.write('insert row into prayer_requests', () => fetch(`${process.env.SUPABASE_URL}/rest/v1/prayer_requests`, {
           method: 'POST',
           headers: {
             'apikey': process.env.SUPABASE_SECRET_KEY,
@@ -134,7 +136,7 @@ exports.handler = async (event) => {
             submitted_at: new Date().toISOString().slice(0, 10)
           }),
           signal: AbortSignal.timeout(10000)
-        });
+        }));
         if (!res.ok) console.error('[Prayer] Supabase insert failed:', res.status, await res.text());
       } catch (supabaseErr) {
         console.error('[Prayer] Supabase error:', supabaseErr.message);
@@ -147,7 +149,7 @@ exports.handler = async (event) => {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: JSON.stringify(tm.prepareEmail({
           from: process.env.EMAIL_FROM || 'Prayer & Pastoral Care <notifications@christchurchbluffton.org>',
           to: notifyTo,
           subject: `New Prayer & Pastoral Care Request — ${name || 'Anonymous'}`,
@@ -160,7 +162,7 @@ exports.handler = async (event) => {
             otherNeedText ? fieldRow('Other/Need', otherNeedText) : '',
             fieldRow('Prayer', prayer.replace(/\n/g, '<br>'))
           ].join(''))
-        }),
+        })),
         signal: AbortSignal.timeout(10000)
       });
     }
@@ -171,7 +173,7 @@ exports.handler = async (event) => {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: JSON.stringify(tm.prepareEmail({
           from: process.env.EMAIL_FROM || 'Christ Church Bluffton <notifications@christchurchbluffton.org>',
           reply_to: 'admin@christchurchbluffton.org',
           to: [email],
@@ -192,7 +194,7 @@ exports.handler = async (event) => {
           <p style="font-family:Georgia,'Times New Roman',serif; font-size:16px; color:#333333; line-height:1.6; margin:28px 0 0; padding-top:20px; border-top:1px solid #EEEEEE;">
             With you in prayer,<br>Christ Church Bluffton
           </p>`)
-        }),
+        })),
         signal: AbortSignal.timeout(10000)
       });
     }
@@ -204,4 +206,13 @@ exports.handler = async (event) => {
     // Still return success — pastoral UX
     return { statusCode: 200, body: JSON.stringify({ success: true }) };
   }
+};
+
+// Form Test Mode wrapper — see workflow/form-test-mode/ and the Web Design playbook. With
+// FORM_TEST_MODE_TO unset this passes every response through untouched.
+exports.handler = async (event) => {
+  const early = tm.guard();
+  if (early) return early;
+  const res = await handleRequest(event);
+  return tm.isTestMode() ? Object.assign({}, res, { headers: tm.headers(res.headers) }) : res;
 };

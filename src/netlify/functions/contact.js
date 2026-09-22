@@ -1,3 +1,5 @@
+const tm = require('./lib/form-test-mode');
+
 async function verifyTurnstile(token) {
   const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'POST',
@@ -100,7 +102,7 @@ async function breezeRequest(endpoint, params) {
   try { return JSON.parse(text); } catch { return { raw: text }; }
 }
 
-exports.handler = async (event) => {
+const handleRequest = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
@@ -137,10 +139,13 @@ exports.handler = async (event) => {
         { field_id: process.env.BREEZE_EMAIL_FIELD_ID, field_type: 'email', response: true, details: { address: email } },
         ...(phone ? [{ field_id: process.env.BREEZE_PHONE_FIELD_ID, field_type: 'phone', response: true, details: { phone_mobile: phone } }] : [])
       ];
-      const person = await breezeRequest('people/add', { first, last, fields_json: JSON.stringify(fields) });
+      // Breeze writes are GET requests, so both calls sit inside one tm.write() — skipped in test mode
+      await tm.write('add person to Breeze and assign Contact Form tag', async () => {
+        const person = await breezeRequest('people/add', { first, last, fields_json: JSON.stringify(fields) });
 
-      // Assign "Contact Form" tag
-      await breezeRequest('tags/assign', { person_id: person.id, tag_id: process.env.BREEZE_TAG_CONTACT });
+        // Assign "Contact Form" tag
+        await breezeRequest('tags/assign', { person_id: person.id, tag_id: process.env.BREEZE_TAG_CONTACT });
+      });
     } catch (breezeErr) {
       console.error('[Contact] Breeze error:', breezeErr.message);
     }
@@ -150,7 +155,7 @@ exports.handler = async (event) => {
     // collects a real name, unlike the newsletter footer form.
     if (process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
       try {
-        const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/subscribers`, {
+        const res = await tm.write('insert row into subscribers', () => fetch(`${process.env.SUPABASE_URL}/rest/v1/subscribers`, {
           method: 'POST',
           headers: {
             'apikey': process.env.SUPABASE_SECRET_KEY,
@@ -160,7 +165,7 @@ exports.handler = async (event) => {
           },
           body: JSON.stringify({ first_name: first, last_name: last, email, source: 'contact' }),
           signal: AbortSignal.timeout(10000)
-        });
+        }));
         if (!res.ok) console.error('[Contact] Supabase insert failed:', res.status, await res.text());
       } catch (supabaseErr) {
         console.error('[Contact] Supabase error:', supabaseErr.message);
@@ -170,7 +175,7 @@ exports.handler = async (event) => {
       // Prayer Requests log — in addition to the Subscribers row above, not instead of it.
       if (interest === 'prayer' && prayerContact) {
         try {
-          const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/prayer_requests`, {
+          const res = await tm.write('insert row into prayer_requests', () => fetch(`${process.env.SUPABASE_URL}/rest/v1/prayer_requests`, {
             method: 'POST',
             headers: {
               'apikey': process.env.SUPABASE_SECRET_KEY,
@@ -190,7 +195,7 @@ exports.handler = async (event) => {
               submitted_at: new Date().toISOString().slice(0, 10)
             }),
             signal: AbortSignal.timeout(10000)
-          });
+          }));
           if (!res.ok) console.error('[Contact] Prayer request insert failed:', res.status, await res.text());
         } catch (supabaseErr) {
           console.error('[Contact] Prayer request insert error:', supabaseErr.message);
@@ -229,13 +234,13 @@ exports.handler = async (event) => {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: JSON.stringify(tm.prepareEmail({
           from: process.env.EMAIL_FROM || 'Contact Form Submission <notifications@christchurchbluffton.org>',
           to: notifyTo,
           subject: `New Contact Form — ${fullName}`,
           text: `New contact form submission:\n\nName: ${fullName}\nEmail: ${email}\nPhone: ${phone || '(none)'}\nInterest: ${interest}\nMessage: ${message || '(none)'}`,
           html: emailShell('Contact Form Submission', fieldsHtml)
-        }),
+        })),
         signal: AbortSignal.timeout(10000)
       });
     }
@@ -312,14 +317,14 @@ exports.handler = async (event) => {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: JSON.stringify(tm.prepareEmail({
           from: process.env.EMAIL_FROM || 'Christ Church Bluffton <notifications@christchurchbluffton.org>',
           reply_to: replyTo,
           to: [email],
           subject,
           text: textBody,
           html: replyShell(heading, bodyHtml)
-        }),
+        })),
         signal: AbortSignal.timeout(10000)
       });
     }
@@ -329,4 +334,13 @@ exports.handler = async (event) => {
     console.error('[Contact] Error:', err.message);
     return { statusCode: 500, body: JSON.stringify({ error: 'Something went wrong. Please try again.' }) };
   }
+};
+
+// Form Test Mode wrapper — see workflow/form-test-mode/ and the Web Design playbook. With
+// FORM_TEST_MODE_TO unset this passes every response through untouched.
+exports.handler = async (event) => {
+  const early = tm.guard();
+  if (early) return early;
+  const res = await handleRequest(event);
+  return tm.isTestMode() ? Object.assign({}, res, { headers: tm.headers(res.headers) }) : res;
 };
