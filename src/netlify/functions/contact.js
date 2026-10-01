@@ -12,7 +12,7 @@ function formatPhone(raw) {
 // A person who is already on the Subscribers list (same email, any capitalization) is not added a second time.
 async function subscriberExists(email) {
   try {
-    const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/subscribers?select=id&email=ilike.%22${encodeURIComponent(String(email || '').replace(/["\\]/g, ''))}%22&limit=1`, {
+    const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/subscribers?select=id&email=ilike.${encodeURIComponent(String(email || '').replace(/["\\]/g, ''))}&limit=1`, {
       headers: { apikey: process.env.SUPABASE_SECRET_KEY, Authorization: `Bearer ${process.env.SUPABASE_SECRET_KEY}` },
       signal: AbortSignal.timeout(10000)
     });

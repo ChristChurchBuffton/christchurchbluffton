@@ -89,7 +89,7 @@ async function findOrCreateHousehold(parent, student) {
   }
   // Student on the household's own roster too — matched by name within that family so a
   // resubmission never adds a second entry (and never changes the existing one).
-  const existingKids = await sb('GET', `congregant_children?family_id=eq.${family.id}&first_name=ilike.%22${encodeURIComponent(q(student.firstName))}%22&last_name=ilike.%22${encodeURIComponent(q(student.lastName))}%22&select=id`);
+  const existingKids = await sb('GET', `congregant_children?family_id=eq.${family.id}&first_name=ilike.${encodeURIComponent(q(student.firstName))}&last_name=ilike.${encodeURIComponent(q(student.lastName))}&select=id`);
   const kidPayload = { family_id: family.id, first_name: student.firstName, last_name: student.lastName, birthdate: student.birthdate || null };
   if (!existingKids.length) {
     const maxOrder = await sb('GET', `congregant_children?family_id=eq.${family.id}&select=sort_order&order=sort_order.desc&limit=1`);
@@ -169,10 +169,10 @@ const handleRequest = async (event) => {
       // "Possible duplicate", hidden from check-in, and an admin decides in the Youth tab.
       let studentId, studentCode;
       let existing = [];
-      if (familyId) existing = await sb('GET', `youth_students?family_id=eq.${familyId}&first_name=ilike.%22${encodeURIComponent(q(student.firstName))}%22&last_name=ilike.%22${encodeURIComponent(q(student.lastName))}%22&select=id,student_code`);
+      if (familyId) existing = await sb('GET', `youth_students?family_id=eq.${familyId}&first_name=ilike.${encodeURIComponent(q(student.firstName))}&last_name=ilike.${encodeURIComponent(q(student.lastName))}&select=id,student_code`);
       let possibleDuplicateStudentId = existing.length ? existing[0].id : null;
       if (!existing.length) {
-        const sameName = await sb('GET', `youth_students?first_name=ilike.%22${encodeURIComponent(q(student.firstName))}%22&last_name=ilike.%22${encodeURIComponent(q(student.lastName))}%22&select=id&limit=1`);
+        const sameName = await sb('GET', `youth_students?first_name=ilike.${encodeURIComponent(q(student.firstName))}&last_name=ilike.${encodeURIComponent(q(student.lastName))}&select=id&limit=1`);
         if (sameName.length) possibleDuplicateStudentId = sameName[0].id;
       }
       const corePayload = {
