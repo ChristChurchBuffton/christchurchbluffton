@@ -91,6 +91,29 @@
     align-items: center;
     justify-content: space-between;
   }
+  .preview-mode-toggle {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--text-dark);
+    background: var(--white);
+    border: 1px solid var(--border-gray);
+    border-radius: 100px;
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .preview-mode-toggle:hover { border-color: var(--navy-blue); color: var(--navy-blue); }
+  .preview-mode-toggle.active {
+    background: var(--navy-blue);
+    border-color: var(--navy-blue);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
   .preview-pane .preview-header .live-dot {
     display: inline-block;
     width: 7px;
@@ -335,6 +358,75 @@
     cursor: pointer;
   }
   .image-popover-tile .tile-actions button:hover { border-color: var(--navy-blue); color: var(--navy-blue); }
+
+  /* ---- Workflow 5: rich-text formatting toolbar + save affordances ---- */
+  .cms-field-commit {
+    position: absolute;
+    z-index: 9998;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 1px solid #2e7d32;
+    background: #2e7d32;
+    color: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+  }
+  .cms-field-commit:hover { background: #245e28; }
+  .cms-field.cms-protected { outline: 2px dotted rgba(177,67,67,0.6) !important; cursor: not-allowed; }
+
+  .rich-toolbar {
+    display: none;
+    position: absolute;
+    z-index: 10000;
+    background: #1e2547;
+    border: 1px solid #c3a355;
+    border-radius: 10px;
+    padding: 6px;
+    gap: 4px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .rich-toolbar.open { display: flex; align-items: center; flex-wrap: wrap; max-width: 480px; }
+  .rich-toolbar select {
+    font-size: 12px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: #2a3260;
+    color: #fff;
+    cursor: pointer;
+  }
+  .rich-toolbar button {
+    min-width: 26px;
+    height: 26px;
+    padding: 0 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: #2a3260;
+    color: #fff;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .rich-toolbar button:hover { background: #384080; }
+  .rich-toolbar button.active { background: #c3a355; color: #1e2547; border-color: #c3a355; }
+  .rich-toolbar button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .rich-toolbar button:disabled:hover { background: #2a3260; }
+  .rich-toolbar .rt-sep { width: 1px; align-self: stretch; background: rgba(255,255,255,0.2); margin: 2px 2px; }
+
+  /* ---- Publish action (per-page) ---- */
+  .publish-btn {
+    background: #b14343;
+    color: #fff;
+  }
+  .publish-btn:hover { background: #963a3a; }
+  .publish-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  #preview-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .page-badge { display: inline-block; margin-left: 8px; min-width: 18px; padding: 1px 6px; border-radius: 10px; background: var(--gold); color: #1e2547; font-size: 11px; font-weight: bold; line-height: 16px; text-align: center; }
 </style>
 </head>
 <body data-page="content">
@@ -386,7 +478,7 @@
         Newsletter
         <span class="nav-note">Disabled — use a PC</span>
       </a>
-      <a href="notifications" data-page="notifications" data-site-admin-only="true">
+      <a href="notifications" data-page="notifications" data-permission="notifications">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         Notification Settings
       </a>
@@ -443,8 +535,10 @@
         </div>
         <div class="topbar-actions">
           <button type="button" class="log-link" id="log-link">View Change Log</button>
-          <button type="button" class="log-link" id="revert-btn" disabled title="No unsaved changes on this page to discard">Revert</button>
-          <button class="btn btn-gold save-btn" id="save-btn" disabled title="Not connected to the live site yet — edits won't be enabled until this panel can push changes to christchurchbluffton.org">Save Changes</button>
+          <button type="button" class="log-link" id="revert-btn" disabled title="No unsaved changes on this page to discard">Revert All</button>
+          <button class="btn btn-gold save-btn" id="save-btn" title="Saves every field's current state as a draft — locked or unlocked, whatever it is right now. This does NOT publish anything live.">Save Changes</button>
+          <button class="btn btn-outline" id="preview-btn" disabled title="Open this page with your saved changes applied, at its own link">Preview Draft</button>
+          <button class="btn btn-gold publish-btn" id="publish-btn" disabled title="Send this page's saved changes to the temporary preview site">Publish Page</button>
         </div>
       </div>
       <div class="content" id="page-body">
@@ -461,6 +555,7 @@
           <div class="preview-pane" id="preview-pane">
             <div class="preview-header">
               <span><span class="live-dot"></span>Live Preview <span class="preview-note" id="preview-page-label">Home</span></span>
+              <button type="button" class="preview-mode-toggle" id="preview-mode-toggle">📱 Mobile Preview</button>
             </div>
             <div class="preview-frame-wrap" id="preview-frame-wrap">
               <div class="preview-frame-scaler" id="preview-frame-scaler">
@@ -487,11 +582,769 @@
     </div>
   </div>
 
+  <div class="rich-toolbar" id="rich-toolbar">
+    <select id="rt-font" title="Font">
+      <option value="Lora">Lora</option>
+      <option value="Adobe Caslon Pro">Adobe Caslon Pro</option>
+    </select>
+    <div class="rt-sep"></div>
+    <button type="button" id="rt-bold" title="Bold"><b>B</b></button>
+    <button type="button" id="rt-semibold" title="Semi Bold"><b>S</b></button>
+    <button type="button" id="rt-italic" title="Italic"><i>I</i></button>
+    <button type="button" id="rt-swash" title="Swash — decorative capital letters. Uses Adobe Caslon Pro italic, so this turns those on too."><i>Sw</i></button>
+    <div class="rt-sep"></div>
+    <button type="button" id="rt-link" title="Make the selected text a clickable link — or link the email, web address or phone number in this box">&#128279; Link</button>
+    <button type="button" id="rt-unlink" disabled title="Remove the link">Unlink</button>
+    <div class="rt-sep"></div>
+    <button type="button" id="rt-revert" disabled title="Nothing to undo in this box">&#8630; Revert</button>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/shared.js"></script>
   <script>
     function escapeHtml(str) {
       return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    // Editing switch (Kevin, 2026-09-28): editing must NOT work on the live site
+    // (christchurchbluffton.org) — edits only save as drafts and nothing publishes them yet, so
+    // it would just confuse the church. It works only on localhost and on the temp link; any
+    // other host (the live domain, www, anything unlisted) gets a read-only preview. Allowlist,
+    // not blocklist, so an unexpected host fails closed. When Publish is proven on the temp link,
+    // this is the one place to widen. This is a UI switch, not a security control — the database
+    // rules still decide who may write.
+    // A second rule on top of the host (Kevin, 2026-09-28): even where editing is on, only top
+    // admins (role site_admin) whose Content Editor access hasn't been turned off may edit —
+    // everyone else with the permission gets a read-only view. The database enforces the same rule
+    // (can_edit_content()); this just keeps the screen honest.
+    const HOST_ALLOWS_EDITING = ['localhost', '127.0.0.1', '[::1]', 'christchurch-bluffton.netlify.app'].includes(location.hostname);
+    const IS_TEMP_SITE = location.hostname === 'christchurch-bluffton.netlify.app';
+    // Who is signed in isn't known until the login check finishes, so these start "off" (read-only,
+    // the safe default) and applyEditingGate() sets them for real in the bootstrap at the bottom,
+    // before anything is bound or shown.
+    let IS_TOP_ADMIN = false;
+    let EDITING_ENABLED = false;
+    function applyEditingGate() {
+      const s = getSession();
+      IS_TOP_ADMIN = !!s && s.role === 'site_admin' && !(s.permissions && s.permissions.contentEditor === false);
+      EDITING_ENABLED = HOST_ALLOWS_EDITING && IS_TOP_ADMIN;
+      if (EDITING_ENABLED) return;
+      const offSaveBtn = document.getElementById('save-btn');
+      offSaveBtn.disabled = true;
+      if (!HOST_ALLOWS_EDITING) {
+        document.querySelector('.topbar .subtitle').textContent = "Preview only — editing isn't turned on for this site yet";
+        offSaveBtn.title = "Editing isn't turned on for this site yet";
+        document.querySelector('.live-url-banner').innerHTML = "<strong>Editing Not Available Yet</strong> — you can look at each page here, but changes can't be made or saved.";
+      } else {
+        document.querySelector('.topbar .subtitle').textContent = "View only — only top admins can make changes";
+        offSaveBtn.title = "Only top admins can save changes";
+        document.querySelector('.live-url-banner').innerHTML = "<strong>View Only</strong> — you can look at each page here, but only top admins can make changes.";
+      }
+    }
+
+    // ---- Workflow 5: rich-text formatting ----
+    // Fixed allowlists — a per-field format choice can ONLY ever be one of these values.
+    // Anything outside these lists is stripped by sanitizeRichHtml(), never trusted verbatim.
+    const RICH_FONTS = ['Lora', 'Adobe Caslon Pro'];
+    const RICH_WEIGHTS = [400, 600, 700]; // 400=normal, 600=Semi Bold, 700=Bold
+    // Adobe Caslon Pro's italic styles carry real OpenType swash alternate glyphs (confirmed
+    // directly against the font's own GSUB feature table, 2026-09-08) — swsh/salt/cswh together
+    // give the full swash treatment (decorative italic capitals). Applied/checked as one
+    // combined value rather than exposing three separate technical feature tags to a
+    // non-technical user. Has no visible effect on Lora or on upright (non-italic) Caslon text
+    // — those weights don't carry these glyphs at all — but is safe to apply either way.
+    // NOTE: this exact string (no explicit "1", this comma/spacing) is what the browser itself
+    // normalizes an inline style.fontFeatureSettings assignment down to — verified directly
+    // rather than assumed. The sanitizer's exact-match check below only ever sees this same
+    // normalized form, so it has to match it precisely or every swash application would be
+    // silently stripped as unrecognized on the very next save.
+    const SWASH_FEATURE = '"swsh", "salt", "cswh"';
+
+    // Fields that are fully excluded from the Content Editor (Kevin, 2026-09-07: "cannot edit
+    // the popout box") — the Prayer & Pastoral Care popup's own form content. Checked by CSS
+    // selector against the live preview iframe; anything inside these never gets a lock icon,
+    // a toolbar, or a data-bind-id at all.
+    // Verified against the real markup (src/includes/prayer-fab.html): the popup is
+    // <div class="prayer-popup" id="prayerPopup">, the FAB button is
+    // <button class="prayer-fab" id="prayerFab"> — actual ids are camelCase (no hyphen), so
+    // only the class-based selectors below ever match; kept both class forms for safety against
+    // future markup changes (e.g. a "prayer-popup-body" or "prayer-popup-header" child class).
+    // .donation-secure ("Secure giving powered by Tithe.ly" on the Give page) moved here from
+    // FONT_ONLY_TEXT below, 2026-09-08 (Kevin: "remove the dotted border ... that will not be
+    // able to be changed") — reverses the 2026-09-07 "font only" decision for this one line;
+    // now fully locked out like the prayer popup, no dashed border, no formatting at all.
+    const FULLY_PROTECTED_SELECTOR = '.prayer-popup, [class*="prayer-popup"], .donation-secure';
+
+    // Never becomes an editable field at all — the getTextNodes() and whole-element passes both
+    // skip anything inside these. .copyright is the footer's "© 2026 Christ Church Bluffton. All
+    // rights reserved." line (Kevin, 2026-09-28: it should not be editable) — the year is also
+    // set by script, so an edit there would never stick anyway.
+    const NEVER_EDITABLE_SELECTOR = '#loader, .mobile-menu, .footer-links-list, .footer-legal, .footer-powered, .copyright';
+
+    // Elements limited to font/style formatting only — wording (and, for links, the href) stays
+    // fixed, but the rich-text toolbar still applies. Confirmed by Kevin 2026-09-07: the Prayer
+    // & Pastoral Care button/FAB itself. (The "Secure giving powered by Tithe.ly" line was here
+    // too until 2026-09-08 — see FULLY_PROTECTED_SELECTOR above.)
+    const FONT_ONLY_TEXT = [];
+
+    // Strict allowlist sanitizer for per-field rich markup. Only <span style="..."> (with
+    // exactly font-family/font-weight/font-style/font-feature-settings, each individually
+    // checked against the fixed allowlists above) and <br> survive — every other tag is
+    // unwrapped (children kept, tag discarded) and every other attribute (including any event
+    // handler) is stripped outright,
+    // never copied through. Runs on every save before it reaches Supabase, and again
+    // defensively before any saved value is re-injected into a preview.
+    // NOTE 2026-09-08: font-size formatting was removed (Kevin) — a fixed pixel value applied
+    // through this toolbar can't know about the site's responsive breakpoints, so it would show
+    // the same size on mobile as on desktop, silently overriding whatever smaller size a heading
+    // steps down to on a phone. Alignment (left/center/right) was removed the same day too.
+    // Neither is recognized/stripped here anymore, on purpose — see git history if either is
+    // ever revisited.
+    function isSafeLinkHref(href) {
+      return /^(mailto:|tel:|https?:\/\/|\/(?!\/)|#)/i.test(href);
+    }
+
+    function sanitizeRichHtml(html) {
+      const container = document.implementation.createHTMLDocument('').createElement('div');
+      container.innerHTML = html == null ? '' : String(html);
+
+      function cleanStyle(styleDecl) {
+        const out = [];
+        const ff = (styleDecl.fontFamily || '').replace(/^['"]|['"]$/g, '');
+        if (RICH_FONTS.includes(ff)) out.push(`font-family:'${ff}'`);
+        const fw = parseInt(styleDecl.fontWeight, 10);
+        if (RICH_WEIGHTS.includes(fw)) out.push(`font-weight:${fw}`);
+        if (styleDecl.fontStyle === 'italic') out.push('font-style:italic');
+        if (styleDecl.fontFeatureSettings === SWASH_FEATURE) out.push(`font-feature-settings:${SWASH_FEATURE}`);
+        return out.join(';');
+      }
+
+      function unwrap(el) {
+        const parent = el.parentNode;
+        while (el.firstChild) parent.insertBefore(el.firstChild, el);
+        parent.removeChild(el);
+      }
+
+      function walk(node) {
+        Array.from(node.childNodes).forEach(child => {
+          if (child.nodeType === 3) return; // plain text — always safe as-is
+          if (child.nodeType !== 1) { child.remove(); return; } // comments etc. — discard
+          if (child.tagName === 'BR') return; // allowed, no attributes to strip
+          walk(child); // recurse before deciding this node's own fate
+          if (child.tagName === 'SPAN') {
+            const cleaned = cleanStyle(child.style);
+            Array.from(child.attributes).forEach(a => child.removeAttribute(a.name));
+            if (cleaned) child.setAttribute('style', cleaned);
+            else unwrap(child); // no real formatting left — a bare span is just noise
+          } else if (child.tagName === 'A') {
+            // Links survive only with a safe destination (email, phone, web address, or a
+            // page on this site) and nothing but href — never javascript:, never event handlers.
+            const href = (child.getAttribute('href') || '').trim();
+            if (isSafeLinkHref(href)) {
+              Array.from(child.attributes).forEach(a => { if (a.name !== 'href') child.removeAttribute(a.name); });
+            } else {
+              unwrap(child);
+            }
+          } else {
+            unwrap(child); // any other tag (div/b/script/img/etc.) — keep content, drop the tag
+          }
+        });
+      }
+      walk(container);
+      return container.innerHTML;
+    }
+
+    // Walks up from a node to the nearest ancestor carrying data-bind-id (the field's own
+    // editable element) — used to figure out which field a selection/edit belongs to.
+    function getEnclosingField(node) {
+      let el = node.nodeType === 3 ? node.parentElement : node;
+      while (el && !el.hasAttribute('data-bind-id')) el = el.parentElement;
+      return el;
+    }
+
+    // Re-reads a field's current (already-edited) DOM content, sanitizes it, writes the
+    // sanitized markup back into the DOM (so what's shown always matches what would be saved),
+    // and records it as a pending change exactly like a normal typed edit.
+    function commitFieldFromDom(fieldEl) {
+      const id = fieldEl.getAttribute('data-bind-id');
+      if (!id) return;
+      const clean = sanitizeRichHtml(fieldEl.innerHTML);
+      if (clean !== fieldEl.innerHTML) fieldEl.innerHTML = clean;
+      onFieldEdited(id, clean);
+    }
+
+    // "All header nav items must share identical font styling — changing one changes all of
+    // them together" (agent-workflow-specs.md, Workflow 5 spec, confirmed 2026-09-07 — each nav
+    // word is its own separate field/DB row, but they're meant to move as one unit). Reads back
+    // the computed style of whichever nav field was JUST formatted, then rewrites every OTHER
+    // header nav field (including the header's own "Give" button) as one clean span carrying
+    // that same font-family/weight/style/swash, committing each so Save persists it everywhere.
+    // Deliberately full-word-replace, not a partial-selection merge — every nav item is a single
+    // short word/phrase with no realistic case for only half of "About" being bold, so reading
+    // the edited field's overall computed style and stamping it uniformly onto each sibling is
+    // sufficient and far simpler than replicating applyCharFormat's own partial-selection logic
+    // for each one.
+    function syncHeaderNavStyle(sourceEl) {
+      const headerEl = sourceEl.closest('.header');
+      if (!headerEl) return;
+      const doc = sourceEl.ownerDocument;
+      // Read from the INNERMOST wrapping element, not sourceEl itself — applyCharFormat wraps
+      // the just-formatted text in a nested <span>, and CSS inheritance only flows parent-to-
+      // child, never child-to-parent, so checking sourceEl's own computed style would miss
+      // whatever was just applied and silently sync "no formatting" to every other nav item.
+      let styleSource = sourceEl;
+      while (styleSource.firstElementChild) styleSource = styleSource.firstElementChild;
+      const cs = doc.defaultView.getComputedStyle(styleSource);
+      const ff = (cs.fontFamily || '').replace(/^['"]|['"]$/g, '').split(',')[0].trim();
+      const fw = parseInt(cs.fontWeight, 10);
+      const featureSettings = cs.fontFeatureSettings || '';
+      const hasSwash = ['swsh', 'salt', 'cswh'].every(tag => featureSettings.includes(`"${tag}"`));
+
+      const styleParts = [];
+      if (RICH_FONTS.includes(ff)) styleParts.push(`font-family:'${ff}'`);
+      if (RICH_WEIGHTS.includes(fw)) styleParts.push(`font-weight:${fw}`);
+      if (cs.fontStyle === 'italic') styleParts.push('font-style:italic');
+      if (hasSwash) styleParts.push(`font-feature-settings:${SWASH_FEATURE}`);
+      const styleStr = styleParts.join(';');
+
+      const others = Array.from(headerEl.querySelectorAll('[data-bind-id]')).filter(el => el !== sourceEl);
+      others.forEach(el => {
+        const text = el.textContent;
+        if (styleStr) {
+          const span = doc.createElement('span');
+          span.setAttribute('style', styleStr);
+          span.textContent = text;
+          el.innerHTML = '';
+          el.appendChild(span);
+        } else {
+          el.textContent = text;
+        }
+        commitFieldFromDom(el);
+      });
+    }
+
+    // If the current selection exactly and only covers the content of one existing span already
+    // carrying this style property (any value), returns that span (so the caller can toggle it
+    // off or update it in place) — otherwise null. Deliberately simple (exact-match only): a
+    // selection spanning part of a formatted run, or overlapping two different runs, always
+    // falls through to "wrap a new span" rather than attempting a full merge/split of existing
+    // formatting. Good enough for the common case (select a phrase, click a button, click again
+    // to undo); a real multi-run merge engine is out of scope for this pass.
+    //
+    // Matches by character offset (via fieldTextOffset), not range.commonAncestorContainer.
+    // Found 2026-09-08 (Kevin: "having trouble going backward with the font" after applying
+    // Adobe Caslon Pro): when a selection's start boundary sits at the trailing edge of the
+    // PREVIOUS text node (the normal shape produced by re-selecting a run that starts partway
+    // through a field — e.g. selectFieldTextRange picking "Christ Church "'s end as the start
+    // boundary rather than the span's start), commonAncestorContainer resolves to fieldEl itself,
+    // not the span — so the old check always missed it and wrapped a NEW span around the old one
+    // instead of updating it. Since the inner (old) span's style still wins, the font looked
+    // permanently stuck. Scanning every descendant span by exact offset match also naturally
+    // handles multiple nested format spans (e.g. font-family wrapping font-weight) — it finds
+    // whichever one actually carries the property being toggled, not just the nearest ancestor.
+    function findExactSpanWrapping(fieldEl, range, prop) {
+      const wantText = range.toString();
+      if (!wantText) return null;
+      const start = fieldTextOffset(fieldEl, range.startContainer, range.startOffset);
+      const end = fieldTextOffset(fieldEl, range.endContainer, range.endOffset);
+      const spans = fieldEl.querySelectorAll('span');
+      for (const span of spans) {
+        if (!span.style[prop]) continue;
+        const spanRange = fieldEl.ownerDocument.createRange();
+        spanRange.selectNodeContents(span);
+        const spanStart = fieldTextOffset(fieldEl, spanRange.startContainer, spanRange.startOffset);
+        const spanEnd = spanStart + span.textContent.length;
+        if (spanStart === start && spanEnd === end) return span;
+      }
+      return null;
+    }
+
+    // Converts a Range boundary (node + offset) into a plain character index relative to
+    // fieldEl's own flattened text — used to re-select the same stretch of text by position
+    // after a DOM rewrite replaces the actual nodes a Range was pointing at. Built via a
+    // synthetic Range + toString().length rather than manually walking text nodes: a boundary
+    // from selectNodeContents() lands on an ELEMENT with an offset counted in child nodes, not
+    // a text node with a character offset, which a naive text-node-only walk never matches
+    // (found 2026-09-08 while fixing the selection-drops-after-formatting bug below — an
+    // earlier version of this function always returned the same value for both ends,
+    // collapsing the restored selection every time).
+    function fieldTextOffset(fieldEl, node, offset) {
+      const doc = fieldEl.ownerDocument;
+      const preRange = doc.createRange();
+      preRange.selectNodeContents(fieldEl);
+      preRange.setEnd(node, offset);
+      return preRange.toString().length;
+    }
+    // Inverse of fieldTextOffset() — builds and applies a real Selection Range for a plain
+    // character range within fieldEl, regardless of how many spans currently divide up its
+    // text. Returns the Range it set.
+    function selectFieldTextRange(fieldEl, start, end) {
+      const doc = fieldEl.ownerDocument;
+      const walker = doc.createTreeWalker(fieldEl, NodeFilter.SHOW_TEXT);
+      let total = 0, startNode = null, startOff = 0, endNode = null, endOff = 0, n;
+      while ((n = walker.nextNode())) {
+        const len = n.textContent.length;
+        if (startNode === null && total + len >= start) { startNode = n; startOff = start - total; }
+        if (endNode === null && total + len >= end) { endNode = n; endOff = end - total; }
+        total += len;
+      }
+      if (!startNode) { startNode = fieldEl; startOff = 0; }
+      if (!endNode) { endNode = startNode; endOff = startOff; }
+      const range = doc.createRange();
+      range.setStart(startNode, startOff);
+      range.setEnd(endNode, endOff);
+      const sel = doc.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      return range;
+    }
+
+    function applyCharFormat(prop, cssValue) {
+      const doc = document.getElementById('preview-iframe').contentDocument;
+      const sel = doc.getSelection();
+      if (!sel) return;
+      if (!sel.rangeCount || sel.isCollapsed) {
+        // Live selection was lost — most likely the font <select> needed real page-level focus
+        // to open, which blurs (and can collapse) the iframe's own selection. Restore the last
+        // real highlighted range instead of silently doing nothing. Found 2026-09-08 (Kevin:
+        // "the font drop down isn't working") — this was why: Bold/Semi Bold/Italic are plain
+        // buttons, protected from this by the toolbar's mousedown-preventDefault below, but a
+        // native <select> needs actual focus to open at all, so it can't be protected the same way.
+        if (!rtSavedRange) return;
+        sel.removeAllRanges();
+        sel.addRange(rtSavedRange.cloneRange());
+        if (sel.isCollapsed) return; // saved range no longer resolves to real content
+      }
+      const range = sel.getRangeAt(0);
+      const fieldEl = getEnclosingField(range.commonAncestorContainer);
+      // Note: cms-protected fields (Prayer FAB, "Secure giving powered by Tithe.ly") deliberately
+      // are NOT excluded here — their wording is locked (contenteditable=false, set above), but
+      // font/style formatting is exactly what they're supposed to still allow.
+      if (!fieldEl) return;
+
+      // A span already carrying THIS property, exactly wrapping this selection, gets updated
+      // or toggled off in place — never wrapped again. Found 2026-09-08 (Kevin): re-applying a
+      // different value (e.g. stepping font-size up on text already sized down) matched nothing
+      // here before (the old check required the OLD value to equal the NEW one), so it fell
+      // through to the wrap-a-new-span branch and nested spans inside each other — the outer
+      // span's value visually did nothing, and the inner (real) value could never be reached by
+      // a later "step back up" since each step nested yet another layer instead of adjusting it.
+      const existing = findExactSpanWrapping(fieldEl, range, prop);
+      if (existing && existing.style[prop] === cssValue) {
+        // Same value already applied to exactly this selection — toggle off.
+        const parent = existing.parentNode;
+        const firstUnwrapped = existing.firstChild;
+        const lastUnwrapped = existing.lastChild;
+        while (existing.firstChild) parent.insertBefore(existing.firstChild, existing);
+        parent.removeChild(existing);
+        // Unlike the other two branches below, unwrapping never explicitly re-selects the text —
+        // the browser is left to decide what happens to the selection when the span it was
+        // inside gets removed, and it doesn't reliably keep it. Found 2026-09-08 (Kevin: "hit
+        // bold again to remove - it dropped the highlight"). Rebuild it the same way the other
+        // branches do, spanning the unwrapped nodes now sitting directly in parent.
+        if (firstUnwrapped && lastUnwrapped) {
+          sel.removeAllRanges();
+          const nr = doc.createRange();
+          nr.setStartBefore(firstUnwrapped);
+          nr.setEndAfter(lastUnwrapped);
+          sel.addRange(nr);
+        }
+      } else if (existing) {
+        // Same span, different value for this property — update in place, don't nest.
+        existing.style[prop] = cssValue;
+        sel.removeAllRanges();
+        const nr = doc.createRange();
+        nr.selectNodeContents(existing);
+        sel.addRange(nr);
+      } else {
+        const span = doc.createElement('span');
+        span.style[prop] = cssValue;
+        try {
+          range.surroundContents(span);
+        } catch (e) {
+          // surroundContents throws if the range's boundaries fall inside two different
+          // existing elements (e.g. straddling two previously-formatted runs) — fall back to
+          // extract+wrap, which handles that case at the cost of flattening any formatting
+          // that was already inside the selected range.
+          const frag = range.extractContents();
+          span.appendChild(frag);
+          range.insertNode(span);
+          // extractContents() clones (rather than removes) any span it only partially contains —
+          // if the whole of that span's content happened to fall inside the range (the common
+          // case: re-formatting a selection that exactly matches an existing formatted run), the
+          // clone goes into the extracted fragment but the original is left behind, now empty.
+          // Found 2026-09-08 alongside the "going backward with the font" bug: applying several
+          // formats in sequence to the same exact selection was leaving an orphaned empty <span>
+          // behind on every step that hit this fallback.
+          // Checked by textContent, not hasChildNodes(): at this point the leftover isn't
+          // actually childless yet — extractContents() leaves it holding one EMPTY text node
+          // (still a child), which only collapses away to a truly-empty tag once
+          // commitFieldFromDom() below round-trips the markup through an HTML string via
+          // sanitizeRichHtml. textContent === '' catches both shapes up front.
+          fieldEl.querySelectorAll('span').forEach(s => {
+            if (s.textContent === '') s.remove();
+          });
+        }
+        sel.removeAllRanges();
+        const nr = doc.createRange();
+        nr.selectNodeContents(span);
+        sel.addRange(nr);
+      }
+      // commitFieldFromDom() can rewrite fieldEl.innerHTML (sanitizeRichHtml) if the current
+      // markup isn't already byte-identical to its sanitized form — that replaces every node
+      // inside the field with fresh ones, invalidating whatever Range the selection above was
+      // just pointing at and silently collapsing it. Capture the selection as plain character
+      // offsets first (durable across the rewrite, unlike node references), then rebuild the
+      // same selection by position afterward. Found 2026-09-08 (Kevin: "when i highlight and
+      // then change everything bold - keep the highlighted. it currently drops").
+      let startOffset = null, endOffset = null;
+      if (sel.rangeCount) {
+        const finalRange = sel.getRangeAt(0);
+        startOffset = fieldTextOffset(fieldEl, finalRange.startContainer, finalRange.startOffset);
+        endOffset = fieldTextOffset(fieldEl, finalRange.endContainer, finalRange.endOffset);
+      }
+      commitFieldFromDom(fieldEl);
+      if (fieldEl.closest('.header')) syncHeaderNavStyle(fieldEl);
+      if (startOffset !== null) {
+        const restored = selectFieldTextRange(fieldEl, startOffset, endOffset);
+        rtSavedRange = restored.cloneRange();
+      }
+      // Explicit call, not left to the selectionchange event the addRange() above naturally
+      // fires: refreshToolbar() (which normally handles that event) starts with a guard that
+      // bails out whenever focus is still inside the toolbar — built so the font <select>
+      // doesn't get its own focus-in treated as "left the field" (see that guard's own comment).
+      // But once the font dropdown has been used, the select KEEPS focus even after clicking a
+      // plain button like Bold — those buttons deliberately preventDefault their mousedown so
+      // clicking one never steals focus from whatever's already focused (also see comment
+      // above) — so that same guard ends up silently swallowing every resync after every click
+      // until focus finally moves somewhere else. Found 2026-09-08 (Kevin: "sometimes the bold
+      // button will go back to blue when i click it after being bolded but sometimes it wont...
+      // it seems to happen when i lcikc the font drop dwon"): the formatting itself was toggling
+      // correctly the whole time — confirmed directly in the DOM — only the button's own active/
+      // inactive display was going stale. Calling this here guarantees the toolbar reflects
+      // reality after every format change, regardless of where focus happens to be sitting.
+      syncToolbarState();
+    }
+
+    let rtCurrentField = null;
+    // Preserves the last real (non-collapsed) selection independent of live focus — see the
+    // fallback at the top of applyCharFormat() for why this exists.
+    let rtSavedRange = null;
+    function showRichToolbar(fieldEl, rect) {
+      rtCurrentField = fieldEl;
+      updateFieldRevertButton();
+      updateLinkButtons();
+      const bar = document.getElementById('rich-toolbar');
+      const wrap = document.getElementById('preview-frame-wrap');
+      const wrapRect = wrap.getBoundingClientRect();
+      const scale = wrap.clientWidth / PREVIEW_WIDTH;
+      bar.classList.add('open');
+      const top = wrapRect.top + window.scrollY + (rect.top * scale) - bar.offsetHeight - 8;
+      const left = wrapRect.left + window.scrollX + (rect.left * scale);
+      // The toolbar lives in THIS (outer admin) page, not inside the preview iframe — so unlike
+      // the "Change Photo" buttons (which are appended inside the iframe's own document and can
+      // go behind the site header with a plain z-index below its 100), this toolbar always
+      // paints on top of the ENTIRE iframe no matter its z-index; there's no such thing as
+      // "behind the header" for one specific region of an iframe's content from outside it.
+      // Found 2026-09-08 (Kevin: "the font/bold box, like the change photo. needs to go behind
+      // the header") — the real fix is to never let it land where the header renders in the
+      // first place: measure the site's own sticky header (always pinned at the iframe
+      // viewport's own top:0, so its rendered height IS its full extent regardless of scroll)
+      // and clamp the toolbar below it, rather than adjusting layering.
+      const headerEl = fieldEl.ownerDocument.querySelector('#site-header');
+      const headerBottom = headerEl
+        ? wrapRect.top + window.scrollY + (headerEl.getBoundingClientRect().height * scale) + 8
+        : 8;
+      bar.style.top = Math.max(8, headerBottom, top) + 'px';
+      bar.style.left = Math.max(8, left) + 'px';
+    }
+    function hideRichToolbar() {
+      document.getElementById('rich-toolbar').classList.remove('open');
+      rtCurrentField = null;
+      updateFieldRevertButton();
+      // Deliberately does NOT clear rtSavedRange here. This used to null it out on every hide,
+      // which is the one thing standing between a toolbar click and a silent no-op — found
+      // 2026-09-08 (Kevin: "went back to lora nd i couldnt unbold or un uitalic without having
+      // to redo the highlight"). The toolbar can hide/reshow from a transient focus blip (the
+      // font <select> genuinely stealing real page focus to open) faster than the guard above
+      // catches it, especially with a real mouse click on the native popup rather than a
+      // scripted one — if that happens even once, the very next format click has nothing to
+      // fall back to and does nothing, with no visible error. Leaving the last real selection
+      // in place costs nothing: a live, non-collapsed selection always wins over it anyway (see
+      // the top of applyCharFormat), so this only ever gets used as the fallback it was built
+      // to be.
+    }
+
+    document.getElementById('rt-font').addEventListener('change', (e) => applyCharFormat('fontFamily', e.target.value));
+    document.getElementById('rt-bold').addEventListener('click', () => applyCharFormat('fontWeight', '700'));
+    document.getElementById('rt-semibold').addEventListener('click', () => applyCharFormat('fontWeight', '600'));
+    document.getElementById('rt-italic').addEventListener('click', () => applyCharFormat('fontStyle', 'italic'));
+    document.getElementById('rt-swash').addEventListener('click', applySwash);
+    document.getElementById('rt-revert').addEventListener('click', revertCurrentField);
+    document.getElementById('rt-link').addEventListener('click', applyLink);
+    document.getElementById('rt-unlink').addEventListener('click', removeLink);
+
+    // Swash letterforms exist only in the ITALIC faces of Adobe Caslon Pro — checked against the
+    // font files' own feature tables 2026-09-28: regular/semibold/bold have none, and Lora has
+    // none — so on anything else the button did nothing and looked broken (Kevin: "SW isn't
+    // working when i have adobe caslon pro selected" — it was selected, but not italic). Turning
+    // swash ON now also puts the selection in Adobe Caslon Pro italic; turning it OFF only
+    // removes the swash and leaves the font/italic alone. Reads the toolbar's own active
+    // states (kept in sync by syncToolbarState) so an already-italic selection isn't toggled off.
+    function applySwash() {
+      const swashOn = document.getElementById('rt-swash').classList.contains('active');
+      if (!swashOn) {
+        if (document.getElementById('rt-font').value !== 'Adobe Caslon Pro') applyCharFormat('fontFamily', 'Adobe Caslon Pro');
+        if (!document.getElementById('rt-italic').classList.contains('active')) applyCharFormat('fontStyle', 'italic');
+      }
+      applyCharFormat('fontFeatureSettings', SWASH_FEATURE);
+    }
+
+    // Per-box revert (Kevin, 2026-09-28: "if i fix a text box i want that specific text box to
+    // have a revert option. all boxes should have this"). Lives in the formatting toolbar, which
+    // already appears for every editable box the moment it's selected. Enabled only while the
+    // selected box has an unsaved change; same "discard" meaning as Revert All, one box at a time.
+    function updateFieldRevertButton() {
+      const btn = document.getElementById('rt-revert');
+      if (!btn) return;
+      const id = rtCurrentField && rtCurrentField.getAttribute('data-bind-id');
+      const hasEdit = !!(id && pendingChanges[id]);
+      btn.disabled = !hasEdit;
+      btn.title = hasEdit ? 'Undo your unsaved changes to this box' : 'Nothing to undo in this box';
+    }
+
+    function revertCurrentField() {
+      if (!rtCurrentField) return;
+      const id = rtCurrentField.getAttribute('data-bind-id');
+      if (!id || !pendingChanges[id]) return;
+      let ids = [id];
+      // Header nav words move as one unit (see syncHeaderNavStyle) — undoing one undoes them all.
+      const headerEl = rtCurrentField.closest('.header');
+      if (headerEl) {
+        ids = Array.from(headerEl.querySelectorAll('[data-bind-id]'))
+          .map(el => el.getAttribute('data-bind-id'))
+          .filter(i => pendingChanges[i]);
+      }
+      applyRevert(ids);
+      syncToolbarState();
+    }
+
+    // ---- Links (Kevin, 2026-09-28): typed emails / web addresses / phone numbers become clickable ----
+    // One pattern, three kinds. Email is listed first so an address is never mistaken for a
+    // web address; a bare domain only counts with a common ending (.com/.org/.church/...) so
+    // ordinary sentences with a period don't turn into links.
+    const LINK_PATTERN = /(?<email>[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,})|(?<url>(?:https?:\/\/|www\.)[^\s<>"']*[^\s<>"'.,;:!?)\]]|\b[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.(?:com|org|net|edu|gov|us|io|co|church|info)\b(?:\/[^\s<>"']*[^\s<>"'.,;:!?)\]])?)|(?<phone>(?<![\d-])(?:\+?1[\s.-]?)?(?:\(\d{3}\)|\d{3})[\s.-]?\d{3}[\s.-]?\d{4}(?![\d-]))/gi;
+
+    const autoLinkOff = new Set(); // field ids where the person chose Unlink — don't re-link those
+
+    function hrefForMatch(m) {
+      if (m.groups.email) return 'mailto:' + m[0];
+      if (m.groups.phone) {
+        const digits = m[0].replace(/\D/g, '');
+        return 'tel:+' + (digits.length === 10 ? '1' + digits : digits);
+      }
+      return /^https?:\/\//i.test(m[0]) ? m[0] : 'https://' + m[0];
+    }
+
+    // What a person typed in the "link to" box -> a safe destination.
+    function normalizeLinkTarget(v) {
+      v = (v || '').trim();
+      if (!v) return null;
+      if (/^(mailto:|tel:|https?:\/\/)/i.test(v)) return v;
+      if (/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(v)) return 'mailto:' + v;
+      const digits = v.replace(/\D/g, '');
+      if (/^[\d\s().+-]+$/.test(v) && digits.length >= 10) return 'tel:+' + (digits.length === 10 ? '1' + digits : digits);
+      if (v.startsWith('/') && !v.startsWith('//')) return v;
+      return 'https://' + v.replace(/^\/+/, '');
+    }
+
+    // Text nodes inside a box that are not already part of a link inside it.
+    function unlinkedTextNodes(fieldEl) {
+      const walker = fieldEl.ownerDocument.createTreeWalker(fieldEl, NodeFilter.SHOW_TEXT, {
+        acceptNode(n) {
+          const a = n.parentElement && n.parentElement.closest('a');
+          return a && fieldEl.contains(a) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+        }
+      });
+      const out = []; let n;
+      while ((n = walker.nextNode())) out.push(n);
+      return out;
+    }
+
+    // Boxes that ARE a link themselves (buttons, nav words, staff email links) or that hold
+    // locked/font-only content are never given links inside them.
+    function canHoldLinks(fieldEl) {
+      return !!fieldEl && !fieldEl.closest('a') && !fieldEl.closest(FULLY_PROTECTED_SELECTOR) && !fieldEl.classList.contains('cms-protected');
+    }
+
+    function hasLinkableText(fieldEl) {
+      if (!canHoldLinks(fieldEl)) return false;
+      return unlinkedTextNodes(fieldEl).some(n => { LINK_PATTERN.lastIndex = 0; return LINK_PATTERN.test(n.textContent); });
+    }
+
+    // Wraps every email / web address / phone number in the box in a real link. True if it
+    // changed anything.
+    function autoLinkField(fieldEl) {
+      if (!canHoldLinks(fieldEl)) return false;
+      const doc = fieldEl.ownerDocument;
+      let changed = false;
+      unlinkedTextNodes(fieldEl).forEach(node => {
+        const text = node.textContent;
+        LINK_PATTERN.lastIndex = 0;
+        let last = 0, m, frag = null;
+        while ((m = LINK_PATTERN.exec(text))) {
+          frag = frag || doc.createDocumentFragment();
+          frag.appendChild(doc.createTextNode(text.slice(last, m.index)));
+          const a = doc.createElement('a');
+          a.setAttribute('href', hrefForMatch(m));
+          a.textContent = m[0];
+          frag.appendChild(a);
+          last = m.index + m[0].length;
+          changed = true;
+        }
+        if (frag) {
+          frag.appendChild(doc.createTextNode(text.slice(last)));
+          node.parentNode.replaceChild(frag, node);
+        }
+      });
+      return changed;
+    }
+
+    // Link enabled: text is selected, or the box has an email/web address/phone number not yet
+    // linked. Unlink enabled: the cursor/selection is inside a link in this box.
+    function updateLinkButtons() {
+      const linkBtn = document.getElementById('rt-link');
+      const unlinkBtn = document.getElementById('rt-unlink');
+      if (!linkBtn || !unlinkBtn) return;
+      const doc = document.getElementById('preview-iframe').contentDocument;
+      const sel = doc && doc.getSelection();
+      const field = rtCurrentField;
+      const holds = canHoldLinks(field);
+      const hasSelection = !!(sel && sel.rangeCount && !sel.isCollapsed && field && field.contains(sel.getRangeAt(0).commonAncestorContainer));
+      linkBtn.disabled = !(holds && (hasSelection || hasLinkableText(field)));
+      let inLink = null;
+      if (field && sel && sel.rangeCount) {
+        const node = sel.getRangeAt(0).startContainer;
+        const el = node.nodeType === 3 ? node.parentElement : node;
+        const a = el && el.closest && el.closest('a');
+        if (a && field.contains(a)) inLink = a;
+      }
+      unlinkBtn.disabled = !inLink;
+    }
+
+    function wrapRangeInLink(fieldEl, range, href) {
+      const doc = fieldEl.ownerDocument;
+      const a = doc.createElement('a');
+      a.setAttribute('href', href);
+      try {
+        range.surroundContents(a);
+      } catch (e) {
+        a.appendChild(range.extractContents());
+        range.insertNode(a);
+      }
+      commitFieldFromDom(fieldEl);
+      autoLinkOff.delete(fieldEl.getAttribute('data-bind-id'));
+    }
+
+    function applyLink() {
+      const doc = document.getElementById('preview-iframe').contentDocument;
+      const sel = doc.getSelection();
+      let range = null;
+      if (sel && sel.rangeCount && !sel.isCollapsed) range = sel.getRangeAt(0).cloneRange();
+      else if (rtSavedRange && !rtSavedRange.collapsed) range = rtSavedRange.cloneRange();
+      const fieldEl = range ? getEnclosingField(range.commonAncestorContainer) : rtCurrentField;
+      if (!canHoldLinks(fieldEl)) return;
+      const id = fieldEl.getAttribute('data-bind-id');
+
+      if (!range) {
+        // Nothing selected: link every email / web address / phone number in the box.
+        if (autoLinkField(fieldEl)) { commitFieldFromDom(fieldEl); autoLinkOff.delete(id); }
+        syncToolbarState();
+        return;
+      }
+      // Selected text that already IS an email / web address / phone number links itself.
+      const picked = range.toString().trim();
+      LINK_PATTERN.lastIndex = 0;
+      const m = LINK_PATTERN.exec(picked);
+      if (m && m[0] === picked) { wrapRangeInLink(fieldEl, range, hrefForMatch(m)); syncToolbarState(); return; }
+
+      // Anything else: ask where it should go.
+      openConfirmDialog({
+        title: 'Add a link',
+        subtitle: '"' + picked.slice(0, 60) + '"',
+        bodyHtml: '<label style="font-size:13px;color:var(--text-dark);display:block;margin-bottom:8px;">Link to (web address, email, or phone number):</label>' +
+          '<input type="text" id="link-target-input" style="width:100%;padding:10px 12px;border:1px solid var(--border-gray);border-radius:8px;font-size:14px;" placeholder="example.org  or  name@example.org  or  843-555-0123">',
+        buttons: [
+          { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+          { label: 'Add Link', className: 'btn btn-gold', onClick: () => {
+            const href = normalizeLinkTarget(document.getElementById('link-target-input').value);
+            closeModal();
+            if (href && isSafeLinkHref(href)) { wrapRangeInLink(fieldEl, range, href); syncToolbarState(); }
+          } }
+        ]
+      });
+      const input = document.getElementById('link-target-input');
+      if (input) input.focus();
+    }
+
+    function removeLink() {
+      const doc = document.getElementById('preview-iframe').contentDocument;
+      const sel = doc.getSelection();
+      const field = rtCurrentField;
+      if (!field || !sel || !sel.rangeCount) return;
+      const node = sel.getRangeAt(0).startContainer;
+      const el = node.nodeType === 3 ? node.parentElement : node;
+      const a = el && el.closest && el.closest('a');
+      if (!a || !field.contains(a)) return;
+      while (a.firstChild) a.parentNode.insertBefore(a.firstChild, a);
+      a.remove();
+      autoLinkOff.add(field.getAttribute('data-bind-id'));
+      commitFieldFromDom(field);
+      syncToolbarState();
+    }
+    // Clicking a toolbar BUTTON must not blur whatever field is currently focused inside the
+    // iframe — without this, mousedown on a button blurs the field FIRST (before the click
+    // handler runs), which the focus-based show/hide above would read as "left the field" and
+    // hide the toolbar out from under the click. Deliberately excludes the font <select>: a
+    // native dropdown needs its own default mousedown behavior to actually open at all —
+    // preventDefault on it silently blocks the picker from opening (found 2026-09-08, Kevin:
+    // "when i click the dropdown its locked" — this was why). The select doesn't need this
+    // protection anyway; applyCharFormat()'s rtSavedRange fallback already covers it losing
+    // focus/selection when it legitimately needs to open.
+    document.getElementById('rich-toolbar').addEventListener('mousedown', (e) => {
+      if (e.target.tagName !== 'SELECT') e.preventDefault();
+    });
+
+    // Reflects the current selection's actual formatting in the toolbar itself — which
+    // button(s) show pressed and what the font dropdown shows. None of this existed before
+    // 2026-09-08 (Kevin: font/bold never reflected what was actually selected) — the CSS for a
+    // pressed button state (.rich-toolbar button.active) was already built but nothing ever
+    // toggled it.
+    function syncToolbarState() {
+      updateLinkButtons();
+      const doc = document.getElementById('preview-iframe').contentDocument;
+      const sel = doc.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+      let startNode = range.startContainer;
+      if (startNode.nodeType === 3) startNode = startNode.parentElement;
+      if (!startNode) return;
+      const startStyle = doc.defaultView.getComputedStyle(startNode);
+
+      const fontFamily = (startStyle.fontFamily || '').replace(/^['"]|['"]$/g, '').split(',')[0].trim();
+      const fontSel = document.getElementById('rt-font');
+      if (RICH_FONTS.includes(fontFamily)) fontSel.value = fontFamily;
+
+      const weight = parseInt(startStyle.fontWeight, 10) || 400;
+      document.getElementById('rt-bold').classList.toggle('active', weight >= 700);
+      document.getElementById('rt-semibold').classList.toggle('active', weight === 600);
+      document.getElementById('rt-italic').classList.toggle('active', startStyle.fontStyle === 'italic');
+      // getComputedStyle's own fontFeatureSettings string is alphabetically re-sorted by the
+      // browser (verified directly, 2026-09-08) — different order than SWASH_FEATURE's inline-
+      // style form, so this checks all three tags are present rather than an exact string match.
+      const featureSettings = startStyle.fontFeatureSettings || '';
+      const hasSwash = ['swsh', 'salt', 'cswh'].every(tag => featureSettings.includes(`"${tag}"`));
+      document.getElementById('rt-swash').classList.toggle('active', hasSwash);
     }
 
     // pageContent is now loaded from Supabase (site_content_sections/fields/images/repeats) —
@@ -514,8 +1367,15 @@
     // starts empty here, includes a real baseline entry inserted by supabase/seed-content.js.
     let changeLog = [];
 
-    const PREVIEW_WIDTH = 1440;
-    const PREVIEW_HEIGHT = 900;
+    // Mutable (not const) — the mobile preview toggle below switches these between the desktop
+    // size and a real mobile breakpoint (414×896, iPhone 11/XR — recommended and confirmed with
+    // Kevin 2026-09-08, matching this project's own existing breakpoint-testing checklist,
+    // `_Breakpoint Playbook/01-testing-protocol.md`) so the iframe genuinely re-renders at that
+    // width — not just a CSS zoom of the desktop layout — and the site's own real mobile media
+    // queries actually engage.
+    let PREVIEW_WIDTH = 1440;
+    let PREVIEW_HEIGHT = 900;
+    let previewMode = 'desktop';
 
     const pageFileMap = {
       'Home': 'index.html',
@@ -540,10 +1400,10 @@
     // jsonb blob on its own row, not as individual field rows.
     async function loadContentFromDb() {
       const [{ data: sections, error: e1 }, { data: fields, error: e2 }, { data: images, error: e3 }, { data: repeats, error: e4 }] = await Promise.all([
-        supabaseClient.from('site_content_sections').select('*').order('sort_order'),
-        supabaseClient.from('site_content_fields').select('*').order('sort_order'),
+        supabaseClient.from('site_content_sections').select('*').order('sort_order').order('id'),
+        supabaseClient.from('site_content_fields').select('*').order('sort_order').order('id'),
         supabaseClient.from('site_content_images').select('*'),
-        supabaseClient.from('site_content_repeats').select('*').order('sort_order')
+        supabaseClient.from('site_content_repeats').select('*').order('sort_order').order('id')
       ]);
       if (e1 || e2 || e3 || e4) {
         console.error('loadContentFromDb failed:', (e1 || e2 || e3 || e4).message);
@@ -564,21 +1424,22 @@
       (fields || []).forEach(f => {
         const sec = sectionLookup[f.page + '|' + f.section_name];
         if (!sec) return;
-        sec.fields.push({ label: f.field_label, type: f.field_type, value: f.field_value, original: f.original_value, __dbTable: 'field', __dbId: f.id });
+        sec.fields.push({ label: f.field_label, type: f.field_type, value: f.field_value, original: f.original_value, published: f.published_value == null ? null : f.published_value, __dbTable: 'field', __dbId: f.id, __version: f.version || 0 });
       });
 
       (images || []).forEach(img => {
         const sec = sectionLookup[img.page + '|' + img.section_name];
         if (!sec) return;
-        sec.images.push({ file: img.file, label: img.label, size: img.size });
+        sec.images.push({ file: img.file, label: img.label, size: img.size, replacement_path: img.replacement_path || null, replacement_variants: img.replacement_variants || null, replacement_original_name: img.replacement_original_name || null, published_replacement_path: img.published_replacement_path || null, __imgDbId: img.id, __version: img.version || 0 });
       });
 
       (repeats || []).forEach(r => {
         const sec = sectionLookup[r.page + '|' + r.section_name];
         if (!sec) return;
-        const fieldsArr = (r.fields || []).map(f => ({ label: f.label, type: f.type, value: f.value, original: f.original !== undefined ? f.original : f.value }));
-        fieldsArr.forEach(f => { f.__dbTable = 'repeatField'; f.__repeatDbId = r.id; f.__repeatFieldsRef = fieldsArr; });
-        sec.repeats.push({ title: r.repeat_title, fields: fieldsArr, image: r.image || undefined });
+        const fieldsArr = (r.fields || []).map(f => ({ label: f.label, type: f.type, value: f.value, original: f.original !== undefined ? f.original : f.value, published: f.published !== undefined ? f.published : null }));
+        const versionRef = { v: r.version || 0 }; // shared by every box and photo on this card: one row, one version
+        fieldsArr.forEach(f => { f.__dbTable = 'repeatField'; f.__repeatDbId = r.id; f.__repeatFieldsRef = fieldsArr; f.__repeatVersionRef = versionRef; });
+        sec.repeats.push({ title: r.repeat_title, fields: fieldsArr, image: r.image ? { ...r.image, replacement_path: r.image.replacement_path || null, replacement_variants: r.image.replacement_variants || null, published_replacement_path: r.image.published_replacement_path || null, __repeatImageDbId: r.id, __repeatVersionRef: versionRef } : undefined });
       });
 
       return result;
@@ -594,6 +1455,138 @@
       }));
     }
 
+    // ---- What's saved but not yet published (Kevin, 2026-09-28) ----
+    // A box is a "draft" when its saved wording differs from what's live on the real page:
+    // the last published wording, or the page's original wording before the first publish.
+    function htmlToPlain(html) {
+      const d = document.createElement('div');
+      d.innerHTML = html == null ? '' : html;
+      return d.textContent;
+    }
+    function fieldIsDraft(f) {
+      if (f.published != null) return f.value !== f.published;
+      if (f.value === f.original) return false;
+      // Typing a box back to its exact original wording isn't a change, even if the saved form differs.
+      return !(!/</.test(f.value || '') && htmlToPlain(f.value) === f.original);
+    }
+    function photoIsDraft(img) {
+      return (img.replacement_path || null) !== (img.published_replacement_path || null);
+    }
+    function countDrafts(sections) {
+      let n = 0;
+      (sections || []).forEach(sec => {
+        (sec.fields || []).forEach(f => { if (fieldIsDraft(f)) n++; });
+        (sec.images || []).forEach(img => { if (photoIsDraft(img)) n++; });
+        (sec.repeats || []).forEach(rep => {
+          (rep.fields || []).forEach(f => { if (fieldIsDraft(f)) n++; });
+          if (rep.image && photoIsDraft(rep.image)) n++;
+        });
+      });
+      return n;
+    }
+    // Publishing a page also publishes any unpublished header/footer changes, since those live in
+    // shared files — so they count toward every page.
+    function draftCountFor(page) {
+      return countDrafts(pageContent[page]) + (page === 'Site-Wide' ? 0 : countDrafts(pageContent['Site-Wide']));
+    }
+
+    function updatePublishButtons() {
+      const pubBtn = document.getElementById('publish-btn');
+      const prevBtn = document.getElementById('preview-btn');
+      if (!pubBtn || !prevBtn || !pageContent[currentPage]) return;
+      const n = draftCountFor(currentPage);
+      const pending = Object.keys(pendingChanges).length;
+      pubBtn.textContent = n ? `Publish Page (${n})` : 'Publish Page';
+      let pubWhy = '';
+      if (!EDITING_ENABLED) pubWhy = 'Only top admins can publish';
+      else if (!IS_TEMP_SITE) pubWhy = 'Publishing works on the temporary preview site — not from your own computer';
+      else if (pending) pubWhy = 'Save your changes first, then publish';
+      else if (!n) pubWhy = 'Nothing to publish — no saved changes on this page';
+      pubBtn.disabled = !!pubWhy;
+      pubBtn.title = pubWhy || `Send ${n} saved change${n === 1 ? '' : 's'} to the temporary preview site (not the live website)`;
+      let prevWhy = '';
+      if (!EDITING_ENABLED) prevWhy = 'Only top admins can preview drafts';
+      else if (!IS_TEMP_SITE) prevWhy = 'Draft preview works on the temporary preview site — not from your own computer';
+      else if (pending) prevWhy = 'Save your changes first, then preview';
+      prevBtn.disabled = !!prevWhy;
+      prevBtn.title = prevWhy || 'Open this page with your saved changes applied, at its own link';
+    }
+
+    async function callPublishFunction(payload) {
+      const token = await getAccessToken();
+      const res = await fetch('/.netlify/functions/publish-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: token ? `Bearer ${token}` : '' },
+        body: JSON.stringify(payload)
+      });
+      let data = {};
+      try { data = await res.json(); } catch (e) { /* non-JSON error page */ }
+      if (!res.ok) {
+        const err = new Error(data.error || `Publish service answered ${res.status}`);
+        err.failed = data.failed || [];
+        throw err;
+      }
+      return data;
+    }
+
+    function publishCurrentPage() {
+      const n = draftCountFor(currentPage);
+      if (!n) return;
+      openConfirmDialog({
+        title: `Publish "${currentPage}"?`,
+        subtitle: 'To the temporary preview site',
+        bodyHtml: `<p class="confirm-text">This sends <strong>${n}</strong> saved change${n === 1 ? '' : 's'} to the <strong>temporary preview site</strong>. It does <strong>not</strong> change the live website. The preview site updates in about a minute.</p>`,
+        buttons: [
+          { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+          { label: 'Publish', className: 'btn btn-gold', onClick: doPublish }
+        ]
+      });
+    }
+
+    async function doPublish() {
+      closeModal();
+      const pubBtn = document.getElementById('publish-btn');
+      pubBtn.disabled = true;
+      pubBtn.textContent = 'Publishing…';
+      try {
+        const result = await callPublishFunction({ page: currentPage });
+        pageContent = await loadContentFromDb(); // published state changed — reload it
+        renderPageList();
+        loadPreview();
+        openConfirmDialog({
+          title: result.message ? 'Nothing to publish' : 'Published to the preview site',
+          bodyHtml: result.message
+            ? `<p class="confirm-text">${escapeHtml(result.message)}</p>`
+            : `<p class="confirm-text">${result.changes} change${result.changes === 1 ? '' : 's'} sent to the temporary preview site. It goes live there in about a minute.${result.commitUrl ? ` <a href="${escapeHtml(result.commitUrl)}" target="_blank" rel="noopener">See exactly what changed</a>.` : ''}</p>`,
+          buttons: [{ label: 'Done', className: 'btn btn-gold', onClick: closeModal }]
+        });
+      } catch (err) {
+        const list = (err.failed || []).map(f => `<li>${escapeHtml(f.label || f.key || '')}: ${escapeHtml(f.reason || '')}</li>`).join('');
+        openConfirmDialog({
+          title: 'Could not publish',
+          bodyHtml: `<p class="confirm-text">${escapeHtml(err.message)} Nothing was published.</p>${list ? `<ul style="margin:10px 0 0 18px;font-size:13px;">${list}</ul>` : ''}`,
+          buttons: [{ label: 'Close', className: 'btn btn-outline', onClick: closeModal }]
+        });
+      }
+      updatePublishButtons();
+    }
+
+    async function openDraftPreview() {
+      // Opened first (inside the click) so the browser doesn't block it as a pop-up.
+      const win = window.open('', '_blank');
+      try {
+        const result = await callPublishFunction({ action: 'preview-link', page: currentPage });
+        if (win) win.location.href = result.url; else window.location.href = result.url;
+      } catch (err) {
+        if (win) win.close();
+        openConfirmDialog({
+          title: 'Could not open the preview',
+          bodyHtml: `<p class="confirm-text">${escapeHtml(err.message)}</p>`,
+          buttons: [{ label: 'Close', className: 'btn btn-outline', onClick: closeModal }]
+        });
+      }
+    }
+
     function renderPageList() {
       const list = document.getElementById('page-list');
       list.innerHTML = '';
@@ -606,6 +1599,14 @@
         const btn = document.createElement('button');
         btn.className = 'page-btn';
         btn.textContent = page;
+        const drafts = draftCountFor(page);
+        if (drafts) {
+          const badge = document.createElement('span');
+          badge.className = 'page-badge';
+          badge.textContent = drafts;
+          badge.title = `${drafts} saved change${drafts === 1 ? '' : 's'} not published yet`;
+          btn.appendChild(badge);
+        }
         btn.addEventListener('click', () => {
           if (page === currentPage) return;
           requestPageSwitch(page);
@@ -613,6 +1614,7 @@
         item.appendChild(btn);
         list.appendChild(item);
       });
+      updatePublishButtons();
     }
 
     // Switching pages is blocked while there are unsaved edits — staff must save (or
@@ -663,9 +1665,9 @@
       imageRegistry = [];
       let imgCounter = 0;
 
-      const registerField = (f, sectionName) => {
+      const registerField = (f, sectionName, scope) => {
         const id = 'f' + (fieldCounter++);
-        currentFlatFields.push({ id, value: f.value, original: getOriginalValue(f) });
+        currentFlatFields.push({ id, value: f.value, original: getOriginalValue(f), scope });
         fieldRefs[id] = f;
         fieldMeta[id] = { label: f.label, section: sectionName };
       };
@@ -674,14 +1676,28 @@
       };
 
       // Footer content ("Site-Wide") appears on every page's mirror, so it's registered alongside
-      // whatever page is currently loaded rather than needing its own menu entry. The site's logos
-      // are excluded on purpose — those are brand assets, not staff-editable content.
-      const siteWide = currentPage === 'Site-Wide' ? [] : pageContent['Site-Wide'].filter(s => s.name !== 'Logos');
+      // whatever page is currently loaded rather than needing its own menu entry. Logos used to
+      // be excluded here on purpose ("brand assets, not staff-editable content") — reversed
+      // 2026-09-09 (Kevin: "the header, i cant change the logo in the top left corner of hte
+      // hader"), matching the original Workflow 4 spec ("Logos — swappable, with auto-
+      // downsizing") that this was always meant to build toward. Corrected the DB rows for this
+      // section at the same time — they'd gone stale (one pointed at `logo-white-bg.png`, which
+      // isn't used anywhere on the public site at all, mislabeled "Header logo"; the real header
+      // logo, `header-logo.png`, was never in this list). Uses the exact same Change Photo
+      // mechanism as every other image site-wide — including that mechanism's own existing
+      // limitation (see commitPendingChanges: image changes don't persist to a real file yet,
+      // only text fields do) — not a new upload pipeline invented for this.
+      const siteWide = currentPage === 'Site-Wide' ? [] : pageContent['Site-Wide'];
       const sections = pageContent[currentPage].concat(siteWide);
-      sections.forEach(section => {
-        (section.fields || []).forEach(f => registerField(f, section.name));
+      const pageSectionCount = pageContent[currentPage].length;
+      sections.forEach((section, sectionIndex) => {
+        // 'site' = the shared header/footer/prayer button; 'page' = the page's own content. A record
+        // only binds inside its own region — the same split Publish uses (shared files vs the page
+        // file) — so a Site-Wide "Give" can never grab the page's "Give" or the other way round.
+        const scope = sectionIndex < pageSectionCount ? 'page' : 'site';
+        (section.fields || []).forEach(f => registerField(f, section.name, scope));
         (section.repeats || []).forEach(block => {
-          (block.fields || []).forEach(f => registerField(f, section.name + ' — ' + block.title));
+          (block.fields || []).forEach(f => registerField(f, section.name + ' — ' + block.title, scope));
           if (block.image) registerImage(block.image, section.name + ' — ' + block.title);
         });
         (section.images || []).forEach(img => registerImage(img, section.name));
@@ -722,9 +1738,20 @@
       const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
         acceptNode(node) {
           const tag = node.parentElement && node.parentElement.tagName;
-          if (tag === 'SCRIPT' || tag === 'STYLE') return NodeFilter.FILTER_REJECT;
+          // Dropdown choices and text boxes are form machinery, never page copy — the Contact
+          // form's options even decide which auto-reply gets sent. (Also keeps a Site-Wide record
+          // from ever binding to a dropdown option that happens to share its wording.)
+          if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT' || tag === 'OPTION' || tag === 'SELECT' || tag === 'TEXTAREA') return NodeFilter.FILTER_REJECT;
           if (!node.textContent.trim()) return NodeFilter.FILTER_REJECT;
-          if (node.parentElement && node.parentElement.closest('#loader, #site-header, nav, .footer-links-list, .footer-legal, .footer-powered')) return NodeFilter.FILTER_REJECT;
+          // #site-header itself is no longer excluded wholesale — the main nav's own links and
+          // the header's "Give" button need to be discoverable as fields too, so their FONT can
+          // be changed (see the isFontOnly check in wireInlineTextEditing: nav wording itself
+          // stays locked, matching "menu names can change font but cannot change words or urls").
+          // Found 2026-09-08 (Kevin: "ALL of it needs to be added. all the text should be
+          // editable"). .mobile-menu is still fully excluded — it's the hamburger overlay's
+          // hidden-by-default duplicate of the same nav links plus its own close button and
+          // logo, not something worth doubly wiring up.
+          if (node.parentElement && node.parentElement.closest(NEVER_EDITABLE_SELECTOR)) return NodeFilter.FILTER_REJECT;
           return NodeFilter.FILTER_ACCEPT;
         }
       });
@@ -736,6 +1763,7 @@
 
     const INLINE_EDIT_STYLE = `
       .cms-field {
+        position: relative;
         outline: 1px dashed rgba(195,163,85,0.55);
         outline-offset: 2px;
         border-radius: 3px;
@@ -744,6 +1772,20 @@
       }
       .cms-field:hover { outline: 1px dashed #303b6a; background: rgba(195,163,85,0.08); }
       .cms-field:focus { outline: 2px solid #303b6a; background: rgba(195,163,85,0.14); }
+      /* Small dot on any field with an unsaved change — purely cosmetic feedback for what
+         "Save Changes" is actually about to save (Kevin, 2026-09-08). */
+      .cms-field.cms-field-edited::after {
+        content: '';
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #c3a355;
+        border: 1px solid #1e2547;
+        pointer-events: none;
+      }
       /* Inline text-carrier tags (span/em/strong/etc.) can't always be promoted to their
          block-level parent — e.g. a quote whose citation lives in a sibling <span>, or a
          <br>-separated address line. Left at the default display:inline, a dashed outline
@@ -758,10 +1800,22 @@
         display: inline-block;
         max-width: 100%;
       }
+      /* A gold dashed outline is invisible on a gold background (the "Est. 2026" stat box, gold
+         buttons) — those fields looked uneditable. Navy outline there instead. */
+      .cms-field.cms-on-gold { outline-color: rgba(30,37,71,0.85); }
+      .cms-field.cms-on-gold:hover { background: rgba(30,37,71,0.10); }
       .cms-image-editable { outline: 2px dashed rgba(195,163,85,0.65); outline-offset: 2px; }
       .cms-image-btn {
         position: absolute;
-        z-index: 9999;
+        /* Below the real site header's own z-index (100, shared.css #site-header) so the
+           button correctly tucks behind the sticky logo/nav bar as the page scrolls past a
+           photo near the top — found 2026-09-08 (Kevin: buttons were rendering IN FRONT of
+           the header, "should go behind the header for just a more professional look").
+           Still comfortably above ordinary hero content/overlay layers (hero-content and
+           hero::after both sit at z-index:1), which is the original reason this was high at
+           all — a decorative dark-tint overlay would otherwise sit on top of the image and
+           swallow a click aimed at the button. */
+        z-index: 10;
         display: inline-flex;
         align-items: center;
         gap: 6px;
@@ -781,6 +1835,11 @@
       .cms-image-btn:hover { background: #303b6a; }
     `;
 
+    function nodeIsSiteWide(n) {
+      const el = n.nodeType === 3 ? n.parentElement : n;
+      return !!(el && el.closest('#site-header, #site-footer, #site-prayer'));
+    }
+
     function bindPreview() {
       const iframe = document.getElementById('preview-iframe');
       const doc = iframe.contentDocument;
@@ -795,16 +1854,29 @@
       styleEl.textContent = INLINE_EDIT_STYLE;
       doc.head.appendChild(styleEl);
 
+      // The Home page's own count-up script (IntersectionObserver) overwrites a .stat-number's
+      // text every time it scrolls into view — which destroyed the editable box inside it, so
+      // "2.4B+" and "2000+" stopped being editable the moment they appeared (Kevin, 2026-09-28).
+      // Swap each counter for an identical copy: the page script only holds the originals (now
+      // detached from the page), so the copy is never touched by it and stays editable.
+      doc.querySelectorAll('.stat-number[data-count]').forEach(el => el.replaceWith(el.cloneNode(true)));
+
       const nodes = getTextNodes(doc.body);
       const used = new Set();
       boundMap = {};
       currentFlatFields.forEach(f => {
         const target = (f.original || '').trim();
         if (!target) return;
-        const match = nodes.find(n => !used.has(n) && n.textContent.trim() === target);
+        const match = nodes.find(n => !used.has(n) && n.textContent.trim() === target && (f.scope === 'site') === nodeIsSiteWide(n));
         if (!match) return;
         used.add(match);
-        if (f.value !== f.original) match.textContent = f.value;
+        // NOTE: previously overwrote match.textContent here when f.value differed from
+        // f.original. Removed — a saved value may now carry Workflow 5 rich-format markup,
+        // which can't render correctly as a plain text node's textContent (would show literal
+        // "<span..." on screen). wireInlineTextEditing() applies the current saved value (via
+        // innerHTML, sanitized) once the field's real <span> element exists to hold it, further
+        // down. Leaving the pristine original text in place here also keeps the "smallest
+        // owning element" climb below matching against the real, unedited source structure.
 
         // Prefer binding to the smallest ELEMENT that fully owns this text (its whole trimmed
         // content is exactly the field value) over the raw text node — a contenteditable text
@@ -823,6 +1895,15 @@
           // contributes no text so the equality check above doesn't catch it, but swallowing it
           // into the editable box is still wrong.
           if (owner.children.length > 1) break;
+          // Don't climb past an element whose own computed font-size differs from the level
+          // we're about to leave — e.g. <h1 class="hero-title"><span class="title-line"> where
+          // the span carries the real display-heading size (clamp(2.5rem,8vw,5rem)) and the h1
+          // itself has none. Climbing past a styled wrapper like that silently loses its styling
+          // once the field becomes editable (found 2026-09-08: typing in the homepage hero title
+          // dropped it from its real ~5rem size to the browser's bare default h1 size, and Revert
+          // couldn't restore it because the DOM structure the fix would need was never tracked).
+          const currentEl = boundEl.nodeType === 3 ? boundEl.parentElement : boundEl;
+          if (currentEl && getComputedStyle(currentEl).fontSize !== getComputedStyle(owner).fontSize) break;
           boundEl = owner;
           // Never promote PAST a link/button — e.g. a mailto link that wraps an icon + the email
           // text (siblings, so the checks above don't stop there) must end up bound to the <a>
@@ -858,34 +1939,62 @@
       // split their text across several text nodes, so no single node matches the field's full
       // value. Fall back to binding the whole element when its FLATTENED text matches exactly —
       // editing it will lose the inline formatting, but that beats it being uneditable at all.
+      // Includes 'span' and 'a' — found 2026-09-08 while making every field on the site editable
+      // (Kevin: "ALL of it needs to be added. all the text should be editable."): a mailto
+      // link's text split by a <wbr> has exactly this shape but was never caught here, since
+      // neither tag was in the candidate list at all. Two variants seen on the site — some pages
+      // wrap the split text in its own <span class="link-text"> inside the <a> (About page staff
+      // emails), others put the <wbr> directly inside the <a> with no inner span (Give page) —
+      // covering both tags handles either shape.
       const usedElements = new Set();
       currentFlatFields.forEach(f => {
         if (boundMap[f.id]) return;
         const target = (f.original || '').trim();
         if (!target) return;
-        const candidates = Array.from(doc.querySelectorAll('p, li, h1, h2, h3, h4, h5, h6, blockquote'));
+        const candidates = Array.from(doc.querySelectorAll('p, li, h1, h2, h3, h4, h5, h6, blockquote, span, a, label, legend'));
         const match = candidates.find(el => {
           if (usedElements.has(el)) return false;
           if (el.children.length === 0) return false; // plain elements were already handled above
-          if (el.closest('#loader, #site-header, nav, .footer-links-list, .footer-legal, .footer-powered')) return false;
+          if (el.closest(NEVER_EDITABLE_SELECTOR)) return false;
+          if ((f.scope === 'site') !== nodeIsSiteWide(el)) return false;
           return el.textContent.trim() === target;
         });
         if (match) {
           usedElements.add(match);
-          if (f.value !== f.original) match.textContent = f.value;
+          // innerHTML (not textContent) — the saved value may carry Workflow 5 rich-format
+          // markup. Already loses this element's original inline formatting either way (the
+          // pre-existing, documented tradeoff above) — using innerHTML at least lets a
+          // subsequently-applied rich format render correctly instead of showing as literal text.
+          if (f.value !== f.original) match.innerHTML = sanitizeRichHtml(f.value);
           boundMap[f.id] = match;
         }
       });
 
+      // Read-only preview when editing is switched off (see EDITING_ENABLED): no editable
+      // fields, no "Change Photo" buttons, no formatting toolbar.
+      if (!EDITING_ENABLED) return;
       wireInlineTextEditing(doc);
       wireInlineImages(doc);
+      wireSelectionToolbar(doc);
     }
 
     function wireFieldEvents(el, id) {
-      // Trim before comparing/storing — contenteditable's textContent includes the surrounding
-      // source HTML's indentation whitespace, which made reverting a field back to its original
-      // text still register as a pending change (oldValue has no whitespace, raw textContent did).
-      el.addEventListener('input', () => onFieldEdited(id, el.textContent.trim()));
+      // innerHTML now (not textContent) — a field's value can carry Workflow 5's rich-format
+      // spans. Sanitized on every input, not just on save, so what's shown always matches what
+      // would actually be persisted (and a stray pasted tag never lingers in the DOM unsanitized
+      // even for the moment before the next save).
+      el.addEventListener('input', () => {
+        const clean = sanitizeRichHtml(el.innerHTML);
+        if (clean !== el.innerHTML) el.innerHTML = clean;
+        onFieldEdited(id, clean);
+      });
+      // An email, web address or phone number typed into a box becomes a clickable link when the
+      // box is left — only for boxes actually edited (so just tabbing through never changes
+      // anything), and not for boxes where the person just used Unlink.
+      el.addEventListener('blur', () => {
+        if (!pendingChanges[id] || autoLinkOff.has(id)) return;
+        if (autoLinkField(el)) commitFieldFromDom(el);
+      });
       el.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !(fieldRefs[id] && fieldRefs[id].type === 'textarea')) {
           e.preventDefault();
@@ -907,45 +2016,184 @@
     // editing one field can never bleed into a sibling field sharing the same parent element.
     // Whole-element matches (see the fallback pass above) are made editable directly instead,
     // since there's no single text node to isolate.
+    // Buttons are editable like any other text by default (agent-workflow-specs.md, "Buttons —
+    // label text only, never the link": "the visible text is editable, the underlying link/
+    // destination is not" — Kevin, 2026-09-07, explicitly naming "Give Now" as NOT an exception,
+    // "same as any other button"). This used to do the opposite — lock every button out by
+    // default and carve out "Give Now" as the one named exception — backwards from the actual
+    // spec. Found 2026-09-08 (Kevin: "i still cant changet he text/font of the buttons"): every
+    // button site-wide (Discover Our Vision, Stay Connected, Plan Your Visit, Learn More About
+    // Us, etc.) was silently locked out by this. The two real named exceptions (Prayer FAB
+    // label, "Secure giving powered by Tithe.ly") are font-only, not full-lock, and are already
+    // handled above via isFontOnly — nothing else needs locking here.
+    function isButtonLabel(ownerEl) {
+      return false;
+    }
+
+    // True when the field sits on a gold background (nearest non-transparent background walking
+    // up the page is roughly the site's gold, #c3a355) — used to swap its edit outline to navy.
+    function isOnGoldBackground(el) {
+      const win = el.ownerDocument.defaultView;
+      for (let e = el; e && e.nodeType === 1; e = e.parentElement) {
+        const m = win.getComputedStyle(e).backgroundColor.match(/rgba?\(([^)]+)\)/);
+        if (!m) continue;
+        const [r, g, b, a = 1] = m[1].split(',').map(parseFloat);
+        if (a < 0.5) continue; // transparent — keep looking up
+        return r > 150 && r < 235 && g > 110 && g < 200 && b < 130 && (r - b) > 70;
+      }
+      return false;
+    }
+
     function wireInlineTextEditing(doc) {
       Object.keys(boundMap).forEach(id => {
         const node = boundMap[id];
         if (!node) return;
-
-        // Button labels (e.g. "Get Connected" in a CTA banner) are intentionally left
-        // un-editable — they read as functional site controls, not body copy. Real <button>
-        // elements and pill/CTA-styled links (class contains "btn", e.g. btn-primary, cta-btn,
-        // give-btn-custom) are excluded this way; plain inline links like a mailto: email address
-        // (e.g. "connect-email", no "btn" in the class) are left editable like normal text.
         const ownerEl = node.nodeType === 3 ? node.parentElement : node;
-        if (ownerEl && ownerEl.closest('button, input[type="submit"], a[class*="btn"]')) return;
+
+        // Fully excluded — never becomes a field at all (Kevin, 2026-09-07: "cannot edit the
+        // popout box"). Checked before anything else so none of the button/text logic below
+        // ever gets a chance to register it.
+        if (ownerEl && ownerEl.closest(FULLY_PROTECTED_SELECTOR)) return;
+
+        const rawText = (node.textContent || '').trim();
+        // Font-only elements (Kevin, 2026-09-07): the Prayer & Pastoral Care FAB's own label,
+        // and the "Secure giving powered by Tithe.ly" line — wording locked permanently (never
+        // contenteditable, no lock/unlock toggle at all), but still selectable so the Workflow 5
+        // toolbar can restyle them like any other text. Checked BEFORE the generic button-label
+        // exclusion below — the FAB is a real <button> (src/includes/prayer-fab.html:
+        // <button class="prayer-fab" id="prayerFab">) and would otherwise be caught and fully
+        // excluded by that check, same as any other button label.
+        // The main site header (`.header`, src/includes/header.html — the nav links plus its
+        // own "Give" button) gets the same font-only treatment: "menu names can change font but
+        // cannot change words or urls" (Kevin, standing rule, reconfirmed 2026-09-08). A
+        // location check (closest('.header')), not a text-value check, so it only locks THIS
+        // specific header instance — other places on the site that happen to say "Give" (the
+        // footer's own mobile Give button, etc.) are unaffected and stay normally editable.
+        const isFontOnly = FONT_ONLY_TEXT.includes(rawText) || (ownerEl && ownerEl.closest('.prayer-fab, .header'));
+
+        if (!isFontOnly && isButtonLabel(ownerEl)) return;
 
         if (node.nodeType === 3) {
           if (!node.parentNode) return;
           const span = doc.createElement('span');
-          span.className = 'cms-field';
+          span.className = isFontOnly ? 'cms-field cms-protected' : 'cms-field';
           span.setAttribute('data-bind-id', id);
-          span.setAttribute('contenteditable', 'plaintext-only');
+          // Font-only fields are still contenteditable="true", same as a normal field — NOT
+          // false. Found 2026-09-08 wiring up the header nav's own font-only editing (Kevin:
+          // "menu names can change font"): a nav link's text lives inside a real <a href>, and a
+          // non-editable <a> (contenteditable="false", or no contenteditable at all) flatly
+          // refuses to let the mouse select its text in Chrome at all — not a CSS issue (user-
+          // select computes 'auto'), not specific to double vs triple-click, confirmed even with
+          // the contenteditable attribute removed entirely. It still correctly gains focus on
+          // click, just never produces a Selection, so the toolbar's "highlight then format"
+          // flow had nothing to work with. contenteditable="true" makes text selection behave
+          // normally (same as any other editable field, incl. other <a> button labels already
+          // working elsewhere); actually blocking the WORDS from changing now happens via the
+          // beforeinput guard below instead, scoped to .cms-protected.
+          span.setAttribute('contenteditable', 'true');
           span.setAttribute('spellcheck', 'false');
-          // The matched text node often carries the source HTML's leading/trailing indentation
-          // whitespace (e.g. a <br>-separated address line). Left as-is, that whitespace becomes
-          // part of the editable span's own content — it renders as a stray zero-width fragment
-          // ahead of the visible text (splitting the dashed outline into two boxes) and, worse,
-          // would get saved back into the field's value verbatim if a staff member edited the
-          // text without noticing it. stripSourceWhitespace() removes that formatting noise
-          // while keeping a real single space intact (see its comment above).
-          span.textContent = stripSourceWhitespace(node.textContent);
+          // If this field already has a saved value different from its as-shipped original, it
+          // may carry Workflow 5 rich-format markup — render via innerHTML (sanitized) rather
+          // than textContent so any font/weight/style/size formatting actually displays instead
+          // of showing as literal "<span..." text. Otherwise, just show the pristine original.
+          const ref = fieldRefs[id];
+          if (ref && ref.value !== ref.original) {
+            span.innerHTML = sanitizeRichHtml(ref.value);
+          } else {
+            span.textContent = stripSourceWhitespace(node.textContent);
+          }
           node.parentNode.replaceChild(span, node);
+          if (isOnGoldBackground(span)) span.classList.add('cms-on-gold');
           boundMap[id] = span.firstChild || span;
-          wireFieldEvents(span, id);
+          if (!isFontOnly) wireFieldEvents(span, id);
+          else span.title = 'Wording is locked — font/style only';
         } else if (node.nodeType === 1) {
           node.classList.add('cms-field');
+          if (isOnGoldBackground(node)) node.classList.add('cms-on-gold');
+          if (isFontOnly) node.classList.add('cms-protected');
           node.setAttribute('data-bind-id', id);
-          node.setAttribute('contenteditable', 'plaintext-only');
+          // Always 'true', even for font-only fields — see the contenteditable comment on the
+          // span branch above for why (found 2026-09-08 wiring up the header nav's own font-only
+          // editing: a plain, non-editable <a> flatly refuses mouse text selection in Chrome).
+          node.setAttribute('contenteditable', 'true');
           node.setAttribute('spellcheck', 'false');
-          wireFieldEvents(node, id);
+          if (!isFontOnly) wireFieldEvents(node, id);
+          else node.title = 'Wording is locked — font/style only';
         }
       });
+    }
+
+    // Shows the Workflow 5 toolbar as soon as a field is selected (focused), not only once
+    // text inside it is highlighted — Kevin, 2026-09-08: "when a text box is selected then
+    // the text change/bold etc then shows, not when you highlight." Font-only fields (the
+    // Prayer FAB, the header nav) are contenteditable="true" same as any other field (see
+    // wireInlineTextEditing), so they get this same focus-based behavior too — only truly
+    // fully-protected elements (FULLY_PROTECTED_SELECTOR: the prayer popup, the Tithe.ly line)
+    // are excluded entirely below and never show the toolbar at all.
+    function wireSelectionToolbar(doc) {
+      function currentActiveField() {
+        const el = doc.activeElement;
+        if (!el) return null;
+        const fieldEl = getEnclosingField(el);
+        if (!fieldEl || fieldEl.closest(FULLY_PROTECTED_SELECTOR)) return null;
+        return fieldEl;
+      }
+      // The toolbar's position is only ever computed at show-time, baked into fixed pixel
+      // coordinates on the OUTER admin page — correct on its own for ordinary page scroll (an
+      // absolutely-positioned element naturally scrolls away with everything else around it,
+      // no extra code needed). But the preview iframe ALSO scrolls internally on its own, apart
+      // from the outer page (confirmed live: scrolling over the preview changes both the outer
+      // page's scrollY and the iframe's own contentWindow.scrollY, independently) — and a field
+      // moving because of THAT scroll never re-fires focusin/selectionchange, so the toolbar
+      // was left floating in its last computed spot while the field it belonged to scrolled out
+      // from underneath it. Found 2026-09-08 (Kevin: "when i click in a text box and scroll -
+      // the font/bold etc editor stays floating. have it disappaear when that text box
+      // disappaeras"). isFieldVisible() below is the gate that fixes it — checked both from the
+      // normal focus/selection paths and from a new iframe-scroll listener.
+      function isFieldVisible(fieldEl) {
+        const rect = fieldEl.getBoundingClientRect();
+        return rect.bottom > 0 && rect.top < doc.defaultView.innerHeight;
+      }
+      function refreshToolbar() {
+        // Never hide (or clear rtSavedRange) while focus is actually inside the toolbar itself
+        // — e.g. the font <select> is open. Opening it needs real page-level focus to work at
+        // all, which unavoidably blurs/clears the iframe's own selection and would otherwise
+        // fire this same refreshToolbar() (via selectionchange, not just focusout) and wipe the
+        // very range the dropdown's change handler needs a moment later. Found 2026-09-08
+        // (Kevin: "the font drop down isn't working") — an earlier fix only guarded the
+        // focusout listener, missing that selectionchange reaches this exact same function.
+        if (document.getElementById('rich-toolbar').contains(document.activeElement)) return;
+
+        const activeField = currentActiveField();
+        if (activeField && isFieldVisible(activeField)) {
+          showRichToolbar(activeField, activeField.getBoundingClientRect());
+          syncToolbarState();
+          return;
+        }
+        const sel = doc.getSelection();
+        if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+          const range = sel.getRangeAt(0);
+          const fieldEl = getEnclosingField(range.commonAncestorContainer);
+          if (fieldEl && !fieldEl.closest(FULLY_PROTECTED_SELECTOR) && isFieldVisible(fieldEl)) {
+            showRichToolbar(fieldEl, range.getBoundingClientRect());
+            rtSavedRange = range.cloneRange();
+            syncToolbarState();
+            return;
+          }
+        }
+        hideRichToolbar();
+      }
+      doc.addEventListener('focusin', refreshToolbar);
+      // Deferred a tick — during focusout itself, doc.activeElement hasn't necessarily settled
+      // on its final value yet (browser-dependent), so checking immediately can misread which
+      // field (if any) focus actually landed on next.
+      doc.addEventListener('focusout', () => setTimeout(refreshToolbar, 0));
+      doc.addEventListener('selectionchange', refreshToolbar);
+      // Iframe-internal scroll doesn't fire either of the above — see isFieldVisible()'s
+      // comment. This also correctly RE-shows the toolbar (repositioned) if the field scrolls
+      // back into view without ever losing real focus, matching the same "still editing this
+      // field" state refreshToolbar already handles everywhere else.
+      doc.defaultView.addEventListener('scroll', refreshToolbar);
     }
 
     function onFieldEdited(id, newText) {
@@ -1002,6 +2250,8 @@
       imageRegistry.forEach(info => {
         const match = imgs.find(im => (im.getAttribute('src') || '').split('/').pop() === info.file);
         if (!match) return;
+        rememberOriginalImage(match);
+        if (info.ref.replacement_path) setImageSource(match, contentImageUrl(info.ref.replacement_path));
         match.classList.add('cms-image-editable');
         // Once swapped, src becomes a data: URI and the original-filename match above no longer
         // works — a stable id (same pattern as text fields) is what lets Revert find this exact
@@ -1019,6 +2269,18 @@
         const btnTop = rect.top + Math.max(rect.height - 40, Math.min(rect.height, 6));
         btn.style.top = (btnTop + scrollTop) + 'px';
         btn.style.left = (rect.left + scrollLeft + 10) + 'px';
+        // The site header is sticky and paints ABOVE everything (z-index 100), so the normal
+        // button — z-index 10, sitting on the logo inside the header's own bar — was hidden
+        // behind it and impossible to click, which made the header logo look uneditable (Kevin,
+        // 2026-09-28). Header images get a button pinned to the screen (fixed, viewport
+        // coordinates — the header itself never scrolls away) and layered above the header.
+        if (match.closest('#site-header, .header')) {
+          btn.style.position = 'fixed';
+          btn.style.zIndex = '200';
+          // Just below the logo box (not over the artwork) — Kevin, 2026-09-28.
+          btn.style.top = (rect.top + rect.height + 2) + 'px';
+          btn.style.left = (rect.left + 10) + 'px';
+        }
         btn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -1028,46 +2290,277 @@
       });
     }
 
+    // ---- Photo swaps (Kevin, 2026-09-28) ----
+    // Saved as a draft the same way text edits are: the chosen picture is shrunk in the browser,
+    // uploaded to the `content-images` storage bucket, and recorded on the photo's own record
+    // (its site_content_images row — or, for photos that live inside a repeated card, that
+    // card's image entry). Nothing here changes the live site; Publish will do that later.
+    function contentImageUrl(path) {
+      return supabaseClient.storage.from('content-images').getPublicUrl(path).data.publicUrl;
+    }
+
+    // A swapped picture is one file, so it drops srcset/sizes (which would otherwise win over
+    // src and keep showing the old picture). The page's own attributes are remembered once so
+    // Revert / "Use Original Photo" can always put them back exactly.
+    function snapshotImageAttrs(imgEl) {
+      return { src: imgEl.getAttribute('src'), srcset: imgEl.getAttribute('srcset'), sizes: imgEl.getAttribute('sizes') };
+    }
+    function rememberOriginalImage(imgEl) {
+      if (!imgEl.__orig) imgEl.__orig = snapshotImageAttrs(imgEl);
+    }
+    function setImageSource(imgEl, src) {
+      imgEl.removeAttribute('srcset');
+      imgEl.removeAttribute('sizes');
+      imgEl.setAttribute('src', src);
+    }
+    function restoreImageAttrs(imgEl, a) {
+      imgEl.setAttribute('src', a.src);
+      if (a.srcset == null) imgEl.removeAttribute('srcset'); else imgEl.setAttribute('srcset', a.srcset);
+      if (a.sizes == null) imgEl.removeAttribute('sizes'); else imgEl.setAttribute('sizes', a.sizes);
+    }
+
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Couldn't read that file."));
+        reader.readAsDataURL(file);
+      });
+    }
+    function loadImageFromUrl(url) {
+      return new Promise((resolve, reject) => {
+        const im = new Image();
+        im.onload = () => resolve(im);
+        im.onerror = () => reject(new Error("That file isn't a picture the browser can open."));
+        im.src = url;
+      });
+    }
+
+    // "images/foo-800.webp 800w, images/foo.webp 1600w" -> [{file:'foo-800.webp', w:800}, ...]
+    function srcsetCandidates(srcset) {
+      if (!srcset) return [];
+      return srcset.split(',').map(part => {
+        const bits = part.trim().split(/\s+/);
+        const wm = /^(\d+)w$/.exec(bits[1] || '');
+        return { file: (bits[0] || '').split('/').pop(), w: wm ? +wm[1] : null };
+      }).filter(c => c.file && c.w);
+    }
+
+    // Shrinks the chosen picture for the web before anything is uploaded — one file for every size
+    // the page itself uses (the page's srcset lists e.g. an 800px and a 1600px file; each gets a
+    // matching new picture so small screens don't keep showing the old photo). The longest side is
+    // capped at the spot's recommended size and never enlarged. Logos stay PNG so see-through
+    // backgrounds stay crisp; everything else is WebP (the format the site's photos are in).
+    async function prepareSwapImage(file, info, imgEl) {
+      if (!/^image\//.test(file.type)) throw new Error("That file isn't a picture.");
+      if (file.size > 25 * 1024 * 1024) throw new Error('That picture is over 25 MB — please choose a smaller one.');
+      const img = await loadImageFromUrl(await readFileAsDataUrl(file));
+      const m = /(\d+)\s*[×x]\s*(\d+)/.exec(info.size || '');
+      const cap = m ? Math.max(+m[1], +m[2]) : 1600;
+      let targets = srcsetCandidates(imgEl && imgEl.__orig && imgEl.__orig.srcset);
+      if (!targets.some(t => t.file === info.file)) targets = targets.concat([{ file: info.file, w: null }]);
+      const variants = [];
+      for (const t of targets) {
+        let scale = Math.min(1, cap / Math.max(img.width, img.height));
+        if (t.w) scale = Math.min(scale, t.w / img.width);
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const ext = (/\.[^.]+$/.exec(t.file) || ['.webp'])[0].toLowerCase();
+        const type = ext === '.png' ? 'image/png' : ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : 'image/webp';
+        const blob = await new Promise(res => canvas.toBlob(res, type, 0.84));
+        // Some browsers quietly hand back PNG when asked for WebP — that would put PNG bytes in a
+        // .webp file on the real site. Refuse rather than publish a broken picture.
+        if (!blob || blob.type !== type) throw new Error("This browser can't make web-ready photos — please use Chrome or Edge.");
+        variants.push({ file: t.file, blob, type, width: w, height: h });
+      }
+      const main = variants.find(v => v.file === info.file) || variants[0];
+      return { variants, previewUrl: URL.createObjectURL(main.blob) };
+    }
+
+    function conflictError() {
+      const e = new Error('someone else saved a change here first, so yours was not saved. Reload the page to see their version.');
+      e.isConflict = true;
+      return e;
+    }
+
+    // Writes one photo change: uploads the new files (or clears the swap), records it on the photo's
+    // record — checking nobody else changed it first — then removes the previous swapped files so
+    // nothing is left orphaned. The same picture used elsewhere (the crest logo appears on six
+    // pages) is updated everywhere, since publishing replaces the one shared file.
+    async function saveImageChange(id, change, who) {
+      const info = imageRegistry.find(i => i.id === id);
+      if (!info) return;
+      const ref = info.ref;
+      const bucket = supabaseClient.storage.from('content-images');
+      const slug = str => String(str).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      const prevObjects = (ref.replacement_variants && ref.replacement_variants.length ? ref.replacement_variants.map(v => v.path) : (ref.replacement_path ? [ref.replacement_path] : []));
+      const uploaded = [];
+      let newPath = null, newVariants = null, originalName = null;
+      if (!change.restoreOriginal) {
+        const folder = `${slug(currentPage)}/${slug(info.file.replace(/\.[^.]+$/, ''))}-${Date.now()}`;
+        for (const v of change.variants) {
+          const path = `${folder}/${v.file}`;
+          const { error: upErr } = await bucket.upload(path, v.blob, { contentType: v.type, upsert: false });
+          if (upErr) {
+            if (uploaded.length) await bucket.remove(uploaded.map(u => u.path));
+            throw upErr;
+          }
+          uploaded.push({ file: v.file, path });
+        }
+        newVariants = uploaded;
+        newPath = (uploaded.find(u => u.file === info.file) || uploaded[0]).path;
+        originalName = change.originalName;
+      }
+      const patch = {
+        replacement_path: newPath,
+        replacement_variants: newVariants,
+        replacement_original_name: originalName,
+        replaced_at: newPath ? new Date().toISOString() : null,
+        replaced_by: newPath ? who : null
+      };
+      const repeatImage = base => {
+        const image = { file: base.file, label: base.label, size: base.size };
+        if (base.published_replacement_path) image.published_replacement_path = base.published_replacement_path;
+        if (newPath) { image.replacement_path = newPath; image.replacement_variants = newVariants; image.replacement_original_name = originalName; }
+        return image;
+      };
+      let dbErr = null;
+      if (ref.__imgDbId) {
+        const { data, error } = await supabaseClient.from('site_content_images').update(patch).eq('id', ref.__imgDbId).eq('version', ref.__version).select('version');
+        dbErr = error || (!data || !data.length ? conflictError() : null);
+        if (!dbErr) ref.__version = data[0].version;
+      } else if (ref.__repeatImageDbId) {
+        const { data, error } = await supabaseClient.from('site_content_repeats').update({ image: repeatImage(ref) }).eq('id', ref.__repeatImageDbId).eq('version', ref.__repeatVersionRef.v).select('version');
+        dbErr = error || (!data || !data.length ? conflictError() : null);
+        if (!dbErr) ref.__repeatVersionRef.v = data[0].version;
+      }
+      if (dbErr) {
+        if (uploaded.length) await bucket.remove(uploaded.map(u => u.path));
+        throw dbErr;
+      }
+      ref.replacement_path = newPath;
+      ref.replacement_variants = newVariants;
+      ref.replacement_original_name = originalName;
+
+      // Everywhere else this same picture file is used.
+      const others = supabaseClient.from('site_content_images').update(patch).eq('file', info.file);
+      const { error: otherErr } = ref.__imgDbId ? await others.neq('id', ref.__imgDbId) : await others;
+      if (otherErr) throw otherErr;
+      const { data: cards } = await supabaseClient.from('site_content_repeats').select('id, image').filter('image->>file', 'eq', info.file);
+      for (const card of (cards || [])) {
+        if (card.id === ref.__repeatImageDbId) continue;
+        const image = repeatImage(card.image);
+        const { error: cardErr } = await supabaseClient.from('site_content_repeats').update({ image }).eq('id', card.id);
+        if (cardErr) throw cardErr;
+      }
+      if (prevObjects.length) await bucket.remove(prevObjects);
+    }
+
     function openImagePopover(info, imgEl) {
+      const ref = info.ref;
+      const pending = () => pendingChanges[info.id];
+      const savedName = () => (ref.replacement_original_name ? ref.replacement_original_name : info.file);
+
       document.getElementById('modal-title').textContent = info.label;
       document.getElementById('modal-subtitle').textContent = info.section;
       document.getElementById('modal-body').innerHTML = `
         <div class="image-popover-tile">
-          <img class="thumb" id="popover-thumb" src="assets/site-images/${info.file}" alt="${info.file}">
-          <div class="tile-filename" id="popover-filename">${info.file}</div>
-          <div class="rec-size">Recommended: ${info.size}px</div>
+          <img class="thumb" id="popover-thumb" src="" alt="">
+          <div class="tile-filename" id="popover-filename"></div>
+          <div class="rec-size">Recommended: ${escapeHtml(info.size)}px — pictures are shrunk to fit automatically</div>
           <div class="tile-actions">
             <button type="button" id="popover-replace">Replace Photo</button>
+            <button type="button" id="popover-original" style="display:none;">Use Original Photo</button>
+            <button type="button" id="popover-undo" style="display:none;">Undo Unsaved Change</button>
           </div>
+          <div id="popover-msg" style="font-size:12px;color:var(--danger);margin-top:8px;min-height:16px;"></div>
           <input type="file" accept="image/*" id="popover-file-input" style="display:none;">
         </div>`;
 
+      const msg = document.getElementById('popover-msg');
+      function refresh() {
+        const p = pending();
+        const thumb = document.getElementById('popover-thumb');
+        const nameEl = document.getElementById('popover-filename');
+        const originalUrl = `assets/site-images/${info.file}`;
+        let hasCustom;
+        if (p) {
+          hasCustom = !p.restoreOriginal;
+          thumb.src = p.restoreOriginal ? originalUrl : p.previewUrl;
+          nameEl.textContent = p.restoreOriginal ? info.file + ' (original — unsaved)' : p.originalName + ' (new — unsaved)';
+        } else {
+          hasCustom = !!ref.replacement_path;
+          thumb.src = ref.replacement_path ? contentImageUrl(ref.replacement_path) : originalUrl;
+          nameEl.textContent = ref.replacement_path ? savedName() + ' (saved)' : info.file;
+        }
+        document.getElementById('popover-original').style.display = hasCustom ? '' : 'none';
+        document.getElementById('popover-undo').style.display = p ? '' : 'none';
+      }
+      refresh();
+
       const fileInput = document.getElementById('popover-file-input');
       document.getElementById('popover-replace').addEventListener('click', () => fileInput.click());
-      fileInput.addEventListener('change', (e) => {
+      fileInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        // Capture the true original src once, the first time this image is edited — if it's
-        // swapped a second time before ever saving/reverting, re-deriving from imgEl.src here
-        // would capture the already-swapped data: URI instead of the real original.
-        const existing = pendingChanges[info.id];
-        const oldSrc = existing ? existing.oldSrc : imgEl.src;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          document.getElementById('popover-thumb').src = ev.target.result;
-          imgEl.src = ev.target.result;
+        msg.textContent = 'Preparing picture…';
+        try {
+          const prep = await prepareSwapImage(file, info, imgEl);
+          // Capture the true starting look once, the first time this image is edited — a second
+          // swap before saving must still revert to what the page actually had, not the first swap.
+          const existing = pending();
+          const oldAttrs = existing ? existing.oldAttrs : snapshotImageAttrs(imgEl);
+          setImageSource(imgEl, prep.previewUrl);
           pendingChanges[info.id] = {
             type: 'image',
             label: info.label,
             section: info.section,
-            oldValue: info.file,
+            oldValue: existing ? existing.oldValue : savedName(),
             newValue: file.name,
-            oldSrc,
+            oldAttrs,
+            variants: prep.variants,
+            originalName: file.name,
+            previewUrl: prep.previewUrl,
             apply: () => {}
           };
           updateSaveButtonState();
+          msg.textContent = '';
+          refresh();
+        } catch (err) {
+          msg.textContent = err.message || "Couldn't use that picture.";
+        }
+        fileInput.value = '';
+      });
+
+      document.getElementById('popover-original').addEventListener('click', () => {
+        // Nothing saved to go back from: the same as undoing the unsaved swap.
+        if (!ref.replacement_path) { applyRevert([info.id]); msg.textContent = ''; refresh(); return; }
+        const existing = pending();
+        const oldAttrs = existing ? existing.oldAttrs : snapshotImageAttrs(imgEl);
+        restoreImageAttrs(imgEl, imgEl.__orig);
+        pendingChanges[info.id] = {
+          type: 'image',
+          label: info.label,
+          section: info.section,
+          oldValue: existing ? existing.oldValue : savedName(),
+          newValue: 'Original photo (' + info.file + ')',
+          oldAttrs,
+          restoreOriginal: true,
+          apply: () => {}
         };
-        reader.readAsDataURL(file);
+        updateSaveButtonState();
+        msg.textContent = '';
+        refresh();
+      });
+
+      document.getElementById('popover-undo').addEventListener('click', () => {
+        applyRevert([info.id]);
+        msg.textContent = '';
+        refresh();
       });
 
       setModalFooter([{ label: 'Done', className: 'btn btn-gold', onClick: closeModal }]);
@@ -1084,6 +2577,22 @@
       revertBtn.title = count > 0
         ? `Discard ${count} unsaved change${count === 1 ? '' : 's'} on this page`
         : 'No unsaved changes on this page to discard';
+      refreshEditedIndicators();
+      updateFieldRevertButton();
+      updatePublishButtons();
+    }
+
+    // Recomputed from scratch on every pendingChanges mutation (called from
+    // updateSaveButtonState, the one function every save/edit/revert code path already runs
+    // through) rather than toggled piecemeal at each call site, so the dots can never drift
+    // out of sync with what's actually pending.
+    function refreshEditedIndicators() {
+      const doc = document.getElementById('preview-iframe').contentDocument;
+      if (!doc) return;
+      const editedIds = new Set(Object.keys(pendingChanges));
+      doc.querySelectorAll('[data-bind-id]').forEach(el => {
+        el.classList.toggle('cms-field-edited', editedIds.has(el.getAttribute('data-bind-id')));
+      });
     }
 
     // Resets every pending edit on the current page back to what was on the page before
@@ -1112,12 +2621,16 @@
         const el = previewDoc && previewDoc.querySelector(`[data-bind-id="${id}"]`);
         if (!el) return;
         if (change.type === 'text') {
-          el.textContent = change.oldValue;
+          // innerHTML (sanitized), not textContent — oldValue is the field's last saved value,
+          // which can carry rich-format spans that textContent would show as literal "<span..."
+          el.innerHTML = sanitizeRichHtml(change.oldValue);
         } else if (change.type === 'image') {
-          el.src = change.oldSrc;
+          restoreImageAttrs(el, change.oldAttrs);
         }
       });
-      pendingChanges = {};
+      // Only the reverted boxes leave the pending list — the rest keep their unsaved edits
+      // (Revert All passes every pending id, so it still clears everything).
+      ids.forEach(id => { delete pendingChanges[id]; });
       updateSaveButtonState();
     }
 
@@ -1128,6 +2641,7 @@
     }
 
     async function commitPendingChanges() {
+      if (!EDITING_ENABLED) return;
       const ids = Object.keys(pendingChanges);
       if (ids.length === 0) return;
       const session = getSession();
@@ -1137,21 +2651,36 @@
 
       const saveBtn = document.getElementById('save-btn');
       saveBtn.disabled = true;
-      try {
-        for (const id of ids) {
-          const change = pendingChanges[id];
-          const ref = fieldRefs[id];
-          change.apply();
-
-          // Image changes stay a no-op here too (matching the prior mock behavior) — only
-          // text-field edits actually persist. See the "Change Photo" popover handler above.
-          if (ref && ref.__dbTable === 'field') {
-            const { error } = await supabaseClient.from('site_content_fields').update({ field_value: ref.value }).eq('id', ref.__dbId);
+      const saved = [];
+      const problems = [];
+      for (const id of ids) {
+        const change = pendingChanges[id];
+        const ref = fieldRefs[id];
+        const previousValue = ref ? ref.value : undefined;
+        try {
+          if (change.type === 'image') {
+            change.apply();
+            await saveImageChange(id, change, who);
+          } else if (ref && ref.__dbTable === 'field') {
+            change.apply();
+            // Only saves if nobody else changed this box since it was loaded (version number).
+            const { data, error } = await supabaseClient.from('site_content_fields').update({ field_value: ref.value }).eq('id', ref.__dbId).eq('version', ref.__version).select('version');
             if (error) throw error;
+            if (!data || !data.length) throw conflictError();
+            ref.__version = data[0].version;
           } else if (ref && ref.__dbTable === 'repeatField') {
-            const plainFields = ref.__repeatFieldsRef.map(f => ({ label: f.label, type: f.type, value: f.value, original: f.original }));
-            const { error } = await supabaseClient.from('site_content_repeats').update({ fields: plainFields }).eq('id', ref.__repeatDbId);
+            change.apply();
+            const plainFields = ref.__repeatFieldsRef.map(f => {
+              const out = { label: f.label, type: f.type, value: f.value, original: f.original };
+              if (f.published != null) out.published = f.published; // what's live — must survive every save
+              return out;
+            });
+            const { data, error } = await supabaseClient.from('site_content_repeats').update({ fields: plainFields }).eq('id', ref.__repeatDbId).eq('version', ref.__repeatVersionRef.v).select('version');
             if (error) throw error;
+            if (!data || !data.length) throw conflictError();
+            ref.__repeatVersionRef.v = data[0].version;
+          } else {
+            change.apply();
           }
 
           const { error: logErr } = await supabaseClient.from('content_change_log').insert({
@@ -1171,15 +2700,21 @@
             oldValue: change.oldValue,
             newValue: change.newValue
           });
+          saved.push(id);
+        } catch (err) {
+          // It didn't save — put the saved value back in memory so nothing pretends it did.
+          if (ref && previousValue !== undefined) ref.value = previousValue;
+          problems.push(`${change.label}: ${err.message}`);
         }
-      } catch (err) {
-        alert('Could not save all changes: ' + err.message);
       }
+      if (problems.length) adminAlert('Some changes were not saved:\n\n' + problems.join('\n'), 'Not saved');
 
-      logActivity('content_save', `${ids.length} field${ids.length === 1 ? '' : 's'} on ${currentPage}`);
-      pendingChanges = {};
+      logActivity('content_save', `${saved.length} field${saved.length === 1 ? '' : 's'} on ${currentPage}`);
+      // Only what actually saved leaves the pending list — anything that failed stays pending.
+      saved.forEach(id => { delete pendingChanges[id]; });
       saveBtn.disabled = false;
       updateSaveButtonState();
+      renderPageList();
     }
 
     const LOG_PAGE_SIZE = 10;
@@ -1221,15 +2756,55 @@
 
     document.getElementById('log-link').addEventListener('click', openChangeLogModal);
     document.getElementById('revert-btn').addEventListener('click', revertPendingChanges);
+    document.getElementById('publish-btn').addEventListener('click', publishCurrentPage);
+    document.getElementById('preview-btn').addEventListener('click', openDraftPreview);
     document.getElementById('save-btn').addEventListener('click', () => commitPendingChanges());
 
     function fitPreviewScale() {
       const wrap = document.getElementById('preview-frame-wrap');
       const scaler = document.getElementById('preview-frame-scaler');
-      const scale = wrap.clientWidth / PREVIEW_WIDTH;
+      const iframe = document.getElementById('preview-iframe');
+      // The iframe's own width/height must actually change (not just get visually scaled) for
+      // mobile mode to mean anything real — a CSS transform:scale() alone would just zoom the
+      // same 1440px-wide desktop layout in and out, never triggering the site's own mobile
+      // media queries, which key off the iframe's real rendered width.
+      iframe.style.width = PREVIEW_WIDTH + 'px';
+      iframe.style.height = PREVIEW_HEIGHT + 'px';
+      let scale = wrap.clientWidth / PREVIEW_WIDTH;
+      // Desktop mode fills the available width same as always. Mobile mode never scales UP past
+      // real size, though — wrap.clientWidth is much wider than 414px, and blowing a phone-width
+      // layout up to ~2.8x would be an oversized, blurry-looking "preview," not an accurate one.
+      if (previewMode === 'mobile') scale = Math.min(1, scale);
       scaler.style.transform = `scale(${scale})`;
       wrap.style.height = Math.round(PREVIEW_HEIGHT * scale) + 'px';
     }
+
+    function togglePreviewMode() {
+      previewMode = previewMode === 'desktop' ? 'mobile' : 'desktop';
+      if (previewMode === 'mobile') {
+        PREVIEW_WIDTH = 414;
+        PREVIEW_HEIGHT = 896;
+      } else {
+        PREVIEW_WIDTH = 1440;
+        PREVIEW_HEIGHT = 900;
+      }
+      const btn = document.getElementById('preview-mode-toggle');
+      btn.textContent = previewMode === 'mobile' ? '🖥️ Desktop Preview' : '📱 Mobile Preview';
+      btn.classList.toggle('active', previewMode === 'mobile');
+      fitPreviewScale();
+      // "Change Photo" button positions are computed once, for the desktop layout, at bind time
+      // (wireInlineImages) — they'd sit in the wrong spot once the page reflows to a real 414px
+      // layout, and properly recomputing them for both sizes wasn't part of what was asked for
+      // here. Hiding them in mobile mode avoids showing them somewhere visibly wrong; switching
+      // back to desktop restores them exactly as they were.
+      const iframeDoc = document.getElementById('preview-iframe').contentDocument;
+      if (iframeDoc) {
+        iframeDoc.querySelectorAll('.cms-image-btn').forEach(btn => {
+          btn.style.display = previewMode === 'mobile' ? 'none' : '';
+        });
+      }
+    }
+    document.getElementById('preview-mode-toggle').addEventListener('click', togglePreviewMode);
 
     function loadPreview() {
       const iframe = document.getElementById('preview-iframe');
@@ -1275,6 +2850,15 @@
             e.stopPropagation();
           }
         }, true);
+        // Font-only fields (.cms-protected) are contenteditable="true" so their text can be
+        // selected and reformatted like anything else (see the comment on contenteditable in
+        // wireInlineTextEditing) — this is what actually keeps their WORDS locked despite that:
+        // block every real content-changing input (typing, deleting, pasting), while still
+        // letting the rich-text toolbar's own DOM edits through, since applyCharFormat() wraps
+        // spans directly rather than going through beforeinput at all.
+        iframe.contentDocument.addEventListener('beforeinput', (e) => {
+          if (e.target.closest && e.target.closest('.cms-protected')) e.preventDefault();
+        }, true);
       };
       iframe.src = 'assets/site-mirror/' + file;
     }
@@ -1297,6 +2881,8 @@
 
     loadSidebar().then(async () => {
       if (!document.getElementById('page-list')) return;
+      // Login is confirmed by now (loadSidebar waited for it): decide who may edit, then bind.
+      applyEditingGate();
       // The "Desktop only" gate itself is now a live CSS media query (see #mobile-restricted-panel
       // above) instead of a one-time check here — the editor always initializes underneath it.
       pageContent = await contentPromise;

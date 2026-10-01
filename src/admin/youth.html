@@ -9,15 +9,154 @@
 <title>Youth — Christ Church Bluffton Admin</title>
 <link rel="stylesheet" href="css/shared.css">
 <style>
-  .coming-soon-panel {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 80px 24px; color: var(--text-muted);
+  /* ---- Modal (shared shell pattern, copied from congregants.html) ---- */
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0; background: rgba(30,37,71,0.55);
+    z-index: 1000; align-items: center; justify-content: center; padding: 24px;
   }
-  .coming-soon-panel .icon { font-size: 40px; margin-bottom: 16px; }
-  .coming-soon-panel h2 { font-family: Georgia, 'Times New Roman', serif; color: var(--navy-blue); margin: 0 0 8px; }
+  .modal-backdrop.open { display: flex; }
+  .modal-box {
+    background: var(--white); border-radius: 14px; width: 100%; max-width: 560px;
+    max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+  }
+  .modal-box.wide { max-width: 720px; }
+  .modal-header { padding: 20px 26px; border-bottom: 1px solid var(--border-gray); display: flex; align-items: center; justify-content: space-between; }
+  .modal-header .modal-title { font-family: Georgia, 'Times New Roman', serif; font-size: 20px; color: var(--navy-blue); }
+  .modal-header .modal-subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .modal-close { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border-gray); background: var(--white); color: var(--text-muted); font-size: 16px; cursor: pointer; flex-shrink: 0; }
+  .modal-close:hover { border-color: var(--navy-blue); color: var(--navy-blue); }
+  .modal-body { padding: 22px 26px; overflow-y: auto; }
+  /* Small question box that sits on top of whatever modal is open (replaces the browser's black confirm box). */
+  .ask-backdrop { display: none; position: fixed; inset: 0; background: rgba(30,37,71,0.55); z-index: 1100; align-items: center; justify-content: center; padding: 24px; }
+  .ask-backdrop.open { display: flex; }
+  .ask-box { background: var(--white); border-radius: 14px; width: 100%; max-width: 440px; box-shadow: 0 24px 70px rgba(0,0,0,0.35); overflow: hidden; }
+  .ask-head { padding: 18px 24px; border-bottom: 2px solid var(--gold); background: linear-gradient(135deg, rgba(195,163,85,0.12) 0%, rgba(195,163,85,0.04) 100%); }
+  .ask-title { font-family: Georgia, 'Times New Roman', serif; font-size: 18px; color: var(--navy-blue); }
+  .ask-body { padding: 18px 24px; font-size: 14px; line-height: 1.6; color: var(--text-dark); }
+  .ask-household { margin: 12px 0; padding: 10px 14px; background: var(--lightest-gray, #f6f5f1); border: 1px solid var(--border-gray); border-radius: 10px; }
+  .ask-household strong { display: block; font-family: Georgia, 'Times New Roman', serif; font-size: 15px; color: var(--navy-blue); }
+  .ask-household span { font-size: 13px; color: var(--text-muted); }
+  .ask-foot { padding: 14px 24px 18px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+  .modal-footer { padding: 16px 26px; border-top: 1px solid var(--border-gray); display: flex; justify-content: flex-end; gap: 10px; }
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 13px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; }
+  .field input[type="text"], .field input[type="email"], .field input[type="date"], .field input[type="datetime-local"], .field select, .field textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border-gray); border-radius: 8px;
+    font-family: inherit; font-size: 14px; background: var(--lightest-gray); color: var(--text-dark);
+  }
+  .field textarea { min-height: 80px; resize: vertical; font-family: inherit; font-size: 14px; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--gold); background: var(--white); }
+  .name-row { display: flex; gap: 12px; }
+  .name-row .field { flex: 1; }
+  .modal-section-title {
+    font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.4px; color: var(--gold-text);
+    margin: 20px 0 12px; padding-top: 16px; border-top: 1px solid var(--border-gray);
+  }
+  .modal-section-title:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+  .form-error { background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; }
+  .form-error.visible { display: block; }
+
+  /* ---- Page-specific ---- */
+  .page-width { max-width: 1280px; margin: 0 auto; }
+  .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border-gray); }
+  .tab-btn { padding: 10px 18px; border: none; background: none; font-family: inherit; font-size: 14px; font-weight: bold; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; }
+  .tab-btn.active { color: var(--navy-blue); border-bottom-color: var(--gold); }
+  .toolbar-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+  .toggle-switch { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dark); }
+  .toggle-switch .switch { position: relative; width: 40px; height: 22px; }
+  .toggle-switch .switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-switch .slider { position: absolute; inset: 0; background: var(--border-gray); border-radius: 100px; cursor: pointer; transition: background 0.15s; }
+  .toggle-switch .slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.15s; }
+  .toggle-switch input:checked + .slider { background: #2e7d32; }
+  .toggle-switch input:checked + .slider::before { transform: translateX(18px); }
+
+  .consent-toggles { display: flex; gap: 24px; margin-bottom: 14px; }
+  .consent-file-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    background: var(--lightest-gray); border: 1px solid var(--border-gray); border-radius: 8px;
+    padding: 10px 14px; margin-bottom: 14px; font-size: 13px; color: var(--text-dark);
+  }
+
+  .roster-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .student-card { background: #fff; border: 1px solid var(--border-gray); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; }
+  .student-name { font-family: Georgia, 'Times New Roman', serif; font-size: 1.1rem; color: var(--navy-blue); font-weight: bold; }
+  .student-code { font-size: 11px; color: var(--text-muted); font-family: 'Courier New', monospace; }
+  .student-meta { font-size: 13px; color: var(--text-dark); margin-top: 8px; line-height: 1.6; }
+  .student-meta .label { font-weight: bold; color: var(--text-muted); }
+  .student-parent { font-size: 13px; color: var(--text-dark); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-gray); line-height: 1.6; }
+  .student-parent .label { font-weight: bold; color: var(--text-muted); }
+  .student-parent .parent-heading { font-size: 10.5px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gold-text); margin-bottom: 2px; }
+  .consent-badge { display: inline-block; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 100px; margin-top: 6px; margin-right: 4px; }
+  .consent-yes { background: rgba(46,125,50,0.12); color: #2e7d32; }
+  .consent-no { background: rgba(177,67,67,0.1); color: var(--danger); }
+  .consent-expired { background: rgba(195,163,85,0.2); color: #8a6d1f; }
+  .possible-dup-notice {
+    margin-top: 10px; padding: 8px 12px; border-radius: 8px; font-size: 12px; line-height: 1.5;
+    background: rgba(195,163,85,0.12); color: #7a5f1a;
+  }
+  .possible-dup-notice a { color: var(--navy-blue); font-weight: bold; }
+  .no-parent-notice {
+    margin-top: 10px; padding: 8px 12px; border-radius: 8px; font-size: 12px; line-height: 1.5;
+    background: rgba(177,67,67,0.08); color: var(--danger); font-weight: bold;
+  }
+  /* One row along the bottom of the card: View Household on the left, the eye / edit / remove icons on the right (same look as Congregants). */
+  /* Yellow "Testing In Progress" bar — same shape as the red Work In Progress bars, in yellow. */
+  .test-banner {
+    margin: 16px 32px 0; padding: 12px 16px; border-radius: 10px;
+    background: rgba(230,190,40,0.18); border: 1px solid rgba(190,150,0,0.55);
+    font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: var(--text-dark); text-align: center;
+  }
+  .test-banner strong { color: #8a6a00; }
+  @media (max-width: 768px) { .test-banner { margin: 12px 16px 0; } }
+  .student-actions { margin-top: auto; padding-top: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .student-icon-row { display: flex; gap: 6px; margin-left: auto; }
+  .icon-btn {
+    width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-gray);
+    background: var(--white); display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); cursor: pointer; padding: 0; flex-shrink: 0;
+  }
+  .icon-btn svg { width: 14px; height: 14px; }
+  .icon-btn:hover { border-color: var(--navy-blue); color: var(--navy-blue); background: rgba(48,59,106,0.05); }
+  .icon-btn.danger:hover { border-color: var(--danger); color: var(--danger); background: rgba(177,67,67,0.05); }
+  /* ---- Student portfolio popup ---- */
+  .pf { font-size: 14px; color: var(--text-dark); line-height: 1.6; }
+  .pf-section { margin-bottom: 18px; }
+  .pf-section:last-child { margin-bottom: 0; }
+  .pf-title { font-size: 10.5px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gold-text); padding-bottom: 4px; margin-bottom: 8px; border-bottom: 1px solid var(--border-gray); }
+  .pf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; }
+  .pf-item .pf-label { display: block; font-size: 11px; color: var(--text-muted); }
+  .pf-item .pf-value { display: block; overflow-wrap: anywhere; }
+  .pf-item.wide { grid-column: 1 / -1; }
+  .pf-badges .consent-badge { margin-right: 6px; }
+  .pf-nights { margin: 6px 0 0; padding-left: 18px; font-size: 13px; color: var(--text-muted); }
+  @media (max-width: 480px) { .pf-grid { grid-template-columns: 1fr; } }
+  .empty-panel { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+
+  .night-row { background: #fff; border: 1px solid var(--border-gray); border-radius: 10px; padding: 14px 18px; margin-bottom: 10px; cursor: pointer; }
+  .night-row-head { display: flex; justify-content: space-between; align-items: center; }
+  .night-title { font-weight: bold; color: var(--navy-blue); }
+  .night-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .night-count { font-size: 13px; font-weight: bold; color: var(--gold-text); }
+  .attendee-list { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-gray); display: none; font-size: 13px; }
+  .night-row.open .attendee-list { display: block; }
+  .attendee-row { display: flex; justify-content: space-between; padding: 4px 0; }
+
+  .leader-loc-list { list-style: none; padding: 0; margin: 0 0 14px; }
+  .leader-loc-list li { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-gray); font-size: 14px; }
+  .leader-loc-list li:last-child { border-bottom: none; }
+  .small-btn { padding: 4px 10px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border-gray); background: #fff; cursor: pointer; }
+  .small-btn:hover { border-color: var(--gold); }
+  .small-btn.danger { border-color: var(--danger); color: var(--danger); }
+  .small-btn.danger:hover { background: var(--danger); color: #fff; }
+  .confirm-delete-inline { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+  .inline-add-row { display: flex; gap: 8px; margin-top: 10px; }
+  .inline-add-row input { flex: 1; padding: 8px 10px; border: 1px solid var(--border-gray); border-radius: 8px; font-family: inherit; font-size: 13px; }
 </style>
 </head>
-<body data-page="youth">
+<body data-page="youth" data-permission="youth">
   <div class="app-shell">
     <div id="sidebar-mount">
 <aside class="sidebar">
@@ -66,7 +205,7 @@
         Newsletter
         <span class="nav-note">Disabled — use a PC</span>
       </a>
-      <a href="notifications" data-page="notifications" data-site-admin-only="true">
+      <a href="notifications" data-page="notifications" data-permission="notifications">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         Notification Settings
       </a>
@@ -119,14 +258,62 @@
       <div class="topbar">
         <div>
           <h1>Youth</h1>
-          <div class="subtitle">A dedicated space for youth ministry — parent and student info, more to come</div>
+          <div class="subtitle">Student roster, sign-ups, and check-in</div>
+        </div>
+        <div class="toolbar-actions">
+          <button type="button" class="btn btn-outline" id="manage-lists-btn">Leaders &amp; Locations</button>
+          <button type="button" class="btn btn-outline" id="add-student-btn">+ Add Student</button>
+          <button type="button" class="btn btn-gold" id="access-checkin-btn">Access Check In</button>
         </div>
       </div>
+      <div class="test-banner">
+        <strong>Testing In Progress</strong>
+      </div>
       <div class="content" id="page-body">
-        <div class="coming-soon-panel">
-          <div class="icon">🚧</div>
-          <h2>Coming Soon</h2>
+        <div class="page-width">
+          <div class="tabs">
+            <button type="button" class="tab-btn active" data-tab="roster">Roster</button>
+            <button type="button" class="tab-btn" data-tab="attendance">Attendance</button>
+          </div>
+
+          <div id="tab-roster">
+            <div class="toolbar">
+              <div class="search-wrap" style="position:relative;">
+                <input type="text" id="roster-search" placeholder="Search students..." style="padding:9px 12px 9px 34px; border:1px solid var(--border-gray); border-radius:8px; font-family:inherit; font-size:13px; min-width:260px;">
+              </div>
+              <div class="count-badge" id="student-count">— students</div>
+            </div>
+            <div class="roster-grid" id="roster-grid"></div>
+          </div>
+
+          <div id="tab-attendance" style="display:none;">
+            <div id="nights-list"></div>
+          </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-backdrop">
+    <div class="modal-box" id="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="modal-title">Title</div>
+          <div class="modal-subtitle" id="modal-subtitle"></div>
+        </div>
+        <button type="button" class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+  <div class="ask-backdrop" id="ask-backdrop" role="dialog" aria-modal="true" aria-labelledby="ask-title">
+    <div class="ask-box">
+      <div class="ask-head"><div class="ask-title" id="ask-title">Existing household found</div></div>
+      <div class="ask-body" id="ask-body"></div>
+      <div class="ask-foot">
+        <button type="button" class="btn btn-outline" id="ask-no">Create a new household</button>
+        <button type="button" class="btn btn-gold" id="ask-yes">Link to this household</button>
       </div>
     </div>
   </div>
@@ -134,7 +321,723 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/shared.js"></script>
   <script>
-    loadSidebar();
+    function escapeHtml(str) {
+      return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+    function formatDateTime(iso) {
+      if (!iso) return '—';
+      return new Date(iso).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+    function formatDateOnly(iso) {
+      if (!iso) return '—';
+      // A plain "YYYY-MM-DD" (no time part, e.g. youth_consents.signed_at) is parsed as UTC
+      // midnight by `new Date()`, which shifts a day backward once toLocaleDateString() renders
+      // it in a negative-UTC timezone. Force local-time parsing for that case only — a full
+      // timestamp (already carries its own timezone) is unaffected.
+      const d = /^\d{4}-\d{2}-\d{2}$/.test(iso) ? new Date(iso + 'T00:00:00') : new Date(iso);
+      return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    let students = [];       // youth_students rows, joined with details+consents when youthLeader
+    let leaders = [];
+    let locations = [];
+    let armedDeleteLeaderId = null;   // id of the one row currently showing "Confirm / Cancel" instead of Delete
+    let armedDeleteLocationId = null;
+    let nights = [];
+    let attendanceByNight = {};
+    let backgroundReady = Promise.resolve();
+    let isYouthLeader = false;
+    let searchTerm = '';
+    let currentTab = 'roster';
+
+    function closeModal() {
+      document.getElementById('modal-backdrop').classList.remove('open');
+      document.getElementById('modal-box').classList.remove('wide');
+    }
+    function setModalFooter(buttons) {
+      const footer = document.getElementById('modal-footer');
+      footer.innerHTML = '';
+      buttons.forEach(b => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = b.className;
+        btn.textContent = b.label;
+        btn.addEventListener('click', b.onClick);
+        footer.appendChild(btn);
+      });
+    }
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    document.getElementById('modal-backdrop').addEventListener('click', (e) => { if (e.target.id === 'modal-backdrop') closeModal(); });
+
+    // Grades move up every August 6. schoolYearStart() = the calendar year the CURRENT school year began in.
+    function schoolYearStart(d) { d = d || new Date(); return (d.getMonth() > 7 || (d.getMonth() === 7 && d.getDate() >= 6)) ? d.getFullYear() : d.getFullYear() - 1; }
+    // A grade entered for an earlier school year moves up one for every Aug 1 since. Past 12th = Graduated.
+    function effectiveGrade(text, enteredYear) {
+      const t = String(text || '').trim();
+      const m = t.match(/\d+/);
+      if (!t || !m || enteredYear == null) return t;
+      const n = parseInt(m[0], 10) + (schoolYearStart() - enteredYear);
+      if (n > 12) return 'Graduated';
+      if (n < 1) return t;
+      const suffix = (n % 100 >= 11 && n % 100 <= 13) ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th');
+      return n + suffix;
+    }
+
+    // ---- Data loading ----
+    // Students, details and consents are independent reads, so they all go out at once. On a page
+    // load they start the moment the script runs (prefetchedStudents, below) — NOT after the
+    // sidebar finishes checking the session — the same way Congregants starts its own fetch, so the
+    // two waits overlap instead of adding up. Row-level security still decides what comes back.
+    function fetchStudentRows() {
+      return Promise.all([
+        supabaseClient.from('youth_students').select('*').order('last_name', { ascending: true }),
+        supabaseClient.from('youth_student_details').select('*'),
+        supabaseClient.from('youth_consents').select('*').order('created_at', { ascending: false })
+      ]);
+    }
+    let prefetchedStudents = null;
+    async function loadStudents() {
+      const pending = prefetchedStudents || fetchStudentRows();
+      prefetchedStudents = null; // only the first call uses the early fetch; later reloads (after a save) fetch fresh
+      const [{ data, error }, { data: details }, { data: consents }] = await pending;
+      if (error) { console.error('loadStudents failed:', error.message); students = []; return; }
+      students = data || [];
+      if (isYouthLeader) {
+        const detailsByStudent = {};
+        (details || []).forEach(d => { detailsByStudent[d.student_id] = d; });
+        const latestConsentByStudent = {};
+        (consents || []).forEach(c => { if (!latestConsentByStudent[c.student_id]) latestConsentByStudent[c.student_id] = c; });
+        students.forEach(s => {
+          s.__details = detailsByStudent[s.id] || null;
+          s.__consent = latestConsentByStudent[s.id] || null;
+        });
+      }
+    }
+    async function loadLeadersAndLocations() {
+      const [{ data: l }, { data: loc }] = await Promise.all([
+        supabaseClient.from('youth_leaders').select('*').order('name', { ascending: true }),
+        supabaseClient.from('youth_locations').select('*').order('name', { ascending: true })
+      ]);
+      leaders = l || []; locations = loc || [];
+    }
+    async function loadNights() {
+      const { data, error } = await supabaseClient.from('youth_nights').select('*').order('occurred_at', { ascending: false });
+      if (error) { console.error('loadNights failed:', error.message); nights = []; return; }
+      nights = data || [];
+      const { data: att } = await supabaseClient.from('youth_attendance').select('*, youth_students(first_name,last_name,student_code)').order('checked_in_at', { ascending: true });
+      attendanceByNight = {};
+      (att || []).forEach(a => { (attendanceByNight[a.night_id] = attendanceByNight[a.night_id] || []).push(a); });
+    }
+
+    // ---- Consent status helpers ----
+    // A consent is only "current" within one year of when it was signed and never revoked — this
+    // is the practical shape of the brief's "yearly expiration/renewal" requirement; nothing
+    // automated flips a flag, it's just checked fresh every time the roster renders.
+    function consentStatus(consent) {
+      if (!consent) return { label: 'No consent on file', cls: 'consent-no' };
+      if (consent.revoked_at) return { label: 'Revoked', cls: 'consent-no' };
+      const signed = new Date(consent.signed_at);
+      const oneYearLater = new Date(signed); oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+      const expired = new Date() > oneYearLater;
+      const parts = [];
+      parts.push({ label: `Photos: ${consent.identifiable_photos ? 'Yes' : 'No'}`, cls: consent.identifiable_photos ? 'consent-yes' : 'consent-no' });
+      parts.push({ label: `Video: ${consent.identifiable_video ? 'Yes' : 'No'}`, cls: consent.identifiable_video ? 'consent-yes' : 'consent-no' });
+      if (expired) parts.push({ label: 'Expired — needs renewal', cls: 'consent-expired' });
+      return { parts };
+    }
+
+    // ---- Roster ----
+    function renderRoster() {
+      const term = searchTerm.toLowerCase();
+      const filtered = students.filter(s => !term || `${s.first_name} ${s.last_name} ${s.student_code} ${s.parent_first_name || ''} ${s.parent_last_name || ''}`.toLowerCase().includes(term));
+      document.getElementById('student-count').textContent = `${students.length} ${students.length === 1 ? 'student' : 'students'}`;
+      const grid = document.getElementById('roster-grid');
+      if (!filtered.length) {
+        grid.innerHTML = `<div class="empty-panel" style="grid-column:1/-1;">${students.length === 0 ? 'No students yet — add the first one, or wait for sign-ups.' : 'No matches for that search.'}</div>`;
+        return;
+      }
+      grid.innerHTML = filtered.map(s => {
+        const status = isYouthLeader ? consentStatus(s.__consent) : null;
+        return `
+        <div class="student-card" data-id="${s.id}">
+          <div class="student-name">${escapeHtml(s.first_name)} ${escapeHtml(s.last_name)}</div>
+          <div class="student-meta">
+            ${isYouthLeader && s.__details && s.__details.grade ? `<div><span class="label">Grade:</span> ${escapeHtml(effectiveGrade(s.__details.grade, s.__details.grade_year))}</div>` : ''}
+            ${s.birthdate ? `<div><span class="label">DOB:</span> ${formatDateOnly(s.birthdate)}</div>` : ''}
+          </div>
+          ${(s.parent_first_name || s.parent_last_name || s.parent_phone || s.parent_phone_2 || s.parent_email) ? `<div class="student-parent">
+            <div class="parent-heading">Parent / Guardian</div>
+            ${(s.parent_first_name || s.parent_last_name) ? `<div>${escapeHtml(s.parent_first_name || '')} ${escapeHtml(s.parent_last_name || '')}</div>` : ''}
+            ${s.parent_phone ? `<div><span class="label">Parent Phone:</span> ${escapeHtml(s.parent_phone)}</div>` : ''}
+            ${s.parent_phone_2 ? `<div><span class="label">Parent Phone 2:</span> ${escapeHtml(s.parent_phone_2)}</div>` : ''}
+            ${s.parent_email ? `<div><span class="label">Parent Email:</span> ${escapeHtml(s.parent_email)}</div>` : ''}
+          </div>` : ''}
+          ${status ? (status.parts ? status.parts.map(p => `<span class="consent-badge ${p.cls}">${p.label}</span>`).join('') : `<span class="consent-badge ${status.cls}">${status.label}</span>`) : ''}
+          ${(!s.family_id && !s.parent_first_name && !s.parent_last_name && !s.parent_phone && !s.parent_email) ? `<div class="no-parent-notice">No parent information on file</div>` : ''}
+          ${s.possible_duplicate_family_id ? `<div class="possible-dup-notice">Possible existing household found (same last name) — nobody confirmed it when this student signed up online. <a href="congregants?family=${s.possible_duplicate_family_id}">Review it</a>?</div>` : ''}
+          <div class="student-actions">
+            ${s.family_id ? `<a href="congregants?family=${s.family_id}" class="btn btn-outline" style="font-size:12px; padding:6px 12px;">View Household</a>` : ''}
+            <div class="student-icon-row">
+              <button type="button" class="icon-btn" data-action="view-student" data-id="${s.id}" title="View portfolio" aria-label="View portfolio">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+              <button type="button" class="icon-btn" data-action="edit-student" data-id="${s.id}" title="Edit" aria-label="Edit">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+              </button>
+              <button type="button" class="icon-btn danger" data-action="remove-student" data-id="${s.id}" title="Remove" aria-label="Remove">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // Shows what's on file (if anything) and lets a youth leader set it directly — toggle the two
+    // consent flags, record who signed, and optionally attach a scan of a paper form. Saving any
+    // of this adds a new youth_consents row (never overwrites the last one — same history-first
+    // rule the rest of consent already follows), carrying the existing attached file forward if
+    // no new one is uploaded.
+    function consentSectionHtml(existing) {
+      const consent = existing ? existing.__consent : null;
+      // Blank when there's no real consent yet — pre-filling this with the parent's name (from
+      // the student's own contact fields) meant an untouched Save could silently fabricate a
+      // "signed" record nobody actually signed. Found live 2026-09-30 (Aden/Connor both got a
+      // false consent row this way); only ever pre-fill from an EXISTING consent's own signature.
+      const defaultSignedBy = consent ? consent.signature_name : '';
+      return `
+        <div class="modal-section-title">Photo &amp; Video Consent</div>
+        <div class="consent-toggles">
+          <label class="toggle-switch">
+            <span class="switch"><input type="checkbox" id="st-consent-photos" ${consent && consent.identifiable_photos ? 'checked' : ''}><span class="slider"></span></span>
+            <span>Identifiable Photos</span>
+          </label>
+          <label class="toggle-switch">
+            <span class="switch"><input type="checkbox" id="st-consent-video" ${consent && consent.identifiable_video ? 'checked' : ''}><span class="slider"></span></span>
+            <span>Identifiable Video</span>
+          </label>
+        </div>
+        <div class="field"><label>Signed By (Parent/Guardian)</label><input type="text" id="st-consent-signed-by" value="${escapeHtml(defaultSignedBy)}"></div>
+        <div class="consent-file-row">
+          <span>${consent
+            ? `On file: signed ${formatDateOnly(consent.signed_at)} (terms ${escapeHtml(consent.terms_version)})${consent.revoked_at ? ' — <strong style="color:var(--danger);">Revoked</strong>' : ''}`
+            : 'No consent on file yet.'}</span>
+          ${consent && consent.form_file_path ? `<button type="button" class="btn btn-outline" id="view-consent-file-btn" style="font-size:12px; padding:6px 12px;">View Attached Form</button>` : ''}
+        </div>
+        <div class="field">
+          <label>Attach Signed Form${consent && consent.form_file_name ? ` (replacing "${escapeHtml(consent.form_file_name)}")` : ' (optional — scan or photo of a paper form)'}</label>
+          <input type="file" id="st-consent-file" accept=".pdf,.jpg,.jpeg,.png,.heic">
+        </div>`;
+    }
+
+    // Same matching rule the public New Student form's own findOrCreateHousehold() uses
+    // (new-student-signup.js) — kept in sync deliberately: a student added manually here should
+    // link to an existing congregant family the same way a public signup would, or create one
+    // (parent as head, student added to that family's own child list, same shape) if there isn't
+    // a match yet. Matched on parent email OR parent phone+last name against either the head or
+    // spouse fields. Silently returns null (no family_id set) when there's no parent name to
+    // match or create with at all — a student can exist without a household link.
+    // A styled yes/no question that sits on top of the open Add/Edit Student popup. Returns a promise: true = link, false = create new.
+    function askLinkHousehold(h) {
+      return new Promise(resolve => {
+        const backdrop = document.getElementById('ask-backdrop');
+        const contact = h.head_email || h.head_phone || 'no contact info on file';
+        document.getElementById('ask-body').innerHTML =
+          '<div>A household with this last name is already in Congregants. Nothing else lines up (no matching email or phone), so please confirm.</div>' +
+          '<div class="ask-household"><strong>' + escapeHtml((h.head_first_name || '') + ' ' + (h.head_last_name || '')) + '</strong><span>' + escapeHtml(contact) + '</span></div>' +
+          '<div>Is this the same family?</div>';
+        const yes = document.getElementById('ask-yes'), no = document.getElementById('ask-no');
+        const done = (answer) => { backdrop.classList.remove('open'); yes.onclick = null; no.onclick = null; resolve(answer); };
+        yes.onclick = () => done(true);
+        no.onclick = () => done(false);
+        backdrop.classList.add('open');
+        yes.focus();
+      });
+    }
+
+    async function findOrCreateHousehold(parent, student) {
+      if (!parent.firstName || !parent.lastName) return null;
+      let family = null;
+      const orParts = [];
+      if (parent.email) orParts.push(`head_email.eq.${parent.email}`, `spouse_email.eq.${parent.email}`);
+      if (parent.phone) {
+        orParts.push(`and(head_phone.eq.${parent.phone},head_last_name.eq.${parent.lastName})`);
+        orParts.push(`and(spouse_phone.eq.${parent.phone},spouse_last_name.eq.${parent.lastName})`);
+      }
+      // The parent's own first + last name matching the head OR the spouse is just as certain as an email — this is what
+      // lets a spouse (e.g. Stephanie listed under Kevin's household) link without being asked.
+      if (parent.firstName && parent.lastName) {
+        const fn = parent.firstName.replace(/["\\]/g, ''), ln = parent.lastName.replace(/["\\]/g, '');
+        orParts.push(`and(head_first_name.ilike."${fn}",head_last_name.ilike."${ln}")`);
+        orParts.push(`and(spouse_first_name.ilike."${fn}",spouse_last_name.ilike."${ln}")`);
+      }
+      if (orParts.length) {
+        const { data } = await supabaseClient.from('congregant_families').select('id').or(orParts.join(',')).limit(1);
+        if (data && data.length) family = data[0];
+      }
+      // A same-last-name-only match (nothing else lining up) isn't confident enough to merge
+      // silently — but unlike the public form, a staff member IS right here, so ask directly
+      // rather than guessing either way (Kevin, 2026-09-30: "provide a suggestion if there are
+      // similar features").
+      if (!family && parent.lastName) {
+        const { data: similar } = await supabaseClient.from('congregant_families')
+          .select('id,head_first_name,head_last_name,head_email,head_phone')
+          .or(`head_last_name.eq.${parent.lastName},spouse_last_name.eq.${parent.lastName}`).limit(1);
+        if (similar && similar.length) {
+          const s = similar[0];
+          const useExisting = await askLinkHousehold(s);
+          if (useExisting) family = s;
+        }
+      }
+      if (!family) {
+        const { data, error } = await supabaseClient.from('congregant_families').insert({
+          head_first_name: parent.firstName, head_last_name: parent.lastName,
+          head_email: parent.email || null, head_phone: parent.phone || null,
+          address: parent.address || null, city: parent.city || null, state: parent.state || null, zip: parent.zip || null
+        }).select().single();
+        if (error) { console.error('findOrCreateHousehold: create family failed:', error.message); return null; }
+        family = data;
+      }
+      const { data: existingKids } = await supabaseClient.from('congregant_children')
+        .select('id').eq('family_id', family.id).eq('first_name', student.firstName).eq('last_name', student.lastName);
+      const kidPayload = { family_id: family.id, first_name: student.firstName, last_name: student.lastName, birthdate: student.birthdate || null };
+      if (existingKids && existingKids.length) {
+        await supabaseClient.from('congregant_children').update(kidPayload).eq('id', existingKids[0].id);
+      } else {
+        const { data: maxOrder } = await supabaseClient.from('congregant_children').select('sort_order').eq('family_id', family.id).order('sort_order', { ascending: false }).limit(1);
+        await supabaseClient.from('congregant_children').insert(Object.assign({ sort_order: maxOrder && maxOrder.length ? maxOrder[0].sort_order + 1 : 0 }, kidPayload));
+      }
+      return family.id;
+    }
+
+    function openStudentModal(existing) {
+      document.getElementById('modal-title').textContent = existing ? 'Edit Student' : 'Add Student';
+      document.getElementById('modal-subtitle').textContent = '';
+      document.getElementById('modal-box').classList.add('wide');
+      const d = existing ? existing.__details || {} : {};
+      document.getElementById('modal-body').innerHTML = `
+        <div class="form-error" id="student-error"></div>
+        <div class="modal-section-title">Student</div>
+        <div class="name-row">
+          <div class="field"><label>First Name*</label><input type="text" id="st-first" value="${existing ? escapeHtml(existing.first_name) : ''}"></div>
+          <div class="field"><label>Last Name*</label><input type="text" id="st-last" value="${existing ? escapeHtml(existing.last_name) : ''}"></div>
+        </div>
+        <div class="name-row">
+          <div class="field"><label>Birthday</label><input type="date" id="st-birthdate" value="${existing ? (existing.birthdate || '') : ''}"></div>
+          <div class="field"><label>Current Grade</label><input type="text" id="st-grade" value="${escapeHtml(effectiveGrade(d.grade, d.grade_year))}" ${isYouthLeader ? '' : 'disabled placeholder="Youth Leader access required"'}></div>
+          <div class="field"><label>Attending School</label><input type="text" id="st-school" value="${existing ? escapeHtml(existing.school || '') : ''}"></div>
+        </div>
+        <div class="name-row">
+          <div class="field"><label>Phone</label><input type="text" id="st-phone" value="${existing ? escapeHtml(existing.phone || '') : ''}"></div>
+          <div class="field"><label>Email</label><input type="email" id="st-email" value="${existing ? escapeHtml(existing.email || '') : ''}"></div>
+        </div>
+        <div class="field"><label>Notes</label><textarea id="st-notes" style="min-height:70px;" ${isYouthLeader ? '' : 'disabled placeholder="Youth Leader access required"'}>${escapeHtml(d.notes || '')}</textarea></div>
+        <div class="modal-section-title">Parent / Guardian</div>
+        <div class="name-row">
+          <div class="field"><label>First Name</label><input type="text" id="st-parent-first" value="${existing ? escapeHtml(existing.parent_first_name || '') : ''}"></div>
+          <div class="field"><label>Last Name</label><input type="text" id="st-parent-last" value="${existing ? escapeHtml(existing.parent_last_name || '') : ''}"></div>
+        </div>
+        <div class="name-row">
+          <div class="field"><label>Phone</label><input type="text" id="st-parent-phone" value="${existing ? escapeHtml(existing.parent_phone || '') : ''}"></div>
+          <div class="field"><label>Secondary Phone</label><input type="text" id="st-parent-phone-2" value="${existing ? escapeHtml(existing.parent_phone_2 || '') : ''}"></div>
+          <div class="field"><label>Email</label><input type="email" id="st-parent-email" value="${existing ? escapeHtml(existing.parent_email || '') : ''}"></div>
+        </div>
+        <div class="field"><label>Address</label><input type="text" id="st-parent-address" value="${existing ? escapeHtml(existing.parent_address || '') : ''}"></div>
+        <div class="name-row">
+          <div class="field"><label>City</label><input type="text" id="st-parent-city" value="${existing ? escapeHtml(existing.parent_city || '') : ''}"></div>
+          <div class="field" style="flex:0 1 100px;"><label>State</label><input type="text" id="st-parent-state" maxlength="2" value="${existing ? escapeHtml(existing.parent_state || '') : ''}"></div>
+          <div class="field" style="flex:0 1 130px;"><label>Zip</label><input type="text" id="st-parent-zip" maxlength="10" value="${existing ? escapeHtml(existing.parent_zip || '') : ''}"></div>
+        </div>
+        ${isYouthLeader ? consentSectionHtml(existing) : ''}`;
+      setModalFooter([
+        { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+        { label: existing ? 'Save Changes' : 'Add Student', className: 'btn btn-gold', onClick: () => submitStudentForm(existing) }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+      const viewBtn = document.getElementById('view-consent-file-btn');
+      if (viewBtn) viewBtn.addEventListener('click', async () => {
+        const path = existing.__consent.form_file_path;
+        const { data, error } = await supabaseClient.storage.from('consent-forms').createSignedUrl(path, 300);
+        if (error) { adminAlert('Could not open the attached form: ' + error.message, 'Could not open'); return; }
+        window.open(data.signedUrl, '_blank');
+      });
+    }
+
+    async function submitStudentForm(existing) {
+      const firstName = document.getElementById('st-first').value.trim();
+      const lastName = document.getElementById('st-last').value.trim();
+      const errorBox = document.getElementById('student-error');
+      errorBox.classList.remove('visible');
+      if (!firstName || !lastName) {
+        errorBox.textContent = 'First and last name are required.';
+        errorBox.classList.add('visible');
+        return;
+      }
+      const birthdate = document.getElementById('st-birthdate').value || null;
+      const parentFirstName = document.getElementById('st-parent-first').value.trim();
+      const parentLastName = document.getElementById('st-parent-last').value.trim();
+      const parentPhone = formatPhone(document.getElementById('st-parent-phone').value.trim());
+      const parentEmail = document.getElementById('st-parent-email').value.trim();
+      const parentAddress = document.getElementById('st-parent-address').value.trim();
+      const parentCity = document.getElementById('st-parent-city').value.trim();
+      const parentState = document.getElementById('st-parent-state').value.trim();
+      const parentZip = document.getElementById('st-parent-zip').value.trim();
+
+      // Same household find-or-create the public New Student form already does — a student
+      // added here should link up to an existing congregant family the same way, or create one
+      // (parent as head, student added to that family's own child list) if there isn't one yet.
+      // A student who is already linked to a household keeps that link when edited — the match only
+      // runs for a student with no household yet (a new one, or one never matched), so editing a grade
+      // or a note never re-asks the question or risks creating a second household.
+      const familyId = (existing && existing.family_id) ? existing.family_id : await findOrCreateHousehold(
+        { firstName: parentFirstName, lastName: parentLastName, phone: parentPhone, email: parentEmail, address: parentAddress, city: parentCity, state: parentState, zip: parentZip },
+        { firstName, lastName, birthdate }
+      );
+
+      const corePayload = {
+        first_name: firstName, last_name: lastName, birthdate,
+        phone: formatPhone(document.getElementById('st-phone').value.trim()) || null,
+        email: document.getElementById('st-email').value.trim() || null,
+        school: document.getElementById('st-school').value.trim() || null,
+        family_id: familyId || (existing ? existing.family_id : null),
+        // Whichever way the household question just got resolved (matched, linked, or a fresh
+        // one created), a staff member was right here to decide it — this old flag from a public
+        // signup nobody confirmed no longer applies.
+        possible_duplicate_family_id: null,
+        parent_first_name: parentFirstName || null,
+        parent_last_name: parentLastName || null,
+        parent_phone: parentPhone || null,
+        parent_phone_2: formatPhone(document.getElementById('st-parent-phone-2').value.trim()) || null,
+        parent_email: parentEmail || null,
+        parent_address: parentAddress || null,
+        parent_city: parentCity || null,
+        parent_state: parentState || null,
+        parent_zip: parentZip || null
+      };
+      let studentId = existing ? existing.id : null;
+      if (existing) {
+        const { error } = await supabaseClient.from('youth_students').update(corePayload).eq('id', existing.id);
+        if (error) { errorBox.textContent = error.message; errorBox.classList.add('visible'); return; }
+      } else {
+        const { data, error } = await supabaseClient.from('youth_students').insert(corePayload).select().single();
+        if (error) { errorBox.textContent = error.message; errorBox.classList.add('visible'); return; }
+        studentId = data.id;
+      }
+      if (isYouthLeader) {
+        const gradeEntered = document.getElementById('st-grade').value.trim() || null;
+        const detailsPayload = { grade: gradeEntered, grade_year: gradeEntered ? schoolYearStart() : null, notes: document.getElementById('st-notes').value.trim() || null };
+        if (existing && existing.__details) await supabaseClient.from('youth_student_details').update(Object.assign({ updated_at: new Date().toISOString() }, detailsPayload)).eq('student_id', studentId);
+        else await supabaseClient.from('youth_student_details').insert(Object.assign({ student_id: studentId }, detailsPayload));
+
+        // Consent: a new history row only when something actually changed here (toggles, who
+        // signed, or a newly-attached file) — same "never overwrite the last one" rule the rest
+        // of consent already follows. An unchanged edit (just fixing a phone number, say) leaves
+        // the existing consent record alone.
+        const consent = existing ? existing.__consent : null;
+        const photosChecked = document.getElementById('st-consent-photos').checked;
+        const videoChecked = document.getElementById('st-consent-video').checked;
+        const signedBy = document.getElementById('st-consent-signed-by').value.trim();
+        const newFile = document.getElementById('st-consent-file').files[0];
+        const changed = consent
+          ? (photosChecked !== !!consent.identifiable_photos || videoChecked !== !!consent.identifiable_video || signedBy !== (consent.signature_name || '') || newFile)
+          : (photosChecked || videoChecked || signedBy || newFile);
+
+        if (changed) {
+          let formFilePath = consent ? consent.form_file_path : null;
+          let formFileName = consent ? consent.form_file_name : null;
+          if (newFile) {
+            const ext = newFile.name.includes('.') ? newFile.name.split('.').pop() : 'dat';
+            const path = `${studentId}/${Date.now()}.${ext}`;
+            const { error: upErr } = await supabaseClient.storage.from('consent-forms').upload(path, newFile, { contentType: newFile.type });
+            if (upErr) { errorBox.textContent = 'Could not upload the consent form: ' + upErr.message; errorBox.classList.add('visible'); return; }
+            formFilePath = path; formFileName = newFile.name;
+          }
+          const { data: termsRow } = await supabaseClient.from('youth_consent_terms').select('version').single();
+          await supabaseClient.from('youth_consents').insert({
+            student_id: studentId, identifiable_photos: photosChecked, identifiable_video: videoChecked,
+            signature_name: signedBy || '(recorded by staff)', terms_version: (termsRow && termsRow.version) || 'v1',
+            form_file_path: formFilePath, form_file_name: formFileName
+          });
+        }
+      }
+      logActivity(existing ? 'congregant_edit' : 'congregant_add', `${firstName} ${lastName} (Youth)`);
+      closeModal();
+      await loadStudents();
+      renderRoster();
+    }
+
+    function openRemoveStudentModal(student) {
+      document.getElementById('modal-title').textContent = 'Remove Student';
+      document.getElementById('modal-subtitle').textContent = '';
+      document.getElementById('modal-body').innerHTML = `<p style="font-size:14px; color:var(--text-dark); line-height:1.6;">Remove <strong>${escapeHtml(student.first_name)} ${escapeHtml(student.last_name)}</strong>? This also removes their attendance history and consent records. This can't be undone.</p>`;
+      setModalFooter([
+        { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+        { label: 'Remove', className: 'btn btn-gold', onClick: async () => {
+          await supabaseClient.from('youth_students').delete().eq('id', student.id);
+          logActivity('congregant_edit', `Removed ${student.first_name} ${student.last_name} (Youth)`);
+          closeModal();
+          await loadStudents();
+          renderRoster();
+        } }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    function pfItem(label, value, wide) {
+      return '<div class="pf-item' + (wide ? ' wide' : '') + '"><span class="pf-label">' + label + '</span><span class="pf-value">' + (value || '—') + '</span></div>';
+    }
+    function ageOf(dateStr) {
+      if (!dateStr) return null;
+      const b = new Date(dateStr + 'T00:00:00'), t = new Date();
+      let a = t.getFullYear() - b.getFullYear();
+      if (t.getMonth() < b.getMonth() || (t.getMonth() === b.getMonth() && t.getDate() < b.getDate())) a--;
+      return a;
+    }
+
+    async function openPortfolioModal(s) {
+      await backgroundReady; // attendance loads in the background
+      const grade = isYouthLeader && s.__details && s.__details.grade ? effectiveGrade(s.__details.grade, s.__details.grade_year) : '';
+      const age = ageOf(s.birthdate);
+      const parentName = [s.parent_first_name, s.parent_last_name].filter(Boolean).join(' ');
+      const address = [s.parent_address, [s.parent_city, s.parent_state, s.parent_zip].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+      const attended = nights.filter(n => (attendanceByNight[n.id] || []).some(a => a.student_id === s.id));
+      let consentHtml = '';
+      if (isYouthLeader) {
+        const c = s.__consent, st = consentStatus(c);
+        const badges = st.parts ? st.parts.map(p => `<span class="consent-badge ${p.cls}">${p.label}</span>`).join('') : `<span class="consent-badge ${st.cls}">${st.label}</span>`;
+        consentHtml = `<div class="pf-section"><div class="pf-title">Photo &amp; Video Consent</div>
+          <div class="pf-badges">${badges}</div>
+          ${c ? `<div style="margin-top:8px; font-size:13px; color:var(--text-muted);">Signed by ${escapeHtml(c.signature_name || '—')} on ${formatDateOnly(c.signed_at)}${c.revoked_at ? ' — <strong style="color:var(--danger);">Revoked</strong>' : ''}</div>` : ''}
+          ${c && c.form_file_path ? '<button type="button" class="btn btn-outline" id="pf-view-form" style="font-size:12px; padding:6px 12px; margin-top:8px;">View Attached Form</button>' : ''}
+        </div>`;
+      }
+      document.getElementById('modal-title').textContent = s.first_name + ' ' + s.last_name;
+      document.getElementById('modal-subtitle').textContent = [grade ? 'Grade ' + grade : '', s.school || ''].filter(Boolean).join(' · ');
+      document.getElementById('modal-body').innerHTML = `<div class="pf">
+        <div class="pf-section"><div class="pf-title">Student</div><div class="pf-grid">
+          ${pfItem('Birthday', s.birthdate ? formatDateOnly(s.birthdate) + (age !== null ? ' · Age ' + age : '') : '')}
+          ${pfItem('Grade', escapeHtml(grade))}
+          ${pfItem('School', escapeHtml(s.school || ''))}
+          ${pfItem('Student Phone', escapeHtml(s.phone || ''))}
+          ${pfItem('Student Email', escapeHtml(s.email || ''), true)}
+        </div></div>
+        <div class="pf-section"><div class="pf-title">Parent / Guardian</div><div class="pf-grid">
+          ${pfItem('Name', escapeHtml(parentName))}
+          ${pfItem('Parent Phone', escapeHtml(s.parent_phone || ''))}
+          ${pfItem('Parent Phone 2', escapeHtml(s.parent_phone_2 || ''))}
+          ${pfItem('Parent Email', escapeHtml(s.parent_email || ''))}
+          ${pfItem('Address', escapeHtml(address), true)}
+        </div></div>
+        ${consentHtml}
+        ${isYouthLeader && s.__details && s.__details.notes ? `<div class="pf-section"><div class="pf-title">Notes</div><div>${escapeHtml(s.__details.notes)}</div></div>` : ''}
+        <div class="pf-section"><div class="pf-title">Attendance</div>
+          <div>${attended.length} ${attended.length === 1 ? 'night' : 'nights'} attended</div>
+          ${attended.length ? `<ul class="pf-nights">${attended.slice(0, 5).map(n => '<li>' + formatDateOnly(n.occurred_at) + ' — ' + escapeHtml(n.location_name_snapshot || '') + '</li>').join('')}</ul>` : ''}
+        </div>
+      </div>`;
+      const buttons = [{ label: 'Close', className: 'btn btn-outline', onClick: closeModal }];
+      if (s.family_id) buttons.push({ label: 'View Household', className: 'btn btn-outline', onClick: () => { window.location.href = 'congregants?family=' + s.family_id; } });
+      buttons.push({ label: 'Edit', className: 'btn btn-gold', onClick: () => openStudentModal(s) });
+      setModalFooter(buttons);
+      document.getElementById('modal-backdrop').classList.add('open');
+      const formBtn = document.getElementById('pf-view-form');
+      if (formBtn) formBtn.addEventListener('click', async () => {
+        const { data, error } = await supabaseClient.storage.from('consent-forms').createSignedUrl(s.__consent.form_file_path, 300);
+        if (error) { adminAlert('Could not open the attached form: ' + error.message, 'Could not open'); return; }
+        window.open(data.signedUrl, '_blank');
+      });
+    }
+
+    document.getElementById('roster-grid').addEventListener('click', (e) => {
+      const viewBtn = e.target.closest('[data-action="view-student"]');
+      if (viewBtn) { const s = students.find(x => x.id === viewBtn.dataset.id); if (s) openPortfolioModal(s); return; }
+      const editBtn = e.target.closest('[data-action="edit-student"]');
+      if (editBtn) { const s = students.find(x => x.id === editBtn.dataset.id); if (s) openStudentModal(s); return; }
+      const removeBtn = e.target.closest('[data-action="remove-student"]');
+      if (removeBtn) { const s = students.find(x => x.id === removeBtn.dataset.id); if (s) openRemoveStudentModal(s); }
+    });
+    document.getElementById('add-student-btn').addEventListener('click', () => openStudentModal(null));
+    document.getElementById('roster-search').addEventListener('input', (e) => { searchTerm = e.target.value; renderRoster(); });
+
+    // ---- Attendance tab ----
+    function renderNights() {
+      const list = document.getElementById('nights-list');
+      if (!nights.length) { list.innerHTML = '<div class="empty-panel">No check-in sessions yet.</div>'; return; }
+      list.innerHTML = nights.map(n => {
+        const att = attendanceByNight[n.id] || [];
+        return `
+        <div class="night-row" data-id="${n.id}">
+          <div class="night-row-head">
+            <div>
+              <div class="night-title">${formatDateOnly(n.occurred_at)} — ${escapeHtml(n.location_name_snapshot)}</div>
+              <div class="night-sub">Leader: ${escapeHtml(n.leader_name_snapshot)}</div>
+              ${n.notes ? `<div class="night-sub">Notes: ${escapeHtml(n.notes)}</div>` : ''}
+            </div>
+            <div class="night-count">${att.length} checked in</div>
+          </div>
+          <div class="attendee-list">
+            ${att.map(a => `<div class="attendee-row"><span>${escapeHtml(a.youth_students ? a.youth_students.first_name + ' ' + a.youth_students.last_name : '(removed student)')}</span><span>${formatDateTime(a.checked_in_at)}</span></div>`).join('') || '<em>No one checked in.</em>'}
+          </div>
+        </div>`;
+      }).join('');
+      document.querySelectorAll('.night-row').forEach(row => {
+        row.addEventListener('click', () => row.classList.toggle('open'));
+      });
+    }
+
+    // The open tab lives in the page address (#attendance) so a refresh stays on the same tab.
+    function showTab(name) {
+      currentTab = name === 'attendance' ? 'attendance' : 'roster';
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === currentTab));
+      document.getElementById('tab-roster').style.display = currentTab === 'roster' ? '' : 'none';
+      document.getElementById('tab-attendance').style.display = currentTab === 'attendance' ? '' : 'none';
+    }
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        showTab(btn.dataset.tab);
+        history.replaceState(null, '', currentTab === 'attendance' ? '#attendance' : location.pathname + location.search);
+      });
+    });
+    if (location.hash === '#attendance') showTab('attendance');
+
+    // ---- Leaders & Locations management ----
+    function renderManageListsModal() {
+      document.getElementById('modal-title').textContent = 'Leaders & Locations';
+      document.getElementById('modal-subtitle').textContent = 'Saved lists used when starting a check-in session';
+      document.getElementById('modal-box').classList.add('wide');
+      document.getElementById('modal-body').innerHTML = `
+        <div class="name-row">
+          <div style="flex:1;">
+            <div class="modal-section-title">Leaders</div>
+            <ul class="leader-loc-list" id="leaders-ul">${leaders.map(l => `<li><span>${escapeHtml(l.name)}</span>${armedDeleteLeaderId === l.id
+              ? `<span class="confirm-delete-inline">Delete? <button type="button" class="small-btn danger" data-confirm-delete-leader="${l.id}">Yes</button><button type="button" class="small-btn" data-cancel-delete-leader="${l.id}">Cancel</button></span>`
+              : `<button type="button" class="small-btn" data-delete-leader="${l.id}">Delete</button>`}</li>`).join('') || '<li>None yet</li>'}</ul>
+            <div class="inline-add-row"><input type="text" id="new-leader-input" placeholder="Add a leader..."><button type="button" class="btn btn-outline" id="add-leader-btn" style="padding:8px 14px; font-size:13px;">Add</button></div>
+          </div>
+          <div style="flex:1;">
+            <div class="modal-section-title">Locations</div>
+            <ul class="leader-loc-list" id="locations-ul">${locations.map(l => `<li><span>${escapeHtml(l.name)}</span>${armedDeleteLocationId === l.id
+              ? `<span class="confirm-delete-inline">Delete? <button type="button" class="small-btn danger" data-confirm-delete-location="${l.id}">Yes</button><button type="button" class="small-btn" data-cancel-delete-location="${l.id}">Cancel</button></span>`
+              : `<button type="button" class="small-btn" data-delete-location="${l.id}">Delete</button>`}</li>`).join('') || '<li>None yet</li>'}</ul>
+            <div class="inline-add-row"><input type="text" id="new-location-input" placeholder="Add a location..."><button type="button" class="btn btn-outline" id="add-location-btn" style="padding:8px 14px; font-size:13px;">Add</button></div>
+          </div>
+        </div>`;
+      setModalFooter([{ label: 'Done', className: 'btn btn-gold', onClick: closeModal }]);
+      document.getElementById('modal-backdrop').classList.add('open');
+
+      document.getElementById('add-leader-btn').addEventListener('click', async () => {
+        const input = document.getElementById('new-leader-input');
+        if (!input.value.trim()) return;
+        await supabaseClient.from('youth_leaders').insert({ name: input.value.trim() });
+        await loadLeadersAndLocations();
+        renderManageListsModal();
+      });
+      document.getElementById('add-location-btn').addEventListener('click', async () => {
+        const input = document.getElementById('new-location-input');
+        if (!input.value.trim()) return;
+        await supabaseClient.from('youth_locations').insert({ name: input.value.trim() });
+        await loadLeadersAndLocations();
+        renderManageListsModal();
+      });
+      document.querySelectorAll('[data-delete-leader]').forEach(btn => btn.addEventListener('click', () => {
+        armedDeleteLeaderId = btn.dataset.deleteLeader;
+        renderManageListsModal();
+      }));
+      document.querySelectorAll('[data-cancel-delete-leader]').forEach(btn => btn.addEventListener('click', () => {
+        armedDeleteLeaderId = null;
+        renderManageListsModal();
+      }));
+      document.querySelectorAll('[data-confirm-delete-leader]').forEach(btn => btn.addEventListener('click', async () => {
+        await supabaseClient.from('youth_leaders').delete().eq('id', btn.dataset.confirmDeleteLeader);
+        armedDeleteLeaderId = null;
+        await loadLeadersAndLocations();
+        renderManageListsModal();
+      }));
+      document.querySelectorAll('[data-delete-location]').forEach(btn => btn.addEventListener('click', () => {
+        armedDeleteLocationId = btn.dataset.deleteLocation;
+        renderManageListsModal();
+      }));
+      document.querySelectorAll('[data-cancel-delete-location]').forEach(btn => btn.addEventListener('click', () => {
+        armedDeleteLocationId = null;
+        renderManageListsModal();
+      }));
+      document.querySelectorAll('[data-confirm-delete-location]').forEach(btn => btn.addEventListener('click', async () => {
+        await supabaseClient.from('youth_locations').delete().eq('id', btn.dataset.confirmDeleteLocation);
+        armedDeleteLocationId = null;
+        await loadLeadersAndLocations();
+        renderManageListsModal();
+      }));
+    }
+    document.getElementById('manage-lists-btn').addEventListener('click', async () => {
+      await backgroundReady;
+      armedDeleteLeaderId = null; armedDeleteLocationId = null; // fresh open should never inherit a stale armed row
+      renderManageListsModal();
+    });
+
+    // ---- Access Check In ----
+    function openAccessCheckInModal() {
+      document.getElementById('modal-title').textContent = 'Start Check-In Session';
+      document.getElementById('modal-subtitle').textContent = '';
+      const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      document.getElementById('modal-body').innerHTML = `
+        <div class="form-error" id="session-error"></div>
+        <div class="field"><label>Date &amp; Time</label><input type="datetime-local" id="session-datetime" value="${now.toISOString().slice(0, 16)}"></div>
+        <div class="field"><label>Youth Leader</label><select id="session-leader">${leaders.map(l => `<option value="${l.id}">${escapeHtml(l.name)}</option>`).join('')}</select></div>
+        <div class="field"><label>Location</label><select id="session-location">${locations.map(l => `<option value="${l.id}">${escapeHtml(l.name)}</option>`).join('')}</select></div>
+        <div class="field"><label>Notes <span style="font-weight:normal; color:var(--text-muted);">(optional)</span></label><textarea id="session-notes" style="min-height:70px; font-family:inherit; font-size:14px;" placeholder="e.g. Fall Kickoff, theme, special guests, anything worth remembering"></textarea></div>`;
+      setModalFooter([
+        { label: 'Cancel', className: 'btn btn-outline', onClick: closeModal },
+        { label: 'Start Session', className: 'btn btn-gold', onClick: startCheckInSession }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+    async function startCheckInSession() {
+      const errorBox = document.getElementById('session-error');
+      const leaderSel = document.getElementById('session-leader');
+      const locationSel = document.getElementById('session-location');
+      if (!leaderSel.value || !locationSel.value) {
+        errorBox.textContent = 'Add at least one leader and one location first (see "Leaders & Locations").';
+        errorBox.classList.add('visible');
+        return;
+      }
+      const leader = leaders.find(l => l.id === leaderSel.value);
+      const location = locations.find(l => l.id === locationSel.value);
+      const session = getSession();
+      const dtVal = document.getElementById('session-datetime').value;
+      const { data, error } = await supabaseClient.from('youth_nights').insert({
+        occurred_at: dtVal ? new Date(dtVal).toISOString() : new Date().toISOString(),
+        leader_id: leader.id, leader_name_snapshot: leader.name,
+        location_id: location.id, location_name_snapshot: location.name,
+        started_by: (session && session.name) || 'Unknown',
+        notes: document.getElementById('session-notes').value.trim() || null
+      }).select().single();
+      if (error) { errorBox.textContent = error.message; errorBox.classList.add('visible'); return; }
+      logActivity('congregant_add', `Started Youth Night — ${location.name}, led by ${leader.name}`);
+      window.location.href = `checkin?night=${data.id}`;
+    }
+    document.getElementById('access-checkin-btn').addEventListener('click', async () => { await backgroundReady; openAccessCheckInModal(); });
+
+    // Kick off every read right now (before loadSidebar() finishes), like Congregants does.
+    prefetchedStudents = fetchStudentRows();
+    backgroundReady = Promise.all([loadLeadersAndLocations(), loadNights()]).then(renderNights);
+
+    loadSidebar().then(async () => {
+      if (!document.getElementById('roster-grid')) return;
+      const session = getSession();
+      isYouthLeader = !!session && hasPermission(session, 'youth'); // one tier now — anyone with Youth sees everything
+
+      document.getElementById('roster-grid').innerHTML = '<div class="empty-panel" style="grid-column:1/-1;">Loading students…</div>';
+      await loadStudents();
+      renderRoster();
+
+      // Arriving from the Congregants page's own "Youth" badge on a child row — scroll to and
+      // highlight that student's card, same idea as the reverse "View Household" link.
+      const wantedStudentId = new URLSearchParams(location.search).get('student');
+      if (wantedStudentId) {
+        const card = document.querySelector(`.student-card[data-id="${wantedStudentId}"]`);
+        if (card) { card.scrollIntoView({ behavior: 'smooth', block: 'center' }); card.style.outline = '2px solid var(--gold)'; }
+      }
+    });
   </script>
 </body>
 </html>

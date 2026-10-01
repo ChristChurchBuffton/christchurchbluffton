@@ -24,6 +24,16 @@
   to = "/.netlify/functions/stay-updated"
   status = 200
 
+[[redirects]]
+  from = "/api/household-intake"
+  to = "/.netlify/functions/household-intake"
+  status = 200
+
+[[redirects]]
+  from = "/api/new-student-signup"
+  to = "/.netlify/functions/new-student-signup"
+  status = 200
+
 # The bare folder path (no photo filename) has nothing to show — send it to the
 # normal 404 page instead of letting the proxy rule below hit Supabase with an empty
 # path. Must come before the wildcard rule; Netlify uses the first matching redirect.

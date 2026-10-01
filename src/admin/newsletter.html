@@ -567,6 +567,19 @@
   .form-msg.visible { display: block; }
 
   /* ---- Preview ---- */
+  .live-url-banner {
+    background: rgba(177,67,67,0.08);
+    border: 1px solid rgba(177,67,67,0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: var(--text-dark);
+  }
+  .live-url-banner strong { color: var(--danger); }
+  .main > .live-url-banner { margin: 16px 32px 0; }
+  @media (max-width: 768px) { .main > .live-url-banner { margin: 12px 16px 0; } }
 </style>
 </head>
 <body data-page="newsletter">
@@ -618,7 +631,7 @@
         Newsletter
         <span class="nav-note">Disabled — use a PC</span>
       </a>
-      <a href="notifications" data-page="notifications" data-site-admin-only="true">
+      <a href="notifications" data-page="notifications" data-permission="notifications">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         Notification Settings
       </a>
@@ -678,6 +691,9 @@
           <button type="button" class="btn btn-outline" id="save-draft-btn">Save Draft</button>
           <button type="button" class="btn btn-gold" id="send-newsletter-btn" disabled title="Not connected yet — sending will be enabled once this panel is wired up to Resend">Send Newsletter</button>
         </div>
+      </div>
+      <div class="live-url-banner">
+        <strong>Work In Progress — Not Live</strong>
       </div>
       <div class="content" id="page-body">
         <div class="send-hub-bar" id="send-hub-bar">

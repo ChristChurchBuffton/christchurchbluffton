@@ -37,6 +37,16 @@ All three public form functions (`contact.js`, `prayer.js`, `stay-updated.js` in
 ## Content Editor mirror maintenance
 Every public page has a matching copy at `src/admin/assets/site-mirror/<page>.html`, used by the admin Content Editor's live preview iframe. **Whenever a public page in `src/` is edited, added, or removed, apply the identical change to its `site-mirror` copy in the same pass** — not a separate cleanup step. Found drift on 2026-09-07 (a missing `@media (max-width:768px)` block in `site-mirror/about.html`, a missing `<wbr>` in `site-mirror/groups.html`'s mailto link) — small, easy-to-miss mismatches from edits that only touched the real page. A structural review/sync audit of every page's mirror against its real counterpart is scoped as the first step of Workflow 4 (`workflow/agent-workflow-specs.md`) before any further Content Editor work.
 
+Run `node admin/check-editor-sync.js` after any change to a public page, the shared header/footer, or the editor's saved records — it checks that the preview copies match, that every saved record still matches its page text, and that every piece of page text and every photo has a record (exit code 1 on problems). It has already caught stale records and wrong-element matches.
+
+## Content Editor — Publish (added 2026-09-28)
+- Editing works only on localhost and the temp site, and only top admins (`site_admin`, Content Editor not turned off) can save — enforced in the database by `can_edit_content()` (migration 0027), not just on screen.
+- **Publish Page** (`src/netlify/functions/publish-content.js`) commits a page's saved text, links and photo swaps to the TEMP repo (`ForgedDigital/christ-church-bluffton`, `main`) in one commit through a GitHub App; Netlify then rebuilds the temp site. It refuses to run on the live domain. The GitHub App env vars (`GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID`, `GITHUB_APP_PRIVATE_KEY`) go on the TEMP Netlify site ONLY — never on Jonathan's.
+- Publish commits to `origin/main` from the server, so `git pull origin main` before your next local commit/push, and before ever pushing to `production`.
+- **Preview Draft** (`preview-content.js`) is a signed 30-minute link showing the page with saved changes applied. The page list shows a count of saved-but-unpublished changes.
+- Photo swaps overwrite the site's file under its existing name (every responsive size); the original bytes are kept once in storage (`content-images/_originals/`) so "Use Original Photo" always works.
+- The text/HTML matching lives in `src/netlify/functions/lib/content-engine.js`. It must skip exactly the areas the editor skips (`NEVER_EDITABLE_SELECTOR` in `content.html` ↔ `NEVER_CLASSES` in the engine) — change them together.
+
 ## SEO / Indexing — GSC Playbook
 - Before launching this site (or any future re-launch) and before any update that touches indexing (URL/slug structure, sitemap, meta tags/canonicals, redirects, robots.txt), follow `Web Design\_GSC Playbook\` — start at its `01-walkthrough.md`. It covers pre-launch readiness checks, the launch-day GSC procedure, post-launch monitoring, and handoff.
 - For deeper/framework-specific indexing troubleshooting, `Web Design\_SEO Playbook\` is the broader reference `_GSC Playbook` points back to.

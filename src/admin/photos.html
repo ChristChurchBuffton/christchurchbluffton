@@ -207,7 +207,7 @@
         Newsletter
         <span class="nav-note">Disabled — use a PC</span>
       </a>
-      <a href="notifications" data-page="notifications" data-site-admin-only="true">
+      <a href="notifications" data-page="notifications" data-permission="notifications">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         Notification Settings
       </a>
@@ -508,12 +508,12 @@
     async function handleFile(file, finalName, category) {
       const { error: uploadError } = await supabaseClient.storage.from('photos').upload(finalName, file);
       if (uploadError) {
-        alert('Could not upload photo: ' + uploadError.message);
+        adminAlert('Could not upload photo: ' + uploadError.message, 'Upload failed');
         return;
       }
       const { error: insertError } = await supabaseClient.from('photos').insert({ filename: finalName, storage_path: finalName, category });
       if (insertError) {
-        alert('Could not save photo record: ' + insertError.message);
+        adminAlert('Could not save photo record: ' + insertError.message, 'Not saved');
         return;
       }
       logActivity('photo_add', finalName);
@@ -618,7 +618,7 @@
         fileInput.value = '';
         if (!file) return;
         if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
-          alert('Please choose a JPG or PNG photo — other file types aren\'t supported here yet (JPG/PNG keep these consistent with email clients like Outlook).');
+          adminAlert('Please choose a JPG or PNG photo — other file types aren\'t supported here yet (JPG/PNG keep these consistent with email clients like Outlook).');
           return;
         }
         const tileHint = document.querySelector('#upload-tile-btn .upload-tile-hint');
@@ -671,7 +671,7 @@
           }
           const { error } = await supabaseClient.from('photos').delete().eq('id', removed.id);
           if (error) {
-            alert('Could not delete photo: ' + error.message);
+            adminAlert('Could not delete photo: ' + error.message, 'Could not delete');
             return;
           }
           logActivity('photo_remove', removed.filename);

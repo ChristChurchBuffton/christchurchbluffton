@@ -46,3 +46,13 @@ archive/
 
 # Local Netlify folder
 .netlify
+
+# Kids' names / photos and live-database backups — never commit (2026-10-01)
+assets/youth/
+assets/church/
+assets/photos/
+workflow/*-backup-*.json
+workflow/consent-import-created-*.json
+
+# Held font work (Lora upgrade) — local only
+workflow/held-fonts/

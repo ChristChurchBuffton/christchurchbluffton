@@ -81,12 +81,34 @@
     font-size: 13px; color: var(--text-dark); line-height: 1.7;
   }
   .family-detail.open { display: block; }
+  /* ---- View household popup ---- */
+  .view-household { font-size: 14px; color: var(--text-dark); line-height: 1.6; }
+  .view-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--border-gray); }
+  .view-label { font-size: 10.5px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 4px; }
+  .view-label-spaced { margin-top: 18px; }
+  .view-value { font-size: 14px; }
+  .view-person { background: var(--lightest-gray, #f6f5f1); border: 1px solid var(--border-gray); border-radius: 10px; padding: 12px 16px; margin-bottom: 10px; }
+  .view-person-name { font-family: Georgia, 'Times New Roman', serif; font-size: 16px; color: var(--navy-blue); margin-bottom: 2px; }
+  .view-person-contact { display: flex; flex-wrap: wrap; gap: 2px 16px; font-size: 13px; color: var(--text-muted); }
+  .view-person-contact .phone-num { white-space: nowrap; }
+  .view-kids { border: 1px solid var(--border-gray); border-radius: 10px; overflow: hidden; }
+  .view-kid { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 16px; border-bottom: 1px solid var(--border-gray); }
+  .view-kid:last-child { border-bottom: none; }
+  .view-kid-name { display: flex; align-items: center; gap: 8px; }
+  .view-kid-bday { font-size: 13px; color: var(--text-muted); text-align: right; }
+  @media (max-width: 480px) { .view-info-grid { grid-template-columns: 1fr; } .view-kid { flex-direction: column; align-items: flex-start; gap: 2px; } .view-kid-bday { text-align: left; } }
   .family-detail .detail-label { font-size: 10.5px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); display: block; margin-top: 10px; }
   .family-detail .detail-label:first-child { margin-top: 0; }
   .family-detail .detail-phone { display: block; white-space: nowrap; }
-  .family-detail .kid-detail-row { display: flex; justify-content: space-between; gap: 10px; }
-  .family-detail .kid-detail-row .kid-name { color: var(--text-dark); }
+  .family-detail .kid-detail-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .family-detail .kid-detail-row .kid-name { color: var(--text-dark); flex: 1; }
   .family-detail .kid-detail-row .kid-bday { color: var(--text-muted); }
+  .youth-link-badge {
+    font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.4px;
+    color: var(--navy-blue); background: rgba(48,59,106,0.08); border-radius: 100px;
+    padding: 2px 9px; text-decoration: none; white-space: nowrap;
+  }
+  .youth-link-badge:hover { background: rgba(48,59,106,0.16); }
 
   .family-card-actions { display: flex; gap: 6px; justify-content: flex-end; padding: 12px 18px; border-top: 1px solid var(--border-gray); }
   .icon-btn {
@@ -106,7 +128,7 @@
   }
   .modal-backdrop.open { display: flex; }
   .modal-box {
-    background: var(--white); border-radius: 14px; width: 100%; max-width: 560px;
+    background: var(--white); border-radius: 14px; width: 100%; max-width: 640px;
     max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 24px 70px rgba(0,0,0,0.35);
   }
   .modal-header { padding: 20px 26px; border-bottom: 1px solid var(--border-gray); display: flex; align-items: center; justify-content: space-between; }
@@ -188,6 +210,7 @@
 
   .form-error { background: rgba(177,67,67,0.08); border: 1px solid rgba(177,67,67,0.3); color: var(--danger); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; }
   .form-error.visible { display: block; }
+
 </style>
 </head>
 <body data-page="congregants" data-permission="congregants">
@@ -239,7 +262,7 @@
         Newsletter
         <span class="nav-note">Disabled — use a PC</span>
       </a>
-      <a href="notifications" data-page="notifications" data-site-admin-only="true">
+      <a href="notifications" data-page="notifications" data-permission="notifications">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         Notification Settings
       </a>
@@ -306,7 +329,9 @@
               <input type="text" id="search-input" placeholder="Name, address, email...">
             </div>
           </div>
-          <div class="count-badge" id="family-count">— families</div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="count-badge" id="family-count">— families</div>
+          </div>
         </div>
 
         <div class="page-width">
@@ -331,29 +356,38 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="js/shared.js"></script>
   <script>
     let families = [];
     let searchTerm = '';
-    let openCardId = null;
 
     function escapeHtml(str) {
       return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     }
 
     // Supabase row (snake_case) -> the camelCase shape every render/modal function below expects.
+    // children now comes from the joined congregant_children rows (migration 0028), not a jsonb
+    // column on this row — each child is a real record with its own id, sorted the same way they
+    // were entered (sort_order). The old jsonb column still exists as children_legacy (a kept
+    // backup, per this project's "never delete, only rename" rule) but nothing here reads it.
     function familyRowToCamel(row) {
+      const kids = (row.congregant_children || []).slice().sort((a, b) => a.sort_order - b.sort_order);
       return {
         id: row.id,
         headFirstName: row.head_first_name,
         headLastName: row.head_last_name,
         headEmail: row.head_email,
         headPhone: row.head_phone,
+        headBirthMonth: row.head_birth_month,
+        headBirthDay: row.head_birth_day,
         spouseFirstName: row.spouse_first_name,
         spouseLastName: row.spouse_last_name,
         spouseEmail: row.spouse_email,
         spousePhone: row.spouse_phone,
-        children: row.children || [],
+        spouseBirthMonth: row.spouse_birth_month,
+        spouseBirthDay: row.spouse_birth_day,
+        children: kids.map(k => ({ id: k.id, firstName: k.first_name, lastName: k.last_name, birthdate: k.birthdate || '' })),
         address: row.address,
         city: row.city,
         state: row.state,
@@ -364,17 +398,22 @@
     }
 
     // Form data (camelCase) -> the snake_case column names congregant_families actually has.
+    // Children are no longer part of this payload — see saveChildren(), which writes them to
+    // their own table as inserts/updates/deletes instead of overwriting one blob column.
     function familyDataToRow(data) {
       return {
         head_first_name: data.headFirstName,
         head_last_name: data.headLastName,
         head_email: data.headEmail || null,
         head_phone: data.headPhone || null,
+        head_birth_month: data.headBirthMonth || null,
+        head_birth_day: data.headBirthDay || null,
         spouse_first_name: data.spouseFirstName || null,
         spouse_last_name: data.spouseLastName || null,
         spouse_email: data.spouseEmail || null,
         spouse_phone: data.spousePhone || null,
-        children: data.children || [],
+        spouse_birth_month: data.spouseBirthMonth || null,
+        spouse_birth_day: data.spouseBirthDay || null,
         address: data.address || null,
         city: data.city || null,
         state: data.state || null,
@@ -384,9 +423,11 @@
     }
 
     async function loadFamilies() {
+      // Embeds each family's real congregant_children rows in one query (PostgREST follows the
+      // foreign key automatically) instead of a second round-trip per family.
       const { data, error } = await supabaseClient
         .from('congregant_families')
-        .select('*')
+        .select('*, congregant_children(*)')
         .order('head_last_name', { ascending: true });
       if (error) {
         console.error('loadFamilies failed:', error.message);
@@ -394,6 +435,19 @@
         return;
       }
       families = (data || []).map(familyRowToCamel);
+    }
+
+    // Cross-links a congregant child to their matching Youth roster entry (same family + name),
+    // so the family card can show a "Youth" badge/link — the reverse of the youth roster's own
+    // "View Household" link. Comes back empty (not an error) for a staff member without the
+    // 'youth' permission, since RLS on youth_students just excludes those rows for them.
+    let youthStudentsByFamilyAndName = {};
+    async function loadYouthLinks() {
+      const { data } = await supabaseClient.from('youth_students').select('id,first_name,last_name,family_id').not('family_id', 'is', null);
+      youthStudentsByFamilyAndName = {};
+      (data || []).forEach(s => {
+        youthStudentsByFamilyAndName[`${s.family_id}|${s.first_name}|${s.last_name}`] = s.id;
+      });
     }
 
     // Age as of today, from a YYYY-MM-DD birthdate — accounts for whether this year's birthday has happened yet.
@@ -410,6 +464,14 @@
     function formatDate(dateStr) {
       if (!dateStr) return '—';
       return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    // Adults only get month/day (no birth year on file) — a plain date can't represent that,
+    // so this formats the two small int columns directly instead of reusing formatDate().
+    function formatMonthDay(month, day) {
+      if (!month || !day) return '—';
+      return `${MONTH_NAMES[month - 1]} ${day}`;
     }
 
     function familySurname(f) { return f.headLastName || ''; }
@@ -449,8 +511,6 @@
         const kidsLine = (f.children && f.children.length)
           ? f.children.map(k => `${escapeHtml(k.firstName)} (${ageFromBirthdate(k.birthdate)})`).join(', ')
           : 'No children on file';
-        const isOpen = openCardId === f.id;
-
         return `
         <div class="card family-card" data-id="${f.id}">
           <div class="family-card-head">
@@ -466,20 +526,9 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>${escapeHtml(f.headEmail || '—')}<br>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span class="phone-num">${escapeHtml(f.headPhone || '—')}</span>${f.spousePhone ? ` &middot; <span class="phone-num">${escapeHtml(f.spousePhone)}</span>` : ''}
             </div>
-            <div class="family-detail ${isOpen ? 'open' : ''}" id="detail-${f.id}">
-              <span class="detail-label">Address</span>
-              ${formatAddress(f)}
-              <span class="detail-label">Attending Since</span>
-              ${formatDate(f.attendingSince)}
-              <span class="detail-label">Head of Household</span>
-              ${escapeHtml(f.headFirstName)} ${escapeHtml(f.headLastName)} — ${escapeHtml(f.headEmail || '—')}
-              <div class="detail-phone">${escapeHtml(f.headPhone || '—')}</div>
-              ${f.spouseFirstName ? `<span class="detail-label">Spouse</span>${escapeHtml(f.spouseFirstName)} ${escapeHtml(f.spouseLastName)} — ${escapeHtml(f.spouseEmail || '—')}<div class="detail-phone">${escapeHtml(f.spousePhone || '—')}</div>` : ''}
-              ${(f.children && f.children.length) ? `<span class="detail-label">Children — Birthdates</span>${f.children.map(k => `<div class="kid-detail-row"><span class="kid-name">${escapeHtml(k.firstName)} ${escapeHtml(k.lastName)}</span><span class="kid-bday">${formatDate(k.birthdate)}</span></div>`).join('')}` : ''}
-            </div>
           </div>
           <div class="family-card-actions">
-            <button type="button" class="icon-btn ${isOpen ? 'active' : ''}" data-action="toggle" data-id="${f.id}" title="View details" aria-label="View details">
+            <button type="button" class="icon-btn" data-action="toggle" data-id="${f.id}" title="View details" aria-label="View details">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
             <button type="button" class="icon-btn" data-action="edit" data-id="${f.id}" title="Edit" aria-label="Edit">
@@ -493,7 +542,56 @@
       }).join('');
     }
 
-    function closeModal() { document.getElementById('modal-backdrop').classList.remove('open'); }
+    function viewPersonHtml(label, first, last, email, phone, bdayMonth, bdayDay) {
+      const contact = [
+        email ? `<span>${escapeHtml(email)}</span>` : '',
+        phone ? `<span class="phone-num">${escapeHtml(phone)}</span>` : '',
+        bdayMonth ? `<span>Birthday: ${formatMonthDay(bdayMonth, bdayDay)}</span>` : ''
+      ].filter(Boolean).join('');
+      return `
+        <div class="view-person">
+          <div class="view-label">${label}</div>
+          <div class="view-person-name">${escapeHtml(first)} ${escapeHtml(last)}</div>
+          <div class="view-person-contact">${contact || '<span>No contact info on file</span>'}</div>
+        </div>`;
+    }
+
+    function familyDetailHtml(f) {
+      const kids = (f.children && f.children.length) ? `
+        <div class="view-label view-label-spaced">Children</div>
+        <div class="view-kids">${f.children.map(k => {
+          const youthId = youthStudentsByFamilyAndName[`${f.id}|${k.firstName}|${k.lastName}`];
+          return `<div class="view-kid">
+            <span class="view-kid-name">${escapeHtml(k.firstName)} ${escapeHtml(k.lastName)}${youthId ? ` <a href="youth?student=${youthId}" class="youth-link-badge">Youth</a>` : ''}</span>
+            <span class="view-kid-bday">${k.birthdate ? `${formatDate(k.birthdate)} &middot; Age ${ageFromBirthdate(k.birthdate)}` : '—'}</span>
+          </div>`;
+        }).join('')}</div>` : '';
+      return `
+        <div class="view-info-grid">
+          <div><div class="view-label">Address</div><div class="view-value">${formatAddress(f)}</div></div>
+          <div><div class="view-label">Attending Since</div><div class="view-value">${formatDate(f.attendingSince)}</div></div>
+        </div>
+        ${viewPersonHtml('Head of Household', f.headFirstName, f.headLastName, f.headEmail, f.headPhone, f.headBirthMonth, f.headBirthDay)}
+        ${f.spouseFirstName ? viewPersonHtml('Spouse', f.spouseFirstName, f.spouseLastName, f.spouseEmail, f.spousePhone, f.spouseBirthMonth, f.spouseBirthDay) : ''}
+        ${kids}
+      `;
+    }
+
+    function openViewModal(f) {
+      document.getElementById('modal-title').textContent = `${f.headLastName}, ${f.headFirstName}`;
+      document.getElementById('modal-subtitle').textContent = f.spouseFirstName ? `Spouse: ${f.spouseFirstName} ${f.spouseLastName}` : '';
+      document.getElementById('modal-body').innerHTML = `<div class="view-household">${familyDetailHtml(f)}</div>`;
+      setModalFooter([
+        { label: 'Close', className: 'btn btn-outline', onClick: closeModal },
+        { label: 'Edit', className: 'btn btn-gold', onClick: () => openFamilyModal(f) }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-backdrop').classList.remove('open');
+      document.querySelectorAll('.family-card').forEach(c => { c.style.outline = ''; });
+    }
     function setModalFooter(buttons) {
       const footer = document.getElementById('modal-footer');
       footer.innerHTML = '';
@@ -509,14 +607,38 @@
 
     function kidRowHtml(kid, index) {
       const k = kid || { firstName: '', lastName: '', birthdate: '' };
+      // data-kid-id carries the real congregant_children row id (blank for a not-yet-saved child)
+      // so saveChildren() can tell an edited existing row apart from a brand-new one.
       return `
-        <div class="kid-row" data-kid-index="${index}">
+        <div class="kid-row" data-kid-index="${index}" data-kid-id="${k.id || ''}">
           <div class="field kid-first"><input type="text" class="kid-first-input" placeholder="First name" value="${escapeHtml(k.firstName)}"></div>
           <div class="field kid-last"><input type="text" class="kid-last-input" placeholder="Last name" value="${escapeHtml(k.lastName)}"></div>
           <div class="field kid-bday"><input type="date" class="kid-bday-input" value="${k.birthdate || ''}"></div>
           <button type="button" class="remove-kid-btn" data-remove-kid="${index}" title="Remove child" aria-label="Remove child">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
           </button>
+        </div>`;
+    }
+
+    // A blank-first "—" option plus Jan–Dec, so no birthday on file renders as genuinely empty
+    // rather than defaulting to January. `selected` compares as a number since the month/day
+    // columns come back from Supabase as numbers, not strings.
+    function monthOptionsHtml(selected) {
+      return '<option value="">—</option>' + MONTH_NAMES.map((name, i) =>
+        `<option value="${i + 1}"${selected === i + 1 ? ' selected' : ''}>${name}</option>`).join('');
+    }
+    function dayOptionsHtml(selected) {
+      let out = '<option value="">—</option>';
+      for (let d = 1; d <= 31; d++) out += `<option value="${d}"${selected === d ? ' selected' : ''}>${d}</option>`;
+      return out;
+    }
+    function birthdayFieldsHtml(prefix, month, day) {
+      return `
+        <div class="field"><label>Birthday</label>
+          <div class="name-row" style="gap:8px;">
+            <select id="${prefix}-birth-month">${monthOptionsHtml(month)}</select>
+            <select id="${prefix}-birth-day">${dayOptionsHtml(day)}</select>
+          </div>
         </div>`;
     }
 
@@ -535,48 +657,66 @@
     }
 
     let modalChildren = [];
+    // Snapshot of every child id this family had when the modal opened — taken once, held fixed
+    // for the whole editing session. modalChildren itself is NOT a safe source for this: the
+    // Remove button splices an entry out of modalChildren entirely, so by save time an id the
+    // person removed is already gone from that array — diffing against it there would never
+    // detect a removal at all (found while testing: deleting two children saved as if nothing
+    // had been removed).
+    let modalOriginalChildIds = [];
 
-    function openFamilyModal(existing) {
-      modalChildren = existing ? existing.children.map(k => ({ ...k })) : [];
+    // `prefill`, if given, is what the FIELDS show (e.g. a pending submission's info merged
+    // over the existing record) — `existing` still decides whether this saves as an update to a
+    // real family (and which one) or a brand-new insert. The two are the same object for a plain
+    // Edit; they differ only for the "Review & Merge" flow below.
+    function openFamilyModal(existing, prefill) {
+      const display = prefill || existing;
+      modalChildren = display ? display.children.map(k => ({ ...k })) : [];
+      // Merge prefill: a member carried over from the submission has no real id yet (it isn't a
+      // saved row), so it must be treated as new on save, same as clicking "+ Add Child" would.
+      if (prefill) modalOriginalChildIds = (existing.children || []).filter(k => k.id).map(k => k.id);
+      else modalOriginalChildIds = modalChildren.filter(k => k.id).map(k => k.id);
       document.getElementById('modal-title').textContent = existing ? 'Edit Family' : 'Add Family';
-      document.getElementById('modal-subtitle').textContent = '';
+      document.getElementById('modal-subtitle').textContent = prefill ? 'Reviewing a pending submission — check everything before saving' : '';
       document.getElementById('modal-body').innerHTML = `
         <div class="form-error" id="fam-error"></div>
 
         <div class="modal-section-title">Head of Household</div>
         <div class="name-row">
-          <div class="field"><label>First Name<span class="required-mark">*</span></label><input type="text" id="head-first" placeholder="John" value="${existing ? escapeHtml(existing.headFirstName) : ''}"></div>
-          <div class="field"><label>Last Name<span class="required-mark">*</span></label><input type="text" id="head-last" placeholder="Smith" value="${existing ? escapeHtml(existing.headLastName) : ''}"></div>
+          <div class="field"><label>First Name<span class="required-mark">*</span></label><input type="text" id="head-first" placeholder="John" value="${display ? escapeHtml(display.headFirstName) : ''}"></div>
+          <div class="field"><label>Last Name<span class="required-mark">*</span></label><input type="text" id="head-last" placeholder="Smith" value="${display ? escapeHtml(display.headLastName) : ''}"></div>
         </div>
         <div class="name-row">
-          <div class="field"><label>Email</label><input type="email" id="head-email" placeholder="john@example.com" value="${existing ? escapeHtml(existing.headEmail || '') : ''}"></div>
-          <div class="field"><label>Phone</label><input type="text" id="head-phone" placeholder="(xxx) xxx-xxxx" value="${existing ? escapeHtml(existing.headPhone || '') : ''}"></div>
+          <div class="field"><label>Email</label><input type="email" id="head-email" placeholder="john@example.com" value="${display ? escapeHtml(display.headEmail || '') : ''}"></div>
+          <div class="field"><label>Phone</label><input type="text" id="head-phone" placeholder="(xxx) xxx-xxxx" value="${display ? escapeHtml(display.headPhone || '') : ''}"></div>
         </div>
+        ${birthdayFieldsHtml('head', display ? display.headBirthMonth : null, display ? display.headBirthDay : null)}
 
         <div class="modal-section-title">Spouse (optional)</div>
         <div class="name-row">
-          <div class="field"><label>First Name</label><input type="text" id="spouse-first" placeholder="Jane" value="${existing ? escapeHtml(existing.spouseFirstName || '') : ''}"></div>
-          <div class="field"><label>Last Name</label><input type="text" id="spouse-last" placeholder="Smith" value="${existing ? escapeHtml(existing.spouseLastName || '') : ''}"></div>
+          <div class="field"><label>First Name</label><input type="text" id="spouse-first" placeholder="Jane" value="${display ? escapeHtml(display.spouseFirstName || '') : ''}"></div>
+          <div class="field"><label>Last Name</label><input type="text" id="spouse-last" placeholder="Smith" value="${display ? escapeHtml(display.spouseLastName || '') : ''}"></div>
         </div>
         <div class="name-row">
-          <div class="field"><label>Email</label><input type="email" id="spouse-email" placeholder="jane@example.com" value="${existing ? escapeHtml(existing.spouseEmail || '') : ''}"></div>
-          <div class="field"><label>Phone</label><input type="text" id="spouse-phone" placeholder="(xxx) xxx-xxxx" value="${existing ? escapeHtml(existing.spousePhone || '') : ''}"></div>
+          <div class="field"><label>Email</label><input type="email" id="spouse-email" placeholder="jane@example.com" value="${display ? escapeHtml(display.spouseEmail || '') : ''}"></div>
+          <div class="field"><label>Phone</label><input type="text" id="spouse-phone" placeholder="(xxx) xxx-xxxx" value="${display ? escapeHtml(display.spousePhone || '') : ''}"></div>
         </div>
+        ${birthdayFieldsHtml('spouse', display ? display.spouseBirthMonth : null, display ? display.spouseBirthDay : null)}
 
         <div class="modal-section-title">Children</div>
         <div id="kids-list"></div>
         <button type="button" class="add-kid-btn" id="add-kid-btn">+ Add Child</button>
 
         <div class="modal-section-title">Household</div>
-        <div class="field"><label>Street Address</label><input type="text" id="fam-address" placeholder="52 Wyndham Dr" value="${existing ? escapeHtml(existing.address || '') : ''}"></div>
+        <div class="field"><label>Street Address</label><input type="text" id="fam-address" placeholder="52 Wyndham Dr" value="${display ? escapeHtml(display.address || '') : ''}"></div>
         <div class="city-state-zip">
-          <div class="field csz-city"><label>City</label><input type="text" id="fam-city" placeholder="Bluffton" value="${existing ? escapeHtml(existing.city || '') : ''}"></div>
+          <div class="field csz-city"><label>City</label><input type="text" id="fam-city" placeholder="Bluffton" value="${display ? escapeHtml(display.city || '') : ''}"></div>
           <div class="csz-state-zip">
-            <div class="field csz-state"><label>State</label><input type="text" id="fam-state" placeholder="SC" maxlength="2" value="${existing ? escapeHtml(existing.state || '') : ''}"></div>
-            <div class="field csz-zip"><label>Zip</label><input type="text" id="fam-zip" placeholder="29910" maxlength="10" value="${existing ? escapeHtml(existing.zip || '') : ''}"></div>
+            <div class="field csz-state"><label>State</label><input type="text" id="fam-state" placeholder="SC" maxlength="2" value="${display ? escapeHtml(display.state || '') : ''}"></div>
+            <div class="field csz-zip"><label>Zip</label><input type="text" id="fam-zip" placeholder="29910" maxlength="10" value="${display ? escapeHtml(display.zip || '') : ''}"></div>
           </div>
         </div>
-        <div class="field"><label>Attending Since</label><input type="date" id="fam-attending-since" value="${existing ? (existing.attendingSince || '') : ''}"></div>`;
+        <div class="field"><label>Attending Since</label><input type="date" id="fam-attending-since" value="${display ? (display.attendingSince || '') : ''}"></div>`;
 
       renderKidRows(modalChildren);
       document.getElementById('add-kid-btn').addEventListener('click', () => {
@@ -593,11 +733,34 @@
     }
 
     function readKidsFromForm() {
-      return Array.from(document.querySelectorAll('.kid-row')).map(row => ({
+      return Array.from(document.querySelectorAll('.kid-row')).map((row, i) => ({
+        id: row.dataset.kidId || null,
         firstName: row.querySelector('.kid-first-input').value.trim(),
         lastName: row.querySelector('.kid-last-input').value.trim(),
-        birthdate: row.querySelector('.kid-bday-input').value
+        birthdate: row.querySelector('.kid-bday-input').value,
+        sortOrder: i
       })).filter(k => k.firstName || k.lastName);
+    }
+
+    // Writes the children list back as real rows: existing ids get updated, blank ids get
+    // inserted, and any id that was on the family before but isn't in this list anymore
+    // (removed via the − button) gets deleted. Replaces the old approach of overwriting one
+    // jsonb column wholesale.
+    async function saveChildren(familyId, kids, previousIds) {
+      const keptIds = new Set(kids.filter(k => k.id).map(k => k.id));
+      const removedIds = previousIds.filter(id => !keptIds.has(id));
+      if (removedIds.length) {
+        const { error } = await supabaseClient.from('congregant_children').delete().in('id', removedIds);
+        if (error) return error;
+      }
+      for (const k of kids) {
+        const row = { family_id: familyId, first_name: k.firstName, last_name: k.lastName, birthdate: k.birthdate || null, sort_order: k.sortOrder };
+        const { error } = k.id
+          ? await supabaseClient.from('congregant_children').update(row).eq('id', k.id)
+          : await supabaseClient.from('congregant_children').insert(row);
+        if (error) return error;
+      }
+      return null;
     }
 
     async function submitFamilyForm(existingId) {
@@ -605,10 +768,14 @@
       const headLastName = document.getElementById('head-last').value.trim();
       const headEmail = document.getElementById('head-email').value.trim();
       const headPhone = formatPhone(document.getElementById('head-phone').value.trim());
+      const headBirthMonth = parseInt(document.getElementById('head-birth-month').value, 10) || null;
+      const headBirthDay = parseInt(document.getElementById('head-birth-day').value, 10) || null;
       const spouseFirstName = document.getElementById('spouse-first').value.trim();
       const spouseLastName = document.getElementById('spouse-last').value.trim();
       const spouseEmail = document.getElementById('spouse-email').value.trim();
       const spousePhone = formatPhone(document.getElementById('spouse-phone').value.trim());
+      const spouseBirthMonth = parseInt(document.getElementById('spouse-birth-month').value, 10) || null;
+      const spouseBirthDay = parseInt(document.getElementById('spouse-birth-day').value, 10) || null;
       const address = document.getElementById('fam-address').value.trim();
       const city = document.getElementById('fam-city').value.trim();
       const state = document.getElementById('fam-state').value.trim();
@@ -623,15 +790,20 @@
         return;
       }
 
+      const kids = readKidsFromForm();
       const data = {
-        headFirstName, headLastName, headEmail, headPhone,
-        spouseFirstName, spouseLastName, spouseEmail, spousePhone,
-        children: readKidsFromForm(),
+        headFirstName, headLastName, headEmail, headPhone, headBirthMonth, headBirthDay,
+        spouseFirstName, spouseLastName, spouseEmail, spousePhone, spouseBirthMonth, spouseBirthDay,
         address, city, state, zip, attendingSince
       };
       const payload = familyDataToRow(data);
       const familyLabel = `${headLastName}, ${headFirstName}`;
+      // The fixed snapshot from when the modal opened (see modalOriginalChildIds) — anything in
+      // here that readKidsFromForm() didn't return was removed via the − button and needs
+      // deleting, not just left behind.
+      const previousIds = modalOriginalChildIds;
 
+      let familyId = existingId;
       if (existingId) {
         // existingId is the real Supabase uuid for this family (see familyRowToCamel).
         const { error } = await supabaseClient.from('congregant_families').update(payload).eq('id', existingId);
@@ -640,18 +812,26 @@
           errorBox.classList.add('visible');
           return;
         }
-        logActivity('congregant_edit', familyLabel);
       } else {
         // id is left out of the payload — Postgres generates the real uuid (gen_random_uuid()).
-        const { error } = await supabaseClient.from('congregant_families').insert(payload);
+        // .select().single() gets that new id back so the children below can link to it.
+        const { data: inserted, error } = await supabaseClient.from('congregant_families').insert(payload).select().single();
         if (error) {
           errorBox.textContent = error.message;
           errorBox.classList.add('visible');
           return;
         }
-        logActivity('congregant_add', familyLabel);
+        familyId = inserted.id;
       }
 
+      const kidsError = await saveChildren(familyId, kids, previousIds);
+      if (kidsError) {
+        errorBox.textContent = 'Family saved, but a child record failed to save: ' + kidsError.message;
+        errorBox.classList.add('visible');
+        return;
+      }
+
+      logActivity(existingId ? 'congregant_edit' : 'congregant_add', familyLabel);
       closeModal();
       await loadFamilies();
       renderFamilies();
@@ -666,7 +846,7 @@
         { label: 'Remove', className: 'btn btn-gold', onClick: async () => {
           const { error } = await supabaseClient.from('congregant_families').delete().eq('id', family.id);
           if (error) {
-            alert('Could not remove this family: ' + error.message);
+            adminAlert('Could not remove this family: ' + error.message, 'Could not remove');
             return;
           }
           logActivity('congregant_remove', `${family.headLastName}, ${family.headFirstName}`);
@@ -678,13 +858,26 @@
       document.getElementById('modal-backdrop').classList.add('open');
     }
 
+
     const dataPromise = loadFamilies();
+    const youthLinksPromise = loadYouthLinks();
 
     loadSidebar().then(async () => {
       if (!document.getElementById('congregants-grid')) return;
 
-      await dataPromise;
+      await Promise.all([dataPromise, youthLinksPromise]);
       renderFamilies();
+
+      // Arriving from the Youth roster's own "View Household" link — open and scroll to that
+      // family's card, same idea as the reverse link this page now shows on each child.
+      const wantedFamilyId = new URLSearchParams(location.search).get('family');
+      if (wantedFamilyId && families.some(f => f.id === wantedFamilyId)) {
+        renderFamilies();
+        const card = document.querySelector(`.family-card[data-id="${wantedFamilyId}"]`);
+        if (card) { card.scrollIntoView({ behavior: 'smooth', block: 'center' }); card.style.outline = '2px solid var(--gold)'; }
+        openViewModal(families.find(f => f.id === wantedFamilyId));
+        history.replaceState(null, '', location.pathname);
+      }
 
       document.getElementById('modal-close').addEventListener('click', closeModal);
       document.getElementById('modal-backdrop').addEventListener('click', (e) => {
@@ -697,8 +890,8 @@
       document.getElementById('congregants-grid').addEventListener('click', (e) => {
         const toggleBtn = e.target.closest('[data-action="toggle"]');
         if (toggleBtn) {
-          openCardId = openCardId === toggleBtn.dataset.id ? null : toggleBtn.dataset.id;
-          renderFamilies();
+          const viewFamily = families.find(x => x.id === toggleBtn.dataset.id);
+          if (viewFamily) openViewModal(viewFamily);
           return;
         }
         const editBtn = e.target.closest('[data-action="edit"]');

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christ Church Bluffton | Household Information</title>
+    <meta name="description" content="Share your family's contact information with Christ Church Bluffton.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="css/fonts.css">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/favicon.png">
+    <link rel="stylesheet" href="css/shared.css">
+    <style>
+        /* Same fix as new-student.html (2026-09-30) — every other page on this site defines
+           these locally (shared.css only ever USES them, never defines them); this page never
+           got the block, so anything using var(--navy-blue)/var(--gold) on a non-inherited
+           property (background, border, etc.) was silently resolving to nothing. */
+        :root {
+            --navy-blue: #303b6a;
+            --gold: #c3a355;
+            --gold-text: #7F6D34;
+            --white: #FFFFFF;
+            --lightest-gray: #F5F4EF;
+            --light-gray: #E2E0D8;
+            --dark-gray: #333333;
+            --text-gray: #4A4A55;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Lora', serif; color: #333; background: #F5F4EF; }
+        main { max-width: 640px; margin: 0 auto; padding: 60px 20px 100px; }
+        h1 { font-family: Georgia, 'Times New Roman', serif; color: var(--navy-blue); font-size: 2rem; margin-bottom: 8px; }
+        .lead { color: #555; margin-bottom: 32px; line-height: 1.6; }
+        .card { background: #fff; border-radius: 12px; padding: 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .section-title { font-family: Georgia, 'Times New Roman', serif; color: var(--navy-blue); font-size: 1.15rem; margin: 28px 0 14px; padding-top: 20px; border-top: 1px solid #eee; }
+        .section-title:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+        .row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+        .field { flex: 1 1 200px; display: flex; flex-direction: column; gap: 6px; }
+        label { font-size: 0.8rem; font-weight: bold; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        input[type="text"], input[type="email"], input[type="tel"], input[type="date"] {
+            padding: 11px 12px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; font-size: 1rem;
+        }
+        input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+        .member-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed #ddd; }
+        .member-row .field { flex: 1 1 160px; }
+        .remove-member-btn { background: none; border: 1px solid #c66; color: #c66; border-radius: 8px; padding: 10px 12px; cursor: pointer; font-size: 0.85rem; }
+        .add-member-btn { background: none; border: 1px dashed var(--navy-blue); color: var(--navy-blue); border-radius: 8px; padding: 10px 16px; cursor: pointer; font-family: inherit; margin-top: 4px; }
+        .privacy-line { font-size: 0.85rem; color: #666; margin: 24px 0 16px; line-height: 1.5; }
+        .privacy-line input { margin-right: 8px; }
+        button[type="submit"] { background: var(--gold); color: #1e2547; border: none; border-radius: 100px; padding: 14px 32px; font-family: inherit; font-weight: bold; font-size: 1rem; cursor: pointer; }
+        button[type="submit"]:disabled { opacity: 0.6; cursor: not-allowed; }
+        .form-msg { display: none; margin-top: 16px; padding: 12px 16px; border-radius: 8px; font-size: 0.9rem; }
+        .form-msg.error { display: block; background: #fdeaea; color: #a33; }
+        .form-msg.success-panel { text-align: center; padding: 60px 20px; }
+        .cf-turnstile { margin: 20px 0; }
+        .unavailable-panel { text-align: center; padding: 80px 20px; color: #666; }
+    </style>
+</head>
+<body>
+    <div id="site-header"></div>
+    <main>
+        <div id="form-wrap">
+            <h1>Household Information</h1>
+            <p class="lead">Share whatever you're comfortable with — every field below is optional except at least one name. This helps our team stay in touch and keep our records up to date.</p>
+            <div class="card">
+                <form id="household-form">
+                    <input type="text" name="website_url_confirm" style="position:absolute;left:-9999px;" tabindex="-1" autocomplete="new-password" aria-hidden="true">
+
+                    <div class="section-title">Your Information</div>
+                    <div class="row">
+                        <div class="field"><label>First Name</label><input type="text" id="first-name"></div>
+                        <div class="field"><label>Last Name</label><input type="text" id="last-name"></div>
+                    </div>
+                    <div class="row">
+                        <div class="field"><label>Email</label><input type="email" id="email"></div>
+                        <div class="field"><label>Phone</label><input type="tel" id="phone"></div>
+                    </div>
+                    <div class="row">
+                        <div class="field"><label>Birthday (month/day)</label>
+                            <div style="display:flex; gap:8px;">
+                                <select id="birth-month" style="flex:1; padding:11px 8px; border:1px solid #ccc; border-radius:8px; font-family:inherit;"></select>
+                                <select id="birth-day" style="flex:1; padding:11px 8px; border:1px solid #ccc; border-radius:8px; font-family:inherit;"></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-title">Address</div>
+                    <div class="row">
+                        <div class="field" style="flex:1 1 100%;"><label>Street Address</label><input type="text" id="address"></div>
+                    </div>
+                    <div class="row">
+                        <div class="field"><label>City</label><input type="text" id="city"></div>
+                        <div class="field" style="flex:0 1 100px;"><label>State</label><input type="text" id="state" maxlength="2"></div>
+                        <div class="field" style="flex:0 1 130px;"><label>Zip</label><input type="text" id="zip" maxlength="10"></div>
+                    </div>
+
+                    <div class="section-title">Family Members <span style="font-weight:normal; text-transform:none; letter-spacing:0; color:#888; font-size:0.75rem;">(spouse, children — optional)</span></div>
+                    <div id="members-list"></div>
+                    <button type="button" class="add-member-btn" id="add-member-btn">+ Add Family Member</button>
+
+                    <p class="privacy-line">
+                        <label style="display:flex; align-items:flex-start; gap:8px; font-weight:normal; text-transform:none; letter-spacing:0;">
+                            <input type="checkbox" id="privacy-ack" style="margin-top:3px;">
+                            <span>I understand this information will be kept on file by Christ Church Bluffton for administrative purposes only.</span>
+                        </label>
+                    </p>
+
+                    <div class="cf-turnstile" data-sitekey="0x4AAAAAACneNwgE844_oOI-" data-size="flexible"></div>
+
+                    <button type="submit" id="submit-btn">Submit</button>
+                    <div class="form-msg" id="form-msg"></div>
+                </form>
+            </div>
+        </div>
+        <div class="form-msg success-panel" id="success-panel" style="display:none;">
+            <h1>Thank You</h1>
+            <p class="lead">Your information has been received. Someone from our team will follow up if needed.</p>
+        </div>
+    </main>
+    <div id="site-footer"></div>
+
+    <script src="js/components.js"></script>
+    <script>
+        window.__turnstileReady = false;
+        window.__turnstileQueue = [];
+        window.turnstileOnLoad = function() {
+            window.__turnstileReady = true;
+            window.__turnstileQueue.forEach(function(el) { try { turnstile.render(el); } catch (e) {} });
+            window.__turnstileQueue = [];
+        };
+        window.renderTurnstile = function(el) {
+            if (!el) return;
+            if (window.__turnstileReady && window.turnstile) { try { turnstile.render(el); } catch (e) {} }
+            else { window.__turnstileQueue.push(el); }
+        };
+    </script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=turnstileOnLoad&render=explicit" async defer></script>
+    <script>
+
+      // Format phone numbers as the person leaves the field: 8435550101 -> (843) 555-0101
+      (function () {
+        function fmt(v) { var d = String(v || '').replace(/\D/g, ''); if (d.length === 11 && d[0] === '1') d = d.slice(1); return d.length === 10 ? '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6) : v; }
+        ["phone"].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el) el.addEventListener('blur', function () { el.value = fmt(el.value.trim()); });
+        });
+      })();
+        const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        function fillSelect(el, opts) { el.innerHTML = '<option value="">—</option>' + opts.map((o, i) => `<option value="${i + 1}">${o}</option>`).join(''); }
+        fillSelect(document.getElementById('birth-month'), MONTHS);
+        fillSelect(document.getElementById('birth-day'), Array.from({ length: 31 }, (_, i) => String(i + 1)));
+
+        let memberCount = 0;
+        function addMemberRow() {
+            const id = memberCount++;
+            const div = document.createElement('div');
+            div.className = 'member-row';
+            div.dataset.memberId = id;
+            div.innerHTML = `
+                <div class="field"><label>Name</label><input type="text" class="member-name"></div>
+                <div class="field" style="flex:0 1 150px;"><label>Relationship</label><input type="text" class="member-relationship" placeholder="Spouse, Child, etc."></div>
+                <div class="field" style="flex:0 1 160px;"><label>Birthday</label><input type="date" class="member-birthdate"></div>
+                <button type="button" class="remove-member-btn" aria-label="Remove">Remove</button>`;
+            div.querySelector('.remove-member-btn').addEventListener('click', () => div.remove());
+            document.getElementById('members-list').appendChild(div);
+        }
+        document.getElementById('add-member-btn').addEventListener('click', addMemberRow);
+
+        if (window.renderTurnstile) renderTurnstile(document.querySelector('.cf-turnstile'));
+
+        document.getElementById('household-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const msg = document.getElementById('form-msg');
+            msg.className = 'form-msg';
+            msg.textContent = '';
+
+            const firstName = document.getElementById('first-name').value.trim();
+            const lastName = document.getElementById('last-name').value.trim();
+            if (!firstName && !lastName) {
+                msg.textContent = 'Please share at least a first or last name.';
+                msg.className = 'form-msg error';
+                return;
+            }
+            if (!document.getElementById('privacy-ack').checked) {
+                msg.textContent = 'Please check the box acknowledging how this information is used.';
+                msg.className = 'form-msg error';
+                return;
+            }
+
+            const members = Array.from(document.querySelectorAll('.member-row')).map(row => ({
+                name: row.querySelector('.member-name').value.trim(),
+                relationship: row.querySelector('.member-relationship').value.trim(),
+                birthdate: row.querySelector('.member-birthdate').value
+            })).filter(m => m.name);
+
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Submitting…';
+
+            let token = '';
+            try { token = turnstile.getResponse(document.querySelector('.cf-turnstile')); } catch (e) {}
+
+            try {
+                const res = await fetch('/api/household-intake', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        firstName, lastName,
+                        email: document.getElementById('email').value.trim(),
+                        phone: document.getElementById('phone').value.trim(),
+                        birthMonth: document.getElementById('birth-month').value,
+                        birthDay: document.getElementById('birth-day').value,
+                        address: document.getElementById('address').value.trim(),
+                        city: document.getElementById('city').value.trim(),
+                        state: document.getElementById('state').value.trim(),
+                        zip: document.getElementById('zip').value.trim(),
+                        members,
+                        website_url_confirm: document.querySelector('[name="website_url_confirm"]').value,
+                        turnstileToken: token
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+                document.getElementById('form-wrap').style.display = 'none';
+                document.getElementById('success-panel').style.display = 'block';
+            } catch (err) {
+                msg.textContent = err.message;
+                msg.className = 'form-msg error';
+                btn.disabled = false;
+                btn.textContent = 'Submit';
+                try { turnstile.reset(document.querySelector('.cf-turnstile')); } catch (e) {}
+            }
+        });
+
+        // The release toggle gates this at the FUNCTION level (see household-intake.js) — the
+        // check here is only so a visitor sees a clear message instead of a confusing form that
+        // fails on submit. A direct POST while off still gets refused server-side either way.
+        fetch('/api/household-intake?check=1').then(r => r.json()).then(d => {
+            if (d.enabled === false) {
+                document.getElementById('form-wrap').innerHTML = '<div class="unavailable-panel"><h1 style="color:var(--navy-blue);">Not Available Yet</h1><p>This form isn\'t open yet. Please check back soon.</p></div>';
+            }
+        }).catch(() => {});
+    </script>
+</body>
+</html>

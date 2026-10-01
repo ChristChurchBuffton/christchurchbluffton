@@ -1,5 +1,125 @@
 # Christ Church Bluffton — TODO
 
+## ▶ PUSH PREP (2026-10-01) — READY, nothing committed. Do these at push time:
+- `.gitignore` already ignores `*-previous.*` and `*.pdf`, so the 38 `-previous` files are NOT in git and a git-based deploy won't publish them (they only matter for local `netlify dev`). Still delete them at push (Kevin's rule).
+- Added to `.gitignore` today: `assets/youth/`, `assets/church/`, `assets/photos/` (kids' photos), `workflow/*-backup-*.json` and `workflow/consent-import-created-*.json` (kids' names). NEVER `git add .` blindly — stage explicit files.
+- MUST be in the push or the forms 404: the 2 new redirects in `netlify.toml` (`/api/household-intake`, `/api/new-student-signup`) + `new-student.html`, `household-form.html`, the two functions, `lib/*` helpers.
+- Include the 18 migrations `admin/supabase/migrations/0026…0043` (already applied live; repo needs the record). `0042` comment fixed to Aug 6.
+- `household-intake.js` dead email helpers removed (tested: new / existing / test-mode all pass, 0 emails).
+- Editor-preview images must be included: `src/admin/assets/site-mirror/images/*`, `src/admin/assets/site-images/*` (the two logos there are identical copies of `src/images` — fine).
+- Open for Kevin: consent text says "Christ Church of Bluffton" (2x in `new-student.html:111`) — it matches the church's own PDF form ("Christ Church of Bluffton" / "CHRIST CHURCH OF BLUFFTON"), so it's their wording; the website uses "Christ Church Bluffton". Confirm which is right before launch.
+- **Styled popups (10/1):** no more browser alert()/confirm(). Admin: `adminAlert`/`adminConfirm` added to `src/admin/js/shared.js` (used in congregants, events, content, photos, youth, notifications). Public: `siteAlert` added to `src/js/components.js` (+ its editor-preview copy, + contact.html and its copy). NOTE `components.js`/`shared.css`/`fonts.css` also carry the ON-HOLD font-swap work — they ship together if everything goes live; check the fonts before pushing. Not yet seen in a browser.
+- **FONTS (Kevin 10/1, revised): the Content Editor font dropdown (Lora / Adobe Caslon Pro) SHIPS, but the LIVE site's look must NOT change.** Done: `src/css/fonts.css` (+ mirror) = the committed version + ONLY the 6 inert `Adobe Caslon Pro` @font-face blocks (no live page/CSS uses that family, so nothing changes until a church person publishes a font change later); the 6 `acaslon-pro-*.woff2` stay in `src/fonts/` and the mirror fonts folder. HELD OUT (would change live text): the Lora variable-weight swap + real Lora italics — saved in `workflow/held-fonts/` (fonts.css + 4 `lora-*-var.woff2` ×2), gitignored. Publish is deactivated, so editor edits stay drafts. KEEP the #anchor-realign (components.js) + header min-height (shared.css) fixes + popup helper.
+- After commit: before ANY form submission on the temp link run the pre-flight header probe (test mode is ON there).
+
+
+## ▶ WHERE WE LEFT OFF (2026-10-01, late) — read this first
+**Still NOTHING pushed past temp commit `e51fd12`. Everything below is local (+ live-DB changes). Kevin is leaning "push EVERYTHING live" — decide, then ask before each commit/push.**
+
+### Right now (open loops)
+1. [ ] **Live check-in TEST is still in the DB.** Night **TESTING** (id `17de21a2…`, notes "TESTING") with 7 check-ins (Bo Barber, Griffin Brashear, Sloan Colleran, Noah Hodgson, Ella Holmes + Test Student1/2). Test records to remove ONLY after Kevin looks and says so: students **Test Student1 / Test Student2**, their households **Test Parent1 / Test Parent2** (+ the 2 child rows), the TESTING night + its attendance. Show him the rows first; back up to `workflow/`.
+2. [ ] Kevin said he'll "exit" the check-in kiosk himself (exit needs his admin login).
+3. [ ] Small to-do: the public New Student form saves phones unformatted (`8435550101`); admin Edit formats them `(843) 555-0101` — make the public form match.
+4. [ ] Kevin's earlier 2-minute test (Sophia/Connor save with no pop-up; only real households in Congregants) — the household cleanup is done; the check-in test above exercised the form end to end and passed.
+
+### How to run it locally (changed today)
+- **Admin + forms:** `FORM_TEST_MODE_TO="" netlify dev --port 3010 --staticServerPort 3997 --functions-port 3998 --no-open` from the repo ROOT → `http://localhost:3010` (admin at `/admin/...`, public form at `/new-student`). The extra ports are because **Hamilton Security's netlify dev (port 3006) already owns 3999** — don't kill it. **Test mode is OFF on this server** (empty FORM_TEST_MODE_TO overrides the injected var): contact/prayer/newsletter/household/new-student submissions here are REAL (emails + DB writes). Remove it from the command to get test mode back.
+- `http://localhost:3002` = `node server/server.js` static server: pages only, **forms can't work there** (no secrets/functions). Both servers time out after 2 h (restart when asked).
+- Browser tab for automation was left on `localhost:3010/admin/checkin?night=17de21a2…`.
+
+### Built today (LOCAL, uncommitted) — public site
+- Homepage Next Generation photo (`youth-fall-kickoff-youth-gathered-living-room-tall`, square), Contact "Mobile Phone *" required, Home sitemap 9/30, `contact.js` Youth Group → `contact_youth` notification row (hardcoded fallback). New photos must ship in `src/images/` AND `src/admin/assets/site-mirror/images/` + `site-images/`.
+### Built today (LOCAL, uncommitted) — admin / youth
+- **Youth roster**: card = Student (Grade, DOB) / Parent-Guardian (name, Parent Phone, Parent Email); bottom row = View Household (left) + eye / pencil / trash icons (right); eye opens a **portfolio popup** (student, parent, consent + attached form, notes, attendance). Loads faster (prefetch), Attendance tab survives refresh (`#attendance`), styled "Existing household found" popup (replaces black browser box), editing a linked student never re-asks/duplicates, parent first+last name matching head OR spouse = certain match (also in `new-student-signup.js`).
+- **Check-in session**: Notes box under Location (saves to `youth_nights.notes`, shows on Attendance tab).
+- Grades: "Current Grade", auto-rolls **Aug 6** (`grade_year`), "Graduated" after 12th.
+- Congregants: eye opens a view popup (640px). Notification Settings: collapsible cards, + "Contact Form Youth Notifications"; stale Household/New Student cards hidden. Newsletter: Work-In-Progress banner moved up. `household-intake.js`: no email, saves a household straight into Congregants (kids never to Youth).
+
+### LIVE DB changes made today (with Kevin's OK) — all with backups in `workflow/`
+- Migrations **0041** (`contact_youth` notification row), **0042** (`grade_year`), **0043** (`youth_nights.notes`) applied.
+- Content Editor records written (privacy/contact text, 4 photo rows) — `check-editor-sync` = All good.
+- Duplicate McCartney households cleaned up; 8 + 2 test check-in nights deleted (backups `workflow/*-backup-2026-10-01.json`).
+- **Photo-release CSV imported**: 19 students (11 new households, consents Yes/Yes, Griffin = Yes; Erika + Ethan DeLalio = 2 students) — IDs in `workflow/consent-import-created-2026-10-01.json`. All 20 CSV children checked in to the **Sept 27 Fall Kickoff** at 6:30 PM ET (the only real night left, 20 attended). Totals before the live test: 22 students, 13 households.
+
+### Then (in order)
+1. Remove the live-test records (above) once Kevin okays.
+2. **Decide the push** (everything live vs. approved list only; plan: commit approved list as its own commit, everything else as a 2nd, both to temp, production only up to the 1st). On commit/push: **delete the `-previous` backups** (Kevin's rule), keep `workflow/*-backup-*.json`; move/remove `-previous.js` from `src/netlify/functions/` (they deploy as live functions); NO Claude name/co-author lines; re-check `contact.js` (changed after approval).
+3. Before any submission on the temp link: pre-flight header probe (test mode there is ON).
+4. Reply to Bradley (Kevin handles).
+
+### Still to build / open
+- Admin side of text consent (subscribers phone/consent columns); text consent on youth + household forms (notes in `workflow/agent-workflow-specs.md`); a way to move a student to a different household; `household-form.html` header/footer decision (form not linked publicly — keep it that way); youth release-toggle row ON in DB; Supabase token renews ~2026-11-10.
+
+---
+(older status below)
+
+## STATUS (2026-10-01) — where we are. NOTHING from today past commit `e51fd12` is committed or pushed.
+
+### On the TEMP link already (`origin/main`, commit `e51fd12`, pushed 9/30)
+- [x] Privacy page: Bradley's Data Sharing + Messaging Program Terms; old "sell, trade, or rent" sentence removed; Last Updated = Sept 30, 2026
+- [x] Contact page: required Yes/No text-consent radios + disclaimer, "Youth Group" interest option, Mobile Phone field (made required AFTER this push — see below)
+- [x] Groups page (youth event card, Table 246 / Prayer Groups / Future Leaders photos), `contact.js` consent row in staff email, sitemap dates, editor-preview copies
+
+### LOCAL only (not committed) — public website
+- [ ] Homepage "Next Generation" photo → `youth-fall-kickoff-youth-gathered-living-room-tall` in a square frame (+ editor copy, + images)
+- [ ] Contact: phone field label "Mobile Phone *" + required
+- [ ] Sitemap: Home date 9/30
+- [ ] `contact.js`: Youth Group emails now read the `contact_youth` Notification Settings row (hardcoded fallback bradley@/admin@/youth@)
+- [ ] New photo files must go in the push: `src/images/` (home-gathering-group-photo-3, youth-group-prayer-circle, youth-fall-kickoff-youth-gathered-living-room-tall + small sizes) AND the copies in `src/admin/assets/site-mirror/images/` and `site-images/` (the already-pushed Groups editor preview points at images that weren't in the mirror folder). DON'T push the unused `youth-fall-kickoff-group-gathered-great-room-1(-800).webp`.
+
+### LOCAL only — admin / youth
+- [ ] Congregants: eye icon opens a view modal (not expand); `?family=` link from Youth opens it; popup 640px wide
+- [ ] Youth: names load faster; "Current Grade" label (grades auto-move up every **Aug 6**, "Graduated" after 12th; stored with `grade_year`); red "No parent information on file" flag; styled "Existing household found" popup replaces the black browser confirm box; editing an already-linked student no longer re-runs the household match
+- [ ] Household matching: parent's own first+last name matching the head OR spouse = certain match (youth.html + `new-student-signup.js`)
+- [ ] Notification Settings: cards collapse with arrow; stale Household + New Student cards hidden; new "Contact Form Youth Notifications" card
+- [ ] Newsletter: "Work In Progress — Not Live" banner moved above the sticky bar
+- [ ] `household-intake.js`: no email anymore; saves a household straight into Congregants (head, spouse, children; children NEVER go to Youth; non-spouse/child relations kept only in the saved copy)
+- [ ] New Student form grade label "Current Grade"
+
+### Database changes made LIVE today (with Kevin's OK)
+- [x] 0041 `contact_youth` notification row (bradley@, admin@, youth@) · 0042 `grade_year` column
+- [x] Content Editor records written (privacy text, contact consent fields, phone label, Last Updated, 4 photo records) — `check-editor-sync` = All good. Backup of old rows: `workflow/editor-records-backup-2026-10-01.json`
+- [x] Household cleanup: 4 duplicate McCartney households (made by repeated Saves + "Create new") deleted; Sophia + Connor re-linked to the original; backup `workflow/household-cleanup-backup-2026-10-01.json`
+
+### WHEN WE GET BACK — in this order
+1. [ ] **Kevin's test (2 min)**: Youth → Ctrl+Shift+R → edit+Save Sophia (no pop-up?) → same for Connor → Congregants shows only 2 families (Chestnut, McCartney) → eye on McCartney opens popup with Kevin, Stephanie + 4 kids. Report any pop-up/extra family.
+2. [ ] **Decide the push**: Kevin is leaning "everything live" (admin is work-in-progress anyway). Previously planned: commit the approved website list as its own commit, everything else as a 2nd commit, both to temp, production only up to the 1st. Ask before each commit/push. `contact.js` changed again since approval — re-check with Kevin.
+3. [ ] On commit/push: **delete the `-previous` backups** (Kevin's standing rule), keep the backup JSONs in `workflow/` until he says; no Claude name/co-author lines in this repo; `-previous.js` files must NOT sit in `src/netlify/functions/` when pushed.
+4. [ ] After push: reply to Bradley (Kevin handles; ignore for me) — opt-in is radio buttons, consent arrives by email; admin-side consent recording still to build.
+
+### Still to build / open
+- [ ] Admin side of text consent: `subscribers` table gets phone + sms_consent + sms_consent_at (contact.js saves them; Subscribers page shows them) — SQL shown to Kevin first
+- [ ] Text-consent on the youth/household forms (notes in `workflow/agent-workflow-specs.md`)
+- [ ] A way to move a student to a different household (editing a linked student keeps its link now)
+- [ ] `household-form.html` header/footer decision; household form not linked publicly — keep it that way until reviewed
+- [ ] Release toggle row for youth is ON in the DB; youth signup page not linked publicly
+- [ ] Supabase token renews ~2026-11-10
+
+
+## PENDING — 2026-09-02 audit sweep, not started yet
+- [ ] **Backup protection for the real database** — Supabase Free tier has zero automatic backups for the real member/prayer-request/volunteer data. Not doing yet — waiting to see what the client wants (Pro upgrade at $25/mo for daily backups, vs. a manual export routine as a free stopgap).
+- [ ] **Staff-role permission restrictions only enforced in the browser, not the database** — fix `has_permission()` in the schema so it mirrors the same restriction `js/shared.js` already enforces client-side. Confirmed safe to do whenever: no current Staff account is actually affected, this only closes a door nobody's using yet.
+- [ ] **Missing `X-Frame-Options` header + HSTS set to `preload`** (against our own standard for client sites) — both one-line fixes in `netlify.toml`, batch together next time that file gets touched.
+- [ ] **Sitemap `lastmod` dates need periodic upkeep** — fixed the stale ones 2026-09-02 (Home/Groups → 08-26, rest → 08-15), but this will drift again as pages change. Low priority (Google mostly ignores it), just keep in mind next time a real content change ships.
+
+## STATUS (2026-08-29): Newsletter "Build Visually" review — filled a full test newsletter, found + fixed a real Preview bug (staging only, not yet pushed)
+- [x] Loaded the "Backend Test Wiring" draft on staging and filled in all 4 default Section blocks with realistic content (Women's Ministry, Youth, Hospitality, Table 246 — matching the real recurring newsletter themes) using real image URLs copied from the live Photos library. Exercised all 3 button types (Web Link, Email w/ auto-fill, Text/sms). Renamed the draft to "Christ Church Bluffton Weekly Word — This Week's Happenings" and saved.
+- [x] **Real bug found**: clicking "Preview" opens the modal but the rendered email was completely blank. Root-caused it — `src/admin/newsletter.html`'s `#preview-modal-iframe` had `sandbox=""`, which blocks the iframe from rendering its `srcdoc` content at all (confirmed by testing the identical HTML in an unsandboxed iframe — it rendered perfectly). The `#preview-iframe` used by "Paste HTML" mode is correctly sandboxed on purpose (that one renders arbitrary pasted content); this one previews our own trusted, self-generated HTML and doesn't need it.
+- [x] **Fixed**: removed the stray `sandbox=""` attribute from the Build-Visually preview iframe. Verified the fix logically (identical HTML rendered fine without it) — not yet verified via an actual redeploy since the fix is uncommitted.
+- [x] Noticed the "Contact Us"/"Email Us" auto-fill-mailto behavior (documented in the 8/28 build notes) did NOT trigger when retyping a button's label to "Contact Us" after creation — had to fill the email manually. Not confirmed as a bug (might only fire on initial button creation, not on later relabeling) — worth a quick look if it matters later, low priority.
+- [x] Deleted the leftover "(untitled)" draft per Kevin's request.
+- [ ] **Not yet committed/pushed** — `src/admin/newsletter.html` fix is local only. Kevin's call on when to push (staging first, per usual).
+
+## STATUS (2026-08-29): Photos auto-compress fix cherry-picked to `production` — commit `a97e4d4`, LIVE and verified
+
+- [x] Verified nothing oversized had crept back into the live Photos storage bucket since the 8/28 fix (19 files, largest 0.81MB, 5.27MB total) — direct read of the Supabase Storage bucket, no browser needed.
+- [x] Tested the new auto-compress code on staging first: a synthetic 12.52MB/4000x3000 JPG uploaded through `/admin/photos.html` landed in storage at 0.67MB.
+- [x] **Cherry-picked just the `src/admin/photos.html` compression change out of `47d781f`** onto a branch off `production/main` (commit `a97e4d4`) — deliberately left the Newsletter composer rebuild and Congregants placeholder-text fix (the other two changes bundled in `47d781f`) on `origin`/staging only, not yet on `production`.
+- [x] Pushed `a97e4d4` to `production` (`ChristChurchBuffton/christchurchbluffton`) — auto-published by Netlify.
+- [x] Re-tested live on `christchurchbluffton.org/admin`: a second 12.52MB test upload landed at 0.67MB — confirmed working on the real site, not just staging. Test files removed by Kevin after each check.
+- [ ] **Still not on production**: the Newsletter composer rebuild and Congregants placeholder-text fix from `47d781f` — only on `origin`/staging. Kevin's call on when those go live.
+- [ ] **Watch bandwidth/credits over the next few weeks** to confirm the compression fix actually flattens the trend (was Aug 11–Sep 10: 22.5MB → 1.8GB → 9.9GB across 3 periods before the fix). Netlify billing note: current period (Aug 28–Sep 27) credit/bandwidth dashboards showed two inconsistent numbers (191.9MB vs. 2.5GB) for the same period — likely a lag in Netlify's own reporting after the plan change, not confirmed as a real problem. Worth a re-check in a day or two; not urgent, nowhere near the 1,000 credit/mo ceiling either way.
+
 ## STATUS (2026-08-26): Volunteers UI + sub-team fix, Table 246 photo, loader click-fix — PUSHED TO BOTH `origin` AND `production`, commit `8d81b63`
 
 ### Volunteers admin page (`src/admin/volunteers.html`) — commit `f2baf33`

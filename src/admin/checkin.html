@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<title>Check In — Christ Church Bluffton Admin</title>
+<link rel="stylesheet" href="css/shared.css">
+<style>
+  /* Kiosk mode: the normal sidebar/nav stays in the DOM (loadSidebar() needs its elements to
+     exist) but is never shown — per the brief, this screen is locked to check-in only, with no
+     visible way to reach the rest of the admin panel. */
+  #sidebar-mount { display: none; }
+  html, body { height: 100%; }
+  body {
+    background: linear-gradient(160deg, #1e2547 0%, #303b6a 55%, #37447c 100%);
+    background-attachment: fixed;
+  }
+  .app-shell { min-height: 100vh; }
+  .main {
+    margin-left: 0 !important; width: 100%;
+    display: flex; align-items: center; justify-content: center; min-height: 100vh;
+  }
+  .content { width: 100%; padding: 40px 20px; display: flex; align-items: center; justify-content: center; }
+
+  .kiosk-shell {
+    max-width: 640px; width: 100%; margin: 0; padding: 44px 40px 46px; text-align: center;
+    background: #fff; border-radius: 22px; box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+  }
+  .kiosk-crest { display: block; height: 56px; margin: 0 auto 22px; }
+  .kiosk-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;
+    padding-bottom: 18px; border-bottom: 1px solid var(--border-gray);
+  }
+  .kiosk-session-info { flex: 1 1 auto; min-width: 0; text-align: left; font-size: 14px; color: var(--text-muted); }
+  .kiosk-session-info strong { color: var(--navy-blue); font-family: Georgia, 'Times New Roman', serif; font-size: 16px; }
+  .exit-btn {
+    flex-shrink: 0; white-space: nowrap; padding: 10px 18px; border-radius: 8px; border: 1px solid var(--border-gray);
+    background: #fff; font-size: 13px; cursor: pointer; color: var(--text-muted); transition: border-color .15s, color .15s;
+  }
+  .exit-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+  .big-buttons { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-top: 40px; }
+  .big-btn {
+    flex: 1 1 260px; max-width: 320px; padding: 50px 20px; border-radius: 18px; border: none; cursor: pointer;
+    font-family: Georgia, 'Times New Roman', serif; font-size: 1.4rem; font-weight: bold; color: #fff;
+    box-shadow: 0 10px 24px rgba(30,37,71,0.16); transition: transform .15s, box-shadow .15s;
+  }
+  .big-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(30,37,71,0.22); }
+  .big-btn.returning { background: var(--navy-blue); }
+  .big-btn.new { background: var(--gold); color: #1e2547; }
+  .big-btn svg { display: block; margin: 0 auto 14px; width: 48px; height: 48px; }
+
+  .search-panel { margin-top: 20px; }
+  .search-input { width: 100%; padding: 18px 20px; font-size: 1.3rem; border: 2px solid var(--border-gray); border-radius: 12px; font-family: inherit; }
+  .search-input:focus { outline: none; border-color: var(--gold); }
+  .search-results { margin-top: 16px; }
+  .search-result-btn {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    width: 100%; padding: 18px 20px; margin-bottom: 10px; border-radius: 12px; border: 1px solid var(--border-gray);
+    background: #fff; font-size: 1.2rem; font-family: inherit; text-align: left; cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .search-result-btn:hover { border-color: var(--gold); background: rgba(195,163,85,0.06); }
+  .search-result-code { font-size: 0.85rem; color: var(--text-muted); font-family: 'Courier New', monospace; flex-shrink: 0; }
+
+  .confirm-panel {
+    padding: 56px 32px; border-radius: 18px; background: #fff; box-shadow: 0 8px 28px rgba(30,37,71,0.08);
+    border-top: 5px solid var(--navy-blue);
+  }
+  .confirm-panel.already-panel { border-top-color: var(--gold); }
+  .confirm-panel.error-panel { border-top-color: var(--danger); }
+  .confirm-icon-badge {
+    width: 84px; height: 84px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px; font-size: 40px; background: rgba(48,59,106,0.08);
+  }
+  .already-panel .confirm-icon-badge { background: rgba(195,163,85,0.16); }
+  .error-panel .confirm-icon-badge { background: rgba(177,67,67,0.12); }
+  .confirm-name { font-family: Georgia, serif; font-size: 1.9rem; color: var(--navy-blue); font-weight: bold; margin-bottom: 6px; }
+  .confirm-panel p { color: var(--text-muted); font-size: 15px; }
+  .already-panel .confirm-name { color: #8a6d1f; }
+
+  .back-link { display: inline-block; margin-top: 24px; color: var(--text-muted); cursor: pointer; font-size: 14px; }
+  .back-link:hover { color: var(--navy-blue); }
+
+  .exit-overlay { position: fixed; inset: 0; background: rgba(30,37,71,0.65); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(2px); }
+  .exit-overlay.open { display: flex; }
+  .exit-box {
+    background: #fff; border-radius: 14px; padding: 32px; max-width: 380px; width: 100%; text-align: left;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+  }
+  .exit-box-icon {
+    width: 48px; height: 48px; border-radius: 50%; background: rgba(177,67,67,0.1); color: var(--danger);
+    display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 14px;
+  }
+  .exit-box h2 { font-family: Georgia, serif; font-size: 20px; color: var(--navy-blue); margin-bottom: 6px; }
+  .exit-box p { font-size: 13px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; }
+  .exit-box label { display: block; font-size: 12px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
+  .exit-box .field-group { margin-bottom: 14px; }
+  .exit-box input {
+    width: 100%; padding: 11px 12px; border: 1px solid var(--border-gray); border-radius: 8px; font-family: inherit; font-size: 14px;
+  }
+  .exit-box input:focus { outline: none; border-color: var(--gold); }
+  .exit-box .error { color: var(--danger); font-size: 13px; margin-bottom: 10px; display: none; }
+  .exit-box .error.visible { display: block; }
+  .exit-box-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+
+  .newstudent-overlay {
+    position: fixed; inset: 0; background: rgba(30,37,71,0.65); z-index: 2000; display: none;
+    align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(2px);
+  }
+  .newstudent-overlay.open { display: flex; }
+  .newstudent-box {
+    background: #fff; border-radius: 16px; width: 100%; max-width: 700px; height: 88vh;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.35); display: flex; flex-direction: column; overflow: hidden;
+  }
+  .newstudent-box-header {
+    display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;
+    border-bottom: 1px solid var(--border-gray); flex-shrink: 0;
+  }
+  .newstudent-box-header h2 { font-family: Georgia, serif; font-size: 18px; color: var(--navy-blue); }
+  .newstudent-box iframe { flex: 1; width: 100%; border: none; }
+</style>
+</head>
+<body data-page="checkin" data-permission="youth">
+  <div class="app-shell">
+    <div id="sidebar-mount">
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img class="brand-crest" src="assets/site-images/logo-dark-bg.png" alt="Christ Church Bluffton crest">
+    <div><div class="title">Christ Church Bluffton</div><div class="label">Admin Panel</div></div>
+    <button type="button" class="hamburger-btn" id="hamburger-btn" aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+    </button>
+  </div>
+  <div class="sidebar-collapsible" id="sidebar-collapsible">
+    <nav>
+      <a href="dashboard" data-page="dashboard">Dashboard</a>
+      <a href="youth" data-page="youth" data-permission="youth">Youth</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="account" class="user-chip" id="user-chip-link"><div class="avatar" id="sidebar-avatar">?</div><div class="user-chip-info"><div class="name" id="sidebar-name">—</div><div class="role" id="sidebar-role">—</div></div></a>
+      <a href="#" class="logout-link" id="logout-link">Log out</a>
+    </div>
+  </div>
+</aside>
+    </div>
+    <div class="main">
+      <div class="content" id="page-body">
+        <div class="kiosk-shell">
+          <img class="kiosk-crest" src="assets/site-images/logo-white-bg.png" alt="Christ Church Bluffton">
+          <div class="kiosk-header">
+            <div class="kiosk-session-info" id="session-info">Loading session…</div>
+            <button type="button" class="exit-btn" id="exit-kiosk-btn">Exit Check-In</button>
+          </div>
+          <div id="kiosk-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="exit-overlay" id="exit-overlay">
+    <div class="exit-box">
+      <div class="exit-box-icon">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </div>
+      <h2>Exit Check-In</h2>
+      <p>Sign in with an admin login to leave check-in mode.</p>
+      <div class="error" id="exit-error"></div>
+      <div class="field-group">
+        <label for="exit-email">Email</label>
+        <input type="email" id="exit-email" autocomplete="username">
+      </div>
+      <div class="field-group">
+        <label for="exit-password">Password</label>
+        <input type="password" id="exit-password" autocomplete="current-password">
+      </div>
+      <div class="exit-box-actions">
+        <button type="button" class="btn btn-outline" id="exit-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-gold" id="exit-confirm-btn">Exit</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="newstudent-overlay" id="newstudent-overlay">
+    <div class="newstudent-box">
+      <div class="newstudent-box-header">
+        <h2>New Student Sign-Up</h2>
+        <button type="button" class="btn btn-outline" id="newstudent-cancel-btn">Cancel</button>
+      </div>
+      <iframe id="newstudent-iframe" title="New Student Sign-Up"></iframe>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    function escapeHtml(str) {
+      return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    const params = new URLSearchParams(location.search);
+    const nightId = params.get('night');
+    let night = null;
+    let students = []; // just id/first/last/student_code — never medical/consent data on this screen
+
+    function renderContent(html) { document.getElementById('kiosk-content').innerHTML = html; }
+
+    function renderHome() {
+      renderContent(`
+        <div class="big-buttons">
+          <button type="button" class="big-btn returning" id="btn-returning">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+            Returning Student
+          </button>
+          <button type="button" class="big-btn new" id="btn-new">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            New Student
+          </button>
+        </div>`);
+      document.getElementById('btn-returning').addEventListener('click', renderSearch);
+      document.getElementById('btn-new').addEventListener('click', openNewStudentModal);
+    }
+
+    // ---- New Student: the same public form, in a popup on this screen instead of a new tab ----
+    // A physical kiosk tablet can't be relied on to handle window.open cleanly (blocked, opens
+    // behind, or the parent doesn't know to switch tabs back) — this keeps them on one screen,
+    // with a real Cancel, and lands back on the kiosk's own "Checked in!" confirmation instead of
+    // a separately-styled success page.
+    function openNewStudentModal() {
+      document.getElementById('newstudent-iframe').src = '/new-student';
+      document.getElementById('newstudent-overlay').classList.add('open');
+    }
+    function closeNewStudentModal() {
+      document.getElementById('newstudent-overlay').classList.remove('open');
+      document.getElementById('newstudent-iframe').src = '';
+    }
+    document.getElementById('newstudent-cancel-btn').addEventListener('click', () => {
+      closeNewStudentModal();
+      renderHome();
+    });
+    window.addEventListener('message', async (e) => {
+      if (e.origin !== location.origin || !e.data || e.data.type !== 'new-student-signed-up') return;
+      closeNewStudentModal();
+      renderContent(`<div class="confirm-panel"><div class="confirm-icon-badge">✅</div><div class="confirm-name">${escapeHtml(e.data.name || '')}</div><p>Signed up!</p></div>`);
+      await loadStudentsForSearch(); // so they show up under Returning Student right away
+      setTimeout(renderHome, 2500);
+    });
+
+    function renderSearch() {
+      renderContent(`
+        <input type="text" class="search-input" id="student-search" placeholder="Type your name..." autocomplete="off">
+        <div class="search-results" id="search-results"></div>
+        <div class="back-link" id="back-to-home">&larr; Back</div>`);
+      document.getElementById('back-to-home').addEventListener('click', renderHome);
+      const input = document.getElementById('student-search');
+      input.focus();
+      input.addEventListener('input', () => {
+        const term = input.value.trim().toLowerCase();
+        const results = document.getElementById('search-results');
+        // Only matching names shown, never the full roster and never any personal detail beyond
+        // the name/Student ID — this screen never has access to medical/consent data at all
+        // (this page's own student list is loaded with select('id,first_name,last_name,
+        // student_code') only, see loadStudentsForSearch()).
+        if (term.length < 2) { results.innerHTML = ''; return; }
+        const matches = students.filter(s => `${s.first_name} ${s.last_name}`.toLowerCase().includes(term)).slice(0, 8);
+        results.innerHTML = matches.map(s => `<button type="button" class="search-result-btn" data-id="${s.id}">${escapeHtml(s.first_name)} ${escapeHtml(s.last_name)}</button>`).join('') || (term.length >= 2 ? '<p style="color:var(--text-muted);">No matches.</p>' : '');
+        results.querySelectorAll('[data-id]').forEach(btn => btn.addEventListener('click', () => checkIn(btn.dataset.id)));
+      });
+    }
+
+    async function checkIn(studentId) {
+      const student = students.find(s => s.id === studentId);
+      const { error } = await supabaseClient.from('youth_attendance').insert({ night_id: nightId, student_id: studentId });
+      if (error) {
+        // A unique-constraint violation (Postgres code 23505) means this exact student is
+        // already checked in to this exact night — the real, database-enforced version of
+        // "prevent double check-in," not just a client-side guess.
+        if (error.code === '23505') {
+          renderContent(`<div class="confirm-panel already-panel"><div class="confirm-icon-badge">⚠️</div><div class="confirm-name">${escapeHtml(student.first_name)} ${escapeHtml(student.last_name)}</div><p>Already checked in tonight.</p></div>`);
+        } else {
+          renderContent(`<div class="confirm-panel error-panel"><div class="confirm-icon-badge">❗</div><p>${escapeHtml(error.message)}</p></div>`);
+        }
+      } else {
+        renderContent(`<div class="confirm-panel"><div class="confirm-icon-badge">✅</div><div class="confirm-name">${escapeHtml(student.first_name)} ${escapeHtml(student.last_name)}</div><p>Checked in!</p></div>`);
+      }
+      setTimeout(renderHome, 2500);
+    }
+
+    async function loadStudentsForSearch() {
+      const { data } = await supabaseClient.from('youth_students').select('id,first_name,last_name,student_code');
+      students = data || [];
+    }
+
+    async function loadNight() {
+      if (!nightId) { document.getElementById('session-info').textContent = 'No check-in session selected.'; return false; }
+      const { data, error } = await supabaseClient.from('youth_nights').select('*').eq('id', nightId).single();
+      if (error || !data) { document.getElementById('session-info').textContent = 'That check-in session could not be found.'; return false; }
+      night = data;
+      document.getElementById('session-info').innerHTML = `<strong>${new Date(night.occurred_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</strong> — ${escapeHtml(night.location_name_snapshot)} · Led by ${escapeHtml(night.leader_name_snapshot)}`;
+      return true;
+    }
+
+    // ---- Exit kiosk mode: requires a real admin login, not a click ----
+    function openExitOverlay() {
+      document.getElementById('exit-error').classList.remove('visible');
+      document.getElementById('exit-email').value = '';
+      document.getElementById('exit-password').value = '';
+      document.getElementById('exit-overlay').classList.add('open');
+    }
+    document.getElementById('exit-kiosk-btn').addEventListener('click', openExitOverlay);
+    document.getElementById('exit-cancel-btn').addEventListener('click', () => document.getElementById('exit-overlay').classList.remove('open'));
+    document.getElementById('exit-confirm-btn').addEventListener('click', async () => {
+      const email = document.getElementById('exit-email').value.trim();
+      const password = document.getElementById('exit-password').value;
+      const errorBox = document.getElementById('exit-error');
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) {
+        errorBox.textContent = 'Incorrect email or password.';
+        errorBox.classList.add('visible');
+        return;
+      }
+      window.location.href = 'youth';
+    });
+
+    loadSidebar().then(async () => {
+      if (!document.getElementById('kiosk-content')) return;
+      const ok = await loadNight();
+      await loadStudentsForSearch();
+      if (ok) renderHome();
+    });
+  </script>
+</body>
+</html>

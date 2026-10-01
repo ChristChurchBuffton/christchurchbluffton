@@ -27,16 +27,26 @@ function formatPhone(raw) {
 
 // Permissions a Staff account can be individually granted. Admin accounts implicitly have all of
 // these plus Team management, which is admin-only and not togglable.
+// Same order as the sidebar nav itself (Dashboard/Staff/Accounts have no permission
+// entry — Dashboard+Staff are open to any logged-in user, Accounts is Site-Admin-only,
+// see the note below) — kept in sync on purpose so the Edit Account checkboxes read
+// top-to-bottom the same as the menu a person actually sees.
 const PERMISSIONS = [
-  { key: 'contentEditor', label: 'Content Editor' },
-  { key: 'photos', label: 'Photos' },
-  { key: 'newsletter', label: 'Newsletter' },
-  { key: 'subscribers', label: 'Subscribers' },
   { key: 'congregants', label: 'Congregants' },
+  { key: 'youth', label: 'Youth' },
   { key: 'prayers', label: 'Prayer & Pastoral Requests' },
-  { key: 'events', label: 'Events' },
   { key: 'signups', label: 'Volunteers' },
-  { key: 'youth', label: 'Youth' }
+  { key: 'subscribers', label: 'Subscribers' },
+  { key: 'newsletter', label: 'Newsletter' },
+  // Added 2026-09-30 (Kevin: "notification settings are not in the admin settings... make
+  // sure everything on the left bar is in the options") — was hardcoded Site-Admin-only
+  // before, now a normal grantable permission like the rest. 'team' (Accounts) stays
+  // Site-Admin-only on purpose: it manages every account's own role/permissions, so making
+  // it grantable would let a lesser role escalate its own access.
+  { key: 'notifications', label: 'Notification Settings' },
+  { key: 'events', label: 'Events' },
+  { key: 'contentEditor', label: 'Content Editor' },
+  { key: 'photos', label: 'Photos' }
 ];
 
 // Permissions Staff can never be granted, even if their permissions object somehow has
@@ -306,7 +316,9 @@ const PAGE_PERMISSION_MAP = {
   prayers: 'prayers',
   events: 'events',
   volunteers: 'signups',
-  youth: 'youth'
+  youth: 'youth',
+  checkin: 'youth',
+  notifications: 'notifications'
 };
 
 // Paints the sidebar's account-specific bits (name/avatar/role, which nav links show,
@@ -662,3 +674,68 @@ async function loadSidebar() {
       </div>`;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Styled message / question boxes — used instead of the browser's own alert()/confirm(), so every
+// warning and question looks like the rest of the admin. adminAlert(message[, title]) and
+// adminConfirm({ title, message, confirmLabel, cancelLabel, danger }) -> Promise<boolean>.
+// ---------------------------------------------------------------------------
+(function () {
+  let built = false, overlay, titleEl, bodyEl, okBtn, cancelBtn, resolver = null, lastFocus = null;
+
+  function build() {
+    if (built) return;
+    built = true;
+    const style = document.createElement('style');
+    style.textContent = `
+      .dlg-backdrop { display:none; position:fixed; inset:0; background:rgba(30,37,71,0.55); z-index:3000; align-items:center; justify-content:center; padding:24px; }
+      .dlg-backdrop.open { display:flex; }
+      .dlg-box { background:#fff; border-radius:14px; width:100%; max-width:440px; box-shadow:0 24px 70px rgba(0,0,0,0.35); overflow:hidden; }
+      .dlg-head { padding:18px 24px; border-bottom:2px solid var(--gold, #c3a355); background:linear-gradient(135deg, rgba(195,163,85,0.12) 0%, rgba(195,163,85,0.04) 100%); }
+      .dlg-title { font-family:Georgia,'Times New Roman',serif; font-size:18px; color:var(--navy-blue, #303b6a); }
+      .dlg-body { padding:18px 24px; font-size:14px; line-height:1.6; color:var(--text-dark, #333); white-space:pre-line; overflow-wrap:anywhere; }
+      .dlg-foot { padding:14px 24px 18px; display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap; }
+      .dlg-foot .btn-danger { background:var(--danger, #B14343); color:#fff; }
+    `;
+    document.head.appendChild(style);
+    overlay = document.createElement('div');
+    overlay.className = 'dlg-backdrop';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'dlg-title');
+    overlay.innerHTML = '<div class="dlg-box"><div class="dlg-head"><div class="dlg-title" id="dlg-title"></div></div><div class="dlg-body" id="dlg-body"></div><div class="dlg-foot"><button type="button" class="btn btn-outline" id="dlg-cancel"></button><button type="button" class="btn btn-gold" id="dlg-ok"></button></div></div>';
+    document.body.appendChild(overlay);
+    titleEl = overlay.querySelector('#dlg-title'); bodyEl = overlay.querySelector('#dlg-body');
+    okBtn = overlay.querySelector('#dlg-ok'); cancelBtn = overlay.querySelector('#dlg-cancel');
+    okBtn.addEventListener('click', () => close(true));
+    cancelBtn.addEventListener('click', () => close(false));
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(false); });
+    document.addEventListener('keydown', (e) => { if (overlay.classList.contains('open') && e.key === 'Escape') close(false); });
+  }
+  function close(answer) {
+    overlay.classList.remove('open');
+    const r = resolver; resolver = null;
+    if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) {} }
+    if (r) r(answer);
+  }
+  function open(opts) {
+    build();
+    if (resolver) close(false);
+    lastFocus = document.activeElement;
+    titleEl.textContent = opts.title;
+    bodyEl.textContent = opts.message;
+    okBtn.textContent = opts.confirmLabel;
+    okBtn.className = 'btn ' + (opts.danger ? 'btn-danger' : 'btn-gold');
+    cancelBtn.textContent = opts.cancelLabel || 'Cancel';
+    cancelBtn.style.display = opts.cancelLabel === null ? 'none' : '';
+    overlay.classList.add('open');
+    okBtn.focus();
+    return new Promise(resolve => { resolver = resolve; });
+  }
+  window.adminAlert = function (message, title) {
+    return open({ title: title || 'Notice', message: String(message), confirmLabel: 'OK', cancelLabel: null });
+  };
+  window.adminConfirm = function (opts) {
+    return open({ title: opts.title || 'Please confirm', message: String(opts.message || ''), confirmLabel: opts.confirmLabel || 'Yes', cancelLabel: opts.cancelLabel || 'Cancel', danger: !!opts.danger });
+  };
+})();

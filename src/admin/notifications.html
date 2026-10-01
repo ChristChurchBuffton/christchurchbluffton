@@ -33,6 +33,17 @@
     background: linear-gradient(135deg, rgba(195,163,85,0.12) 0%, rgba(195,163,85,0.04) 100%);
     border-bottom: 2px solid var(--gold);
   }
+  button.notif-card-head {
+    width: 100%; border: none; font: inherit; text-align: left; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  button.notif-card-head:hover { background: linear-gradient(135deg, rgba(195,163,85,0.18) 0%, rgba(195,163,85,0.07) 100%); }
+  button.notif-card-head:focus-visible { outline: 2px solid var(--navy-blue); outline-offset: -2px; }
+  .notif-card.is-collapsed .notif-card-head { border-bottom: none; }
+  .notif-card-head-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .notif-toggle-arrow { flex-shrink: 0; width: 16px; height: 16px; color: var(--gold-text); transition: transform 0.18s ease; }
+  .notif-toggle-arrow.is-open { transform: rotate(90deg); }
+  .notif-card-count { flex-shrink: 0; font-size: 12px; color: var(--text-muted); white-space: nowrap; }
   .notif-card-title { font-family: Georgia, 'Times New Roman', serif; font-size: 16px; color: var(--navy-blue); }
   .notif-card-subtitle { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; }
   .notif-card-body { padding: 18px 22px; }
@@ -77,7 +88,7 @@
   .section-error.visible { display: block; }
 </style>
 </head>
-<body data-page="notifications" data-site-admin-only="true">
+<body data-page="notifications" data-permission="notifications">
   <div class="app-shell">
     <div id="sidebar-mount">
 <aside class="sidebar">
@@ -126,7 +137,7 @@
         Newsletter
         <span class="nav-note">Disabled — use a PC</span>
       </a>
-      <a href="notifications" data-page="notifications" data-site-admin-only="true">
+      <a href="notifications" data-page="notifications" data-permission="notifications">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         Notification Settings
       </a>
@@ -197,10 +208,12 @@
     const FORM_SECTIONS = [
       { key: 'prayer', title: 'Prayer & Pastoral Care Notifications', subtitle: 'Sent whenever someone submits the prayer & pastoral care form' },
       { key: 'contact', title: 'Contact Form Notifications', subtitle: 'Sent whenever someone submits the contact form' },
-      { key: 'newsletter', title: 'Newsletter Notifications', subtitle: 'Sent whenever someone signs up for the newsletter' }
+      { key: 'contact_youth', title: 'Contact Form Youth Notifications', subtitle: 'Sent whenever someone picks Youth Group on the contact form' },
+      { key: 'newsletter', title: 'Newsletter Notifications', subtitle: 'Sent whenever someone signs up for the newsletter' },
     ];
 
     let settingsByForm = {};
+    let expandedSections = new Set(); // form keys currently open — starts empty (all collapsed)
 
     function escapeHtml(str) {
       return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -236,13 +249,20 @@
               </li>`).join('')}</ul>`
           : `<div class="recipient-empty">No recipients yet — add one below.</div>`;
 
+        const isOpen = expandedSections.has(section.key);
         return `
-          <div class="card notif-card">
-            <div class="notif-card-head">
-              <div class="notif-card-title">${section.title}</div>
-              <div class="notif-card-subtitle">${section.subtitle}</div>
-            </div>
-            <div class="notif-card-body">
+          <div class="card notif-card ${isOpen ? '' : 'is-collapsed'}">
+            <button type="button" class="notif-card-head" data-toggle-section="${section.key}" aria-expanded="${isOpen}">
+              <div class="notif-card-head-left">
+                <svg class="notif-toggle-arrow ${isOpen ? 'is-open' : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"></polyline></svg>
+                <div>
+                  <div class="notif-card-title">${section.title}</div>
+                  <div class="notif-card-subtitle">${section.subtitle}</div>
+                </div>
+              </div>
+              <div class="notif-card-count">${recipients.length} ${recipients.length === 1 ? 'recipient' : 'recipients'}</div>
+            </button>
+            <div class="notif-card-body" ${isOpen ? '' : 'hidden'}>
               <div class="section-error" id="error-${section.key}"></div>
               ${listHtml}
               <div class="add-recipient-row">
@@ -296,7 +316,7 @@
         showSectionError(formKey, 'At least one recipient is required — add a replacement before removing the last one.');
         return;
       }
-      if (!confirm(`Remove ${email} from ${formKey} notifications?`)) return;
+      if (!(await adminConfirm({ title: 'Remove this address?', message: `Remove ${email} from the ${(FORM_SECTIONS.find(x => x.key === formKey) || { title: formKey }).title.replace(/ Notifications$/, '')} notifications?\n\nThey will stop getting those emails.`, confirmLabel: 'Remove', danger: true }))) return;
 
       const updated = current.filter(e => e !== email);
       const { error } = await supabaseClient.from('notification_settings')
@@ -316,6 +336,13 @@
       renderSections();
 
       document.getElementById('notif-sections').addEventListener('click', (e) => {
+        const toggleBtn = e.target.closest('[data-toggle-section]');
+        if (toggleBtn) {
+          const key = toggleBtn.dataset.toggleSection;
+          if (expandedSections.has(key)) expandedSections.delete(key); else expandedSections.add(key);
+          renderSections();
+          return;
+        }
         const removeBtn = e.target.closest('.remove-recipient-btn');
         if (removeBtn) {
           removeRecipient(removeBtn.dataset.form, removeBtn.dataset.email);

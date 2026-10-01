@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christ Church Bluffton | New Student Sign-Up</title>
+    <meta name="description" content="Sign up a new student for Christ Church Bluffton's youth ministry.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="css/fonts.css">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/favicon.png">
+    <link rel="stylesheet" href="css/shared.css">
+    <style>
+        /* Missing on this page until 2026-09-30 — every other page on this site defines these
+           locally (shared.css only ever USES them, never defines them), so var(--navy-blue) etc.
+           silently resolved to nothing here. Harmless on inherited properties like `color` (falls
+           back to the inherited text color, so headings still looked roughly right), but broke
+           anything using it on a non-inherited property like `background` (falls back to
+           transparent — that's why the Submit button was invisible). */
+        :root {
+            --navy-blue: #303b6a;
+            --gold: #c3a355;
+            --gold-text: #7F6D34;
+            --white: #FFFFFF;
+            --lightest-gray: #F5F4EF;
+            --light-gray: #E2E0D8;
+            --dark-gray: #333333;
+            --text-gray: #4A4A55;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Lora', serif; color: #333; background: #F5F4EF; }
+        main { max-width: 640px; margin: 0 auto; padding: 60px 20px 100px; }
+        h1 { font-family: Georgia, 'Times New Roman', serif; color: var(--navy-blue); font-size: 2rem; margin-bottom: 8px; }
+        .lead { color: #555; margin-bottom: 32px; line-height: 1.6; }
+        .card { background: #fff; border-radius: 12px; padding: 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .section-title { font-family: Georgia, 'Times New Roman', serif; color: var(--navy-blue); font-size: 1.15rem; margin: 28px 0 14px; padding-top: 20px; border-top: 1px solid #eee; }
+        .section-title:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+        .row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+        .field { flex: 1 1 200px; display: flex; flex-direction: column; gap: 6px; }
+        label { font-size: 0.8rem; font-weight: bold; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        input[type="text"], input[type="email"], input[type="tel"], input[type="date"], textarea {
+            padding: 11px 12px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; font-size: 1rem;
+        }
+        textarea { min-height: 80px; resize: vertical; }
+        input:focus, textarea:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+        .terms-box { background: #F9F8F4; border: 1px solid #e5e0d0; border-radius: 10px; padding: 20px; max-height: 260px; overflow-y: auto; font-size: 0.92rem; line-height: 1.6; color: #444; margin-bottom: 18px; }
+        .terms-box p { margin-bottom: 12px; }
+        .consent-choice { display: flex; gap: 24px; margin: 6px 0 18px; }
+        .consent-choice label { display: flex; align-items: center; gap: 6px; font-weight: normal; text-transform: none; letter-spacing: 0; color: #333; font-size: 0.95rem; }
+        .privacy-line { font-size: 0.85rem; color: #666; margin: 20px 0; line-height: 1.5; }
+        button[type="submit"] { background: var(--navy-blue); color: #fff; border: none; border-radius: 100px; padding: 18px 48px; font-family: inherit; font-weight: bold; font-size: 1.15rem; cursor: pointer; }
+        button[type="submit"]:disabled { opacity: 0.6; cursor: not-allowed; }
+        .submit-box { background: #F9F8F4; border: 1px solid #e5e0d0; border-radius: 10px; padding: 24px; margin-top: 24px; text-align: center; }
+        .form-msg { display: none; margin-top: 16px; padding: 12px 16px; border-radius: 8px; font-size: 0.9rem; }
+        .form-msg.error { display: block; background: #fdeaea; color: #a33; }
+        .success-panel { text-align: center; padding: 60px 20px; }
+        .student-id-box { display: inline-block; background: var(--navy-blue); color: #fff; font-family: Georgia, serif; font-size: 1.5rem; padding: 12px 28px; border-radius: 10px; margin: 16px 0; letter-spacing: 1px; }
+        .cf-turnstile { margin: 20px 0; }
+        .unavailable-panel { text-align: center; padding: 80px 20px; color: #666; }
+        .required-mark { color: #c66; }
+    </style>
+</head>
+<body>
+    <main>
+        <div id="form-wrap">
+            <h1>New Student Sign-Up</h1>
+            <p class="lead">Fill out this form to sign your student up for our youth ministry.</p>
+            <div class="card">
+                <form id="student-form">
+                    <input type="text" name="website_url_confirm" style="position:absolute;left:-9999px;" tabindex="-1" autocomplete="new-password" aria-hidden="true">
+
+                    <div class="section-title">Student</div>
+                    <div class="row">
+                        <div class="field"><label>First Name<span class="required-mark">*</span></label><input type="text" id="s-first" required></div>
+                        <div class="field"><label>Last Name<span class="required-mark">*</span></label><input type="text" id="s-last" required></div>
+                    </div>
+                    <div class="row">
+                        <div class="field"><label>Student Phone</label><input type="tel" id="s-phone"></div>
+                        <div class="field"><label>Student Email</label><input type="email" id="s-email"></div>
+                    </div>
+                    <div class="row">
+                        <div class="field"><label>Birthday</label><input type="date" id="s-birthdate"></div>
+                        <div class="field"><label>Current Grade</label><input type="text" id="s-grade" placeholder="e.g. 8th"></div>
+                        <div class="field"><label>Attending School</label><input type="text" id="s-school"></div>
+                    </div>
+                    <div class="row">
+                        <div class="field" style="flex:1 1 100%;"><label>Notes <span style="font-weight:normal; text-transform:none;">(allergies, conditions, etc. — optional)</span></label><textarea id="s-notes"></textarea></div>
+                    </div>
+
+                    <div class="section-title">Parent / Guardian</div>
+                    <div class="row">
+                        <div class="field"><label>First Name<span class="required-mark">*</span></label><input type="text" id="p-first" required></div>
+                        <div class="field"><label>Last Name<span class="required-mark">*</span></label><input type="text" id="p-last" required></div>
+                    </div>
+                    <div class="row">
+                        <div class="field"><label>Phone<span class="required-mark">*</span></label><input type="tel" id="p-phone" required></div>
+                        <div class="field"><label>Secondary Phone</label><input type="tel" id="p-phone-2"></div>
+                        <div class="field"><label>Email<span class="required-mark">*</span></label><input type="email" id="p-email" required></div>
+                    </div>
+                    <div class="row">
+                        <div class="field" style="flex:1 1 100%;"><label>Address<span class="required-mark">*</span></label><input type="text" id="p-address" required></div>
+                    </div>
+                    <div class="row">
+                        <div class="field"><label>City</label><input type="text" id="p-city"></div>
+                        <div class="field" style="flex:0 1 100px;"><label>State</label><input type="text" id="p-state" maxlength="2"></div>
+                        <div class="field" style="flex:0 1 130px;"><label>Zip</label><input type="text" id="p-zip" maxlength="10"></div>
+                    </div>
+
+                    <div class="section-title">Consent &amp; Privacy</div>
+                    <div class="terms-box" id="terms-box">
+                        <p><strong>How Christ Church Anglican Bluffton May Use the Media.</strong> If you choose Yes below, Christ Church Anglican Bluffton may use identifiable photos and/or video of the student named above for church information and promotion on its website and official social media accounts, including Facebook and Instagram.</p>
+                        <p>Only a Yes choice grants permission. Your choice applies only to the student named above and the uses described here. This does not permit publishing the student's name alongside the media. You may contact the church office to withdraw permission for future use; copies already shared by others may remain outside the church's control.</p>
+                    </div>
+
+                    <div class="field" style="margin-bottom:10px;"><label>Identifiable Photos<span class="required-mark">*</span></label></div>
+                    <div class="consent-choice">
+                        <label><input type="radio" name="photos" value="yes" required> Yes</label>
+                        <label><input type="radio" name="photos" value="no"> No</label>
+                    </div>
+                    <div class="field" style="margin-bottom:10px;"><label>Identifiable Video<span class="required-mark">*</span></label></div>
+                    <div class="consent-choice">
+                        <label><input type="radio" name="video" value="yes" required> Yes</label>
+                        <label><input type="radio" name="video" value="no"> No</label>
+                    </div>
+
+                    <div class="row">
+                        <div class="field" style="flex:1 1 100%;"><label>Parent/Guardian Signature<span class="required-mark">*</span> <span style="font-weight:normal; text-transform:none; color:#888;">— typing your name means you intend to sign this form</span></label><input type="text" id="signature" required></div>
+                    </div>
+
+                    <p class="privacy-line">
+                        <label style="display:flex; align-items:flex-start; gap:8px; font-weight:normal; text-transform:none; letter-spacing:0;">
+                            <input type="checkbox" id="terms-ack" required style="margin-top:3px;">
+                            <span>I have read and agree to the terms above.</span>
+                        </label>
+                    </p>
+
+                    <div class="cf-turnstile" data-sitekey="0x4AAAAAACneNwgE844_oOI-" data-size="flexible"></div>
+
+                    <div class="submit-box">
+                        <button type="submit" id="submit-btn">Submit</button>
+                        <div class="form-msg" id="form-msg"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="success-panel" id="success-panel" style="display:none;">
+            <h1>Thank You!</h1>
+            <p class="lead">Your student has been signed up. Check-in is by name at the door — no card or number needed.</p>
+        </div>
+    </main>
+
+    <script src="js/components.js"></script>
+    <script>
+        window.__turnstileReady = false;
+        window.__turnstileQueue = [];
+        window.turnstileOnLoad = function() {
+            window.__turnstileReady = true;
+            window.__turnstileQueue.forEach(function(el) { try { turnstile.render(el); } catch (e) {} });
+            window.__turnstileQueue = [];
+        };
+        window.renderTurnstile = function(el) {
+            if (!el) return;
+            if (window.__turnstileReady && window.turnstile) { try { turnstile.render(el); } catch (e) {} }
+            else { window.__turnstileQueue.push(el); }
+        };
+    </script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=turnstileOnLoad&render=explicit" async defer></script>
+    <script>
+        if (window.renderTurnstile) renderTurnstile(document.querySelector('.cf-turnstile'));
+
+
+      // Format phone numbers as the person leaves the field: 8435550101 -> (843) 555-0101
+      (function () {
+        function fmt(v) { var d = String(v || '').replace(/\D/g, ''); if (d.length === 11 && d[0] === '1') d = d.slice(1); return d.length === 10 ? '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6) : v; }
+        ["s-phone","p-phone","p-phone-2"].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el) el.addEventListener('blur', function () { el.value = fmt(el.value.trim()); });
+        });
+      })();
+        const termsVersion = 'v1'; // hardcoded wording (see #terms-box above) — no admin editor for this anymore
+
+        document.getElementById('student-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const msg = document.getElementById('form-msg');
+            msg.className = 'form-msg';
+            msg.textContent = '';
+
+            const val = id => document.getElementById(id).value.trim();
+            const photosChecked = document.querySelector('input[name="photos"]:checked');
+            const videoChecked = document.querySelector('input[name="video"]:checked');
+            if (!val('s-first') || !val('s-last') || !val('p-first') || !val('p-last') || !val('signature')
+                || !val('p-phone') || !val('p-email') || !val('p-address') || !photosChecked || !videoChecked) {
+                msg.textContent = 'Please fill in all required fields.';
+                msg.className = 'form-msg error';
+                return;
+            }
+            if (!document.getElementById('terms-ack').checked) {
+                msg.textContent = 'Please check the box agreeing to the terms.';
+                msg.className = 'form-msg error';
+                return;
+            }
+
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Submitting…';
+            let token = '';
+            try { token = turnstile.getResponse(document.querySelector('.cf-turnstile')); } catch (e) {}
+
+            try {
+                const res = await fetch('/api/new-student-signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        studentFirstName: val('s-first'), studentLastName: val('s-last'),
+                        phone: val('s-phone'), email: val('s-email'), birthdate: val('s-birthdate'), grade: val('s-grade'), school: val('s-school'), notes: val('s-notes'),
+                        parentFirstName: val('p-first'), parentLastName: val('p-last'), parentPhone: val('p-phone'), parentPhone2: val('p-phone-2'), parentEmail: val('p-email'),
+                        parentAddress: val('p-address'), parentCity: val('p-city'), parentState: val('p-state'), parentZip: val('p-zip'),
+                        identifiablePhotos: photosChecked.value === 'yes',
+                        identifiableVideo: videoChecked.value === 'yes',
+                        signatureName: val('signature'), termsVersion,
+                        website_url_confirm: document.querySelector('[name="website_url_confirm"]').value,
+                        turnstileToken: token
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+                document.getElementById('form-wrap').style.display = 'none';
+                document.getElementById('success-panel').style.display = 'block';
+                // Lets an embedding page (the check-in kiosk's popup) know signup finished, so it
+                // can close the popup and show its own confirmation — harmless no-op when this
+                // page is opened directly (not embedded), since nothing is listening for it then.
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'new-student-signed-up', name: `${val('s-first')} ${val('s-last')}` }, location.origin);
+                }
+            } catch (err) {
+                msg.textContent = err.message;
+                msg.className = 'form-msg error';
+                btn.disabled = false;
+                btn.textContent = 'Submit';
+                try { turnstile.reset(document.querySelector('.cf-turnstile')); } catch (e) {}
+            }
+        });
+
+        fetch('/api/new-student-signup?check=1').then(r => r.json()).then(d => {
+            if (d.enabled === false) {
+                document.getElementById('form-wrap').innerHTML = '<div class="unavailable-panel"><h1 style="color:var(--navy-blue);">Not Available Yet</h1><p>This form isn\'t open yet. Please check back soon.</p></div>';
+            }
+        }).catch(() => {});
+    </script>
+</body>
+</html>
