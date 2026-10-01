@@ -342,7 +342,8 @@
           </div>
           <div style="display:flex; align-items:center; gap:12px;">
             <div class="count-badge" id="family-count">— families</div>
-            <button type="button" class="review-badge" id="review-badge" style="display:none;"></button>
+            <button type="button" class="review-badge" id="review-badge" style="display:none;" title="Review the flagged households one at a time"></button>
+            <button type="button" class="dup-link" id="filter-flagged-btn" style="display:none; font-size:12px;"></button>
           </div>
         </div>
 
@@ -516,7 +517,17 @@
       if (reviewOnly && !n) reviewOnly = false;
       const badge = document.getElementById('review-badge');
       badge.style.display = n ? '' : 'none';
-      badge.textContent = reviewOnly ? 'Show all families' : n + ' to review';
+      badge.textContent = n + ' to review';
+      const filterBtn = document.getElementById('filter-flagged-btn');
+      filterBtn.style.display = n ? '' : 'none';
+      filterBtn.textContent = reviewOnly ? 'Show all families' : 'Show only flagged';
+    }
+
+    // Review queue: after each decision, jump straight to the next flagged household (if any).
+    function afterFamilyReview() {
+      closeModal(); renderFamilies();
+      const nxt = families.find(x => x.possibleDuplicateFamilyId);
+      if (nxt) openFamilyDupReview(nxt);
     }
 
     function familyCompareColHtml(title, f) {
@@ -538,13 +549,16 @@
       document.getElementById('modal-subtitle').textContent = flagged.headFirstName + ' ' + flagged.headLastName;
       document.getElementById('modal-body').innerHTML = '<div class="dup-compare">' + familyCompareColHtml('Already on file', original) + familyCompareColHtml('New sign-up (flagged)', flagged) + '</div>' +
         '<p class="dup-help">Removing one moves its children and linked youth students onto the one you keep.</p>';
+      const flaggedList = families.filter(x => x.possibleDuplicateFamilyId);
+      const nextFlagged = flaggedList.length > 1 ? flaggedList[(flaggedList.findIndex(x => x.id === flagged.id) + 1) % flaggedList.length] : null;
       setModalFooter([
         { label: 'Close', className: 'btn btn-outline', onClick: closeModal },
+        ...(nextFlagged ? [{ label: 'Next flagged (' + (flaggedList.findIndex(x => x.id === flagged.id) + 1) + ' of ' + flaggedList.length + ')', className: 'btn btn-outline', onClick: () => openFamilyDupReview(nextFlagged) }] : []),
         { label: 'Not a duplicate', className: 'btn btn-outline', onClick: async () => {
           const { error } = await supabaseClient.from('congregant_families').update({ possible_duplicate_family_id: null }).eq('id', flagged.id);
           if (error) { adminAlert('Could not clear the flag: ' + error.message, 'Not saved'); return; }
           flagged.possibleDuplicateFamilyId = null;
-          closeModal(); renderFamilies();
+          afterFamilyReview();
         } },
         { label: 'Keep original, remove new', className: 'btn btn-outline', onClick: () => confirmMergeFamilies(original, flagged) },
         { label: 'Keep new, remove original', className: 'btn btn-gold', onClick: () => confirmMergeFamilies(flagged, original) }
@@ -573,9 +587,8 @@
         return;
       }
       logActivity('congregant_edit', 'Merged duplicate household ' + loser.headLastName + ', ' + loser.headFirstName + ' into ' + winner.headLastName + ', ' + winner.headFirstName);
-      closeModal();
       await Promise.all([loadFamilies(), loadYouthLinks()]);
-      renderFamilies();
+      afterFamilyReview();
     }
 
     function familyDupNoticeHtml(f) {
@@ -979,7 +992,8 @@
       });
 
       document.getElementById('add-family-btn').addEventListener('click', () => openFamilyModal(null));
-      document.getElementById('review-badge').addEventListener('click', () => { reviewOnly = !reviewOnly; renderFamilies(); });
+      document.getElementById('review-badge').addEventListener('click', () => { const f = families.find(x => x.possibleDuplicateFamilyId); if (f) openFamilyDupReview(f); });
+      document.getElementById('filter-flagged-btn').addEventListener('click', () => { reviewOnly = !reviewOnly; renderFamilies(); });
       document.getElementById('search-input').addEventListener('input', (e) => { searchTerm = e.target.value; renderFamilies(); });
 
       document.getElementById('congregants-grid').addEventListener('click', async (e) => {

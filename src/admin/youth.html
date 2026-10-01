@@ -289,7 +289,8 @@
                 <input type="text" id="roster-search" placeholder="Search students..." style="padding:9px 12px 9px 34px; border:1px solid var(--border-gray); border-radius:8px; font-family:inherit; font-size:13px; min-width:260px;">
               </div>
               <div class="count-badge" id="student-count">— students</div>
-              <button type="button" class="review-badge" id="review-badge" style="display:none;"></button>
+              <button type="button" class="review-badge" id="review-badge" style="display:none;" title="Review the flagged students one at a time"></button>
+              <button type="button" class="dup-dismiss" id="filter-flagged-btn" style="display:none; font-size:12px;"></button>
             </div>
             <div class="roster-grid" id="roster-grid"></div>
           </div>
@@ -820,7 +821,17 @@
       const n = students.filter(s => s.possible_duplicate_student_id).length;
       const badge = document.getElementById('review-badge');
       badge.style.display = n ? '' : 'none';
-      badge.textContent = reviewOnly ? 'Show all students' : n + ' to review';
+      badge.textContent = n + ' to review';
+      const filterBtn = document.getElementById('filter-flagged-btn');
+      filterBtn.style.display = n ? '' : 'none';
+      filterBtn.textContent = reviewOnly ? 'Show all students' : 'Show only flagged';
+    }
+
+    // Review queue: after each decision, jump straight to the next flagged student (if any).
+    async function afterStudentReview() {
+      closeModal(); await loadStudents(); renderRoster();
+      const nxt = students.find(x => x.possible_duplicate_student_id);
+      if (nxt) openStudentDupReview(nxt);
     }
 
     function studentCompareColHtml(title, s) {
@@ -855,13 +866,16 @@
       document.getElementById('modal-body').innerHTML = '<div class="dup-compare">' + studentCompareColHtml('Already on file', original) + studentCompareColHtml('New sign-up (flagged)', flagged) + '</div>' +
         '<p class="dup-help">Removing one moves its attendance and consent records onto the one you keep.</p>';
       document.getElementById('modal-box').classList.add('wide');
+      const flaggedList = students.filter(x => x.possible_duplicate_student_id);
+      const nextFlagged = flaggedList.length > 1 ? flaggedList[(flaggedList.findIndex(x => x.id === flagged.id) + 1) % flaggedList.length] : null;
       setModalFooter([
         { label: 'Close', className: 'btn btn-outline', onClick: closeModal },
+        ...(nextFlagged ? [{ label: 'Next flagged (' + (flaggedList.findIndex(x => x.id === flagged.id) + 1) + ' of ' + flaggedList.length + ')', className: 'btn btn-outline', onClick: () => openStudentDupReview(nextFlagged) }] : []),
         { label: 'Not a duplicate', className: 'btn btn-outline', onClick: async () => {
           const { error } = await supabaseClient.from('youth_students').update({ possible_duplicate_student_id: null }).eq('id', flagged.id);
           if (error) { adminAlert('Could not clear the flag: ' + error.message, 'Not saved'); return; }
           logActivity('congregant_edit', flagged.first_name + ' ' + flagged.last_name + ' (Youth) marked not a duplicate');
-          closeModal(); await loadStudents(); renderRoster();
+          await afterStudentReview();
         } },
         { label: 'Keep original, remove new', className: 'btn btn-outline', onClick: () => confirmMergeStudents(original, flagged) },
         { label: 'Keep new, remove original', className: 'btn btn-gold', onClick: () => confirmMergeStudents(flagged, original) }
@@ -883,7 +897,7 @@
         return;
       }
       logActivity('congregant_edit', 'Merged duplicate student ' + loser.student_code + ' into ' + winner.student_code + ' (Youth)');
-      closeModal(); await loadStudents(); renderRoster();
+      await afterStudentReview();
     }
 
     async function mergeStudents(winner, loser) {
@@ -973,7 +987,8 @@
       });
     }
 
-    document.getElementById('review-badge').addEventListener('click', () => { reviewOnly = !reviewOnly; renderRoster(); });
+    document.getElementById('review-badge').addEventListener('click', () => { const f = students.find(x => x.possible_duplicate_student_id); if (f) openStudentDupReview(f); });
+    document.getElementById('filter-flagged-btn').addEventListener('click', () => { reviewOnly = !reviewOnly; renderRoster(); });
     document.getElementById('roster-grid').addEventListener('click', async (e) => {
       const reviewBtn = e.target.closest('[data-action="review-student-dup"]');
       if (reviewBtn) { const fs_ = students.find(x => x.id === reviewBtn.dataset.id); if (fs_) openStudentDupReview(fs_); return; }

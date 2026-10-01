@@ -75,7 +75,14 @@ async function findOrCreateHousehold(parent, student) {
     if (rows.length) family = rows[0];
   }
   let possibleDuplicateFamilyId = null;
-  if (!family && parent.lastName) {
+  // Re-submission of a student already on file in the matched household: nothing is added to or changed in that household.
+  // The submission is saved as its OWN household (flagged against the match) with the new, flagged student in it, so an admin reviews both.
+  // A new sibling for a known family (no student of that name yet) still just links to the household.
+  if (family) {
+    const dupKid = await sb('GET', `youth_students?family_id=eq.${family.id}&first_name=ilike.${encodeURIComponent(q(student.firstName))}&last_name=ilike.${encodeURIComponent(q(student.lastName))}&select=id&limit=1`);
+    if (dupKid.length) { possibleDuplicateFamilyId = family.id; family = null; }
+  }
+  if (!family && !possibleDuplicateFamilyId && parent.lastName) {
     const similar = await sb('GET', `congregant_families?select=id&or=(head_last_name.ilike.%22${encodeURIComponent(q(parent.lastName))}%22,spouse_last_name.ilike.%22${encodeURIComponent(q(parent.lastName))}%22)&limit=1`);
     if (similar.length) possibleDuplicateFamilyId = similar[0].id;
   }
@@ -83,7 +90,8 @@ async function findOrCreateHousehold(parent, student) {
     const created = await sb('POST', 'congregant_families', {
       head_first_name: parent.firstName, head_last_name: parent.lastName,
       head_email: parent.email || null, head_phone: parent.phone || null,
-      address: parent.address || null, city: parent.city || null, state: parent.state || null, zip: parent.zip || null
+      address: parent.address || null, city: parent.city || null, state: parent.state || null, zip: parent.zip || null,
+      possible_duplicate_family_id: possibleDuplicateFamilyId
     });
     family = created[0];
   }
