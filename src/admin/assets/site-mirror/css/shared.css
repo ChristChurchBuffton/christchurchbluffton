@@ -80,7 +80,11 @@ textarea:focus-visible {
 /* ── Anti-flash (hide until JS loads includes) ── */
 #site-header, #site-footer, #site-prayer { opacity: 0; transition: opacity 0.2s ease; }
 #site-header.loaded, #site-footer.loaded, #site-prayer.loaded { opacity: 1; }
-#site-header { position: sticky; top: 0; z-index: 100; }
+/* min-height = the real header height (.header-container: 85px, 68px on small phones).
+   The header is injected by JS after the page loads; without reserved space it pushes the
+   whole page down ~85px after the browser has already jumped to a #anchor, leaving the
+   target section hidden that far below where it should land. */
+#site-header { position: sticky; top: 0; z-index: 100; min-height: 85px; }
 
 /* ══════════════════════════════════════════════
    HEADER
@@ -1067,6 +1071,10 @@ textarea:focus-visible {
    ══════════════════════════════════════════════ */
 
 @media (max-width: 480px) {
+    #site-header {
+        min-height: 68px;
+    }
+
     .header-container {
         height: 68px;
         padding: 6px 12px;

@@ -13,6 +13,32 @@
     targets.forEach(function(el) { observer.observe(el); });
 })();
 
+// Keep a #anchor link landing on its section. The browser jumps to the anchor on the first
+// layout, before the web fonts have loaded; when Lora swaps in, the text above the target gets
+// taller (90px on Groups) and the page is left stopped short of the section. Re-align once
+// the fonts settle, unless the visitor has already started scrolling.
+(function() {
+    if (!location.hash || !document.fonts) return;
+    var target = null;
+    try { target = document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch (err) {}
+    if (!target) return;
+
+    var visitorMoved = false;
+    function markMoved() { visitorMoved = true; }
+    ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function(evt) {
+        window.addEventListener(evt, markMoved, { once: true, passive: true });
+    });
+
+    // behavior:'instant' — the site sets html{scroll-behavior:smooth}, which would otherwise
+    // animate this correction instead of snapping.
+    function align() {
+        if (!visitorMoved) target.scrollIntoView({ behavior: 'instant', block: 'start' });
+    }
+    document.fonts.addEventListener('loadingdone', align);
+    window.addEventListener('load', function() { document.fonts.ready.then(align); });
+    setTimeout(function() { document.fonts.removeEventListener('loadingdone', align); }, 5000);
+})();
+
 // Load shared components (header, footer, prayer FAB)
 (function() {
     function loadComponent(id, file, callback) {
@@ -138,14 +164,14 @@
                     btn.textContent = 'Subscribe';
                     btn.disabled = false;
                     try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
-                    alert('Something went wrong. Please try again.');
+                    siteAlert('Something went wrong. Please try again.');
                 }
             })
             .catch(function() {
                 btn.textContent = 'Subscribe';
                 btn.disabled = false;
                 try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
-                alert('Something went wrong. Please try again.');
+                siteAlert('Something went wrong. Please try again.');
             });
         });
     });
@@ -319,15 +345,46 @@
                     btn.textContent = 'Submit Request';
                     btn.disabled = false;
                     try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
-                    alert('Something went wrong. Please try again or email us directly.');
+                    siteAlert('Something went wrong. Please try again or email us directly.');
                 }
             })
             .catch(function() {
                 btn.textContent = 'Submit Request';
                 btn.disabled = false;
                 try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch (err) {}
-                alert('Something went wrong. Please try again or email us directly.');
+                siteAlert('Something went wrong. Please try again or email us directly.');
             });
         });
     });
 })();
+
+// Styled message box used instead of the browser's own alert(), so errors look like the rest of the site.
+window.siteAlert = function (message) {
+    var style = document.getElementById('site-dlg-style');
+    if (!style) {
+        style = document.createElement('style');
+        style.id = 'site-dlg-style';
+        style.textContent = '.site-dlg-backdrop{position:fixed;inset:0;background:rgba(30,37,71,.55);z-index:100000;display:flex;align-items:center;justify-content:center;padding:24px}' +
+            '.site-dlg-box{background:#fff;border-radius:14px;max-width:420px;width:100%;box-shadow:0 24px 70px rgba(0,0,0,.35);overflow:hidden;font-family:inherit}' +
+            '.site-dlg-head{padding:16px 22px;background:#303b6a;color:#fff;font-size:1rem;letter-spacing:.5px}' +
+            '.site-dlg-body{padding:20px 22px;font-size:.9375rem;line-height:1.6;color:#333}' +
+            '.site-dlg-foot{padding:0 22px 20px;display:flex;justify-content:flex-end}' +
+            '.site-dlg-ok{background:#c3a355;color:#fff;border:0;border-radius:8px;padding:10px 26px;font:inherit;font-weight:bold;cursor:pointer}' +
+            '.site-dlg-ok:focus-visible{outline:2px solid #303b6a;outline-offset:2px}';
+        document.head.appendChild(style);
+    }
+    var last = document.activeElement;
+    var wrap = document.createElement('div');
+    wrap.className = 'site-dlg-backdrop';
+    wrap.setAttribute('role', 'alertdialog');
+    wrap.setAttribute('aria-modal', 'true');
+    wrap.setAttribute('aria-labelledby', 'site-dlg-title');
+    wrap.innerHTML = '<div class="site-dlg-box"><div class="site-dlg-head" id="site-dlg-title">Something went wrong</div><div class="site-dlg-body"></div><div class="site-dlg-foot"><button type="button" class="site-dlg-ok">OK</button></div></div>';
+    wrap.querySelector('.site-dlg-body').textContent = message;
+    function close() { wrap.remove(); if (last && last.focus) { try { last.focus(); } catch (e) {} } }
+    wrap.querySelector('.site-dlg-ok').addEventListener('click', close);
+    wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
+    wrap.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+    document.body.appendChild(wrap);
+    wrap.querySelector('.site-dlg-ok').focus();
+};

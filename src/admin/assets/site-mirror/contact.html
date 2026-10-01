@@ -667,6 +667,15 @@
         </script>
         <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=turnstileOnLoad&render=explicit" async defer></script>
     <script>
+
+      // Format phone numbers as the person leaves the field: 8435550101 -> (843) 555-0101
+      (function () {
+        function fmt(v) { var d = String(v || '').replace(/\D/g, ''); if (d.length === 11 && d[0] === '1') d = d.slice(1); return d.length === 10 ? '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6) : v; }
+        ["phone"].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el) el.addEventListener('blur', function () { el.value = fmt(el.value.trim()); });
+        });
+      })();
         // Contact form handler
         if (window.renderTurnstile) renderTurnstile(document.querySelector('.cf-turnstile'));
 
@@ -737,14 +746,14 @@
                     btn.textContent = 'Send Message';
                     btn.disabled = false;
                     try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch(e) {}
-                    alert('Something went wrong. Please try again or email us directly.');
+                    (window.siteAlert || window.alert)('Something went wrong. Please try again or email us directly.');
                 }
             })
             .catch(function() {
                 btn.textContent = 'Send Message';
                 btn.disabled = false;
                 try { turnstile.reset(form.querySelector('.cf-turnstile')); } catch(e) {}
-                alert('Something went wrong. Please try again or email us directly.');
+                (window.siteAlert || window.alert)('Something went wrong. Please try again or email us directly.');
             });
         });
 

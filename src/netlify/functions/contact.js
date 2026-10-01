@@ -1,5 +1,14 @@
 const tm = require('./lib/form-test-mode');
 
+// Same rule as the admin's formatPhone(): 10 digits (a leading 1 is dropped) -> (843) 555-0101; anything else is kept as typed.
+function formatPhone(raw) {
+  const t = String(raw || '').trim();
+  if (!t) return '';
+  let d = t.replace(/\D/g, '');
+  if (d.length === 11 && d[0] === '1') d = d.slice(1);
+  return d.length === 10 ? '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6) : t;
+}
+
 async function verifyTurnstile(token) {
   const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'POST',
@@ -108,7 +117,8 @@ const handleRequest = async (event) => {
   }
 
   try {
-    const { fullName, email, phone, smsConsent, interest, message, prayerContact, careTypes, otherNeedText, website_url_confirm, turnstileToken } = JSON.parse(event.body);
+    const { fullName, email, phone: rawPhone, smsConsent, interest, message, prayerContact, careTypes, otherNeedText, website_url_confirm, turnstileToken } = JSON.parse(event.body);
+    const phone = formatPhone(rawPhone);
     const smsConsentLabel = smsConsent === 'yes' ? 'Yes — OK to text' : smsConsent === 'no' ? 'No — do not text' : '(not answered)';
     const cleanCareTypes = Array.isArray(careTypes) ? careTypes.filter(Boolean) : [];
 
@@ -212,7 +222,7 @@ const handleRequest = async (event) => {
       const notifyTo = interest === 'prayer'
         ? await getRecipients('prayer', ['admin@christchurchbluffton.org', 'jonathan@christchurchbluffton.org', 'bradley@christchurchbluffton.org'])
         : interest === 'youth'
-          ? await getRecipients('youth', ['bradley@christchurchbluffton.org', 'admin@christchurchbluffton.org', 'youth@christchurchbluffton.org'])
+          ? await getRecipients('contact_youth', ['bradley@christchurchbluffton.org', 'admin@christchurchbluffton.org', 'youth@christchurchbluffton.org'])
           : await getRecipients('contact', ['info@christchurchbluffton.org', 'admin@christchurchbluffton.org']);
 
       const interestLabels = {
