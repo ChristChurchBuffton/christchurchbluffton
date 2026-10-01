@@ -108,7 +108,8 @@ const handleRequest = async (event) => {
   }
 
   try {
-    const { fullName, email, phone, interest, message, prayerContact, careTypes, otherNeedText, website_url_confirm, turnstileToken } = JSON.parse(event.body);
+    const { fullName, email, phone, smsConsent, interest, message, prayerContact, careTypes, otherNeedText, website_url_confirm, turnstileToken } = JSON.parse(event.body);
+    const smsConsentLabel = smsConsent === 'yes' ? 'Yes — OK to text' : smsConsent === 'no' ? 'No — do not text' : '(not answered)';
     const cleanCareTypes = Array.isArray(careTypes) ? careTypes.filter(Boolean) : [];
 
     // Honeypot — bots fill this hidden field, real users don't
@@ -210,12 +211,15 @@ const handleRequest = async (event) => {
       // request submitted here would silently skip Bradley, Bob, and prayers@.
       const notifyTo = interest === 'prayer'
         ? await getRecipients('prayer', ['admin@christchurchbluffton.org', 'jonathan@christchurchbluffton.org', 'bradley@christchurchbluffton.org'])
-        : await getRecipients('contact', ['info@christchurchbluffton.org', 'admin@christchurchbluffton.org']);
+        : interest === 'youth'
+          ? await getRecipients('youth', ['bradley@christchurchbluffton.org', 'admin@christchurchbluffton.org', 'youth@christchurchbluffton.org'])
+          : await getRecipients('contact', ['info@christchurchbluffton.org', 'admin@christchurchbluffton.org']);
 
       const interestLabels = {
         updates: 'Receiving Updates',
         visiting: 'Planning to Visit',
         volunteering: 'Volunteering',
+        youth: 'Youth Group',
         prayer: 'Prayer & Pastoral Care',
         other: 'Other'
       };
@@ -224,6 +228,7 @@ const handleRequest = async (event) => {
         fieldRow('Name', fullName),
         fieldRow('Email', `<a href="mailto:${email}" style="color:#303b6a;">${email}</a>`),
         fieldRow('Phone', phone || '(none)'),
+        fieldRow('Text Message Consent', smsConsentLabel),
         fieldRow('Interested In', interestLabels[interest] || interest),
         interest === 'prayer' ? fieldRow('Wants Follow-Up', prayerContact ? 'Yes — please reach out' : 'No') : '',
         interest === 'prayer' && cleanCareTypes.length ? fieldRow('Care Type(s)', cleanCareTypes.join(', ')) : '',
@@ -238,7 +243,7 @@ const handleRequest = async (event) => {
           from: process.env.EMAIL_FROM || 'Contact Form Submission <notifications@christchurchbluffton.org>',
           to: notifyTo,
           subject: `New Contact Form — ${fullName}`,
-          text: `New contact form submission:\n\nName: ${fullName}\nEmail: ${email}\nPhone: ${phone || '(none)'}\nInterest: ${interest}\nMessage: ${message || '(none)'}`,
+          text: `New contact form submission:\n\nName: ${fullName}\nEmail: ${email}\nPhone: ${phone || '(none)'}\nText Message Consent: ${smsConsentLabel}\nInterest: ${interest}\nMessage: ${message || '(none)'}`,
           html: emailShell('Contact Form Submission', fieldsHtml)
         })),
         signal: AbortSignal.timeout(10000)
