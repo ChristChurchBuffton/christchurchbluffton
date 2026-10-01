@@ -98,6 +98,12 @@
     background: rgba(195,163,85,0.12); color: #7a5f1a;
   }
   .possible-dup-notice a { color: var(--navy-blue); font-weight: bold; }
+  .review-badge { border: none; border-radius: 100px; padding: 5px 12px; font: inherit; font-size: 12px; font-weight: bold; background: rgba(195,163,85,0.2); color: #7a5f1a; cursor: pointer; }
+  .dup-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .dup-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .dup-col-title { font-size: 10.5px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gold-text); padding-bottom: 4px; border-bottom: 1px solid var(--border-gray); }
+  .dup-help { margin: 16px 0 0; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  @media (max-width: 560px) { .dup-compare { grid-template-columns: 1fr; } }
   .dup-dismiss { border: none; background: none; padding: 0; font: inherit; font-weight: bold; color: var(--navy-blue); text-decoration: underline; cursor: pointer; }
   .no-parent-notice {
     margin-top: 10px; padding: 8px 12px; border-radius: 8px; font-size: 12px; line-height: 1.5;
@@ -283,6 +289,7 @@
                 <input type="text" id="roster-search" placeholder="Search students..." style="padding:9px 12px 9px 34px; border:1px solid var(--border-gray); border-radius:8px; font-family:inherit; font-size:13px; min-width:260px;">
               </div>
               <div class="count-badge" id="student-count">— students</div>
+              <button type="button" class="review-badge" id="review-badge" style="display:none;"></button>
             </div>
             <div class="roster-grid" id="roster-grid"></div>
           </div>
@@ -349,6 +356,7 @@
     let backgroundReady = Promise.resolve();
     let isYouthLeader = false;
     let searchTerm = '';
+    let reviewOnly = false; // roster filtered to students flagged as possible duplicates
     let currentTab = 'roster';
 
     function closeModal() {
@@ -450,7 +458,9 @@
     // ---- Roster ----
     function renderRoster() {
       const term = searchTerm.toLowerCase();
-      const filtered = students.filter(s => !term || `${s.first_name} ${s.last_name} ${s.student_code} ${s.parent_first_name || ''} ${s.parent_last_name || ''}`.toLowerCase().includes(term));
+      updateReviewBadge();
+      if (reviewOnly && !students.some(s => s.possible_duplicate_student_id)) reviewOnly = false;
+      const filtered = students.filter(s => (!reviewOnly || s.possible_duplicate_student_id) && (!term || `${s.first_name} ${s.last_name} ${s.student_code} ${s.parent_first_name || ''} ${s.parent_last_name || ''}`.toLowerCase().includes(term)));
       document.getElementById('student-count').textContent = `${students.length} ${students.length === 1 ? 'student' : 'students'}`;
       const grid = document.getElementById('roster-grid');
       if (!filtered.length) {
@@ -803,10 +813,99 @@
       document.getElementById('modal-backdrop').classList.add('open');
     }
 
+    // ---- Possible-duplicate review (Kevin 10/1) ----
+    // The public form never changes a student already on file — a repeat sign-up lands here as its own flagged card,
+    // hidden from check-in, and an admin decides: not a duplicate / keep the original / keep the new one.
+    function updateReviewBadge() {
+      const n = students.filter(s => s.possible_duplicate_student_id).length;
+      const badge = document.getElementById('review-badge');
+      badge.style.display = n ? '' : 'none';
+      badge.textContent = reviewOnly ? 'Show all students' : n + ' to review';
+    }
+
+    function studentCompareColHtml(title, s) {
+      const grade = s.__details && s.__details.grade ? effectiveGrade(s.__details.grade, s.__details.grade_year) : '';
+      const parent = [s.parent_first_name, s.parent_last_name].filter(Boolean).join(' ');
+      const address = [s.parent_address, [s.parent_city, s.parent_state, s.parent_zip].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+      const nightsAttended = nights.filter(n => (attendanceByNight[n.id] || []).some(a => a.student_id === s.id)).length;
+      const status = consentStatus(s.__consent);
+      const consentText = status.parts ? status.parts.map(p => p.label).join(', ') : status.label;
+      return '<div class="dup-col"><div class="dup-col-title">' + title + '</div>' +
+        pfItem('Name', escapeHtml(s.first_name + ' ' + s.last_name)) +
+        pfItem('Student ID', escapeHtml(s.student_code || '')) +
+        pfItem('Birthdate', s.birthdate ? formatDateOnly(s.birthdate) : '') +
+        pfItem('Grade', escapeHtml(grade)) +
+        pfItem('Student Phone', escapeHtml(s.phone || '')) +
+        pfItem('Parent', escapeHtml(parent)) +
+        pfItem('Parent Phone', escapeHtml(s.parent_phone || '')) +
+        pfItem('Parent Email', escapeHtml(s.parent_email || '')) +
+        pfItem('Address', escapeHtml(address)) +
+        pfItem('Consent', escapeHtml(consentText)) +
+        pfItem('Nights attended', String(nightsAttended)) +
+        pfItem('Added', s.created_at ? new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '') +
+        '</div>';
+    }
+
+    async function openStudentDupReview(flagged) {
+      await backgroundReady; // attendance loads in the background
+      const original = students.find(x => x.id === flagged.possible_duplicate_student_id);
+      if (!original) { adminAlert('The student this was flagged against is no longer on file, so there is nothing to compare.', 'Nothing to review'); return; }
+      document.getElementById('modal-title').textContent = 'Possible duplicate';
+      document.getElementById('modal-subtitle').textContent = flagged.first_name + ' ' + flagged.last_name;
+      document.getElementById('modal-body').innerHTML = '<div class="dup-compare">' + studentCompareColHtml('Already on file', original) + studentCompareColHtml('New sign-up (flagged)', flagged) + '</div>' +
+        '<p class="dup-help">Removing one moves its attendance and consent records onto the one you keep.</p>';
+      document.getElementById('modal-box').classList.add('wide');
+      setModalFooter([
+        { label: 'Close', className: 'btn btn-outline', onClick: closeModal },
+        { label: 'Not a duplicate', className: 'btn btn-outline', onClick: async () => {
+          const { error } = await supabaseClient.from('youth_students').update({ possible_duplicate_student_id: null }).eq('id', flagged.id);
+          if (error) { adminAlert('Could not clear the flag: ' + error.message, 'Not saved'); return; }
+          logActivity('congregant_edit', flagged.first_name + ' ' + flagged.last_name + ' (Youth) marked not a duplicate');
+          closeModal(); await loadStudents(); renderRoster();
+        } },
+        { label: 'Keep original, remove new', className: 'btn btn-outline', onClick: () => confirmMergeStudents(original, flagged) },
+        { label: 'Keep new, remove original', className: 'btn btn-gold', onClick: () => confirmMergeStudents(flagged, original) }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    async function confirmMergeStudents(winner, loser) {
+      const ok = await adminConfirm({
+        title: 'Remove the other record?',
+        message: 'Keep ' + winner.first_name + ' ' + winner.last_name + ' (' + winner.student_code + ') and remove ' + loser.student_code + '? Its attendance and consent records move onto the one you keep. This can’t be undone.',
+        confirmLabel: 'Keep & remove', cancelLabel: 'Cancel'
+      });
+      if (!ok) return;
+      try {
+        await mergeStudents(winner, loser);
+      } catch (err) {
+        adminAlert('Could not finish: ' + err.message, 'Not saved');
+        return;
+      }
+      logActivity('congregant_edit', 'Merged duplicate student ' + loser.student_code + ' into ' + winner.student_code + ' (Youth)');
+      closeModal(); await loadStudents(); renderRoster();
+    }
+
+    async function mergeStudents(winner, loser) {
+      const must = (res) => { if (res.error) throw new Error(res.error.message); return res; };
+      const [lost, kept] = await Promise.all([
+        supabaseClient.from('youth_attendance').select('night_id').eq('student_id', loser.id),
+        supabaseClient.from('youth_attendance').select('night_id').eq('student_id', winner.id)
+      ]);
+      must(lost); must(kept);
+      const have = new Set((kept.data || []).map(a => a.night_id));
+      const bothNights = (lost.data || []).map(a => a.night_id).filter(id => have.has(id));
+      if (bothNights.length) must(await supabaseClient.from('youth_attendance').delete().eq('student_id', loser.id).in('night_id', bothNights));
+      must(await supabaseClient.from('youth_attendance').update({ student_id: winner.id }).eq('student_id', loser.id));
+      must(await supabaseClient.from('youth_consents').update({ student_id: winner.id }).eq('student_id', loser.id));
+      must(await supabaseClient.from('youth_students').delete().eq('id', loser.id));
+      must(await supabaseClient.from('youth_students').update({ possible_duplicate_student_id: null }).eq('id', winner.id));
+    }
+
     function studentDupNoticeHtml(s) {
       const other = students.find(x => x.id === s.possible_duplicate_student_id);
       const who = other ? ' (' + [other.parent_first_name, other.parent_last_name].filter(Boolean).join(' ') + (other.birthdate ? ', born ' + formatDateOnly(other.birthdate) : '') + ')' : '';
-      return '<div class="possible-dup-notice">Possible duplicate — another student with this name is already on file' + escapeHtml(who) + '. <button type="button" class="dup-dismiss" data-action="dismiss-student-dup" data-id="' + s.id + '">Not a duplicate</button></div>';
+      return '<div class="possible-dup-notice">Possible duplicate — another student with this name is already on file' + escapeHtml(who) + '. <button type="button" class="dup-dismiss" data-action="review-student-dup" data-id="' + s.id + '">Review</button> &middot; <button type="button" class="dup-dismiss" data-action="dismiss-student-dup" data-id="' + s.id + '">Not a duplicate</button></div>';
     }
 
     function pfItem(label, value, wide) {
@@ -874,7 +973,10 @@
       });
     }
 
+    document.getElementById('review-badge').addEventListener('click', () => { reviewOnly = !reviewOnly; renderRoster(); });
     document.getElementById('roster-grid').addEventListener('click', async (e) => {
+      const reviewBtn = e.target.closest('[data-action="review-student-dup"]');
+      if (reviewBtn) { const fs_ = students.find(x => x.id === reviewBtn.dataset.id); if (fs_) openStudentDupReview(fs_); return; }
       const dismissBtn = e.target.closest('[data-action="dismiss-student-dup"]');
       if (dismissBtn) {
         const s = students.find(x => x.id === dismissBtn.dataset.id);

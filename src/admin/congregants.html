@@ -76,6 +76,14 @@
   .family-contact-line .phone-num { white-space: nowrap; }
 
   .dup-notice { margin-top: 10px; padding: 8px 12px; border-radius: 8px; font-size: 12px; line-height: 1.5; background: rgba(195,163,85,0.12); color: #7a5f1a; }
+  .review-badge { border: none; border-radius: 100px; padding: 5px 12px; font: inherit; font-size: 12px; font-weight: bold; background: rgba(195,163,85,0.2); color: #7a5f1a; cursor: pointer; }
+  .dup-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .dup-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .dup-col-title { font-size: 10.5px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gold-text); padding-bottom: 4px; border-bottom: 1px solid var(--border-gray); }
+  .dup-col .pf-label { display: block; font-size: 11px; color: var(--text-muted); }
+  .dup-col .pf-value { display: block; overflow-wrap: anywhere; }
+  .dup-help { margin: 16px 0 0; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  @media (max-width: 560px) { .dup-compare { grid-template-columns: 1fr; } }
   .dup-link { border: none; background: none; padding: 0; font: inherit; font-weight: bold; color: var(--navy-blue); text-decoration: underline; cursor: pointer; }
 
   .family-detail {
@@ -334,6 +342,7 @@
           </div>
           <div style="display:flex; align-items:center; gap:12px;">
             <div class="count-badge" id="family-count">— families</div>
+            <button type="button" class="review-badge" id="review-badge" style="display:none;"></button>
           </div>
         </div>
 
@@ -364,6 +373,7 @@
   <script>
     let families = [];
     let searchTerm = '';
+    let reviewOnly = false; // list filtered to households flagged as possible duplicates
 
     function escapeHtml(str) {
       return (str || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -498,19 +508,90 @@
       return haystack.includes(term.toLowerCase());
     }
 
+    // ---- Possible-duplicate review (Kevin 10/1) ----
+    // The public forms never change a household already on file — a repeat/matching sign-up lands here as its own
+    // flagged household and an admin decides: not a duplicate / keep the original / keep the new one.
+    function updateReviewBadge() {
+      const n = families.filter(f => f.possibleDuplicateFamilyId).length;
+      if (reviewOnly && !n) reviewOnly = false;
+      const badge = document.getElementById('review-badge');
+      badge.style.display = n ? '' : 'none';
+      badge.textContent = reviewOnly ? 'Show all families' : n + ' to review';
+    }
+
+    function familyCompareColHtml(title, f) {
+      const item = (label, value) => '<div class="pf-item"><span class="pf-label">' + label + '</span><span class="pf-value">' + (value ? escapeHtml(value) : '—') + '</span></div>';
+      const spouse = [f.spouseFirstName, f.spouseLastName].filter(Boolean).join(' ');
+      const kids = (f.children || []).map(k => k.firstName + ' ' + k.lastName).join(', ');
+      const address = [f.address, [f.city, f.state, f.zip].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+      return '<div class="dup-col"><div class="dup-col-title">' + title + '</div>' +
+        item('Head of household', [f.headFirstName, f.headLastName].filter(Boolean).join(' ')) +
+        item('Email', f.headEmail) + item('Phone', f.headPhone) +
+        item('Spouse', spouse) + item('Address', address) + item('Children', kids) +
+        '</div>';
+    }
+
+    function openFamilyDupReview(flagged) {
+      const original = families.find(x => x.id === flagged.possibleDuplicateFamilyId);
+      if (!original) { adminAlert('The household this was flagged against is no longer on file, so there is nothing to compare.', 'Nothing to review'); return; }
+      document.getElementById('modal-title').textContent = 'Possible duplicate';
+      document.getElementById('modal-subtitle').textContent = flagged.headFirstName + ' ' + flagged.headLastName;
+      document.getElementById('modal-body').innerHTML = '<div class="dup-compare">' + familyCompareColHtml('Already on file', original) + familyCompareColHtml('New sign-up (flagged)', flagged) + '</div>' +
+        '<p class="dup-help">Removing one moves its children and linked youth students onto the one you keep.</p>';
+      setModalFooter([
+        { label: 'Close', className: 'btn btn-outline', onClick: closeModal },
+        { label: 'Not a duplicate', className: 'btn btn-outline', onClick: async () => {
+          const { error } = await supabaseClient.from('congregant_families').update({ possible_duplicate_family_id: null }).eq('id', flagged.id);
+          if (error) { adminAlert('Could not clear the flag: ' + error.message, 'Not saved'); return; }
+          flagged.possibleDuplicateFamilyId = null;
+          closeModal(); renderFamilies();
+        } },
+        { label: 'Keep original, remove new', className: 'btn btn-outline', onClick: () => confirmMergeFamilies(original, flagged) },
+        { label: 'Keep new, remove original', className: 'btn btn-gold', onClick: () => confirmMergeFamilies(flagged, original) }
+      ]);
+      document.getElementById('modal-backdrop').classList.add('open');
+    }
+
+    async function confirmMergeFamilies(winner, loser) {
+      const ok = await adminConfirm({
+        title: 'Remove the other household?',
+        message: 'Keep the ' + winner.headLastName + ' household (' + winner.headFirstName + ' ' + winner.headLastName + ') and remove the other one? Its children and linked youth students move onto the one you keep. This can’t be undone.',
+        confirmLabel: 'Keep & remove', cancelLabel: 'Cancel'
+      });
+      if (!ok) return;
+      try {
+        const must = (res) => { if (res.error) throw new Error(res.error.message); return res; };
+        const sameName = (a, b) => (a.firstName || '').toLowerCase() === (b.firstName || '').toLowerCase() && (a.lastName || '').toLowerCase() === (b.lastName || '').toLowerCase();
+        const kept = winner.children || [];
+        const moveIds = (loser.children || []).filter(k => !kept.some(w => sameName(w, k))).map(k => k.id);
+        if (moveIds.length) must(await supabaseClient.from('congregant_children').update({ family_id: winner.id }).in('id', moveIds));
+        must(await supabaseClient.from('youth_students').update({ family_id: winner.id }).eq('family_id', loser.id));
+        must(await supabaseClient.from('congregant_families').delete().eq('id', loser.id));
+        must(await supabaseClient.from('congregant_families').update({ possible_duplicate_family_id: null }).eq('id', winner.id));
+      } catch (err) {
+        adminAlert('Could not finish: ' + err.message, 'Not saved');
+        return;
+      }
+      logActivity('congregant_edit', 'Merged duplicate household ' + loser.headLastName + ', ' + loser.headFirstName + ' into ' + winner.headLastName + ', ' + winner.headFirstName);
+      closeModal();
+      await Promise.all([loadFamilies(), loadYouthLinks()]);
+      renderFamilies();
+    }
+
     function familyDupNoticeHtml(f) {
       const other = families.find(x => x.id === f.possibleDuplicateFamilyId);
       const name = other ? other.headLastName + ', ' + other.headFirstName : 'another household';
       return '<div class="dup-notice">Possible duplicate of the ' + escapeHtml(name) + ' household. ' +
-        (other ? '<button type="button" class="dup-link" data-action="view-dup-family" data-id="' + f.id + '">View it</button> &middot; ' : '') +
+        (other ? '<button type="button" class="dup-link" data-action="review-family-dup" data-id="' + f.id + '">Review</button> &middot; ' : '') +
         '<button type="button" class="dup-link" data-action="dismiss-family-dup" data-id="' + f.id + '">Not a duplicate</button></div>';
     }
 
     function renderFamilies() {
       document.getElementById('family-count').textContent = `${families.length} ${families.length === 1 ? 'family' : 'families'}`;
 
+      updateReviewBadge();
       const list = families
-        .filter(f => matchesSearch(f, searchTerm))
+        .filter(f => (!reviewOnly || f.possibleDuplicateFamilyId) && matchesSearch(f, searchTerm))
         .sort((a, b) => familySurname(a).localeCompare(familySurname(b)) || (a.headFirstName || '').localeCompare(b.headFirstName || ''));
 
       const grid = document.getElementById('congregants-grid');
@@ -898,14 +979,14 @@
       });
 
       document.getElementById('add-family-btn').addEventListener('click', () => openFamilyModal(null));
+      document.getElementById('review-badge').addEventListener('click', () => { reviewOnly = !reviewOnly; renderFamilies(); });
       document.getElementById('search-input').addEventListener('input', (e) => { searchTerm = e.target.value; renderFamilies(); });
 
       document.getElementById('congregants-grid').addEventListener('click', async (e) => {
-        const viewDup = e.target.closest('[data-action="view-dup-family"]');
-        if (viewDup) {
-          const f = families.find(x => x.id === viewDup.dataset.id);
-          const other = f && families.find(x => x.id === f.possibleDuplicateFamilyId);
-          if (other) openViewModal(other);
+        const reviewDup = e.target.closest('[data-action="review-family-dup"]');
+        if (reviewDup) {
+          const f = families.find(x => x.id === reviewDup.dataset.id);
+          if (f) openFamilyDupReview(f);
           return;
         }
         const dismissDup = e.target.closest('[data-action="dismiss-family-dup"]');

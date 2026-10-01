@@ -290,7 +290,7 @@
     }
 
     async function loadStudentsForSearch() {
-      const { data } = await supabaseClient.from('youth_students').select('id,first_name,last_name,student_code');
+      const { data } = await supabaseClient.from('youth_students').select('id,first_name,last_name,student_code').is('possible_duplicate_student_id', null);
       students = data || [];
     }
 

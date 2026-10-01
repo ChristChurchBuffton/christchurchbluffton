@@ -88,11 +88,10 @@ async function findOrCreateHousehold(parent, student) {
     family = created[0];
   }
   // Student on the household's own roster too — matched by name within that family so a
-  // resubmission updates the existing entry instead of adding a second one.
+  // resubmission never adds a second entry (and never changes the existing one).
   const existingKids = await sb('GET', `congregant_children?family_id=eq.${family.id}&first_name=ilike.%22${encodeURIComponent(q(student.firstName))}%22&last_name=ilike.%22${encodeURIComponent(q(student.lastName))}%22&select=id`);
   const kidPayload = { family_id: family.id, first_name: student.firstName, last_name: student.lastName, birthdate: student.birthdate || null };
-  if (existingKids.length) await sb('PATCH', `congregant_children?id=eq.${existingKids[0].id}`, kidPayload);
-  else {
+  if (!existingKids.length) {
     const maxOrder = await sb('GET', `congregant_children?family_id=eq.${family.id}&select=sort_order&order=sort_order.desc&limit=1`);
     await sb('POST', 'congregant_children', Object.assign({ sort_order: maxOrder.length ? maxOrder[0].sort_order + 1 : 0 }, kidPayload));
   }
@@ -165,15 +164,13 @@ const handleRequest = async (event) => {
         console.error('[New Student Signup] household link error:', famErr.message);
       }
 
-      // Dedup: a student already on file under the same household + name gets updated, not
-      // duplicated with a second Student ID (the brief: "update their info instead of creating a
-      // duplicate"). Matched by family + name since that's the only stable pair available pre-signup.
+      // The public form NEVER changes a student already on file (Kevin 10/1: people may mess it up). If the same name
+      // is already on file — in this household or any other — the submission is saved as its own new card, flagged
+      // "Possible duplicate", hidden from check-in, and an admin decides in the Youth tab.
       let studentId, studentCode;
       let existing = [];
       if (familyId) existing = await sb('GET', `youth_students?family_id=eq.${familyId}&first_name=ilike.%22${encodeURIComponent(q(student.firstName))}%22&last_name=ilike.%22${encodeURIComponent(q(student.lastName))}%22&select=id,student_code`);
-      // A student with the same name already on file in a DIFFERENT household isn't merged automatically (could be a
-      // different child) — but it's flagged so staff can review it from the roster.
-      let possibleDuplicateStudentId = null;
+      let possibleDuplicateStudentId = existing.length ? existing[0].id : null;
       if (!existing.length) {
         const sameName = await sb('GET', `youth_students?first_name=ilike.%22${encodeURIComponent(q(student.firstName))}%22&last_name=ilike.%22${encodeURIComponent(q(student.lastName))}%22&select=id&limit=1`);
         if (sameName.length) possibleDuplicateStudentId = sameName[0].id;
@@ -181,24 +178,18 @@ const handleRequest = async (event) => {
       const corePayload = {
         first_name: student.firstName, last_name: student.lastName,
         phone: student.phone || null, email: student.email || null, birthdate: student.birthdate, school: student.school || null,
-        family_id: familyId, possible_duplicate_family_id: possibleDuplicateFamilyId, possible_duplicate_student_id: existing.length ? undefined : possibleDuplicateStudentId,
+        family_id: familyId, possible_duplicate_family_id: possibleDuplicateFamilyId, possible_duplicate_student_id: possibleDuplicateStudentId,
         parent_first_name: parent.firstName, parent_last_name: parent.lastName, parent_email: parent.email || null,
         parent_phone: parent.phone || null, parent_phone_2: parent.phone2 || null,
         parent_address: parent.address || null, parent_city: parent.city || null, parent_state: parent.state || null, parent_zip: parent.zip || null
       };
-      if (existing.length) {
-        studentId = existing[0].id; studentCode = existing[0].student_code;
-        await sb('PATCH', `youth_students?id=eq.${studentId}`, corePayload);
-      } else {
-        const created = await sb('POST', 'youth_students', corePayload);
-        studentId = created[0].id; studentCode = created[0].student_code;
-      }
+      const created = await sb('POST', 'youth_students', corePayload);
+      studentId = created[0].id; studentCode = created[0].student_code;
 
       // grade_year = the school year (starts Aug 6, named by the calendar year it starts in) the grade was entered for, so the admin side can move it up each August 6.
       const gradeYear = (d => (d.getMonth() > 7 || (d.getMonth() === 7 && d.getDate() >= 6)) ? d.getFullYear() : d.getFullYear() - 1)(new Date());
       const detailsPayload = { grade: student.grade || null, grade_year: student.grade ? gradeYear : null, notes: student.notes || null };
-      if (existing.length) await sb('PATCH', `youth_student_details?student_id=eq.${studentId}`, Object.assign({ updated_at: new Date().toISOString() }, detailsPayload));
-      else await sb('POST', 'youth_student_details', Object.assign({ student_id: studentId }, detailsPayload));
+      await sb('POST', 'youth_student_details', Object.assign({ student_id: studentId }, detailsPayload));
 
       await sb('POST', 'youth_consents', {
         student_id: studentId, identifiable_photos: !!b.identifiablePhotos, identifiable_video: !!b.identifiableVideo,
@@ -207,7 +198,7 @@ const handleRequest = async (event) => {
 
       let checkedInToNight = null;
       try {
-        const liveNightId = await findLiveNight();
+        const liveNightId = possibleDuplicateStudentId ? null : await findLiveNight();
         if (liveNightId) {
           await sb('POST', 'youth_attendance', { night_id: liveNightId, student_id: studentId });
           checkedInToNight = liveNightId;

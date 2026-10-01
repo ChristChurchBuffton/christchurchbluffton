@@ -55,7 +55,7 @@ function splitName(full, fallbackLast) {
 // record, so they're kept only in the saved copy of the submission. An EXACT match (same email,
 // or same phone + last name) attaches to that household and only adds children it doesn't
 // already have — it never overwrites the adults' existing info.
-async function saveHousehold(payload, matchedFamilyId, submittedIp, similarFamilyId) {
+async function saveHousehold(payload, matchedFamilyId, submittedIp, similarFamilyId, matchedForRecord) {
   const members = payload.members || [];
   const spouse = members.find(m => /spouse|husband|wife|partner/i.test(m.relationship || ''));
   const kids = members.filter(m => m !== spouse && /child|son|daughter|kid|step/i.test(m.relationship || ''));
@@ -87,7 +87,7 @@ async function saveHousehold(payload, matchedFamilyId, submittedIp, similarFamil
     if (!r.ok) return r;
   }
 
-  return sbWrite('POST', 'household_intake_submissions', { status: 'approved', payload, matched_family_id: familyId, submitted_ip: submittedIp });
+  return sbWrite('POST', 'household_intake_submissions', { status: 'approved', payload, matched_family_id: matchedForRecord || null, submitted_ip: submittedIp });
 }
 
 const handleRequest = async (event) => {
@@ -177,7 +177,9 @@ const handleRequest = async (event) => {
 
     if (process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
       const submittedIp = (event.headers && (event.headers['x-nf-client-connection-ip'] || event.headers['client-ip'])) || null;
-      const saveRes = await saveHousehold(payload, matchedFamilyId, submittedIp, similarFamilyId);
+      // A household that already matches (email, or phone + last name) is never changed from the public form:
+      // this submission is saved as its own household, flagged as a possible duplicate of the match, for staff to review.
+      const saveRes = await saveHousehold(payload, null, submittedIp, matchedFamilyId || similarFamilyId, matchedFamilyId);
       if (!saveRes.ok) {
         console.error('[Household Intake] save failed:', saveRes.status, saveRes.text || '');
         return { statusCode: 500, body: JSON.stringify({ error: 'Something went wrong. Please try again.' }) };
