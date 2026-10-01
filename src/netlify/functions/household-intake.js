@@ -1,5 +1,3 @@
-const tm = require('./lib/form-test-mode');
-
 async function verifyTurnstile(token) {
   const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'POST',
@@ -57,7 +55,7 @@ function splitName(full, fallbackLast) {
 // record, so they're kept only in the saved copy of the submission. An EXACT match (same email,
 // or same phone + last name) attaches to that household and only adds children it doesn't
 // already have — it never overwrites the adults' existing info.
-async function saveHousehold(payload, matchedFamilyId, submittedIp) {
+async function saveHousehold(payload, matchedFamilyId, submittedIp, similarFamilyId) {
   const members = payload.members || [];
   const spouse = members.find(m => /spouse|husband|wife|partner/i.test(m.relationship || ''));
   const kids = members.filter(m => m !== spouse && /child|son|daughter|kid|step/i.test(m.relationship || ''));
@@ -70,7 +68,8 @@ async function saveHousehold(payload, matchedFamilyId, submittedIp) {
       head_email: payload.email || null, head_phone: payload.phone || null,
       head_birth_month: payload.birthMonth, head_birth_day: payload.birthDay,
       spouse_first_name: sp ? sp.first : null, spouse_last_name: sp ? sp.last : null,
-      address: payload.address || null, city: payload.city || null, state: payload.state || null, zip: payload.zip || null
+      address: payload.address || null, city: payload.city || null, state: payload.state || null, zip: payload.zip || null,
+      possible_duplicate_family_id: similarFamilyId || null
     });
     if (!created.ok) return created;
     familyId = created.json[0].id;
@@ -97,7 +96,7 @@ const handleRequest = async (event) => {
   // personal data either direction.
   if (event.httpMethod === 'GET') {
     if (event.queryStringParameters && event.queryStringParameters.check) {
-      return { statusCode: 200, headers: tm.headers({ 'Content-Type': 'application/json' }), body: JSON.stringify({ enabled: await isFormEnabled() }) };
+      return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: await isFormEnabled() }) };
     }
     return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
@@ -143,10 +142,11 @@ const handleRequest = async (event) => {
     // Duplicate check — email OR phone + last name (per the brief) — flags a probable match for
     // a staff member to review/merge instead of silently creating a second household.
     let matchedFamilyId = null;
+    let similarFamilyId = null; // same last name but nothing else lines up — never merged automatically, but flagged for staff
     if (process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
       try {
         const orParts = [];
-        if (cleanEmail) orParts.push(`head_email.eq.${encodeURIComponent(cleanEmail)}`, `spouse_email.eq.${encodeURIComponent(cleanEmail)}`);
+        if (cleanEmail) orParts.push(`head_email.ilike.%22${encodeURIComponent(cleanEmail.replace(/["\\]/g, ''))}%22`, `spouse_email.ilike.%22${encodeURIComponent(cleanEmail.replace(/["\\]/g, ''))}%22`);
         if (cleanPhone && cleanLast) {
           orParts.push(`and(head_phone.eq.${encodeURIComponent(cleanPhone)},head_last_name.eq.${encodeURIComponent(cleanLast)})`);
           orParts.push(`and(spouse_phone.eq.${encodeURIComponent(cleanPhone)},spouse_last_name.eq.${encodeURIComponent(cleanLast)})`);
@@ -160,6 +160,16 @@ const handleRequest = async (event) => {
             if (rows.length) matchedFamilyId = rows[0].id;
           }
         }
+        if (!matchedFamilyId && cleanLast) {
+          const ln = encodeURIComponent(cleanLast.replace(/["\\]/g, ''));
+          const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/congregant_families?select=id&or=(head_last_name.ilike.%22${ln}%22,spouse_last_name.ilike.%22${ln}%22)&limit=1`, {
+            headers: sbHeaders(), signal: AbortSignal.timeout(10000)
+          });
+          if (res.ok) {
+            const rows = await res.json();
+            if (rows.length) similarFamilyId = rows[0].id;
+          }
+        }
       } catch (dupErr) {
         console.error('[Household Intake] duplicate check error:', dupErr.message);
       }
@@ -167,23 +177,18 @@ const handleRequest = async (event) => {
 
     if (process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
       const submittedIp = (event.headers && (event.headers['x-nf-client-connection-ip'] || event.headers['client-ip'])) || null;
-      const saveRes = await tm.write('create household + children in Congregants, keep a copy of the submission', () => saveHousehold(payload, matchedFamilyId, submittedIp));
+      const saveRes = await saveHousehold(payload, matchedFamilyId, submittedIp, similarFamilyId);
       if (!saveRes.ok) {
         console.error('[Household Intake] save failed:', saveRes.status, saveRes.text || '');
-        return { statusCode: 500, headers: tm.headers(), body: JSON.stringify({ error: 'Something went wrong. Please try again.' }) };
+        return { statusCode: 500, body: JSON.stringify({ error: 'Something went wrong. Please try again.' }) };
       }
     }
 
-    return { statusCode: 200, headers: tm.headers(), body: JSON.stringify({ success: true }) };
+    return { statusCode: 200, body: JSON.stringify({ success: true }) };
   } catch (err) {
     console.error('[Household Intake] Error:', err.message);
-    return { statusCode: 500, headers: tm.headers(), body: JSON.stringify({ error: 'Something went wrong. Please try again.' }) };
+    return { statusCode: 500, body: JSON.stringify({ error: 'Something went wrong. Please try again.' }) };
   }
 };
 
-exports.handler = async (event) => {
-  const early = tm.guard();
-  if (early) return early;
-  const res = await handleRequest(event);
-  return tm.isTestMode() ? Object.assign({}, res, { headers: tm.headers(res.headers) }) : res;
-};
+exports.handler = handleRequest;

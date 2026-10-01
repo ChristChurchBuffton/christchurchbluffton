@@ -1,5 +1,3 @@
-const tm = require('./lib/form-test-mode');
-
 async function verifyTurnstile(token) {
   const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'POST',
@@ -37,6 +35,9 @@ function formatPhone(raw) {
   return d.length === 10 ? '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6) : t;
 }
 
+// Strip quotes/backslashes so a value can sit safely inside a quoted PostgREST filter.
+function q(v) { return String(v || '').replace(/["\\]/g, ''); }
+
 async function isSystemEnabled() {
   try {
     const rows = await sb('GET', 'release_toggles?key=eq.youth_system&select=enabled');
@@ -58,7 +59,7 @@ async function isSystemEnabled() {
 async function findOrCreateHousehold(parent, student) {
   let family = null;
   const orParts = [];
-  if (parent.email) orParts.push(`head_email.eq.${encodeURIComponent(parent.email)}`, `spouse_email.eq.${encodeURIComponent(parent.email)}`);
+  if (parent.email) orParts.push(`head_email.ilike.%22${encodeURIComponent(q(parent.email))}%22`, `spouse_email.ilike.%22${encodeURIComponent(q(parent.email))}%22`);
   if (parent.phone && parent.lastName) {
     orParts.push(`and(head_phone.eq.${encodeURIComponent(parent.phone)},head_last_name.eq.${encodeURIComponent(parent.lastName)})`);
     orParts.push(`and(spouse_phone.eq.${encodeURIComponent(parent.phone)},spouse_last_name.eq.${encodeURIComponent(parent.lastName)})`);
@@ -88,7 +89,7 @@ async function findOrCreateHousehold(parent, student) {
   }
   // Student on the household's own roster too — matched by name within that family so a
   // resubmission updates the existing entry instead of adding a second one.
-  const existingKids = await sb('GET', `congregant_children?family_id=eq.${family.id}&first_name=eq.${encodeURIComponent(student.firstName)}&last_name=eq.${encodeURIComponent(student.lastName)}&select=id`);
+  const existingKids = await sb('GET', `congregant_children?family_id=eq.${family.id}&first_name=ilike.%22${encodeURIComponent(q(student.firstName))}%22&last_name=ilike.%22${encodeURIComponent(q(student.lastName))}%22&select=id`);
   const kidPayload = { family_id: family.id, first_name: student.firstName, last_name: student.lastName, birthdate: student.birthdate || null };
   if (existingKids.length) await sb('PATCH', `congregant_children?id=eq.${existingKids[0].id}`, kidPayload);
   else {
@@ -112,7 +113,7 @@ async function findLiveNight() {
 const handleRequest = async (event) => {
   if (event.httpMethod === 'GET') {
     if (event.queryStringParameters && event.queryStringParameters.check) {
-      return { statusCode: 200, headers: tm.headers({ 'Content-Type': 'application/json' }), body: JSON.stringify({ enabled: await isSystemEnabled() }) };
+      return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: await isSystemEnabled() }) };
     }
     return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
@@ -151,12 +152,9 @@ const handleRequest = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: 'Please fill in all required fields.' }) };
     }
 
-    // Every real write below (household link/create, the student record itself, medical/grade
-    // details, consent, and live check-in) is one unit wrapped in a single tm.write() call — in
-    // test mode NONE of it touches real records, matching this project's standing rule ("wrap
-    // EVERY write to the client's real records"). The student the tester sees back is a clearly
-    // fake preview code, never a real, permanently-reserved Student ID.
-    const writeResult = await tm.write('create/update student, household link, consent, check-in', async () => {
+    // This form always saves for real, on every site (it sends no email and only writes to the
+    // youth + Congregants records), so it deliberately does NOT use the form test-mode switch.
+    const writeResult = await (async () => {
       let familyId = null;
       let possibleDuplicateFamilyId = null;
       try {
@@ -172,11 +170,18 @@ const handleRequest = async (event) => {
       // duplicate"). Matched by family + name since that's the only stable pair available pre-signup.
       let studentId, studentCode;
       let existing = [];
-      if (familyId) existing = await sb('GET', `youth_students?family_id=eq.${familyId}&first_name=eq.${encodeURIComponent(student.firstName)}&last_name=eq.${encodeURIComponent(student.lastName)}&select=id,student_code`);
+      if (familyId) existing = await sb('GET', `youth_students?family_id=eq.${familyId}&first_name=ilike.%22${encodeURIComponent(q(student.firstName))}%22&last_name=ilike.%22${encodeURIComponent(q(student.lastName))}%22&select=id,student_code`);
+      // A student with the same name already on file in a DIFFERENT household isn't merged automatically (could be a
+      // different child) — but it's flagged so staff can review it from the roster.
+      let possibleDuplicateStudentId = null;
+      if (!existing.length) {
+        const sameName = await sb('GET', `youth_students?first_name=ilike.%22${encodeURIComponent(q(student.firstName))}%22&last_name=ilike.%22${encodeURIComponent(q(student.lastName))}%22&select=id&limit=1`);
+        if (sameName.length) possibleDuplicateStudentId = sameName[0].id;
+      }
       const corePayload = {
         first_name: student.firstName, last_name: student.lastName,
         phone: student.phone || null, email: student.email || null, birthdate: student.birthdate, school: student.school || null,
-        family_id: familyId, possible_duplicate_family_id: possibleDuplicateFamilyId,
+        family_id: familyId, possible_duplicate_family_id: possibleDuplicateFamilyId, possible_duplicate_student_id: existing.length ? undefined : possibleDuplicateStudentId,
         parent_first_name: parent.firstName, parent_last_name: parent.lastName, parent_email: parent.email || null,
         parent_phone: parent.phone || null, parent_phone_2: parent.phone2 || null,
         parent_address: parent.address || null, parent_city: parent.city || null, parent_state: parent.state || null, parent_zip: parent.zip || null
@@ -214,19 +219,14 @@ const handleRequest = async (event) => {
       }
 
       return { studentCode, checkedInToNight };
-    });
-    const studentCode = writeResult.skipped ? 'Y-TEST' : writeResult.studentCode;
+    })();
+    const studentCode = writeResult.studentCode;
 
-    return { statusCode: 200, headers: tm.headers(), body: JSON.stringify({ success: true, studentCode }) };
+    return { statusCode: 200, body: JSON.stringify({ success: true, studentCode }) };
   } catch (err) {
     console.error('[New Student Signup] Error:', err.message);
-    return { statusCode: 500, headers: tm.headers(), body: JSON.stringify({ error: 'Something went wrong. Please try again.' }) };
+    return { statusCode: 500, body: JSON.stringify({ error: 'Something went wrong. Please try again.' }) };
   }
 };
 
-exports.handler = async (event) => {
-  const early = tm.guard();
-  if (early) return early;
-  const res = await handleRequest(event);
-  return tm.isTestMode() ? Object.assign({}, res, { headers: tm.headers(res.headers) }) : res;
-};
+exports.handler = handleRequest;

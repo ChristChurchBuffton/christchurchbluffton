@@ -75,6 +75,9 @@
   .family-contact-line svg { width: 13px; height: 13px; vertical-align: -2px; margin-right: 5px; color: var(--text-muted); }
   .family-contact-line .phone-num { white-space: nowrap; }
 
+  .dup-notice { margin-top: 10px; padding: 8px 12px; border-radius: 8px; font-size: 12px; line-height: 1.5; background: rgba(195,163,85,0.12); color: #7a5f1a; }
+  .dup-link { border: none; background: none; padding: 0; font: inherit; font-weight: bold; color: var(--navy-blue); text-decoration: underline; cursor: pointer; }
+
   .family-detail {
     display: none;
     margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-gray);
@@ -393,6 +396,7 @@
         state: row.state,
         zip: row.zip,
         attendingSince: row.attending_since,
+        possibleDuplicateFamilyId: row.possible_duplicate_family_id,
         addedAt: row.added_at ? new Date(row.added_at).getTime() : null
       };
     }
@@ -494,6 +498,14 @@
       return haystack.includes(term.toLowerCase());
     }
 
+    function familyDupNoticeHtml(f) {
+      const other = families.find(x => x.id === f.possibleDuplicateFamilyId);
+      const name = other ? other.headLastName + ', ' + other.headFirstName : 'another household';
+      return '<div class="dup-notice">Possible duplicate of the ' + escapeHtml(name) + ' household. ' +
+        (other ? '<button type="button" class="dup-link" data-action="view-dup-family" data-id="' + f.id + '">View it</button> &middot; ' : '') +
+        '<button type="button" class="dup-link" data-action="dismiss-family-dup" data-id="' + f.id + '">Not a duplicate</button></div>';
+    }
+
     function renderFamilies() {
       document.getElementById('family-count').textContent = `${families.length} ${families.length === 1 ? 'family' : 'families'}`;
 
@@ -522,6 +534,7 @@
               <span class="kids-label">Children</span>
               ${kidsLine}
             </div>
+            ${f.possibleDuplicateFamilyId ? familyDupNoticeHtml(f) : ''}
             <div class="family-contact-line">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>${escapeHtml(f.headEmail || '—')}<br>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span class="phone-num">${escapeHtml(f.headPhone || '—')}</span>${f.spousePhone ? ` &middot; <span class="phone-num">${escapeHtml(f.spousePhone)}</span>` : ''}
@@ -887,7 +900,24 @@
       document.getElementById('add-family-btn').addEventListener('click', () => openFamilyModal(null));
       document.getElementById('search-input').addEventListener('input', (e) => { searchTerm = e.target.value; renderFamilies(); });
 
-      document.getElementById('congregants-grid').addEventListener('click', (e) => {
+      document.getElementById('congregants-grid').addEventListener('click', async (e) => {
+        const viewDup = e.target.closest('[data-action="view-dup-family"]');
+        if (viewDup) {
+          const f = families.find(x => x.id === viewDup.dataset.id);
+          const other = f && families.find(x => x.id === f.possibleDuplicateFamilyId);
+          if (other) openViewModal(other);
+          return;
+        }
+        const dismissDup = e.target.closest('[data-action="dismiss-family-dup"]');
+        if (dismissDup) {
+          const f = families.find(x => x.id === dismissDup.dataset.id);
+          if (f) {
+            const { error } = await supabaseClient.from('congregant_families').update({ possible_duplicate_family_id: null }).eq('id', f.id);
+            if (error) { adminAlert('Could not clear the flag: ' + error.message, 'Not saved'); return; }
+            f.possibleDuplicateFamilyId = null; renderFamilies();
+          }
+          return;
+        }
         const toggleBtn = e.target.closest('[data-action="toggle"]');
         if (toggleBtn) {
           const viewFamily = families.find(x => x.id === toggleBtn.dataset.id);

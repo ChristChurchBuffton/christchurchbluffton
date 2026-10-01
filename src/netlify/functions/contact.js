@@ -9,6 +9,18 @@ function formatPhone(raw) {
   return d.length === 10 ? '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6) : t;
 }
 
+// A person who is already on the Subscribers list (same email, any capitalization) is not added a second time.
+async function subscriberExists(email) {
+  try {
+    const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/subscribers?select=id&email=ilike.%22${encodeURIComponent(String(email || '').replace(/["\\]/g, ''))}%22&limit=1`, {
+      headers: { apikey: process.env.SUPABASE_SECRET_KEY, Authorization: `Bearer ${process.env.SUPABASE_SECRET_KEY}` },
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!res.ok) return false;
+    return (await res.json()).length > 0;
+  } catch (e) { return false; }
+}
+
 async function verifyTurnstile(token) {
   const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'POST',
@@ -166,7 +178,7 @@ const handleRequest = async (event) => {
     // collects a real name, unlike the newsletter footer form.
     if (process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
       try {
-        const res = await tm.write('insert row into subscribers', () => fetch(`${process.env.SUPABASE_URL}/rest/v1/subscribers`, {
+        const res = await tm.write('insert row into subscribers', async () => (await subscriberExists(email)) ? { ok: true, status: 200 } : fetch(`${process.env.SUPABASE_URL}/rest/v1/subscribers`, {
           method: 'POST',
           headers: {
             'apikey': process.env.SUPABASE_SECRET_KEY,

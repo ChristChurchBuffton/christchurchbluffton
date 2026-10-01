@@ -1,5 +1,16 @@
 # Christ Church Bluffton — TODO
 
+## 🔧 LOCAL, NOT YET PUSHED (10/1 late): youth forms always save (no test mode) + duplicate flags
+- `new-student-signup.js` + `household-intake.js` no longer use the form test-mode switch at all — they always write for real, on every site (Kevin: test mode must not be on these). Contact / prayer / newsletter still honor test mode.
+- Duplicate handling: New Student = same household+name updates in place (case-insensitive); same name in ANOTHER household is created but FLAGGED (`youth_students.possible_duplicate_student_id`, migration 0044 APPLIED live). Household form = same-last-name household flagged (`congregant_families.possible_duplicate_family_id`). Contact + newsletter forms no longer add a second Subscribers row for an email already on the list. Admin Add Student asks (styled popup) before adding a name already on file. Roster / Congregants cards show an amber "Possible duplicate" note with a "Not a duplicate" dismiss. Emails now match ignoring capitals. NOT covered: Breeze people/add and prayer requests (no duplicate concept).
+- Needs commit + push to the temp link before Kevin can retest the public New Student form there.
+
+## ✅ PUSHED TO TEMP (Forged GitHub `origin/main`) 2026-10-01 — commits `31a790d` (public site) + `2854038` (youth/admin/forms/editor). PRODUCTION (`production` remote) has NONE of today's work yet.
+- 128 `-previous` backups deleted at commit (rule). Not committed on purpose: `assets/logos/ai-source/` (3.1 MB .ai files, never reviewed), kids' photos in `assets/`, `workflow/*backup*.json`, `workflow/held-fonts/`.
+- **Next:** wait for Netlify to rebuild the temp site (christchurch-bluffton.netlify.app); BEFORE any form submission there run the pre-flight probe (must print X-Form-Test-Mode: on). Then review on the temp link; production push only when Kevin says (plan: `git push production <commit>:main` — 31a790d is the public-site-only commit; `e51fd12` is already before it).
+- **Temp-link test (10/1, Kevin-approved):** pre-flight passed (X-Form-Test-Mode: on, sends to kevin@forgeddigitaldesign.com). Test contact form (Youth Group + text consent Yes + unformatted phone) submitted on christchurch-bluffton.netlify.app; Kevin confirmed the text consent came through in the email. Still untested on temp: New Student form, check-in kiosk, admin pages (temp = same live DB; test mode skips writes).
+- Local servers: netlify dev on 3010 has test mode OFF (submissions real) — restart without `FORM_TEST_MODE_TO=""` or stop it.
+
 ## ▶ PUSH PREP (2026-10-01) — READY, nothing committed. Do these at push time:
 - `.gitignore` already ignores `*-previous.*` and `*.pdf`, so the 38 `-previous` files are NOT in git and a git-based deploy won't publish them (they only matter for local `netlify dev`). Still delete them at push (Kevin's rule).
 - Added to `.gitignore` today: `assets/youth/`, `assets/church/`, `assets/photos/` (kids' photos), `workflow/*-backup-*.json` and `workflow/consent-import-created-*.json` (kids' names). NEVER `git add .` blindly — stage explicit files.

@@ -98,6 +98,7 @@
     background: rgba(195,163,85,0.12); color: #7a5f1a;
   }
   .possible-dup-notice a { color: var(--navy-blue); font-weight: bold; }
+  .dup-dismiss { border: none; background: none; padding: 0; font: inherit; font-weight: bold; color: var(--navy-blue); text-decoration: underline; cursor: pointer; }
   .no-parent-notice {
     margin-top: 10px; padding: 8px 12px; border-radius: 8px; font-size: 12px; line-height: 1.5;
     background: rgba(177,67,67,0.08); color: var(--danger); font-weight: bold;
@@ -474,6 +475,7 @@
           </div>` : ''}
           ${status ? (status.parts ? status.parts.map(p => `<span class="consent-badge ${p.cls}">${p.label}</span>`).join('') : `<span class="consent-badge ${status.cls}">${status.label}</span>`) : ''}
           ${(!s.family_id && !s.parent_first_name && !s.parent_last_name && !s.parent_phone && !s.parent_email) ? `<div class="no-parent-notice">No parent information on file</div>` : ''}
+          ${s.possible_duplicate_student_id ? studentDupNoticeHtml(s) : ''}
           ${s.possible_duplicate_family_id ? `<div class="possible-dup-notice">Possible existing household found (same last name) — nobody confirmed it when this student signed up online. <a href="congregants?family=${s.possible_duplicate_family_id}">Review it</a>?</div>` : ''}
           <div class="student-actions">
             ${s.family_id ? `<a href="congregants?family=${s.family_id}" class="btn btn-outline" style="font-size:12px; padding:6px 12px;">View Household</a>` : ''}
@@ -673,6 +675,22 @@
         errorBox.classList.add('visible');
         return;
       }
+      // Adding someone with the same name as a student already on file: ask first, and if it goes ahead the new
+      // card is flagged "Possible duplicate" so it can be reviewed later.
+      let duplicateOfStudentId = null;
+      if (!existing) {
+        const same = students.find(x => (x.first_name || '').toLowerCase() === firstName.toLowerCase() && (x.last_name || '').toLowerCase() === lastName.toLowerCase());
+        if (same) {
+          const where = [same.parent_first_name, same.parent_last_name].filter(Boolean).join(' ');
+          const ok = await adminConfirm({
+            title: 'Student already on file?',
+            message: 'A student named ' + same.first_name + ' ' + same.last_name + ' is already on file' + (where ? ' (parent: ' + where + ')' : '') + '.\n\nAdd this one as well? It will be marked "Possible duplicate" so you can review it later.',
+            confirmLabel: 'Add anyway', cancelLabel: 'Cancel'
+          });
+          if (!ok) return;
+          duplicateOfStudentId = same.id;
+        }
+      }
       const birthdate = document.getElementById('st-birthdate').value || null;
       const parentFirstName = document.getElementById('st-parent-first').value.trim();
       const parentLastName = document.getElementById('st-parent-last').value.trim();
@@ -704,6 +722,7 @@
         // one created), a staff member was right here to decide it — this old flag from a public
         // signup nobody confirmed no longer applies.
         possible_duplicate_family_id: null,
+        possible_duplicate_student_id: existing ? (existing.possible_duplicate_student_id || null) : duplicateOfStudentId,
         parent_first_name: parentFirstName || null,
         parent_last_name: parentLastName || null,
         parent_phone: parentPhone || null,
@@ -783,6 +802,12 @@
       document.getElementById('modal-backdrop').classList.add('open');
     }
 
+    function studentDupNoticeHtml(s) {
+      const other = students.find(x => x.id === s.possible_duplicate_student_id);
+      const who = other ? ' (' + [other.parent_first_name, other.parent_last_name].filter(Boolean).join(' ') + (other.birthdate ? ', born ' + formatDateOnly(other.birthdate) : '') + ')' : '';
+      return '<div class="possible-dup-notice">Possible duplicate — another student with this name is already on file' + escapeHtml(who) + '. <button type="button" class="dup-dismiss" data-action="dismiss-student-dup" data-id="' + s.id + '">Not a duplicate</button></div>';
+    }
+
     function pfItem(label, value, wide) {
       return '<div class="pf-item' + (wide ? ' wide' : '') + '"><span class="pf-label">' + label + '</span><span class="pf-value">' + (value || '—') + '</span></div>';
     }
@@ -848,7 +873,17 @@
       });
     }
 
-    document.getElementById('roster-grid').addEventListener('click', (e) => {
+    document.getElementById('roster-grid').addEventListener('click', async (e) => {
+      const dismissBtn = e.target.closest('[data-action="dismiss-student-dup"]');
+      if (dismissBtn) {
+        const s = students.find(x => x.id === dismissBtn.dataset.id);
+        if (s) {
+          const { error } = await supabaseClient.from('youth_students').update({ possible_duplicate_student_id: null }).eq('id', s.id);
+          if (error) { adminAlert('Could not clear the flag: ' + error.message, 'Not saved'); return; }
+          s.possible_duplicate_student_id = null; renderRoster();
+        }
+        return;
+      }
       const viewBtn = e.target.closest('[data-action="view-student"]');
       if (viewBtn) { const s = students.find(x => x.id === viewBtn.dataset.id); if (s) openPortfolioModal(s); return; }
       const editBtn = e.target.closest('[data-action="edit-student"]');
