@@ -561,10 +561,11 @@
       if (!parent.firstName || !parent.lastName) return null;
       let family = null;
       const orParts = [];
-      if (parent.email) orParts.push(`head_email.eq.${parent.email}`, `spouse_email.eq.${parent.email}`);
+      const qv = v => '"' + String(v || '').replace(/["\\]/g, '') + '"';
+      if (parent.email) orParts.push(`head_email.ilike.${qv(parent.email)}`, `spouse_email.ilike.${qv(parent.email)}`);
       if (parent.phone) {
-        orParts.push(`and(head_phone.eq.${parent.phone},head_last_name.eq.${parent.lastName})`);
-        orParts.push(`and(spouse_phone.eq.${parent.phone},spouse_last_name.eq.${parent.lastName})`);
+        orParts.push(`and(head_phone.eq.${qv(parent.phone)},head_last_name.ilike.${qv(parent.lastName)})`);
+        orParts.push(`and(spouse_phone.eq.${qv(parent.phone)},spouse_last_name.ilike.${qv(parent.lastName)})`);
       }
       // The parent's own first + last name matching the head OR the spouse is just as certain as an email — this is what
       // lets a spouse (e.g. Stephanie listed under Kevin's household) link without being asked.
@@ -584,7 +585,7 @@
       if (!family && parent.lastName) {
         const { data: similar } = await supabaseClient.from('congregant_families')
           .select('id,head_first_name,head_last_name,head_email,head_phone')
-          .or(`head_last_name.eq.${parent.lastName},spouse_last_name.eq.${parent.lastName}`).limit(1);
+          .or(`head_last_name.ilike.${qv(parent.lastName)},spouse_last_name.ilike.${qv(parent.lastName)}`).limit(1);
         if (similar && similar.length) {
           const s = similar[0];
           const useExisting = await askLinkHousehold(s);

@@ -148,8 +148,8 @@ const handleRequest = async (event) => {
         const orParts = [];
         if (cleanEmail) orParts.push(`head_email.ilike.%22${encodeURIComponent(cleanEmail.replace(/["\\]/g, ''))}%22`, `spouse_email.ilike.%22${encodeURIComponent(cleanEmail.replace(/["\\]/g, ''))}%22`);
         if (cleanPhone && cleanLast) {
-          orParts.push(`and(head_phone.eq.${encodeURIComponent(cleanPhone)},head_last_name.eq.${encodeURIComponent(cleanLast)})`);
-          orParts.push(`and(spouse_phone.eq.${encodeURIComponent(cleanPhone)},spouse_last_name.eq.${encodeURIComponent(cleanLast)})`);
+          orParts.push(`and(head_phone.eq.%22${encodeURIComponent(cleanPhone.replace(/["\\]/g, ''))}%22,head_last_name.ilike.%22${encodeURIComponent(cleanLast.replace(/["\\]/g, ''))}%22)`);
+          orParts.push(`and(spouse_phone.eq.%22${encodeURIComponent(cleanPhone.replace(/["\\]/g, ''))}%22,spouse_last_name.ilike.%22${encodeURIComponent(cleanLast.replace(/["\\]/g, ''))}%22)`);
         }
         if (orParts.length) {
           const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/congregant_families?select=id&or=(${orParts.join(',')})&limit=1`, {

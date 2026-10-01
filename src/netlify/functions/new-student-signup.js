@@ -61,8 +61,8 @@ async function findOrCreateHousehold(parent, student) {
   const orParts = [];
   if (parent.email) orParts.push(`head_email.ilike.%22${encodeURIComponent(q(parent.email))}%22`, `spouse_email.ilike.%22${encodeURIComponent(q(parent.email))}%22`);
   if (parent.phone && parent.lastName) {
-    orParts.push(`and(head_phone.eq.${encodeURIComponent(parent.phone)},head_last_name.eq.${encodeURIComponent(parent.lastName)})`);
-    orParts.push(`and(spouse_phone.eq.${encodeURIComponent(parent.phone)},spouse_last_name.eq.${encodeURIComponent(parent.lastName)})`);
+    orParts.push(`and(head_phone.eq.%22${encodeURIComponent(q(parent.phone))}%22,head_last_name.ilike.%22${encodeURIComponent(q(parent.lastName))}%22)`);
+    orParts.push(`and(spouse_phone.eq.%22${encodeURIComponent(q(parent.phone))}%22,spouse_last_name.ilike.%22${encodeURIComponent(q(parent.lastName))}%22)`);
   }
   // The parent's own first + last name matching the head OR the spouse is as certain as an email (a spouse listed under the other adult's household).
   if (parent.firstName && parent.lastName) {
@@ -76,7 +76,7 @@ async function findOrCreateHousehold(parent, student) {
   }
   let possibleDuplicateFamilyId = null;
   if (!family && parent.lastName) {
-    const similar = await sb('GET', `congregant_families?select=id&or=(head_last_name.eq.${encodeURIComponent(parent.lastName)},spouse_last_name.eq.${encodeURIComponent(parent.lastName)})&limit=1`);
+    const similar = await sb('GET', `congregant_families?select=id&or=(head_last_name.ilike.%22${encodeURIComponent(q(parent.lastName))}%22,spouse_last_name.ilike.%22${encodeURIComponent(q(parent.lastName))}%22)&limit=1`);
     if (similar.length) possibleDuplicateFamilyId = similar[0].id;
   }
   if (!family) {
