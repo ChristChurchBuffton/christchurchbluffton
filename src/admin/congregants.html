@@ -527,11 +527,9 @@
       filterBtn.textContent = reviewOnly ? 'Show all families' : 'Show only flagged';
     }
 
-    // Review queue: after each decision, jump straight to the next flagged household (if any).
+    // One review at a time: after a decision the window closes and the list refreshes.
     function afterFamilyReview() {
       closeModal(); renderFamilies();
-      const nxt = families.find(x => x.possibleDuplicateFamilyId);
-      if (nxt) openFamilyDupReview(nxt);
     }
 
     function familyCompareColHtml(title, f) {
@@ -554,11 +552,8 @@
       document.getElementById('modal-body').innerHTML = '<div class="dup-compare">' + familyCompareColHtml('Already on file', original) + familyCompareColHtml('New sign-up (flagged)', flagged) + '</div>' +
         '<p class="dup-help">Removing one moves its children and linked youth students onto the one you keep.</p>';
       document.getElementById('modal-box').classList.add('wide');
-      const flaggedList = families.filter(x => x.possibleDuplicateFamilyId);
-      const nextFlagged = flaggedList.length > 1 ? flaggedList[(flaggedList.findIndex(x => x.id === flagged.id) + 1) % flaggedList.length] : null;
       setModalFooter([
         { label: 'Close', className: 'btn btn-outline', onClick: closeModal },
-        ...(nextFlagged ? [{ label: 'Next flagged (' + (flaggedList.findIndex(x => x.id === flagged.id) + 1) + ' of ' + flaggedList.length + ')', className: 'btn btn-outline', onClick: () => openFamilyDupReview(nextFlagged) }] : []),
         { label: 'Not a duplicate', className: 'btn btn-outline', onClick: async () => {
           const { error } = await supabaseClient.from('congregant_families').update({ possible_duplicate_family_id: null }).eq('id', flagged.id);
           if (error) { adminAlert('Could not clear the flag: ' + error.message, 'Not saved'); return; }

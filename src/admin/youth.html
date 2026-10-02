@@ -831,11 +831,9 @@
       filterBtn.textContent = reviewOnly ? 'Show all students' : 'Show only flagged';
     }
 
-    // Review queue: after each decision, jump straight to the next flagged student (if any).
+    // One review at a time: after a decision the window closes and the roster refreshes.
     async function afterStudentReview() {
       closeModal(); await loadStudents(); renderRoster();
-      const nxt = students.find(x => x.possible_duplicate_student_id);
-      if (nxt) openStudentDupReview(nxt);
     }
 
     function studentCompareColHtml(title, s) {
@@ -870,11 +868,8 @@
       document.getElementById('modal-body').innerHTML = '<div class="dup-compare">' + studentCompareColHtml('Already on file', original) + studentCompareColHtml('New sign-up (flagged)', flagged) + '</div>' +
         '<p class="dup-help">Removing one moves its attendance and consent records onto the one you keep.</p>';
       document.getElementById('modal-box').classList.add('wide');
-      const flaggedList = students.filter(x => x.possible_duplicate_student_id);
-      const nextFlagged = flaggedList.length > 1 ? flaggedList[(flaggedList.findIndex(x => x.id === flagged.id) + 1) % flaggedList.length] : null;
       setModalFooter([
         { label: 'Close', className: 'btn btn-outline', onClick: closeModal },
-        ...(nextFlagged ? [{ label: 'Next flagged (' + (flaggedList.findIndex(x => x.id === flagged.id) + 1) + ' of ' + flaggedList.length + ')', className: 'btn btn-outline', onClick: () => openStudentDupReview(nextFlagged) }] : []),
         { label: 'Not a duplicate', className: 'btn btn-outline', onClick: async () => {
           const { error } = await supabaseClient.from('youth_students').update({ possible_duplicate_student_id: null, possible_duplicate_family_id: null }).eq('id', flagged.id);
           if (error) { adminAlert('Could not clear the flag: ' + error.message, 'Not saved'); return; }
