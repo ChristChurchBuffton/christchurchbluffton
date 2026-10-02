@@ -886,7 +886,7 @@
     async function confirmMergeStudents(winner, loser) {
       const ok = await adminConfirm({
         title: 'Remove the other record?',
-        message: 'Keep ' + winner.first_name + ' ' + winner.last_name + ' (' + winner.student_code + ') and remove ' + loser.student_code + '? Its attendance and consent records move onto the one you keep. This can’t be undone.',
+        message: 'Keep ' + winner.first_name + ' ' + winner.last_name + ' (' + winner.student_code + ') and remove ' + loser.student_code + '? Its attendance and consent records move onto the one you keep. If it came with its own extra household and nobody else is in it, that household is removed too. This can’t be undone.',
         confirmLabel: 'Keep & remove', cancelLabel: 'Cancel'
       });
       if (!ok) return;
@@ -912,7 +912,24 @@
       if (bothNights.length) must(await supabaseClient.from('youth_attendance').delete().eq('student_id', loser.id).in('night_id', bothNights));
       must(await supabaseClient.from('youth_attendance').update({ student_id: winner.id }).eq('student_id', loser.id));
       must(await supabaseClient.from('youth_consents').update({ student_id: winner.id }).eq('student_id', loser.id));
+      // Any OTHER student flagged as a duplicate of the one being removed stays flagged — now against the one that's kept.
+      must(await supabaseClient.from('youth_students').update({ possible_duplicate_student_id: winner.id }).eq('possible_duplicate_student_id', loser.id).neq('id', winner.id));
       must(await supabaseClient.from('youth_students').delete().eq('id', loser.id));
+      // The extra household that duplicate sign-up created goes too — but only if it is flagged as a duplicate household and nothing else is in it.
+      // Best effort: a youth-only leader may not have access to Congregants, and that must never block removing the student.
+      try {
+        if (loser.family_id && loser.family_id !== winner.family_id) {
+          const { data: fam } = await supabaseClient.from('congregant_families').select('id,possible_duplicate_family_id').eq('id', loser.family_id).maybeSingle();
+          if (fam && fam.possible_duplicate_family_id) {
+            const { data: left } = await supabaseClient.from('youth_students').select('id').eq('family_id', fam.id).limit(1);
+            if (!left || !left.length) {
+              await supabaseClient.from('congregant_families').update({ possible_duplicate_family_id: fam.possible_duplicate_family_id }).eq('possible_duplicate_family_id', fam.id);
+              await supabaseClient.from('congregant_children').delete().eq('family_id', fam.id);
+              await supabaseClient.from('congregant_families').delete().eq('id', fam.id);
+            }
+          }
+        }
+      } catch (e) { console.error('household cleanup skipped:', e.message); }
       must(await supabaseClient.from('youth_students').update({ possible_duplicate_student_id: null, possible_duplicate_family_id: null }).eq('id', winner.id));
     }
 

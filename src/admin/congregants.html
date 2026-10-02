@@ -582,6 +582,8 @@
         const moveIds = (loser.children || []).filter(k => !kept.some(w => sameName(w, k))).map(k => k.id);
         if (moveIds.length) must(await supabaseClient.from('congregant_children').update({ family_id: winner.id }).in('id', moveIds));
         must(await supabaseClient.from('youth_students').update({ family_id: winner.id }).eq('family_id', loser.id));
+        // Any OTHER household flagged as a duplicate of the one being removed stays flagged — now against the one that's kept.
+        must(await supabaseClient.from('congregant_families').update({ possible_duplicate_family_id: winner.id }).eq('possible_duplicate_family_id', loser.id).neq('id', winner.id));
         must(await supabaseClient.from('congregant_families').delete().eq('id', loser.id));
         must(await supabaseClient.from('congregant_families').update({ possible_duplicate_family_id: null }).eq('id', winner.id));
         must(await supabaseClient.from('youth_students').update({ possible_duplicate_family_id: null }).eq('family_id', winner.id));
