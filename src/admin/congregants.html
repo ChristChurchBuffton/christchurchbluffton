@@ -557,6 +557,7 @@
         { label: 'Not a duplicate', className: 'btn btn-outline', onClick: async () => {
           const { error } = await supabaseClient.from('congregant_families').update({ possible_duplicate_family_id: null }).eq('id', flagged.id);
           if (error) { adminAlert('Could not clear the flag: ' + error.message, 'Not saved'); return; }
+          await supabaseClient.from('youth_students').update({ possible_duplicate_family_id: null }).eq('family_id', flagged.id);
           flagged.possibleDuplicateFamilyId = null;
           afterFamilyReview();
         } },
@@ -582,6 +583,7 @@
         must(await supabaseClient.from('youth_students').update({ family_id: winner.id }).eq('family_id', loser.id));
         must(await supabaseClient.from('congregant_families').delete().eq('id', loser.id));
         must(await supabaseClient.from('congregant_families').update({ possible_duplicate_family_id: null }).eq('id', winner.id));
+        must(await supabaseClient.from('youth_students').update({ possible_duplicate_family_id: null }).eq('family_id', winner.id));
       } catch (err) {
         adminAlert('Could not finish: ' + err.message, 'Not saved');
         return;

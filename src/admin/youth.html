@@ -872,7 +872,7 @@
         { label: 'Close', className: 'btn btn-outline', onClick: closeModal },
         ...(nextFlagged ? [{ label: 'Next flagged (' + (flaggedList.findIndex(x => x.id === flagged.id) + 1) + ' of ' + flaggedList.length + ')', className: 'btn btn-outline', onClick: () => openStudentDupReview(nextFlagged) }] : []),
         { label: 'Not a duplicate', className: 'btn btn-outline', onClick: async () => {
-          const { error } = await supabaseClient.from('youth_students').update({ possible_duplicate_student_id: null }).eq('id', flagged.id);
+          const { error } = await supabaseClient.from('youth_students').update({ possible_duplicate_student_id: null, possible_duplicate_family_id: null }).eq('id', flagged.id);
           if (error) { adminAlert('Could not clear the flag: ' + error.message, 'Not saved'); return; }
           logActivity('congregant_edit', flagged.first_name + ' ' + flagged.last_name + ' (Youth) marked not a duplicate');
           await afterStudentReview();
@@ -913,7 +913,7 @@
       must(await supabaseClient.from('youth_attendance').update({ student_id: winner.id }).eq('student_id', loser.id));
       must(await supabaseClient.from('youth_consents').update({ student_id: winner.id }).eq('student_id', loser.id));
       must(await supabaseClient.from('youth_students').delete().eq('id', loser.id));
-      must(await supabaseClient.from('youth_students').update({ possible_duplicate_student_id: null }).eq('id', winner.id));
+      must(await supabaseClient.from('youth_students').update({ possible_duplicate_student_id: null, possible_duplicate_family_id: null }).eq('id', winner.id));
     }
 
     function studentDupNoticeHtml(s) {
@@ -996,9 +996,9 @@
       if (dismissBtn) {
         const s = students.find(x => x.id === dismissBtn.dataset.id);
         if (s) {
-          const { error } = await supabaseClient.from('youth_students').update({ possible_duplicate_student_id: null }).eq('id', s.id);
+          const { error } = await supabaseClient.from('youth_students').update({ possible_duplicate_student_id: null, possible_duplicate_family_id: null }).eq('id', s.id);
           if (error) { adminAlert('Could not clear the flag: ' + error.message, 'Not saved'); return; }
-          s.possible_duplicate_student_id = null; renderRoster();
+          s.possible_duplicate_student_id = null; s.possible_duplicate_family_id = null; renderRoster();
         }
         return;
       }
