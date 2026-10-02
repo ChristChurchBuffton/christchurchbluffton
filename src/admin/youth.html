@@ -487,7 +487,6 @@
           ${status ? (status.parts ? status.parts.map(p => `<span class="consent-badge ${p.cls}">${p.label}</span>`).join('') : `<span class="consent-badge ${status.cls}">${status.label}</span>`) : ''}
           ${(!s.family_id && !s.parent_first_name && !s.parent_last_name && !s.parent_phone && !s.parent_email) ? `<div class="no-parent-notice">No parent information on file</div>` : ''}
           ${s.possible_duplicate_student_id ? studentDupNoticeHtml(s) : ''}
-          ${s.possible_duplicate_family_id ? `<div class="possible-dup-notice">Possible existing household found (same last name) — nobody confirmed it when this student signed up online. <a href="congregants?family=${s.possible_duplicate_family_id}">Review it</a>?</div>` : ''}
           <div class="student-actions">
             ${s.family_id ? `<a href="congregants?family=${s.family_id}" class="btn btn-outline" style="font-size:12px; padding:6px 12px;">View Household</a>` : ''}
             <div class="student-icon-row">
