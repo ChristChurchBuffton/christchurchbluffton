@@ -142,6 +142,7 @@
     background: var(--white); border-radius: 14px; width: 100%; max-width: 640px;
     max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 24px 70px rgba(0,0,0,0.35);
   }
+  .modal-box.wide { max-width: 720px; }
   .modal-header { padding: 20px 26px; border-bottom: 1px solid var(--border-gray); display: flex; align-items: center; justify-content: space-between; }
   .modal-header .modal-title { font-family: Georgia, 'Times New Roman', serif; font-size: 20px; color: var(--navy-blue); }
   .modal-header .modal-subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: var(--text-muted); margin-top: 2px; }
@@ -149,6 +150,9 @@
   .modal-close:hover { border-color: var(--navy-blue); color: var(--navy-blue); }
   .modal-body { padding: 22px 26px; overflow-y: auto; }
   .modal-footer { padding: 16px 26px; border-top: 1px solid var(--border-gray); display: flex; justify-content: flex-end; gap: 10px; }
+  .modal-footer.dup-footer { flex-wrap: wrap; justify-content: center; }
+  .modal-footer .footer-break { flex-basis: 100%; height: 0; }
+  .modal-footer.dup-footer .btn { white-space: nowrap; }
 
   .field { margin-bottom: 16px; }
   .field:last-child { margin-bottom: 0; }
@@ -355,7 +359,7 @@
   </div>
 
   <div class="modal-backdrop" id="modal-backdrop">
-    <div class="modal-box">
+    <div class="modal-box" id="modal-box">
       <div class="modal-header">
         <div>
           <div class="modal-title" id="modal-title">Add Family</div>
@@ -549,6 +553,7 @@
       document.getElementById('modal-subtitle').textContent = flagged.headFirstName + ' ' + flagged.headLastName;
       document.getElementById('modal-body').innerHTML = '<div class="dup-compare">' + familyCompareColHtml('Already on file', original) + familyCompareColHtml('New sign-up (flagged)', flagged) + '</div>' +
         '<p class="dup-help">Removing one moves its children and linked youth students onto the one you keep.</p>';
+      document.getElementById('modal-box').classList.add('wide');
       const flaggedList = families.filter(x => x.possibleDuplicateFamilyId);
       const nextFlagged = flaggedList.length > 1 ? flaggedList[(flaggedList.findIndex(x => x.id === flagged.id) + 1) % flaggedList.length] : null;
       setModalFooter([
@@ -561,9 +566,10 @@
           flagged.possibleDuplicateFamilyId = null;
           afterFamilyReview();
         } },
-        { label: 'Keep original, remove new', className: 'btn btn-outline', onClick: () => confirmMergeFamilies(original, flagged) },
-        { label: 'Keep new, remove original', className: 'btn btn-gold', onClick: () => confirmMergeFamilies(flagged, original) }
-      ]);
+        { lineBreak: true },
+        { label: 'Remove new', className: 'btn btn-outline', onClick: () => confirmMergeFamilies(original, flagged) },
+        { label: 'Remove original', className: 'btn btn-outline', onClick: () => confirmMergeFamilies(flagged, original) }
+      ], { center: true });
       document.getElementById('modal-backdrop').classList.add('open');
     }
 
@@ -595,8 +601,8 @@
 
     function familyDupNoticeHtml(f) {
       const other = families.find(x => x.id === f.possibleDuplicateFamilyId);
-      const name = other ? other.headLastName + ', ' + other.headFirstName : 'another household';
-      return '<div class="dup-notice">Possible duplicate of the ' + escapeHtml(name) + ' household. ' +
+      const who = other ? ' (' + [other.headFirstName, other.headLastName].filter(Boolean).join(' ') + (other.headPhone ? ', ' + other.headPhone : '') + ')' : '';
+      return '<div class="dup-notice">Possible duplicate — another household with this name is already on file' + escapeHtml(who) + '. ' +
         (other ? '<button type="button" class="dup-link" data-action="review-family-dup" data-id="' + f.id + '">Review</button> &middot; ' : '') +
         '<button type="button" class="dup-link" data-action="dismiss-family-dup" data-id="' + f.id + '">Not a duplicate</button></div>';
     }
@@ -699,12 +705,15 @@
 
     function closeModal() {
       document.getElementById('modal-backdrop').classList.remove('open');
+      document.getElementById('modal-box').classList.remove('wide');
       document.querySelectorAll('.family-card').forEach(c => { c.style.outline = ''; });
     }
-    function setModalFooter(buttons) {
+    function setModalFooter(buttons, opts) {
       const footer = document.getElementById('modal-footer');
       footer.innerHTML = '';
+      footer.classList.toggle('dup-footer', !!(opts && opts.center));
       buttons.forEach(b => {
+        if (b.lineBreak) { const br = document.createElement('div'); br.className = 'footer-break'; footer.appendChild(br); return; }
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = b.className;

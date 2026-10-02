@@ -71,7 +71,7 @@ async function findOrCreateHousehold(parent, student) {
     orParts.push(`and(spouse_first_name.ilike.%22${fn}%22,spouse_last_name.ilike.%22${ln}%22)`);
   }
   if (orParts.length) {
-    const rows = await sb('GET', `congregant_families?select=id&or=(${orParts.join(',')})&limit=1`);
+    const rows = await sb('GET', `congregant_families?select=id&or=(${orParts.join(',')})&possible_duplicate_family_id=is.null&order=added_at.asc&limit=1`);
     if (rows.length) family = rows[0];
   }
   let possibleDuplicateFamilyId = null;
@@ -83,7 +83,7 @@ async function findOrCreateHousehold(parent, student) {
     if (dupKid.length) { possibleDuplicateFamilyId = family.id; family = null; }
   }
   if (!family && !possibleDuplicateFamilyId && parent.lastName) {
-    const similar = await sb('GET', `congregant_families?select=id&or=(head_last_name.ilike.%22${encodeURIComponent(q(parent.lastName))}%22,spouse_last_name.ilike.%22${encodeURIComponent(q(parent.lastName))}%22)&limit=1`);
+    const similar = await sb('GET', `congregant_families?select=id&or=(head_last_name.ilike.%22${encodeURIComponent(q(parent.lastName))}%22,spouse_last_name.ilike.%22${encodeURIComponent(q(parent.lastName))}%22)&possible_duplicate_family_id=is.null&order=added_at.asc&limit=1`);
     if (similar.length) possibleDuplicateFamilyId = similar[0].id;
   }
   if (!family) {
@@ -180,7 +180,7 @@ const handleRequest = async (event) => {
       if (familyId) existing = await sb('GET', `youth_students?family_id=eq.${familyId}&first_name=ilike.${encodeURIComponent(q(student.firstName))}&last_name=ilike.${encodeURIComponent(q(student.lastName))}&select=id,student_code`);
       let possibleDuplicateStudentId = existing.length ? existing[0].id : null;
       if (!existing.length) {
-        const sameName = await sb('GET', `youth_students?first_name=ilike.${encodeURIComponent(q(student.firstName))}&last_name=ilike.${encodeURIComponent(q(student.lastName))}&select=id&limit=1`);
+        const sameName = await sb('GET', `youth_students?first_name=ilike.${encodeURIComponent(q(student.firstName))}&last_name=ilike.${encodeURIComponent(q(student.lastName))}&select=id&possible_duplicate_student_id=is.null&order=created_at.asc&limit=1`);
         if (sameName.length) possibleDuplicateStudentId = sameName[0].id;
       }
       const corePayload = {

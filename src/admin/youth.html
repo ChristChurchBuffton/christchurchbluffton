@@ -38,6 +38,9 @@
   .ask-household span { font-size: 13px; color: var(--text-muted); }
   .ask-foot { padding: 14px 24px 18px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
   .modal-footer { padding: 16px 26px; border-top: 1px solid var(--border-gray); display: flex; justify-content: flex-end; gap: 10px; }
+  .modal-footer.dup-footer { flex-wrap: wrap; justify-content: center; }
+  .modal-footer .footer-break { flex-basis: 100%; height: 0; }
+  .modal-footer.dup-footer .btn { white-space: nowrap; }
   .field { margin-bottom: 16px; }
   .field:last-child { margin-bottom: 0; }
   .field label { display: block; font-size: 13px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; }
@@ -364,10 +367,12 @@
       document.getElementById('modal-backdrop').classList.remove('open');
       document.getElementById('modal-box').classList.remove('wide');
     }
-    function setModalFooter(buttons) {
+    function setModalFooter(buttons, opts) {
       const footer = document.getElementById('modal-footer');
       footer.innerHTML = '';
+      footer.classList.toggle('dup-footer', !!(opts && opts.center));
       buttons.forEach(b => {
+        if (b.lineBreak) { const br = document.createElement('div'); br.className = 'footer-break'; footer.appendChild(br); return; }
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = b.className;
@@ -876,9 +881,10 @@
           logActivity('congregant_edit', flagged.first_name + ' ' + flagged.last_name + ' (Youth) marked not a duplicate');
           await afterStudentReview();
         } },
-        { label: 'Keep original, remove new', className: 'btn btn-outline', onClick: () => confirmMergeStudents(original, flagged) },
-        { label: 'Keep new, remove original', className: 'btn btn-gold', onClick: () => confirmMergeStudents(flagged, original) }
-      ]);
+        { lineBreak: true },
+        { label: 'Remove new', className: 'btn btn-outline', onClick: () => confirmMergeStudents(original, flagged) },
+        { label: 'Remove original', className: 'btn btn-outline', onClick: () => confirmMergeStudents(flagged, original) }
+      ], { center: true });
       document.getElementById('modal-backdrop').classList.add('open');
     }
 
