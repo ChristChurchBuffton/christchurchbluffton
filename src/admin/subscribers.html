@@ -327,6 +327,15 @@
               </select>
             </div>
             <div class="filter-field">
+              <label for="sort-select">Sort by</label>
+              <select id="sort-select">
+                <option value="added-desc">Date added (newest first)</option>
+                <option value="added-asc">Date added (oldest first)</option>
+                <option value="name-asc">Last name (A to Z)</option>
+                <option value="name-desc">Last name (Z to A)</option>
+              </select>
+            </div>
+            <div class="filter-field">
               <label for="search-input">Search</label>
               <input type="text" id="search-input" placeholder="Name or email">
             </div>
@@ -382,6 +391,7 @@
     let subscribers = [];
     let sourceFilter = '';
     let searchTerm = '';
+    let sortMode = 'added-desc';
     let currentList = 'christ_church';
 
     function escapeHtml(str) {
@@ -444,7 +454,13 @@
           `${s.firstName} ${s.lastName}`.toLowerCase().includes(term) ||
           (s.email || '').toLowerCase().includes(term));
       }
-      list.sort((a, b) => lastNameOf(`${a.firstName} ${a.lastName}`).localeCompare(lastNameOf(`${b.firstName} ${b.lastName}`)));
+      const byName = (a, b) => (a.lastName || '').localeCompare(b.lastName || '', undefined, { sensitivity: 'base' })
+        || (a.firstName || '').localeCompare(b.firstName || '', undefined, { sensitivity: 'base' });
+      const byAdded = (a, b) => new Date(a.addedAt) - new Date(b.addedAt);
+      if (sortMode === 'added-desc') list.sort((a, b) => byAdded(b, a));
+      else if (sortMode === 'added-asc') list.sort(byAdded);
+      else if (sortMode === 'name-asc') list.sort(byName);
+      else list.sort((a, b) => byName(b, a));
 
       document.getElementById('subscribers-count').textContent = `${unique.length} ${unique.length === 1 ? 'person' : 'people'}`;
 
@@ -627,6 +643,7 @@
       });
 
       document.getElementById('source-filter').addEventListener('change', (e) => { sourceFilter = e.target.value; renderSubscribers(); });
+      document.getElementById('sort-select').addEventListener('change', (e) => { sortMode = e.target.value; renderSubscribers(); });
       document.getElementById('search-input').addEventListener('input', (e) => { searchTerm = e.target.value; renderSubscribers(); });
 
       document.getElementById('subscriber-rows').addEventListener('click', (e) => {
