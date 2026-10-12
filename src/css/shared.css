@@ -986,13 +986,28 @@ textarea:focus-visible {
         height: 64px;
     }
 
+    .footer-give-mobile { display: block; }
+}
+
+/* Quick Links sits too close to Contact at 901-1023px; nudge it toward the logo to center it */
+@media (min-width: 901px) and (max-width: 1023px) {
+    .footer-quicklinks { position: relative; left: -20px; }
+}
+
+/* Same fix the other way at 1024-1199px, where Quick Links leans toward the logo */
+@media (min-width: 1024px) and (max-width: 1199px) {
+    .footer-quicklinks { position: relative; left: 17px; }
+}
+
+/* Footer stacks to two columns only below 900px; 900-1023px keeps the desktop footer layout */
+@media (max-width: 900px) {
     .footer-main {
         grid-template-columns: 1fr 1fr;
         gap: 30px;
     }
 
-    .footer-give-mobile { display: block; }
     .footer-branding { grid-column: 1 / -1; text-align: center; padding-right: 0; }
+    .footer-newsletter { grid-column: 1 / -1; }
     .footer-logo-row { justify-content: center; flex-direction: column; gap: 8px; }
     .footer-contact-info { align-items: center; }
     .footer-column { text-align: center; }
